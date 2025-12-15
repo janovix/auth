@@ -1,3 +1,12 @@
+# [1.0.0-rc.2](https://github.com/janovix/auth/compare/v1.0.0-rc.1...v1.0.0-rc.2) (2025-12-15)
+
+
+### Features
+
+* Add auth pages and components ([6374275](https://github.com/janovix/auth/commit/6374275d8b6b270937e0d54c11188d213c0c307f))
+* Add error handling and improve tests for auth components ([f7b60f6](https://github.com/janovix/auth/commit/f7b60f647f238846c5367dfb467ac31e23c8e65e))
+* Add tests for auth components and utilities ([4d1b7c9](https://github.com/janovix/auth/commit/4d1b7c9fe227f4b3ad6f65b7360d4952cf4c70cd))
+
 # 1.0.0-rc.1 (2025-12-15)
 
 

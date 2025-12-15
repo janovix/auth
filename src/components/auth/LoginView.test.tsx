@@ -126,4 +126,17 @@ describe("LoginView", () => {
 		expect(errorAlert).toHaveTextContent(/credenciales inválidas/i);
 		expect(pushMock).not.toHaveBeenCalled();
 	});
+
+	it("shows default success message when provided", () => {
+		renderWithTheme(
+			<LoginView
+				defaultSuccessMessage="Login exitoso"
+				client={createClient()}
+			/>,
+		);
+
+		expect(
+			screen.getByText(/login exitoso/i, { exact: false }),
+		).toBeInTheDocument();
+	});
 });

@@ -91,8 +91,8 @@ export const LogoutView = () => {
 							</span>
 						</div>
 						<p>
-							Recuerda que QA y producción tienen dominios diferentes, por lo
-							que deberás cerrar sesión manualmente en cada entorno.
+							Recuerda que dev/preview y producción tienen dominios diferentes,
+							por lo que deberás cerrar sesión manualmente en cada entorno.
 						</p>
 						{status === "running" && (
 							<div className="flex items-center gap-2 text-foreground">

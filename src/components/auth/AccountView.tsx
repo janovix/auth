@@ -24,9 +24,8 @@ import {
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 
 const cookieDomainByEnv: Record<AuthEnvironment, string> = {
-	dev: ".algenium.dev",
-	qa: ".algenium.qa",
-	prod: ".algenium.app",
+	dev: ".janovix.workers.dev",
+	prod: ".janovix.ai",
 };
 
 const getRuntimeHost = () =>
@@ -75,9 +74,8 @@ export const AccountView = () => {
 							<AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500" />
 							<div>
 								<p>
-									Si vienes de un PR preview asegúrate de haber iniciado sesión
-									en auth.janovix.algenium.dev para compartir la cookie{" "}
-									<code>.algenium.dev</code>.
+									Si vienes de un preview asegúrate de haber iniciado sesión en
+									el mismo dominio para compartir la cookie.
 								</p>
 							</div>
 						</CardContent>
@@ -179,15 +177,15 @@ export const AccountView = () => {
 							<p className="font-medium text-foreground">Comparte sesión con</p>
 							<p>
 								{environment === "dev"
-									? "auth.janovix.algenium.dev y auth-pr-*.janovix.algenium.dev"
+									? "Todas las aplicaciones bajo *.janovix.workers.dev"
 									: "Solo aplicaciones bajo el dominio actual"}
 							</p>
 						</div>
 						<div>
 							<p className="font-medium text-foreground">Recordatorio</p>
 							<p>
-								QA y producción usan dominios distintos, por lo que deberás
-								iniciar sesión de forma independiente.
+								Dev/preview y producción usan dominios distintos, por lo que
+								deberás iniciar sesión de forma independiente.
 							</p>
 						</div>
 					</CardContent>

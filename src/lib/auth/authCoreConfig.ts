@@ -1,18 +1,9 @@
 const AUTH_CORE_DOMAIN_BY_ENV = {
 	dev: "auth-svc.janovix.workers.dev",
-	qa: "auth-svc.janovix.workers.dev",
 	prod: "auth-svc.janovix.ai",
 } as const;
 
 const LOCAL_DEV_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
-const DEV_HOSTS = new Set([
-	"auth.janovix.algenium.dev",
-	"auth.janovix.workers.dev",
-]);
-const QA_HOSTS = new Set(["auth.janovix.algenium.qa"]);
-const PROD_HOSTS = new Set(["auth.janovix.algenium.app"]);
-
-const PR_PREVIEW_HOST_PATTERN = /^auth-pr-\d+\.janovix\.algenium\.dev$/i;
 
 const DEFAULT_ENVIRONMENT: AuthEnvironment = "dev";
 
@@ -46,30 +37,14 @@ export const resolveAuthEnvironment = (
 		return DEFAULT_ENVIRONMENT;
 	}
 
-	if (PR_PREVIEW_HOST_PATTERN.test(normalizedHost)) {
-		return "dev";
-	}
-
 	if (
 		LOCAL_DEV_HOSTS.has(normalizedHost) ||
-		DEV_HOSTS.has(normalizedHost) ||
-		normalizedHost.endsWith(".janovix.algenium.dev") ||
 		normalizedHost.endsWith(".janovix.workers.dev")
 	) {
 		return "dev";
 	}
 
-	if (
-		QA_HOSTS.has(normalizedHost) ||
-		normalizedHost.endsWith(".janovix.algenium.qa")
-	) {
-		return "qa";
-	}
-
-	if (
-		PROD_HOSTS.has(normalizedHost) ||
-		normalizedHost.endsWith(".janovix.algenium.app")
-	) {
+	if (normalizedHost.endsWith(".janovix.ai")) {
 		return "prod";
 	}
 

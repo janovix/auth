@@ -11,26 +11,12 @@ describe("authCoreConfig", () => {
 			expect(resolveAuthEnvironment("127.0.0.1")).toBe("dev");
 		});
 
-		it("returns dev for auth.janovix.algenium.dev", () => {
-			expect(resolveAuthEnvironment("auth.janovix.algenium.dev")).toBe("dev");
-		});
-
 		it("returns dev for auth.janovix.workers.dev", () => {
 			expect(resolveAuthEnvironment("auth.janovix.workers.dev")).toBe("dev");
 		});
 
-		it("returns dev for PR preview hosts", () => {
-			expect(resolveAuthEnvironment("auth-pr-123.janovix.algenium.dev")).toBe(
-				"dev",
-			);
-		});
-
-		it("returns qa for auth.janovix.algenium.qa", () => {
-			expect(resolveAuthEnvironment("auth.janovix.algenium.qa")).toBe("qa");
-		});
-
-		it("returns prod for auth.janovix.algenium.app", () => {
-			expect(resolveAuthEnvironment("auth.janovix.algenium.app")).toBe("prod");
+		it("returns prod for auth.janovix.ai", () => {
+			expect(resolveAuthEnvironment("auth.janovix.ai")).toBe("prod");
 		});
 
 		it("returns dev as default for unknown hosts", () => {
@@ -39,6 +25,14 @@ describe("authCoreConfig", () => {
 
 		it("returns dev for undefined host", () => {
 			expect(resolveAuthEnvironment(undefined)).toBe("dev");
+		});
+
+		it("returns dev for empty string host", () => {
+			expect(resolveAuthEnvironment("")).toBe("dev");
+		});
+
+		it("handles host with port", () => {
+			expect(resolveAuthEnvironment("localhost:3000")).toBe("dev");
 		});
 	});
 
@@ -53,14 +47,14 @@ describe("authCoreConfig", () => {
 			expect(url).toBe("https://auth-svc.janovix.workers.dev");
 		});
 
-		it("returns dev URL for qa host (preview mode)", () => {
-			const url = getAuthCoreBaseUrl("auth.janovix.algenium.qa");
-			expect(url).toBe("https://auth-svc.janovix.workers.dev");
+		it("returns prod URL for auth.janovix.ai", () => {
+			const url = getAuthCoreBaseUrl("auth.janovix.ai");
+			expect(url).toBe("https://auth-svc.janovix.ai");
 		});
 
-		it("returns prod URL for prod host", () => {
-			const url = getAuthCoreBaseUrl("auth.janovix.algenium.app");
-			expect(url).toBe("https://auth-svc.janovix.ai");
+		it("returns dev URL for undefined host", () => {
+			const url = getAuthCoreBaseUrl(undefined);
+			expect(url).toBe("https://auth-svc.janovix.workers.dev");
 		});
 	});
 });

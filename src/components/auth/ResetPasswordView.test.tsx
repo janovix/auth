@@ -23,7 +23,7 @@ const renderWithTheme = (ui: React.ReactElement) => {
 type ResetClient = Pick<AuthClient, "resetPassword">;
 
 const createClient = (): ResetClient => ({
-	resetPassword: vi.fn() as ResetClient["resetPassword"],
+	resetPassword: vi.fn() as unknown as ResetClient["resetPassword"],
 });
 
 describe("ResetPasswordView", () => {

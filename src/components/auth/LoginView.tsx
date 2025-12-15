@@ -197,17 +197,13 @@ export const LoginView = ({
 													onCheckedChange={(checked) =>
 														field.onChange(checked === true)
 													}
-													aria-label="Mantener sesión en este entorno"
+													aria-label="Mantener sesión iniciada"
 												/>
 											</FormControl>
 											<div className="space-y-1 leading-none">
 												<FormLabel className="text-sm font-medium">
-													Mantener sesión en este entorno
+													Mantener sesión iniciada
 												</FormLabel>
-												<p className="text-xs text-muted-foreground">
-													Better Auth compartirá la cookie segura con los PR
-													previews del mismo entorno.
-												</p>
 											</div>
 										</FormItem>
 									)}

@@ -45,12 +45,12 @@ describe("authCoreConfig", () => {
 	describe("getAuthCoreBaseUrl", () => {
 		it("returns dev URL for localhost", () => {
 			const url = getAuthCoreBaseUrl("localhost");
-			expect(url).toBe("https://auth-core.janovix.algenium.dev");
+			expect(url).toBe("https://auth-svc.janovix.workers.dev");
 		});
 
 		it("returns dev URL for auth.janovix.workers.dev", () => {
 			const url = getAuthCoreBaseUrl("auth.janovix.workers.dev");
-			expect(url).toBe("https://auth-core.janovix.algenium.dev");
+			expect(url).toBe("https://auth-svc.janovix.workers.dev");
 		});
 
 		it("returns dev URL for qa host (preview mode)", () => {

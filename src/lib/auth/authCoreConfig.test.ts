@@ -15,6 +15,10 @@ describe("authCoreConfig", () => {
 			expect(resolveAuthEnvironment("auth.janovix.algenium.dev")).toBe("dev");
 		});
 
+		it("returns dev for auth.janovix.workers.dev", () => {
+			expect(resolveAuthEnvironment("auth.janovix.workers.dev")).toBe("dev");
+		});
+
 		it("returns dev for PR preview hosts", () => {
 			expect(resolveAuthEnvironment("auth-pr-123.janovix.algenium.dev")).toBe(
 				"dev",
@@ -41,7 +45,12 @@ describe("authCoreConfig", () => {
 	describe("getAuthCoreBaseUrl", () => {
 		it("returns dev URL for localhost", () => {
 			const url = getAuthCoreBaseUrl("localhost");
-			expect(url).toBe("https://auth-svc.janovix.workers.dev");
+			expect(url).toBe("https://auth-core.janovix.algenium.dev");
+		});
+
+		it("returns dev URL for auth.janovix.workers.dev", () => {
+			const url = getAuthCoreBaseUrl("auth.janovix.workers.dev");
+			expect(url).toBe("https://auth-core.janovix.algenium.dev");
 		});
 
 		it("returns dev URL for qa host (preview mode)", () => {

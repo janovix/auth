@@ -139,4 +139,44 @@ describe("LoginView", () => {
 			screen.getByText(/login exitoso/i, { exact: false }),
 		).toBeInTheDocument();
 	});
+
+	it("handles exception during login", async () => {
+		const client = createClient();
+		vi.mocked(client.signIn.email).mockRejectedValue(
+			new Error("Network error"),
+		);
+
+		renderWithTheme(<LoginView client={client} />);
+		const user = userEvent.setup();
+
+		await waitFor(() => {
+			const forms = screen.getAllByTestId("login-form");
+			expect(forms.length).toBeGreaterThan(0);
+		});
+
+		const forms = screen.getAllByTestId("login-form");
+		const form = forms[forms.length - 1];
+
+		const emailInputs = screen.getAllByPlaceholderText("usuario@empresa.mx");
+		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
+		const passwordInputs = screen.getAllByPlaceholderText("••••••••");
+		await user.type(passwordInputs[passwordInputs.length - 1], "Secret123!");
+
+		fireEvent.submit(form);
+
+		await waitFor(() => {
+			expect(client.signIn.email).toHaveBeenCalled();
+		});
+
+		const errorAlerts = await screen.findAllByRole(
+			"alert",
+			{},
+			{ timeout: 3000 },
+		);
+		expect(errorAlerts.length).toBeGreaterThan(0);
+		const errorAlert = errorAlerts[errorAlerts.length - 1];
+		expect(errorAlert).toBeInTheDocument();
+		expect(errorAlert).toHaveTextContent(/network error/i);
+		expect(pushMock).not.toHaveBeenCalled();
+	});
 });

@@ -172,4 +172,85 @@ describe("ResetPasswordView", () => {
 			await screen.findByText(/no coinciden/i, { exact: false }),
 		).toBeInTheDocument();
 	});
+
+	it("handles exception during password reset", async () => {
+		const client = createClient();
+		vi.mocked(client.resetPassword).mockRejectedValue(
+			new Error("Network error"),
+		);
+
+		renderWithTheme(<ResetPasswordView token="token-123" client={client} />);
+		const user = userEvent.setup();
+
+		await waitFor(() => {
+			const forms = screen.getAllByTestId("reset-password-form");
+			expect(forms.length).toBeGreaterThan(0);
+		});
+
+		const forms = screen.getAllByTestId("reset-password-form");
+		const form = forms[forms.length - 1];
+
+		const newPasswordInputs = screen.getAllByLabelText(/nueva contraseña/i);
+		await user.type(
+			newPasswordInputs[newPasswordInputs.length - 1],
+			"Secret123!",
+		);
+		const confirmPasswordInputs = screen.getAllByLabelText(
+			/confirma tu contraseña/i,
+		);
+		await user.type(
+			confirmPasswordInputs[confirmPasswordInputs.length - 1],
+			"Secret123!",
+		);
+
+		fireEvent.submit(form);
+
+		await waitFor(() => {
+			expect(client.resetPassword).toHaveBeenCalled();
+		});
+
+		const errorMessages = await screen.findAllByText(/network error/i, {
+			exact: false,
+		});
+		expect(errorMessages.length).toBeGreaterThan(0);
+		expect(pushMock).not.toHaveBeenCalled();
+	});
+
+	it("shows error when submitting without token", async () => {
+		const client = createClient();
+		renderWithTheme(<ResetPasswordView token={null} client={client} />);
+		const user = userEvent.setup();
+
+		await waitFor(() => {
+			const forms = screen.getAllByTestId("reset-password-form");
+			expect(forms.length).toBeGreaterThan(0);
+		});
+
+		const forms = screen.getAllByTestId("reset-password-form");
+		const form = forms[forms.length - 1];
+
+		const newPasswordInputs = screen.getAllByLabelText(/nueva contraseña/i);
+		await user.type(
+			newPasswordInputs[newPasswordInputs.length - 1],
+			"Secret123!",
+		);
+		const confirmPasswordInputs = screen.getAllByLabelText(
+			/confirma tu contraseña/i,
+		);
+		await user.type(
+			confirmPasswordInputs[confirmPasswordInputs.length - 1],
+			"Secret123!",
+		);
+
+		fireEvent.submit(form);
+
+		const errorMessages = await screen.findAllByText(
+			/necesitas abrir el enlace/i,
+			{
+				exact: false,
+			},
+		);
+		expect(errorMessages.length).toBeGreaterThan(0);
+		expect(client.resetPassword).not.toHaveBeenCalled();
+	});
 });

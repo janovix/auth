@@ -80,6 +80,40 @@ describe("useAuthSession", () => {
 		expect(result.current).toBeDefined();
 		expect(typeof result.current.data).toBeDefined();
 	});
+
+	it("uses provided store when available", () => {
+		const snapshot = createSnapshot({
+			data: {
+				user: {
+					id: "user-456",
+					name: "Test User 2",
+					email: "test2@example.com",
+					image: null,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+					emailVerified: false,
+				},
+				session: {
+					id: "session-456",
+					userId: "user-456",
+					token: "token-456",
+					createdAt: new Date(),
+					updatedAt: new Date(),
+					expiresAt: new Date(),
+				},
+			},
+		});
+
+		const store = createSessionStore(snapshot);
+
+		const { result } = renderHook(() => useAuthSession(), {
+			wrapper: ({ children }) => (
+				<AuthSessionProvider store={store}>{children}</AuthSessionProvider>
+			),
+		});
+
+		expect(result.current.data?.user.id).toBe("user-456");
+	});
 });
 
 describe("createSessionStore", () => {

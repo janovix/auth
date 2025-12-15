@@ -1,33 +1,63 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import * as nextThemes from "next-themes";
 
-const renderWithTheme = (ui: React.ReactElement) => {
-	return render(<ThemeProvider>{ui}</ThemeProvider>);
-};
+const setThemeMock = vi.fn();
+
+vi.mock("next-themes", () => ({
+	useTheme: vi.fn(),
+}));
 
 describe("ThemeSwitcher", () => {
-	it("renders theme switcher button", () => {
-		renderWithTheme(<ThemeSwitcher />);
-		const button = screen.getByRole("button", { name: /toggle theme/i });
-		expect(button).toBeInTheDocument();
+	beforeEach(() => {
+		setThemeMock.mockReset();
 	});
 
-	it("toggles theme when clicked", async () => {
-		const user = userEvent.setup();
-		renderWithTheme(<ThemeSwitcher />);
+	it("renders theme switcher button", () => {
+		vi.mocked(nextThemes.useTheme).mockReturnValue({
+			theme: "light",
+			setTheme: setThemeMock,
+			resolvedTheme: "light",
+		} as unknown as ReturnType<typeof nextThemes.useTheme>);
 
-		// React StrictMode renders twice, so use getAllByRole
+		render(<ThemeSwitcher />);
 		const buttons = screen.getAllByRole("button", { name: /toggle theme/i });
 		expect(buttons.length).toBeGreaterThan(0);
-		const button = buttons[buttons.length - 1]; // Use the last one
+	});
 
-		// Click the button (theme toggle functionality is tested by next-themes)
+	it("toggles from light to dark when clicked", async () => {
+		vi.mocked(nextThemes.useTheme).mockReturnValue({
+			theme: "light",
+			setTheme: setThemeMock,
+			resolvedTheme: "light",
+		} as unknown as ReturnType<typeof nextThemes.useTheme>);
+
+		const user = userEvent.setup();
+		render(<ThemeSwitcher />);
+
+		const buttons = screen.getAllByRole("button", { name: /toggle theme/i });
+		const button = buttons[buttons.length - 1];
 		await user.click(button);
 
-		// Button should still be present after click
-		expect(button).toBeInTheDocument();
+		expect(setThemeMock).toHaveBeenCalledWith("dark");
+	});
+
+	it("toggles from dark to light when clicked", async () => {
+		vi.mocked(nextThemes.useTheme).mockReturnValue({
+			theme: "dark",
+			setTheme: setThemeMock,
+			resolvedTheme: "dark",
+		} as unknown as ReturnType<typeof nextThemes.useTheme>);
+
+		const user = userEvent.setup();
+		render(<ThemeSwitcher />);
+
+		const buttons = screen.getAllByRole("button", { name: /toggle theme/i });
+		const button = buttons[buttons.length - 1];
+		await user.click(button);
+
+		expect(setThemeMock).toHaveBeenCalledWith("light");
 	});
 });

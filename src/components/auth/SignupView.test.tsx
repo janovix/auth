@@ -214,4 +214,53 @@ describe("SignupView", () => {
 			await screen.findByText(/no coinciden/i, { exact: false }),
 		).toBeInTheDocument();
 	});
+
+	it("handles exception during signup", async () => {
+		const client = createClient();
+		vi.mocked(client.signUp.email).mockRejectedValue(
+			new Error("Network error"),
+		);
+
+		renderWithTheme(<SignupView client={client} />);
+		const user = userEvent.setup();
+
+		await waitFor(() => {
+			const forms = screen.getAllByTestId("signup-form");
+			expect(forms.length).toBeGreaterThan(0);
+		});
+
+		const forms = screen.getAllByTestId("signup-form");
+		const form = forms[forms.length - 1];
+
+		const firstNameInputs = screen.getAllByLabelText(/^nombre$/i);
+		await user.type(firstNameInputs[firstNameInputs.length - 1], "Ana");
+		const lastNameInputs = screen.getAllByLabelText(/apellido/i);
+		await user.type(lastNameInputs[lastNameInputs.length - 1], "García");
+		const emailInputs = screen.getAllByLabelText(/correo/i);
+		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
+		const passwordInputs = screen.getAllByLabelText(/^contraseña$/i);
+		await user.type(passwordInputs[passwordInputs.length - 1], "Secret123!");
+		const confirmPasswordInputs = screen.getAllByLabelText(
+			/confirma tu contraseña/i,
+		);
+		await user.type(
+			confirmPasswordInputs[confirmPasswordInputs.length - 1],
+			"Secret123!",
+		);
+		const checkboxes = screen.getAllByRole("checkbox", {
+			name: /aceptar términos/i,
+		});
+		await user.click(checkboxes[checkboxes.length - 1]);
+
+		fireEvent.submit(form);
+
+		await waitFor(() => {
+			expect(client.signUp.email).toHaveBeenCalled();
+		});
+
+		expect(
+			await screen.findByText(/network error/i, { exact: false }),
+		).toBeInTheDocument();
+		expect(pushMock).not.toHaveBeenCalled();
+	});
 });

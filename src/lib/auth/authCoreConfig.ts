@@ -1,59 +1,40 @@
-const AUTH_CORE_DOMAIN_BY_ENV = {
-	dev: "auth-svc.janovix.workers.dev",
-	prod: "auth-svc.janovix.ai",
-} as const;
+/**
+ * Gets the auth core base URL from environment variables.
+ * This should be set in wrangler.jsonc as NEXT_PUBLIC_AUTH_CORE_BASE_URL
+ * for client-side access, or AUTH_CORE_BASE_URL for server-side.
+ *
+ * @returns The base URL for the auth core service (e.g., https://auth-svc.janovix.workers.dev)
+ */
+export const getAuthCoreBaseUrl = (): string => {
+	// For client-side, use NEXT_PUBLIC_ prefix
+	// For server-side, use the regular env var
+	const baseUrl =
+		typeof window !== "undefined"
+			? process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL
+			: process.env.AUTH_CORE_BASE_URL;
 
-const LOCAL_DEV_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
-
-const DEFAULT_ENVIRONMENT: AuthEnvironment = "dev";
-
-export type AuthEnvironment = keyof typeof AUTH_CORE_DOMAIN_BY_ENV;
-
-const normalizeHost = (host?: string) => {
-	if (!host) {
-		return undefined;
+	if (!baseUrl) {
+		throw new Error(
+			"AUTH_CORE_BASE_URL or NEXT_PUBLIC_AUTH_CORE_BASE_URL environment variable is not set. Please configure it in wrangler.jsonc",
+		);
 	}
 
-	const cleanedHost = host.trim().toLowerCase();
-	const [hostname] = cleanedHost.split(":");
+	// Ensure the URL includes the protocol
+	if (baseUrl.startsWith("http://") || baseUrl.startsWith("https://")) {
+		return baseUrl;
+	}
 
-	return hostname;
+	return `https://${baseUrl}`;
 };
 
-export const getRuntimeHost = () => {
-	if (typeof window === "undefined") {
-		return undefined;
-	}
-
-	return window.location.host;
-};
-
-export const resolveAuthEnvironment = (
-	host = getRuntimeHost(),
-): AuthEnvironment => {
-	const normalizedHost = normalizeHost(host);
-
-	if (!normalizedHost) {
-		return DEFAULT_ENVIRONMENT;
-	}
-
-	if (
-		LOCAL_DEV_HOSTS.has(normalizedHost) ||
-		normalizedHost.endsWith(".janovix.workers.dev")
-	) {
-		return "dev";
-	}
-
-	if (normalizedHost.endsWith(".janovix.ai")) {
+/**
+ * Derives the environment name from the auth core base URL for display purposes.
+ * @returns "dev" or "prod" based on the URL pattern
+ */
+export const getAuthEnvironment = (): "dev" | "prod" => {
+	const baseUrl = getAuthCoreBaseUrl();
+	if (baseUrl.includes(".janovix.ai")) {
 		return "prod";
 	}
-
-	return DEFAULT_ENVIRONMENT;
-};
-
-export const getAuthCoreBaseUrl = (host?: string) => {
-	const environment = resolveAuthEnvironment(host);
-	const domain = AUTH_CORE_DOMAIN_BY_ENV[environment];
-
-	return `https://${domain}`;
+	return "dev";
 };

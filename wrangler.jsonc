@@ -16,4 +16,11 @@
 		"enabled": true,
 	},
 	"upload_source_maps": true,
+	// Each deployment should have its own wrangler config with the appropriate AUTH_CORE_BASE_URL
+	// For dev/preview: "auth-svc.janovix.workers.dev"
+	// For production: "auth-svc.janovix.ai"
+	"vars": {
+		"AUTH_CORE_BASE_URL": "auth-svc.janovix.workers.dev",
+		"NEXT_PUBLIC_AUTH_CORE_BASE_URL": "auth-svc.janovix.workers.dev",
+	},
 }

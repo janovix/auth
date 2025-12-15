@@ -21,17 +21,13 @@ import { useEffect, useMemo, useState } from "react";
 import { authClient } from "@/lib/auth/authClient";
 import {
 	getAuthCoreBaseUrl,
-	resolveAuthEnvironment,
+	getAuthEnvironment,
 } from "@/lib/auth/authCoreConfig";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 
-const getRuntimeHost = () =>
-	typeof window === "undefined" ? undefined : window.location.host;
-
 export const LogoutView = () => {
-	const host = getRuntimeHost();
-	const environment = useMemo(() => resolveAuthEnvironment(host), [host]);
-	const baseUrl = useMemo(() => getAuthCoreBaseUrl(host), [host]);
+	const environment = useMemo(() => getAuthEnvironment(), []);
+	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
 
 	const [status, setStatus] = useState<
 		"idle" | "running" | "success" | "error"

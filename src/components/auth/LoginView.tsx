@@ -31,7 +31,7 @@ import { Logo } from "@/components/Logo";
 import { authClient, type AuthClient } from "@/lib/auth/authClient";
 import {
 	getAuthCoreBaseUrl,
-	resolveAuthEnvironment,
+	getAuthEnvironment,
 } from "@/lib/auth/authCoreConfig";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 
@@ -51,9 +51,6 @@ type LoginClient = {
 	};
 };
 
-const getRuntimeHost = () =>
-	typeof window === "undefined" ? undefined : window.location.host;
-
 export const LoginView = ({
 	redirectTo,
 	client = authClient,
@@ -69,9 +66,8 @@ export const LoginView = ({
 		defaultSuccessMessage ?? null,
 	);
 
-	const host = getRuntimeHost();
-	const environment = useMemo(() => resolveAuthEnvironment(host), [host]);
-	const baseUrl = useMemo(() => getAuthCoreBaseUrl(host), [host]);
+	const environment = useMemo(() => getAuthEnvironment(), []);
+	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
 
 	const form = useForm<LoginValues>({
 		resolver: zodResolver(loginSchema),

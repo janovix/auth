@@ -18,18 +18,14 @@ import { useMemo } from "react";
 
 import {
 	getAuthCoreBaseUrl,
-	resolveAuthEnvironment,
-	type AuthEnvironment,
+	getAuthEnvironment,
 } from "@/lib/auth/authCoreConfig";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 
-const cookieDomainByEnv: Record<AuthEnvironment, string> = {
+const cookieDomainByEnv: Record<"dev" | "prod", string> = {
 	dev: ".janovix.workers.dev",
 	prod: ".janovix.ai",
 };
-
-const getRuntimeHost = () =>
-	typeof window === "undefined" ? undefined : window.location.host;
 
 const normalizeDate = (value?: string | Date) => {
 	if (!value) {
@@ -54,9 +50,8 @@ export const AccountView = () => {
 	const session = useAuthSession();
 	const data = session.data;
 
-	const host = getRuntimeHost();
-	const environment = useMemo(() => resolveAuthEnvironment(host), [host]);
-	const baseUrl = useMemo(() => getAuthCoreBaseUrl(host), [host]);
+	const environment = useMemo(() => getAuthEnvironment(), []);
+	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
 
 	if (!data) {
 		return (

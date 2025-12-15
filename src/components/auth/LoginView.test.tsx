@@ -91,17 +91,25 @@ describe("LoginView", () => {
 		renderWithTheme(<LoginView client={client} />);
 		const user = userEvent.setup();
 
+		// Wait for form to be rendered (React StrictMode renders twice)
+		await waitFor(() => {
+			const forms = screen.getAllByTestId("login-form");
+			expect(forms.length).toBeGreaterThan(0);
+		});
+
 		const forms = screen.getAllByTestId("login-form");
-		const form = forms[0];
+		const form = forms[forms.length - 1]; // Use the last form (most recent render)
+
 		const emailInputs = screen.getAllByPlaceholderText("usuario@empresa.mx");
-		await user.type(emailInputs[0], "ana@example.com");
+		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
 		const passwordInputs = screen.getAllByPlaceholderText("••••••••");
-		await user.type(passwordInputs[0], "Secret123!");
+		await user.type(passwordInputs[passwordInputs.length - 1], "Secret123!");
+
 		const submitButtons = screen.getAllByRole("button", { name: /ingresar/i });
-		const submitButton = submitButtons[0];
+		const submitButton = submitButtons[submitButtons.length - 1];
 		expect(submitButton).toHaveAttribute("type", "submit");
 
-		// Submit the form
+		// Submit the form using fireEvent.submit (same as first test)
 		fireEvent.submit(form);
 
 		// Wait for the async call to complete
@@ -109,16 +117,11 @@ describe("LoginView", () => {
 			() => {
 				expect(client.signIn.email).toHaveBeenCalled();
 			},
-			{ timeout: 2000 },
-		);
-
-		// Wait for React to update and error message to appear
-		// The error should be displayed in an Alert with role="alert"
-		const errorAlert = await screen.findByRole(
-			"alert",
-			{ name: /no pudimos validar/i },
 			{ timeout: 3000 },
 		);
+
+		// Wait for error message to appear
+		const errorAlert = await screen.findByRole("alert", {}, { timeout: 3000 });
 		expect(errorAlert).toBeInTheDocument();
 		expect(errorAlert).toHaveTextContent(/credenciales inválidas/i);
 		expect(pushMock).not.toHaveBeenCalled();

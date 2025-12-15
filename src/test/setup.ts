@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom/vitest";
+import { vi } from "vitest";
 
 // Mock ResizeObserver for tests
 global.ResizeObserver = class ResizeObserver {
@@ -12,3 +13,18 @@ global.ResizeObserver = class ResizeObserver {
 		// Mock implementation
 	}
 };
+
+// Mock window.matchMedia for next-themes
+Object.defineProperty(window, "matchMedia", {
+	writable: true,
+	value: vi.fn().mockImplementation((query) => ({
+		matches: false,
+		media: query,
+		onchange: null,
+		addListener: vi.fn(), // deprecated
+		removeListener: vi.fn(), // deprecated
+		addEventListener: vi.fn(),
+		removeEventListener: vi.fn(),
+		dispatchEvent: vi.fn(),
+	})),
+});

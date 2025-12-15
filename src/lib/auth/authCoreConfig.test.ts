@@ -41,17 +41,17 @@ describe("authCoreConfig", () => {
 	describe("getAuthCoreBaseUrl", () => {
 		it("returns dev URL for localhost", () => {
 			const url = getAuthCoreBaseUrl("localhost");
-			expect(url).toBe("https://auth-core.janovix.algenium.dev");
+			expect(url).toBe("https://auth-svc.janovix.workers.dev");
 		});
 
-		it("returns qa URL for qa host", () => {
+		it("returns dev URL for qa host (preview mode)", () => {
 			const url = getAuthCoreBaseUrl("auth.janovix.algenium.qa");
-			expect(url).toBe("https://auth-core.janovix.algenium.qa");
+			expect(url).toBe("https://auth-svc.janovix.workers.dev");
 		});
 
 		it("returns prod URL for prod host", () => {
 			const url = getAuthCoreBaseUrl("auth.janovix.algenium.app");
-			expect(url).toBe("https://auth-core.janovix.algenium.app");
+			expect(url).toBe("https://auth-svc.janobvix.ai");
 		});
 	});
 });

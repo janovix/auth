@@ -1,0 +1,25 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "auth",
+	"main": ".open-next/worker.js",
+	"compatibility_date": "2025-10-08",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"assets": {
+		"binding": "ASSETS",
+		"directory": ".open-next/assets",
+	},
+	"observability": {
+		"enabled": true,
+	},
+	"upload_source_maps": true,
+	// Production environment configuration
+	// For production: "auth-svc.janovix.ai"
+	"vars": {
+		"AUTH_CORE_BASE_URL": "auth-svc.janovix.ai",
+		"NEXT_PUBLIC_AUTH_CORE_BASE_URL": "auth-svc.janovix.ai",
+	},
+}

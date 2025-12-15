@@ -1,7 +1,7 @@
 const AUTH_CORE_DOMAIN_BY_ENV = {
 	dev: "auth-svc.janovix.workers.dev",
 	qa: "auth-svc.janovix.workers.dev",
-	prod: "auth-svc.janobvix.ai",
+	prod: "auth-svc.janovix.ai",
 } as const;
 
 const LOCAL_DEV_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);

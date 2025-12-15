@@ -51,7 +51,7 @@ describe("authCoreConfig", () => {
 
 		it("returns prod URL for prod host", () => {
 			const url = getAuthCoreBaseUrl("auth.janovix.algenium.app");
-			expect(url).toBe("https://auth-svc.janobvix.ai");
+			expect(url).toBe("https://auth-svc.janovix.ai");
 		});
 	});
 });

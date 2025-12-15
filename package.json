@@ -70,6 +70,7 @@
 		"typescript": "5.9.3",
 		"vite-tsconfig-paths": "^5.1.4",
 		"vitest": "^4.0.15",
+		"webpack": "^5.103.0",
 		"wrangler": "4.51.0"
 	},
 	"private": true,

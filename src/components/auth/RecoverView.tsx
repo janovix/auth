@@ -30,7 +30,7 @@ import { Logo } from "@/components/Logo";
 import { authClient, type AuthClient } from "@/lib/auth/authClient";
 import {
 	getAuthCoreBaseUrl,
-	resolveAuthEnvironment,
+	getAuthEnvironment,
 } from "@/lib/auth/authCoreConfig";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 
@@ -44,8 +44,6 @@ const recoverSchema = z.object({
 type RecoverValues = z.infer<typeof recoverSchema>;
 type RecoverClient = Pick<AuthClient, "requestPasswordReset">;
 
-const getRuntimeHost = () =>
-	typeof window === "undefined" ? undefined : window.location.host;
 const getRuntimeOrigin = () =>
 	typeof window === "undefined" ? undefined : window.location.origin;
 
@@ -59,9 +57,8 @@ export const RecoverView = ({
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-	const host = getRuntimeHost();
-	const environment = useMemo(() => resolveAuthEnvironment(host), [host]);
-	const baseUrl = useMemo(() => getAuthCoreBaseUrl(host), [host]);
+	const environment = useMemo(() => getAuthEnvironment(), []);
+	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
 	const origin = getRuntimeOrigin();
 
 	const form = useForm<RecoverValues>({

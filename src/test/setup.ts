@@ -1,6 +1,14 @@
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
 
+// Set default environment variables for tests
+if (!process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL) {
+	process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL = "auth-svc.janovix.workers.dev";
+}
+if (!process.env.AUTH_CORE_BASE_URL) {
+	process.env.AUTH_CORE_BASE_URL = "auth-svc.janovix.workers.dev";
+}
+
 // Mock ResizeObserver for tests
 global.ResizeObserver = class ResizeObserver {
 	observe() {

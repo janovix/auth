@@ -18,19 +18,14 @@ import { useMemo } from "react";
 
 import {
 	getAuthCoreBaseUrl,
-	resolveAuthEnvironment,
-	type AuthEnvironment,
+	getAuthEnvironment,
 } from "@/lib/auth/authCoreConfig";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 
-const cookieDomainByEnv: Record<AuthEnvironment, string> = {
-	dev: ".algenium.dev",
-	qa: ".algenium.qa",
-	prod: ".algenium.app",
+const cookieDomainByEnv: Record<"dev" | "prod", string> = {
+	dev: ".janovix.workers.dev",
+	prod: ".janovix.ai",
 };
-
-const getRuntimeHost = () =>
-	typeof window === "undefined" ? undefined : window.location.host;
 
 const normalizeDate = (value?: string | Date) => {
 	if (!value) {
@@ -55,9 +50,8 @@ export const AccountView = () => {
 	const session = useAuthSession();
 	const data = session.data;
 
-	const host = getRuntimeHost();
-	const environment = useMemo(() => resolveAuthEnvironment(host), [host]);
-	const baseUrl = useMemo(() => getAuthCoreBaseUrl(host), [host]);
+	const environment = useMemo(() => getAuthEnvironment(), []);
+	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
 
 	if (!data) {
 		return (
@@ -75,9 +69,8 @@ export const AccountView = () => {
 							<AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500" />
 							<div>
 								<p>
-									Si vienes de un PR preview asegúrate de haber iniciado sesión
-									en auth.janovix.algenium.dev para compartir la cookie{" "}
-									<code>.algenium.dev</code>.
+									Si vienes de un preview asegúrate de haber iniciado sesión en
+									el mismo dominio para compartir la cookie.
 								</p>
 							</div>
 						</CardContent>
@@ -179,15 +172,15 @@ export const AccountView = () => {
 							<p className="font-medium text-foreground">Comparte sesión con</p>
 							<p>
 								{environment === "dev"
-									? "auth.janovix.algenium.dev y auth-pr-*.janovix.algenium.dev"
+									? "Todas las aplicaciones bajo *.janovix.workers.dev"
 									: "Solo aplicaciones bajo el dominio actual"}
 							</p>
 						</div>
 						<div>
 							<p className="font-medium text-foreground">Recordatorio</p>
 							<p>
-								QA y producción usan dominios distintos, por lo que deberás
-								iniciar sesión de forma independiente.
+								Dev/preview y producción usan dominios distintos, por lo que
+								deberás iniciar sesión de forma independiente.
 							</p>
 						</div>
 					</CardContent>

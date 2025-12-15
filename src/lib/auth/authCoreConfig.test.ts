@@ -1,57 +1,68 @@
-import { describe, expect, it, vi } from "vitest";
-import { getAuthCoreBaseUrl, resolveAuthEnvironment } from "./authCoreConfig";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { getAuthCoreBaseUrl, getAuthEnvironment } from "./authCoreConfig";
 
 describe("authCoreConfig", () => {
-	describe("resolveAuthEnvironment", () => {
-		it("returns dev for localhost", () => {
-			expect(resolveAuthEnvironment("localhost")).toBe("dev");
-		});
+	const originalEnv = process.env;
 
-		it("returns dev for 127.0.0.1", () => {
-			expect(resolveAuthEnvironment("127.0.0.1")).toBe("dev");
-		});
+	beforeEach(() => {
+		vi.resetModules();
+		process.env = { ...originalEnv };
+	});
 
-		it("returns dev for auth.janovix.algenium.dev", () => {
-			expect(resolveAuthEnvironment("auth.janovix.algenium.dev")).toBe("dev");
-		});
-
-		it("returns dev for PR preview hosts", () => {
-			expect(resolveAuthEnvironment("auth-pr-123.janovix.algenium.dev")).toBe(
-				"dev",
-			);
-		});
-
-		it("returns qa for auth.janovix.algenium.qa", () => {
-			expect(resolveAuthEnvironment("auth.janovix.algenium.qa")).toBe("qa");
-		});
-
-		it("returns prod for auth.janovix.algenium.app", () => {
-			expect(resolveAuthEnvironment("auth.janovix.algenium.app")).toBe("prod");
-		});
-
-		it("returns dev as default for unknown hosts", () => {
-			expect(resolveAuthEnvironment("unknown.example.com")).toBe("dev");
-		});
-
-		it("returns dev for undefined host", () => {
-			expect(resolveAuthEnvironment(undefined)).toBe("dev");
-		});
+	afterEach(() => {
+		process.env = originalEnv;
 	});
 
 	describe("getAuthCoreBaseUrl", () => {
-		it("returns dev URL for localhost", () => {
-			const url = getAuthCoreBaseUrl("localhost");
+		it("returns URL from NEXT_PUBLIC_AUTH_CORE_BASE_URL for client-side", () => {
+			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
+				"auth-svc.janovix.workers.dev";
+			// Mock window to simulate client-side
+			global.window = { location: {} } as any;
+			const url = getAuthCoreBaseUrl();
 			expect(url).toBe("https://auth-svc.janovix.workers.dev");
 		});
 
-		it("returns dev URL for qa host (preview mode)", () => {
-			const url = getAuthCoreBaseUrl("auth.janovix.algenium.qa");
-			expect(url).toBe("https://auth-svc.janovix.workers.dev");
-		});
-
-		it("returns prod URL for prod host", () => {
-			const url = getAuthCoreBaseUrl("auth.janovix.algenium.app");
+		it("returns URL from AUTH_CORE_BASE_URL for server-side", () => {
+			process.env.AUTH_CORE_BASE_URL = "auth-svc.janovix.ai";
+			// Mock window as undefined to simulate server-side
+			delete (global as any).window;
+			const url = getAuthCoreBaseUrl();
 			expect(url).toBe("https://auth-svc.janovix.ai");
+		});
+
+		it("handles URL with protocol already included", () => {
+			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
+				"https://auth-svc.janovix.workers.dev";
+			global.window = { location: {} } as any;
+			const url = getAuthCoreBaseUrl();
+			expect(url).toBe("https://auth-svc.janovix.workers.dev");
+		});
+
+		it("throws error when environment variable is not set", () => {
+			delete process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL;
+			delete process.env.AUTH_CORE_BASE_URL;
+			global.window = { location: {} } as any;
+			expect(() => getAuthCoreBaseUrl()).toThrow(
+				"AUTH_CORE_BASE_URL or NEXT_PUBLIC_AUTH_CORE_BASE_URL environment variable is not set",
+			);
+		});
+	});
+
+	describe("getAuthEnvironment", () => {
+		it("returns prod for .janovix.ai URL", () => {
+			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL = "auth-svc.janovix.ai";
+			global.window = { location: {} } as any;
+			const env = getAuthEnvironment();
+			expect(env).toBe("prod");
+		});
+
+		it("returns dev for .workers.dev URL", () => {
+			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
+				"auth-svc.janovix.workers.dev";
+			global.window = { location: {} } as any;
+			const env = getAuthEnvironment();
+			expect(env).toBe("dev");
 		});
 	});
 });

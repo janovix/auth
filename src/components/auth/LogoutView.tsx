@@ -21,17 +21,13 @@ import { useEffect, useMemo, useState } from "react";
 import { authClient } from "@/lib/auth/authClient";
 import {
 	getAuthCoreBaseUrl,
-	resolveAuthEnvironment,
+	getAuthEnvironment,
 } from "@/lib/auth/authCoreConfig";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 
-const getRuntimeHost = () =>
-	typeof window === "undefined" ? undefined : window.location.host;
-
 export const LogoutView = () => {
-	const host = getRuntimeHost();
-	const environment = useMemo(() => resolveAuthEnvironment(host), [host]);
-	const baseUrl = useMemo(() => getAuthCoreBaseUrl(host), [host]);
+	const environment = useMemo(() => getAuthEnvironment(), []);
+	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
 
 	const [status, setStatus] = useState<
 		"idle" | "running" | "success" | "error"
@@ -91,8 +87,8 @@ export const LogoutView = () => {
 							</span>
 						</div>
 						<p>
-							Recuerda que QA y producción tienen dominios diferentes, por lo
-							que deberás cerrar sesión manualmente en cada entorno.
+							Recuerda que dev/preview y producción tienen dominios diferentes,
+							por lo que deberás cerrar sesión manualmente en cada entorno.
 						</p>
 						{status === "running" && (
 							<div className="flex items-center gap-2 text-foreground">

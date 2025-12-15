@@ -1,3 +1,12 @@
+# [1.0.0-rc.3](https://github.com/janovix/auth/compare/v1.0.0-rc.2...v1.0.0-rc.3) (2025-12-15)
+
+
+### Bug Fixes
+
+* **auth:** use auth-svc.janovix.workers.dev for dev/preview environments ([1b55b37](https://github.com/janovix/auth/commit/1b55b3780646eae003e48fbb809d574a91119cc0))
+* **storybook:** install webpack as dev dependency for DefinePlugin ([c5253f9](https://github.com/janovix/auth/commit/c5253f9c9031db3f648d5f733e09bcdefb7b788c))
+* **storybook:** set AUTH_CORE_BASE_URL environment variables for Storybook builds ([9015436](https://github.com/janovix/auth/commit/9015436bb962c493029db33473970f658e9b905d))
+
 # [1.0.0-rc.2](https://github.com/janovix/auth/compare/v1.0.0-rc.1...v1.0.0-rc.2) (2025-12-15)
 
 

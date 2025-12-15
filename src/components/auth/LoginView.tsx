@@ -213,13 +213,6 @@ export const LoginView = ({
 									)}
 								/>
 
-								<p className="text-xs text-muted-foreground">
-									Endpoint activo:{" "}
-									<span className="font-mono text-xs text-foreground">
-										{baseUrl}/api/auth
-									</span>
-								</p>
-
 								<CardFooter className="flex flex-col gap-4 px-0 pb-0">
 									<Button
 										type="submit"

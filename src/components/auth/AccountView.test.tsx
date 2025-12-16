@@ -34,7 +34,7 @@ describe("AccountView", () => {
 	it("shows a helper when there is no active session", () => {
 		renderWithSession(createSnapshot());
 		expect(
-			screen.getByText(/no encontramos una sesión activa/i, { exact: false }),
+			screen.getByText(/sesión no encontrada/i, { exact: false }),
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole("link", { name: /iniciar sesión/i }),

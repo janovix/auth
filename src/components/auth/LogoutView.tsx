@@ -68,7 +68,8 @@ export const LogoutView = () => {
 						<div>
 							<CardTitle>Cerrar sesión</CardTitle>
 							<CardDescription>
-								Se revocará tu sesión activa y se eliminará la cookie de autenticación
+								Se revocará tu sesión activa y se eliminará la cookie de
+								autenticación
 							</CardDescription>
 						</div>
 						<Badge variant="secondary">
@@ -79,16 +80,17 @@ export const LogoutView = () => {
 						<div className="flex items-center gap-3 text-muted-foreground">
 							<LogOut className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
 							<div>
-								<p className="text-xs text-muted-foreground/70 mb-0.5">Endpoint</p>
-								<p className="font-mono text-xs">
-									{baseUrl}/api/auth/sign-out
+								<p className="text-xs text-muted-foreground/70 mb-0.5">
+									Endpoint
 								</p>
+								<p className="font-mono text-xs">{baseUrl}/api/auth/sign-out</p>
 							</div>
 						</div>
 						<div className="rounded-lg border border-dashed border-primary/20 bg-muted/40 p-4 text-muted-foreground">
 							<p className="text-xs">
-								Nota: Los entornos de desarrollo y producción tienen dominios diferentes,
-								por lo que deberás cerrar sesión manualmente en cada uno si es necesario.
+								Nota: Los entornos de desarrollo y producción tienen dominios
+								diferentes, por lo que deberás cerrar sesión manualmente en cada
+								uno si es necesario.
 							</p>
 						</div>
 						{status === "running" && (
@@ -99,7 +101,9 @@ export const LogoutView = () => {
 						)}
 						{feedback && (
 							<Alert variant={status === "error" ? "destructive" : "default"}>
-								{status === "success" && <CheckCircle2 className="h-4 w-4" aria-hidden="true" />}
+								{status === "success" && (
+									<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+								)}
 								<AlertTitle>
 									{status === "error"
 										? "Error al cerrar sesión"

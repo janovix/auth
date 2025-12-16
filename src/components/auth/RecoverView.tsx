@@ -123,7 +123,11 @@ export const RecoverView = ({
 				</CardHeader>
 				<CardContent>
 					{successMessage ? (
-						<Alert role="status" data-testid="recover-success-alert" className="mb-6">
+						<Alert
+							role="status"
+							data-testid="recover-success-alert"
+							className="mb-6"
+						>
 							<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
 							<AlertTitle>Solicitud enviada</AlertTitle>
 							<AlertDescription>
@@ -155,7 +159,10 @@ export const RecoverView = ({
 										name="email"
 										render={({ field }) => (
 											<FormItem>
-												<FieldLabel htmlFor="email" className="flex items-center gap-2">
+												<FieldLabel
+													htmlFor="email"
+													className="flex items-center gap-2"
+												>
 													<Mail className="h-4 w-4" aria-hidden="true" />
 													Correo electrónico
 												</FieldLabel>
@@ -171,7 +178,10 @@ export const RecoverView = ({
 													/>
 												</FormControl>
 												<FormMessage />
-												<FieldDescription id="email-description" className="sr-only">
+												<FieldDescription
+													id="email-description"
+													className="sr-only"
+												>
 													Ingresa el correo asociado a tu cuenta
 												</FieldDescription>
 											</FormItem>
@@ -181,7 +191,10 @@ export const RecoverView = ({
 
 								<Field>
 									<div className="flex items-start gap-3 rounded-lg border border-dashed border-primary/20 bg-muted/40 p-4 text-sm">
-										<MailCheck className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" aria-hidden="true" />
+										<MailCheck
+											className="h-5 w-5 text-primary mt-0.5 flex-shrink-0"
+											aria-hidden="true"
+										/>
 										<p className="text-muted-foreground">
 											Si la cuenta existe, recibirás un enlace temporal válido
 											únicamente durante los próximos minutos.
@@ -198,7 +211,10 @@ export const RecoverView = ({
 									>
 										{isSubmitting ? (
 											<span className="flex items-center justify-center gap-2">
-												<Mail className="h-4 w-4 animate-pulse" aria-hidden="true" />
+												<Mail
+													className="h-4 w-4 animate-pulse"
+													aria-hidden="true"
+												/>
 												Enviando enlace...
 											</span>
 										) : (

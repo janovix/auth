@@ -155,7 +155,10 @@ export const LoginView = ({
 										name="email"
 										render={({ field }) => (
 											<FormItem>
-												<FieldLabel htmlFor="email" className="flex items-center gap-2">
+												<FieldLabel
+													htmlFor="email"
+													className="flex items-center gap-2"
+												>
 													<Mail className="h-4 w-4" aria-hidden="true" />
 													Correo electrónico
 												</FieldLabel>
@@ -171,7 +174,10 @@ export const LoginView = ({
 													/>
 												</FormControl>
 												<FormMessage />
-												<FieldDescription id="email-description" className="sr-only">
+												<FieldDescription
+													id="email-description"
+													className="sr-only"
+												>
 													Ingresa tu dirección de correo corporativo
 												</FieldDescription>
 											</FormItem>
@@ -180,7 +186,10 @@ export const LoginView = ({
 								</Field>
 								<Field>
 									<div className="flex items-center">
-										<FieldLabel htmlFor="password" className="flex items-center gap-2">
+										<FieldLabel
+											htmlFor="password"
+											className="flex items-center gap-2"
+										>
 											<Lock className="h-4 w-4" aria-hidden="true" />
 											Contraseña
 										</FieldLabel>
@@ -213,7 +222,10 @@ export const LoginView = ({
 													/>
 												</FormControl>
 												<FormMessage />
-												<FieldDescription id="password-description" className="sr-only">
+												<FieldDescription
+													id="password-description"
+													className="sr-only"
+												>
 													Ingresa tu contraseña de acceso
 												</FieldDescription>
 											</FormItem>
@@ -263,7 +275,10 @@ export const LoginView = ({
 									>
 										{isSubmitting ? (
 											<span className="flex items-center justify-center gap-2">
-												<LogIn className="h-4 w-4 animate-pulse" aria-hidden="true" />
+												<LogIn
+													className="h-4 w-4 animate-pulse"
+													aria-hidden="true"
+												/>
 												Iniciando sesión...
 											</span>
 										) : (

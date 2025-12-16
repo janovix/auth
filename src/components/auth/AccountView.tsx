@@ -72,7 +72,10 @@ export const AccountView = () => {
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="flex items-start gap-3 text-sm">
-							<AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500 flex-shrink-0" aria-hidden="true" />
+							<AlertTriangle
+								className="mt-0.5 h-4 w-4 text-amber-500 flex-shrink-0"
+								aria-hidden="true"
+							/>
 							<div className="text-muted-foreground">
 								<p>
 									Si vienes de un preview, asegúrate de haber iniciado sesión en
@@ -103,9 +106,7 @@ export const AccountView = () => {
 					<CardHeader className="flex flex-wrap items-center justify-between gap-4">
 						<div>
 							<CardTitle>Mi cuenta</CardTitle>
-							<CardDescription>
-								Información de tu sesión activa
-							</CardDescription>
+							<CardDescription>Información de tu sesión activa</CardDescription>
 						</div>
 						<Badge variant="secondary">
 							Entorno · {environment.toUpperCase()}
@@ -114,9 +115,14 @@ export const AccountView = () => {
 					<CardContent className="grid gap-6 md:grid-cols-2">
 						<div className="space-y-3 text-sm">
 							<div className="flex items-center gap-2">
-								<User className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+								<User
+									className="h-4 w-4 text-muted-foreground"
+									aria-hidden="true"
+								/>
 								<div>
-									<p className="font-medium text-foreground">{data.user.name}</p>
+									<p className="font-medium text-foreground">
+										{data.user.name}
+									</p>
 									<p className="font-mono text-xs text-muted-foreground mt-0.5">
 										{data.user.email}
 									</p>
@@ -129,7 +135,10 @@ export const AccountView = () => {
 						</div>
 						<div className="space-y-3 text-sm">
 							<div className="flex items-center gap-2">
-								<Clock4 className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+								<Clock4
+									className="h-4 w-4 text-muted-foreground"
+									aria-hidden="true"
+								/>
 								<div>
 									<p className="font-medium text-foreground">
 										Expira {formatExpiresIn(data.session.expiresAt)}
@@ -175,14 +184,20 @@ export const AccountView = () => {
 					<CardContent className="grid gap-4 md:grid-cols-2 text-sm">
 						<div>
 							<p className="font-medium text-foreground mb-1">Dominio</p>
-							<p className="font-mono text-xs text-muted-foreground">{cookieDomain}</p>
+							<p className="font-mono text-xs text-muted-foreground">
+								{cookieDomain}
+							</p>
 						</div>
 						<div>
 							<p className="font-medium text-foreground mb-1">Endpoint base</p>
-							<p className="font-mono text-xs text-muted-foreground">{baseUrl}/api/auth</p>
+							<p className="font-mono text-xs text-muted-foreground">
+								{baseUrl}/api/auth
+							</p>
 						</div>
 						<div>
-							<p className="font-medium text-foreground mb-1">Alcance de la sesión</p>
+							<p className="font-medium text-foreground mb-1">
+								Alcance de la sesión
+							</p>
 							<p className="text-muted-foreground">
 								{environment === "dev"
 									? "Todas las aplicaciones bajo *.janovix.workers.dev"
@@ -190,10 +205,13 @@ export const AccountView = () => {
 							</p>
 						</div>
 						<div>
-							<p className="font-medium text-foreground mb-1">Nota importante</p>
+							<p className="font-medium text-foreground mb-1">
+								Nota importante
+							</p>
 							<p className="text-muted-foreground">
 								Los entornos de desarrollo y producción usan dominios distintos,
-								por lo que deberás iniciar sesión de forma independiente en cada uno.
+								por lo que deberás iniciar sesión de forma independiente en cada
+								uno.
 							</p>
 						</div>
 					</CardContent>
@@ -211,14 +229,18 @@ export const AccountView = () => {
 							<p className="text-xs uppercase tracking-wide text-muted-foreground/70 mb-1">
 								Token de sesión
 							</p>
-							<p className="font-mono text-xs break-all text-muted-foreground">{data.session.token}</p>
+							<p className="font-mono text-xs break-all text-muted-foreground">
+								{data.session.token}
+							</p>
 						</div>
 						{data.session.ipAddress && (
 							<div>
 								<p className="text-xs uppercase tracking-wide text-muted-foreground/70 mb-1">
 									Dirección IP
 								</p>
-								<p className="font-mono text-xs text-muted-foreground">{data.session.ipAddress}</p>
+								<p className="font-mono text-xs text-muted-foreground">
+									{data.session.ipAddress}
+								</p>
 							</div>
 						)}
 						{data.session.userAgent && (
@@ -226,7 +248,9 @@ export const AccountView = () => {
 								<p className="text-xs uppercase tracking-wide text-muted-foreground/70 mb-1">
 									User Agent
 								</p>
-								<p className="font-mono text-xs break-all text-muted-foreground">{data.session.userAgent}</p>
+								<p className="font-mono text-xs break-all text-muted-foreground">
+									{data.session.userAgent}
+								</p>
 							</div>
 						)}
 					</CardContent>

@@ -161,7 +161,11 @@ export const ResetPasswordView = ({
 					) : null}
 
 					{successMessage ? (
-						<Alert role="status" data-testid="reset-success-alert" className="mb-6">
+						<Alert
+							role="status"
+							data-testid="reset-success-alert"
+							className="mb-6"
+						>
 							<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
 							<AlertTitle>Contraseña actualizada</AlertTitle>
 							<AlertDescription>{successMessage}</AlertDescription>
@@ -187,7 +191,10 @@ export const ResetPasswordView = ({
 										name="newPassword"
 										render={({ field }) => (
 											<FormItem>
-												<FieldLabel htmlFor="newPassword" className="flex items-center gap-2">
+												<FieldLabel
+													htmlFor="newPassword"
+													className="flex items-center gap-2"
+												>
 													<Lock className="h-4 w-4" aria-hidden="true" />
 													Nueva contraseña
 												</FieldLabel>
@@ -203,11 +210,19 @@ export const ResetPasswordView = ({
 													/>
 												</FormControl>
 												<FormMessage />
-												<FieldDescription id="newPassword-description" className="sr-only">
-													La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, números y un símbolo
+												<FieldDescription
+													id="newPassword-description"
+													className="sr-only"
+												>
+													La contraseña debe tener al menos 8 caracteres,
+													incluir mayúsculas, números y un símbolo
 												</FieldDescription>
-												<FieldDescription id="newPassword-requirements" className="text-xs text-muted-foreground mt-1">
-													Mínimo 8 caracteres, incluye mayúsculas, números y símbolos
+												<FieldDescription
+													id="newPassword-requirements"
+													className="text-xs text-muted-foreground mt-1"
+												>
+													Mínimo 8 caracteres, incluye mayúsculas, números y
+													símbolos
 												</FieldDescription>
 											</FormItem>
 										)}
@@ -220,7 +235,10 @@ export const ResetPasswordView = ({
 										name="confirmPassword"
 										render={({ field }) => (
 											<FormItem>
-												<FieldLabel htmlFor="confirmPassword" className="flex items-center gap-2">
+												<FieldLabel
+													htmlFor="confirmPassword"
+													className="flex items-center gap-2"
+												>
 													<Lock className="h-4 w-4" aria-hidden="true" />
 													Confirmar contraseña
 												</FieldLabel>
@@ -236,7 +254,10 @@ export const ResetPasswordView = ({
 													/>
 												</FormControl>
 												<FormMessage />
-												<FieldDescription id="confirmPassword-description" className="sr-only">
+												<FieldDescription
+													id="confirmPassword-description"
+													className="sr-only"
+												>
 													Vuelve a ingresar tu contraseña para confirmar
 												</FieldDescription>
 											</FormItem>
@@ -247,7 +268,10 @@ export const ResetPasswordView = ({
 								<Field>
 									<div className="rounded-lg border border-dashed border-primary/30 bg-muted/50 p-4 text-sm">
 										<p className="flex items-center gap-2 font-semibold text-foreground mb-2">
-											<KeyRound className="h-4 w-4 text-primary" aria-hidden="true" />
+											<KeyRound
+												className="h-4 w-4 text-primary"
+												aria-hidden="true"
+											/>
 											Recomendaciones de seguridad
 										</p>
 										<ul className="space-y-1.5 text-muted-foreground">
@@ -278,7 +302,10 @@ export const ResetPasswordView = ({
 									>
 										{isSubmitting ? (
 											<span className="flex items-center justify-center gap-2">
-												<Lock className="h-4 w-4 animate-pulse" aria-hidden="true" />
+												<Lock
+													className="h-4 w-4 animate-pulse"
+													aria-hidden="true"
+												/>
 												Guardando contraseña...
 											</span>
 										) : (

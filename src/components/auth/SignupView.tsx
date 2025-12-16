@@ -177,7 +177,10 @@ export const SignupView = ({
 											name="firstName"
 											render={({ field }) => (
 												<FormItem>
-													<FieldLabel htmlFor="firstName" className="flex items-center gap-2">
+													<FieldLabel
+														htmlFor="firstName"
+														className="flex items-center gap-2"
+													>
 														<User className="h-4 w-4" aria-hidden="true" />
 														Nombre
 													</FieldLabel>
@@ -192,7 +195,10 @@ export const SignupView = ({
 														/>
 													</FormControl>
 													<FormMessage />
-													<FieldDescription id="firstName-description" className="sr-only">
+													<FieldDescription
+														id="firstName-description"
+														className="sr-only"
+													>
 														Tu nombre de pila
 													</FieldDescription>
 												</FormItem>
@@ -203,7 +209,10 @@ export const SignupView = ({
 											name="lastName"
 											render={({ field }) => (
 												<FormItem>
-													<FieldLabel htmlFor="lastName" className="flex items-center gap-2">
+													<FieldLabel
+														htmlFor="lastName"
+														className="flex items-center gap-2"
+													>
 														<User className="h-4 w-4" aria-hidden="true" />
 														Apellido
 													</FieldLabel>
@@ -218,7 +227,10 @@ export const SignupView = ({
 														/>
 													</FormControl>
 													<FormMessage />
-													<FieldDescription id="lastName-description" className="sr-only">
+													<FieldDescription
+														id="lastName-description"
+														className="sr-only"
+													>
 														Tu apellido
 													</FieldDescription>
 												</FormItem>
@@ -233,7 +245,10 @@ export const SignupView = ({
 										name="email"
 										render={({ field }) => (
 											<FormItem>
-												<FieldLabel htmlFor="email" className="flex items-center gap-2">
+												<FieldLabel
+													htmlFor="email"
+													className="flex items-center gap-2"
+												>
 													<Mail className="h-4 w-4" aria-hidden="true" />
 													Correo electrónico
 												</FieldLabel>
@@ -249,7 +264,10 @@ export const SignupView = ({
 													/>
 												</FormControl>
 												<FormMessage />
-												<FieldDescription id="email-description" className="sr-only">
+												<FieldDescription
+													id="email-description"
+													className="sr-only"
+												>
 													Tu dirección de correo corporativo
 												</FieldDescription>
 											</FormItem>
@@ -263,10 +281,15 @@ export const SignupView = ({
 										name="organization"
 										render={({ field }) => (
 											<FormItem>
-												<FieldLabel htmlFor="organization" className="flex items-center gap-2">
+												<FieldLabel
+													htmlFor="organization"
+													className="flex items-center gap-2"
+												>
 													<Building2 className="h-4 w-4" aria-hidden="true" />
 													Organización
-													<span className="text-xs text-muted-foreground font-normal">(opcional)</span>
+													<span className="text-xs text-muted-foreground font-normal">
+														(opcional)
+													</span>
 												</FieldLabel>
 												<FormControl>
 													<Input
@@ -278,7 +301,10 @@ export const SignupView = ({
 													/>
 												</FormControl>
 												<FormMessage />
-												<FieldDescription id="organization-description" className="sr-only">
+												<FieldDescription
+													id="organization-description"
+													className="sr-only"
+												>
 													Nombre de tu organización o empresa
 												</FieldDescription>
 											</FormItem>
@@ -292,7 +318,10 @@ export const SignupView = ({
 										name="password"
 										render={({ field }) => (
 											<FormItem>
-												<FieldLabel htmlFor="password" className="flex items-center gap-2">
+												<FieldLabel
+													htmlFor="password"
+													className="flex items-center gap-2"
+												>
 													<Lock className="h-4 w-4" aria-hidden="true" />
 													Contraseña
 												</FieldLabel>
@@ -308,11 +337,19 @@ export const SignupView = ({
 													/>
 												</FormControl>
 												<FormMessage />
-												<FieldDescription id="password-description" className="sr-only">
-													La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, números y un símbolo
+												<FieldDescription
+													id="password-description"
+													className="sr-only"
+												>
+													La contraseña debe tener al menos 8 caracteres,
+													incluir mayúsculas, números y un símbolo
 												</FieldDescription>
-												<FieldDescription id="password-requirements" className="text-xs text-muted-foreground mt-1">
-													Mínimo 8 caracteres, incluye mayúsculas, números y símbolos
+												<FieldDescription
+													id="password-requirements"
+													className="text-xs text-muted-foreground mt-1"
+												>
+													Mínimo 8 caracteres, incluye mayúsculas, números y
+													símbolos
 												</FieldDescription>
 											</FormItem>
 										)}
@@ -324,7 +361,10 @@ export const SignupView = ({
 										name="confirmPassword"
 										render={({ field }) => (
 											<FormItem>
-												<FieldLabel htmlFor="confirmPassword" className="flex items-center gap-2">
+												<FieldLabel
+													htmlFor="confirmPassword"
+													className="flex items-center gap-2"
+												>
 													<Lock className="h-4 w-4" aria-hidden="true" />
 													Confirmar contraseña
 												</FieldLabel>
@@ -340,7 +380,10 @@ export const SignupView = ({
 													/>
 												</FormControl>
 												<FormMessage />
-												<FieldDescription id="confirmPassword-description" className="sr-only">
+												<FieldDescription
+													id="confirmPassword-description"
+													className="sr-only"
+												>
 													Vuelve a ingresar tu contraseña para confirmar
 												</FieldDescription>
 											</FormItem>
@@ -369,7 +412,10 @@ export const SignupView = ({
 														htmlFor="acceptTerms"
 														className="text-sm font-medium cursor-pointer flex items-start gap-2"
 													>
-														<ShieldCheck className="h-4 w-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+														<ShieldCheck
+															className="h-4 w-4 mt-0.5 flex-shrink-0"
+															aria-hidden="true"
+														/>
 														<span>
 															Acepto los{" "}
 															<Link
@@ -390,8 +436,12 @@ export const SignupView = ({
 														</span>
 													</FormLabel>
 													<FormMessage />
-													<FieldDescription id="acceptTerms-description" className="sr-only">
-														Debes aceptar los términos y condiciones para continuar
+													<FieldDescription
+														id="acceptTerms-description"
+														className="sr-only"
+													>
+														Debes aceptar los términos y condiciones para
+														continuar
 													</FieldDescription>
 												</div>
 											</FormItem>
@@ -408,7 +458,10 @@ export const SignupView = ({
 									>
 										{isSubmitting ? (
 											<span className="flex items-center justify-center gap-2">
-												<UserPlus className="h-4 w-4 animate-pulse" aria-hidden="true" />
+												<UserPlus
+													className="h-4 w-4 animate-pulse"
+													aria-hidden="true"
+												/>
 												Creando cuenta...
 											</span>
 										) : (

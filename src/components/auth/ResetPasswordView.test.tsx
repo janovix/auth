@@ -136,7 +136,7 @@ describe("ResetPasswordView", () => {
 		renderWithTheme(<ResetPasswordView token={null} />);
 
 		expect(
-			screen.getByText(/no encontramos un token válido/i, { exact: false }),
+			screen.getByText(/token inválido o expirado/i, { exact: false }),
 		).toBeInTheDocument();
 	});
 

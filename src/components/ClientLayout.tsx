@@ -80,7 +80,9 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
 			)}
 
 			{/* Main content area - scrollable */}
-			<div className={`flex-1 w-full flex flex-col items-center px-4 md:px-10 pt-4 pb-4 relative z-10 overflow-y-auto min-h-0 ${showBackground ? "justify-center lg:pt-6 lg:pb-6" : "justify-start"}`}>
+			<div
+				className={`flex-1 w-full flex flex-col items-center px-4 md:px-10 pt-4 pb-4 relative z-10 overflow-y-auto min-h-0 ${showBackground ? "justify-center lg:pt-6 lg:pb-6" : "justify-start"}`}
+			>
 				<div className="flex w-full max-w-sm flex-col gap-4 lg:gap-6">
 					{/* Login form */}
 					{children}

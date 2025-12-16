@@ -47,15 +47,15 @@ describe("LoginView", () => {
 
 		const forms = screen.getAllByTestId("login-form");
 		const form = forms[0];
-		const emailInputs = screen.getAllByPlaceholderText("usuario@empresa.mx");
+		const emailInputs = screen.getAllByPlaceholderText("tu@empresa.com");
 		await user.type(emailInputs[0], "ana@example.com");
-		const passwordInputs = screen.getAllByPlaceholderText("••••••••");
+		const passwordInputs = screen.getAllByPlaceholderText(/ingresa tu contraseña/i);
 		await user.type(passwordInputs[0], "Secret123!");
 		const checkboxes = screen.getAllByRole("checkbox", {
-			name: /mantener sesión/i,
+			name: /recordar sesión/i,
 		});
 		await user.click(checkboxes[0]);
-		const submitButtons = screen.getAllByRole("button", { name: /ingresar/i });
+		const submitButtons = screen.getAllByRole("button", { name: /iniciar sesión/i });
 		const submitButton = submitButtons[0];
 		expect(submitButton).toHaveAttribute("type", "submit");
 		fireEvent.submit(form);
@@ -94,12 +94,12 @@ describe("LoginView", () => {
 		const forms = screen.getAllByTestId("login-form");
 		const form = forms[forms.length - 1]; // Use the last form (most recent render)
 
-		const emailInputs = screen.getAllByPlaceholderText("usuario@empresa.mx");
+		const emailInputs = screen.getAllByPlaceholderText("tu@empresa.com");
 		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
-		const passwordInputs = screen.getAllByPlaceholderText("••••••••");
+		const passwordInputs = screen.getAllByPlaceholderText(/ingresa tu contraseña/i);
 		await user.type(passwordInputs[passwordInputs.length - 1], "Secret123!");
 
-		const submitButtons = screen.getAllByRole("button", { name: /ingresar/i });
+		const submitButtons = screen.getAllByRole("button", { name: /iniciar sesión/i });
 		const submitButton = submitButtons[submitButtons.length - 1];
 		expect(submitButton).toHaveAttribute("type", "submit");
 
@@ -151,9 +151,9 @@ describe("LoginView", () => {
 		const forms = screen.getAllByTestId("login-form");
 		const form = forms[forms.length - 1];
 
-		const emailInputs = screen.getAllByPlaceholderText("usuario@empresa.mx");
+		const emailInputs = screen.getAllByPlaceholderText("tu@empresa.com");
 		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
-		const passwordInputs = screen.getAllByPlaceholderText("••••••••");
+		const passwordInputs = screen.getAllByPlaceholderText(/ingresa tu contraseña/i);
 		await user.type(passwordInputs[passwordInputs.length - 1], "Secret123!");
 
 		fireEvent.submit(form);

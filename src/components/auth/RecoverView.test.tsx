@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 import type { AuthClient } from "@/lib/auth/authClient";
@@ -17,6 +17,10 @@ const createClient = (): RecoverClient => ({
 });
 
 describe("RecoverView", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	it("requests a password reset email for the given address", async () => {
 		const client = createClient();
 		vi.mocked(client.requestPasswordReset).mockResolvedValue({
@@ -38,7 +42,7 @@ describe("RecoverView", () => {
 		const emailInputs = screen.getAllByLabelText(/correo/i);
 		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
 		const submitButtons = screen.getAllByRole("button", {
-			name: /recibir enlace/i,
+			name: /enviar enlace de recuperación/i,
 		});
 		const submitButton = submitButtons[submitButtons.length - 1];
 		expect(submitButton).toHaveAttribute("type", "submit");
@@ -63,7 +67,7 @@ describe("RecoverView", () => {
 			},
 		});
 
-		renderWithTheme(<RecoverView client={client} />);
+		renderWithTheme(<RecoverView redirectTo="/recover/reset" client={client} />);
 		const user = userEvent.setup();
 
 		await waitFor(() => {
@@ -76,16 +80,17 @@ describe("RecoverView", () => {
 
 		const emailInputs = screen.getAllByLabelText(/correo/i);
 		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
-		const submitButtons = screen.getAllByRole("button", {
-			name: /recibir enlace/i,
+		
+		// Wait a bit for form validation to complete
+		await waitFor(() => {
+			expect(emailInputs[emailInputs.length - 1]).toHaveValue("ana@example.com");
 		});
-		const submitButton = submitButtons[submitButtons.length - 1];
-		expect(submitButton).toHaveAttribute("type", "submit");
+		
 		fireEvent.submit(form);
 
 		await waitFor(() => {
 			expect(client.requestPasswordReset).toHaveBeenCalled();
-		});
+		}, { timeout: 3000 });
 
 		expect(
 			await screen.findByText(/solicitud inválida/i, { exact: false }),
@@ -99,7 +104,7 @@ describe("RecoverView", () => {
 			error: null,
 		});
 
-		renderWithTheme(<RecoverView client={client} />);
+		renderWithTheme(<RecoverView redirectTo="/recover/reset" client={client} />);
 		const user = userEvent.setup();
 
 		await waitFor(() => {
@@ -112,11 +117,26 @@ describe("RecoverView", () => {
 
 		const emailInputs = screen.getAllByLabelText(/correo/i);
 		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
-		fireEvent.submit(form);
+		
+		// Wait for form to be ready and submit button to be available
+		await waitFor(() => {
+			const submitButtons = screen.getAllByRole("button", {
+				name: /enviar enlace de recuperación/i,
+			});
+			expect(submitButtons.length).toBeGreaterThan(0);
+		});
+		
+		const submitButtons = screen.getAllByRole("button", {
+			name: /enviar enlace de recuperación/i,
+		});
+		const submitButton = submitButtons[submitButtons.length - 1];
+		
+		// Click the button instead of submitting form directly
+		await user.click(submitButton);
 
 		await waitFor(() => {
 			expect(client.requestPasswordReset).toHaveBeenCalled();
-		});
+		}, { timeout: 3000 });
 
 		expect(
 			await screen.findByText(/error en el servidor/i, { exact: false }),

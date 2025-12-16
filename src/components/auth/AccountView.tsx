@@ -57,14 +57,6 @@ export const AccountView = () => {
 	const session = useAuthSession();
 	const data = session.data;
 
-	// DEBUG: Log what AccountView receives
-	console.log("[ACCOUNT_VIEW] Render:", {
-		hasData: !!data,
-		userId: data?.user?.id,
-		isPending: session.isPending,
-		isClient: typeof window !== "undefined",
-	});
-
 	const environment = useMemo(() => getAuthEnvironment(), []);
 	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
 

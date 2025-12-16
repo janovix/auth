@@ -56,24 +56,12 @@ export async function getServerSession(): Promise<ServerSession> {
 		const cookieStore = await cookies();
 		const cookieHeader = cookieStore.toString();
 
-		// DEBUG: Log cookie info
-		console.log(
-			"[GET_SERVER_SESSION] Cookie header length:",
-			cookieHeader?.length ?? 0,
-		);
-		console.log("[GET_SERVER_SESSION] Has cookies:", !!cookieHeader);
-
 		// If no cookies, definitely no session
 		if (!cookieHeader) {
-			console.log("[GET_SERVER_SESSION] No cookies, returning null");
 			return null;
 		}
 
 		const baseUrl = getAuthCoreBaseUrl();
-		console.log(
-			"[GET_SERVER_SESSION] Fetching from:",
-			`${baseUrl}/api/auth/get-session`,
-		);
 
 		// For server-to-server requests, we need to include Origin header
 		// to pass Better Auth's origin check. Use the auth-svc URL as origin
@@ -89,11 +77,8 @@ export async function getServerSession(): Promise<ServerSession> {
 			cache: "no-store",
 		});
 
-		console.log("[GET_SERVER_SESSION] Response status:", response.status);
-
 		if (!response.ok) {
 			// Non-2xx response means no valid session
-			console.log("[GET_SERVER_SESSION] Non-OK response, returning null");
 			return null;
 		}
 
@@ -122,25 +107,10 @@ export async function getServerSession(): Promise<ServerSession> {
 
 		const data: SessionResponse = await response.json();
 
-		console.log("[GET_SERVER_SESSION] Response data:", {
-			hasData: !!data,
-			hasUser: !!data?.user,
-			hasSession: !!data?.session,
-			userId: data?.user?.id,
-		});
-
 		// Better Auth returns { user, session } or null
 		if (!data || !data.user || !data.session) {
-			console.log(
-				"[GET_SERVER_SESSION] Missing user or session, returning null",
-			);
 			return null;
 		}
-
-		console.log(
-			"[GET_SERVER_SESSION] Success! Returning session for user:",
-			data.user.id,
-		);
 
 		// Parse date strings into Date objects
 		return {
@@ -158,7 +128,7 @@ export async function getServerSession(): Promise<ServerSession> {
 		};
 	} catch (error) {
 		// Log error but don't throw - treat as unauthenticated
-		console.error("[GET_SERVER_SESSION] Failed to fetch session:", error);
+		console.error("[getServerSession] Failed to fetch session:", error);
 		return null;
 	}
 }

@@ -1,3 +1,10 @@
+# [1.0.0-rc.6](https://github.com/janovix/auth/compare/v1.0.0-rc.5...v1.0.0-rc.6) (2025-12-16)
+
+
+### Features
+
+* **auth:** add Next.js middleware for session management and route protection ([b39ac7b](https://github.com/janovix/auth/commit/b39ac7ba2e9ce8df106f8104b26938c9cd64855e))
+
 # [1.0.0-rc.5](https://github.com/janovix/auth/compare/v1.0.0-rc.4...v1.0.0-rc.5) (2025-12-16)
 
 

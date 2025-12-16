@@ -10,6 +10,9 @@ import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
  */
 export const authClient = createAuthClient({
 	baseURL: getAuthCoreBaseUrl(),
+	fetchOptions: {
+		credentials: "include",
+	},
 });
 
 export type AuthClient = typeof authClient;

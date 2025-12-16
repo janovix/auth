@@ -157,6 +157,9 @@ describe("getServerSession", () => {
 				method: "GET",
 				headers: {
 					cookie: "better-auth.session_token=xyz",
+					// Origin header is required to pass Better Auth's origin check
+					// for server-to-server requests
+					origin: "https://auth-svc.test.dev",
 				},
 				cache: "no-store",
 			},

@@ -75,10 +75,15 @@ export async function getServerSession(): Promise<ServerSession> {
 			`${baseUrl}/api/auth/get-session`,
 		);
 
+		// For server-to-server requests, we need to include Origin header
+		// to pass Better Auth's origin check. Use the auth-svc URL as origin
+		// since it's a trusted origin for itself.
 		const response = await fetch(`${baseUrl}/api/auth/get-session`, {
 			method: "GET",
 			headers: {
 				cookie: cookieHeader,
+				// Add Origin header to pass Better Auth's origin check
+				origin: baseUrl,
 			},
 			// Don't cache session requests
 			cache: "no-store",

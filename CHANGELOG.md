@@ -1,3 +1,10 @@
+# [1.0.0-rc.5](https://github.com/janovix/auth/compare/v1.0.0-rc.4...v1.0.0-rc.5) (2025-12-16)
+
+
+### Features
+
+* **auth:** implement Next.js 16 proxy for session management and enhance AccountView with server-side session fetching ([b54a560](https://github.com/janovix/auth/commit/b54a56063a77ac0147b5e891db76839ca8b5b230))
+
 # [1.0.0-rc.4](https://github.com/janovix/auth/compare/v1.0.0-rc.3...v1.0.0-rc.4) (2025-12-16)
 
 

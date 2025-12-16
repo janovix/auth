@@ -1,22 +1,50 @@
-"use client";
-import LightPillar from "../components/LightPillar";
+import { LoginPageWrapper } from "@/components/auth/LoginPageWrapper";
+import type { Metadata } from "next";
 
-export default function Home() {
+type PageProps = {
+	searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+const getRedirect = (
+	params?: Record<string, string | string[] | undefined>,
+) => {
+	if (!params) {
+		return undefined;
+	}
+
+	const value = params.next ?? params.redirectTo;
+	return typeof value === "string" ? value : undefined;
+};
+
+const getResetSuccessMessage = (
+	params?: Record<string, string | string[] | undefined>,
+) => {
+	if (!params) {
+		return undefined;
+	}
+
+	const value = params.reset;
+	if (typeof value !== "string") {
+		return undefined;
+	}
+
+	return value === "success"
+		? "Tu contraseña fue actualizada. Ingresa con tus nuevas credenciales."
+		: undefined;
+};
+
+export const metadata: Metadata = {
+	title: "Iniciar sesión | Janovix Auth",
+	description:
+		"Conecta con auth-core usando la librería Better Auth y cookies HttpOnly.",
+};
+
+export default async function HomePage({ searchParams }: PageProps) {
+	const resolvedParams = await searchParams;
 	return (
-		<div style={{ width: "100%", height: "600px", position: "relative" }}>
-			<LightPillar
-				topColor="#5227FF"
-				bottomColor="#FF9FFC"
-				intensity={1.0}
-				rotationSpeed={0.3}
-				glowAmount={0.005}
-				pillarWidth={3.0}
-				pillarHeight={0.4}
-				noiseIntensity={0.5}
-				pillarRotation={0}
-				interactive={false}
-				mixBlendMode="normal"
-			/>
-		</div>
+		<LoginPageWrapper
+			redirectTo={getRedirect(resolvedParams)}
+			defaultSuccessMessage={getResetSuccessMessage(resolvedParams)}
+		/>
 	);
 }

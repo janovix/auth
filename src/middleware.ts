@@ -27,13 +27,14 @@ export function middleware(request: NextRequest) {
 	// Define route protection rules
 	const isProtectedRoute = pathname.startsWith("/account");
 	const isAuthRoute =
+		pathname === "/" ||
 		pathname.startsWith("/login") ||
 		pathname.startsWith("/signup") ||
 		pathname.startsWith("/recover");
 
 	// Redirect unauthenticated users away from protected routes
 	if (isProtectedRoute && !sessionCookie) {
-		const loginUrl = new URL("/login", request.url);
+		const loginUrl = new URL("/", request.url);
 		// Preserve the original destination for post-login redirect
 		loginUrl.searchParams.set("next", pathname);
 		return NextResponse.redirect(loginUrl);
@@ -49,5 +50,5 @@ export function middleware(request: NextRequest) {
 
 export const config = {
 	// Apply middleware to protected and auth routes
-	matcher: ["/account/:path*", "/login", "/signup", "/recover/:path*"],
+	matcher: ["/account/:path*", "/", "/login", "/signup", "/recover/:path*"],
 };

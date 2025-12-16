@@ -4,7 +4,6 @@ import {
 	createContext,
 	useCallback,
 	useContext,
-	useRef,
 	useSyncExternalStore,
 } from "react";
 import { atom, type WritableAtom } from "nanostores";
@@ -19,7 +18,11 @@ type SessionSnapshot = ReturnType<SessionStore["get"]>;
 // Better Auth's useSession is typed as ReadableAtom but is actually writable
 type WritableSessionStore = WritableAtom<SessionSnapshot>;
 
+// Context for custom store (used in tests)
 const AuthSessionContext = createContext<SessionStore | null>(null);
+
+// Context for server-side hydrated session
+const HydratedSessionContext = createContext<ServerSession | null>(null);
 
 const useSessionStore = () =>
 	useContext(AuthSessionContext) ?? authClient.useSession;
@@ -39,11 +42,11 @@ export const AuthSessionProvider = ({
 };
 
 /**
- * Hydrates the Better Auth session store with server-side fetched session data.
+ * Provides server-side session data to child components via React Context.
  *
  * This component should wrap any page/component that receives session data from
- * the server. It sets the initial session in the store BEFORE children render,
- * preventing the "blink" effect where components first show no session then update.
+ * the server. It provides the session through context so that `useAuthSession()`
+ * can return the server data immediately, preventing the "blink" effect.
  *
  * @example
  * ```tsx
@@ -65,27 +68,26 @@ export const SessionHydrator = ({
 	children: ReactNode;
 	session: ServerSession;
 }) => {
-	const hydrated = useRef(false);
-
-	// Hydrate the store only once on first render
-	if (!hydrated.current && session) {
-		// Set the session data directly in the authClient's session store
-		// Cast to WritableSessionStore since Better Auth's types are ReadableAtom
-		// but the underlying store is writable
-		const store = authClient.useSession as unknown as WritableSessionStore;
-		store.set({
-			data: session,
-			error: null,
-			isPending: false,
-		});
-		hydrated.current = true;
-	}
-
-	return <>{children}</>;
+	return (
+		<HydratedSessionContext.Provider value={session}>
+			{children}
+		</HydratedSessionContext.Provider>
+	);
 };
 
-export const useAuthSession = () => {
+/**
+ * Hook to access the current auth session.
+ *
+ * Returns session data from one of these sources (in priority order):
+ * 1. Server-hydrated session from `SessionHydrator` context (prevents blink)
+ * 2. Client-side session store from Better Auth
+ *
+ * The server-hydrated session is used as fallback when the client store
+ * doesn't have data yet, ensuring seamless SSR hydration without flicker.
+ */
+export const useAuthSession = (): SessionSnapshot => {
 	const store = useSessionStore();
+	const hydratedSession = useContext(HydratedSessionContext);
 
 	const subscribe = useCallback(
 		(listener: () => void) => store.subscribe(() => listener()),
@@ -94,11 +96,37 @@ export const useAuthSession = () => {
 
 	const getSnapshot = useCallback(() => store.get(), [store]);
 
-	return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+	const storeSnapshot = useSyncExternalStore(
+		subscribe,
+		getSnapshot,
+		getSnapshot,
+	);
+
+	// If the store has data, use it (for real-time updates)
+	// Otherwise, fall back to the hydrated server session
+	if (storeSnapshot.data) {
+		return storeSnapshot;
+	}
+
+	// Use hydrated session if store is empty but we have server data
+	if (hydratedSession) {
+		return {
+			data: hydratedSession,
+			error: null,
+			isPending: false,
+		};
+	}
+
+	// No session available
+	return storeSnapshot;
 };
 
 export const createSessionStore = (snapshot: SessionSnapshot) =>
 	atom(snapshot) as SessionStore;
+
+// Export the writable store helper for tests
+export const getWritableSessionStore = () =>
+	authClient.useSession as unknown as WritableSessionStore;
 
 export type AuthSessionSnapshot = SessionSnapshot;
 export type AuthSessionStore = SessionStore;

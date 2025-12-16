@@ -1,19 +1,14 @@
-import { render, renderHook } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import type { WritableAtom } from "nanostores";
+import { render, renderHook, cleanup } from "@testing-library/react";
+import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import {
 	AuthSessionProvider,
 	createSessionStore,
+	getWritableSessionStore,
 	SessionHydrator,
 	useAuthSession,
 	type AuthSessionSnapshot,
 } from "./useAuthSession";
-import { authClient } from "./authClient";
 import type { ServerSession } from "./getServerSession";
-
-// Helper to cast the session store to writable for testing
-const getWritableStore = () =>
-	authClient.useSession as unknown as WritableAtom<AuthSessionSnapshot>;
 
 const createSnapshot = (
 	overrides?: Partial<AuthSessionSnapshot>,
@@ -175,25 +170,32 @@ describe("SessionHydrator", () => {
 
 	beforeEach(() => {
 		// Reset the session store before each test
-		getWritableStore().set({
+		getWritableSessionStore().set({
 			data: null,
 			error: null,
 			isPending: false,
 		});
 	});
 
-	it("hydrates the session store with server session data", () => {
-		render(
+	afterEach(() => {
+		cleanup();
+	});
+
+	it("provides session via context to useAuthSession hook", () => {
+		// Component that uses the hook
+		const SessionConsumer = () => {
+			const session = useAuthSession();
+			return <div data-testid="session-data">{session.data?.user.name}</div>;
+		};
+
+		const { getByTestId } = render(
 			<SessionHydrator session={mockSession}>
-				<div>Test Child</div>
+				<SessionConsumer />
 			</SessionHydrator>,
 		);
 
-		// The store should now have the hydrated session
-		const storeValue = authClient.useSession.get();
-		expect(storeValue.data).toEqual(mockSession);
-		expect(storeValue.error).toBeNull();
-		expect(storeValue.isPending).toBe(false);
+		// The hook should return the hydrated session
+		expect(getByTestId("session-data").textContent).toBe("Hydrated User");
 	});
 
 	it("renders children correctly", () => {
@@ -206,45 +208,61 @@ describe("SessionHydrator", () => {
 		expect(getByText("Test Child Content")).toBeInTheDocument();
 	});
 
-	it("does not hydrate when session is null", () => {
-		// Set some existing data
-		getWritableStore().set({
-			data: mockSession,
+	it("useAuthSession returns empty session when hydrator has null", () => {
+		const SessionConsumer = () => {
+			const session = useAuthSession();
+			return <div data-testid="has-data">{session.data ? "yes" : "no"}</div>;
+		};
+
+		const { getByTestId } = render(
+			<SessionHydrator session={null}>
+				<SessionConsumer />
+			</SessionHydrator>,
+		);
+
+		expect(getByTestId("has-data").textContent).toBe("no");
+	});
+
+	it("prefers store data over hydrated session for real-time updates", () => {
+		// Set some data in the store
+		getWritableSessionStore().set({
+			data: {
+				user: {
+					id: "store-user",
+					name: "Store User",
+					email: "store@example.com",
+					image: null,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+					emailVerified: true,
+				},
+				session: {
+					id: "store-session",
+					userId: "store-user",
+					token: "store-token",
+					createdAt: new Date(),
+					updatedAt: new Date(),
+					expiresAt: new Date(Date.now() + 3600 * 1000),
+				},
+			},
 			error: null,
 			isPending: false,
 		});
 
-		render(
-			<SessionHydrator session={null}>
-				<div>Test Child</div>
-			</SessionHydrator>,
-		);
+		const SessionConsumer = () => {
+			const session = useAuthSession();
+			return (
+				<div data-testid="store-priority-user">{session.data?.user.name}</div>
+			);
+		};
 
-		// The store should still have the original data (not overwritten with null)
-		const storeValue = authClient.useSession.get();
-		expect(storeValue.data).toEqual(mockSession);
-	});
-
-	it("only hydrates once even with re-renders", () => {
-		const store = getWritableStore();
-		const setSpy = vi.spyOn(store, "set");
-
-		const { rerender } = render(
+		const { getByTestId } = render(
 			<SessionHydrator session={mockSession}>
-				<div>Test Child</div>
+				<SessionConsumer />
 			</SessionHydrator>,
 		);
 
-		// Re-render the component
-		rerender(
-			<SessionHydrator session={mockSession}>
-				<div>Test Child Updated</div>
-			</SessionHydrator>,
-		);
-
-		// Should only have been called once (on first render)
-		expect(setSpy).toHaveBeenCalledTimes(1);
-
-		setSpy.mockRestore();
+		// Should use store data (Store User) instead of hydrated (Hydrated User)
+		expect(getByTestId("store-priority-user").textContent).toBe("Store User");
 	});
 });

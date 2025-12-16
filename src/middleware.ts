@@ -2,22 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
 /**
- * Next.js 16+ Proxy for optimistic route protection.
+ * Next.js Middleware for optimistic route protection.
  *
- * This proxy runs BEFORE the page renders and checks for the existence of
+ * This middleware runs BEFORE the page renders and checks for the existence of
  * a session cookie. If no cookie exists, it redirects to the login page.
  *
  * Important: This is an OPTIMISTIC check - it only verifies the cookie exists,
- * not that it's valid. Actual session validation should still happen in your
- * pages/components. This prevents the "blink" effect where users briefly see
- * protected content before being redirected.
+ * not that it's valid. Actual session validation still happens server-side
+ * in the page components. This prevents the "blink" effect where users briefly
+ * see protected content before being redirected.
  *
  * For cross-subdomain cookies (like .janovix.workers.dev), the cookie will be
- * available to this proxy since it runs on the same parent domain.
+ * available to this middleware since it's set on the parent domain.
  *
- * @see https://www.better-auth.com/docs/integrations/next#nextjs-16-proxy
+ * @see https://www.better-auth.com/docs/integrations/next
  */
-export async function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 
 	// Get the session cookie from the request
@@ -48,6 +48,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-	// Apply proxy to protected and auth routes
+	// Apply middleware to protected and auth routes
 	matcher: ["/account/:path*", "/login", "/signup", "/recover/:path*"],
 };

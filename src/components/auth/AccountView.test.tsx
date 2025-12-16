@@ -3,7 +3,6 @@ import {
 	createSessionStore,
 	type AuthSessionSnapshot,
 } from "@/lib/auth/useAuthSession";
-import type { ServerSession } from "@/lib/auth/getServerSession";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -22,14 +21,11 @@ const createSnapshot = (
 	...overrides,
 });
 
-const renderWithSession = (
-	snapshot: AuthSessionSnapshot,
-	initialSession?: ServerSession,
-) => {
+const renderWithSession = (snapshot: AuthSessionSnapshot) => {
 	const store = createSessionStore(snapshot);
 	return renderWithTheme(
 		<AuthSessionProvider store={store}>
-			<AccountView initialSession={initialSession} />
+			<AccountView />
 		</AuthSessionProvider>,
 	);
 };
@@ -107,35 +103,6 @@ describe("AccountView", () => {
 		expect(screen.getByText(/Mozilla\/5.0/)).toBeInTheDocument();
 	});
 
-	it("uses initialSession when client session is not available", () => {
-		// Provide initialSession from server, but no client session
-		const initialSession: ServerSession = {
-			user: {
-				id: "server-user-123",
-				name: "Server User",
-				email: "server@example.com",
-				image: null,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				emailVerified: true,
-			},
-			session: {
-				id: "server-session-123",
-				userId: "server-user-123",
-				token: "server-token-123",
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				expiresAt: new Date(Date.now() + 3600 * 1000),
-			},
-		};
-
-		// Empty client session (null data)
-		renderWithSession(createSnapshot(), initialSession);
-
-		// Should show data from initialSession
-		expect(
-			screen.getByText(/server user/i, { exact: false }),
-		).toBeInTheDocument();
-		expect(screen.getByText(/server-token-123/)).toBeInTheDocument();
-	});
+	// Note: Session hydration is now handled by SessionHydrator component
+	// in the page.tsx Server Component, not via props to AccountView
 });

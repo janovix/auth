@@ -68,6 +68,13 @@ export const SessionHydrator = ({
 	children: ReactNode;
 	session: ServerSession;
 }) => {
+	// DEBUG: Log when SessionHydrator renders
+	console.log("[SESSION_HYDRATOR] Rendering with session:", {
+		hasSession: !!session,
+		userId: session?.user?.id,
+		isClient: typeof window !== "undefined",
+	});
+
 	return (
 		<HydratedSessionContext.Provider value={session}>
 			{children}
@@ -102,14 +109,26 @@ export const useAuthSession = (): SessionSnapshot => {
 		getSnapshot,
 	);
 
+	// DEBUG: Log what's available
+	console.log("[USE_AUTH_SESSION] Hook called:", {
+		hasStoreData: !!storeSnapshot.data,
+		storeUserId: storeSnapshot.data?.user?.id,
+		storePending: storeSnapshot.isPending,
+		hasHydratedSession: !!hydratedSession,
+		hydratedUserId: hydratedSession?.user?.id,
+		isClient: typeof window !== "undefined",
+	});
+
 	// If the store has data, use it (for real-time updates)
 	// Otherwise, fall back to the hydrated server session
 	if (storeSnapshot.data) {
+		console.log("[USE_AUTH_SESSION] Returning STORE data");
 		return storeSnapshot;
 	}
 
 	// Use hydrated session if store is empty but we have server data
 	if (hydratedSession) {
+		console.log("[USE_AUTH_SESSION] Returning HYDRATED data");
 		return {
 			data: hydratedSession,
 			error: null,
@@ -118,6 +137,7 @@ export const useAuthSession = (): SessionSnapshot => {
 	}
 
 	// No session available
+	console.log("[USE_AUTH_SESSION] Returning EMPTY (no session)");
 	return storeSnapshot;
 };
 

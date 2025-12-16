@@ -36,6 +36,13 @@ export default async function RootLayout({
 	// Fetch session on server - this runs before any page renders
 	const session = await getServerSession();
 
+	// DEBUG: Log session fetch on server
+	console.log("[LAYOUT] Server session fetched:", {
+		hasSession: !!session,
+		userId: session?.user?.id,
+		userEmail: session?.user?.email,
+	});
+
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body

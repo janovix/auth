@@ -111,13 +111,13 @@ export const LoginView = ({
 	const isSubmitting = form.formState.isSubmitting;
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background via-background to-muted px-4 py-12">
+		<div className="flex min-h-screen items-center justify-center px-4 py-12">
 			<div className="w-full max-w-md space-y-8">
 				<div className="flex justify-center">
 					<Logo variant="logo" />
 				</div>
 
-				<Card className="shadow-xl shadow-black/5">
+				<Card className="shadow-xl shadow-black/5 backdrop-blur-sm bg-card/95">
 					<CardHeader className="space-y-4">
 						<div>
 							<CardTitle className="text-2xl">Inicia sesión</CardTitle>

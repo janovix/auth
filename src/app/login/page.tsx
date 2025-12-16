@@ -1,4 +1,4 @@
-import { LoginView } from "@/components/auth/LoginView";
+import { LoginPageWrapper } from "@/components/auth/LoginPageWrapper";
 import type { Metadata } from "next";
 
 type PageProps = {
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 export default async function LoginPage({ searchParams }: PageProps) {
 	const resolvedParams = await searchParams;
 	return (
-		<LoginView
+		<LoginPageWrapper
 			redirectTo={getRedirect(resolvedParams)}
 			defaultSuccessMessage={getResetSuccessMessage(resolvedParams)}
 		/>

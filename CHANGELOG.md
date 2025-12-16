@@ -1,3 +1,10 @@
+# [1.0.0-rc.7](https://github.com/janovix/auth/compare/v1.0.0-rc.6...v1.0.0-rc.7) (2025-12-16)
+
+
+### Features
+
+* **auth:** implement SessionHydrator for improved session management in AccountView ([2e9f843](https://github.com/janovix/auth/commit/2e9f843b3db6909d79cac008eaf5c7395d25fb6d))
+
 # [1.0.0-rc.6](https://github.com/janovix/auth/compare/v1.0.0-rc.5...v1.0.0-rc.6) (2025-12-16)
 
 

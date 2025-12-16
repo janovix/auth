@@ -104,7 +104,7 @@ export const LoginView = ({
 	const isSubmitting = form.formState.isSubmitting;
 
 	return (
-		<div className="w-full max-w-md space-y-6">
+		<div className="w-full space-y-6">
 			<div className="space-y-2">
 				<h1 className="text-2xl font-semibold">Inicia sesión</h1>
 				<p className="text-sm text-muted-foreground">

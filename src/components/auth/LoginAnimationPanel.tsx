@@ -19,8 +19,8 @@ export function LoginAnimationPanel() {
 	const deviceCheck = useMemo(() => {
 		if (typeof window === "undefined") return false;
 
-		// Check screen size - hide on mobile/small screens (use lg breakpoint ~1024px)
-		const isSmallScreen = window.innerWidth < 1024;
+		// Check screen size - hide on mobile/small screens (use md breakpoint ~768px)
+		const isSmallScreen = window.innerWidth < 768;
 		if (isSmallScreen) return false;
 
 		// Check for mobile device indicators
@@ -95,15 +95,15 @@ export function LoginAnimationPanel() {
 
 	return (
 		<div
-			className="relative hidden lg:flex lg:flex-1 lg:items-center lg:justify-center overflow-hidden"
+			className="absolute inset-0 w-full h-full"
 			style={{
 				opacity: isVisible ? 1 : 0,
 				transition: "opacity 0.8s ease-in-out",
 			}}
 			aria-hidden="true"
 		>
-			{/* Animated background */}
-			<div className="absolute inset-0">
+			{/* Animated background - full screen */}
+			<div className="absolute inset-0 w-full h-full">
 				<LightPillar
 					topColor="#5227FF"
 					bottomColor="#FF9FFC"

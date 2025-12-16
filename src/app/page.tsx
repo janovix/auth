@@ -1,3 +1,4 @@
+"use client";
 import LightPillar from "../components/LightPillar";
 
 export default function Home() {

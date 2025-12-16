@@ -1,50 +1,28 @@
-import { LoginView } from "@/components/auth/LoginView";
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 type PageProps = {
 	searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-const getRedirect = (
-	params?: Record<string, string | string[] | undefined>,
-) => {
-	if (!params) {
-		return undefined;
-	}
-
-	const value = params.next ?? params.redirectTo;
-	return typeof value === "string" ? value : undefined;
-};
-
-const getResetSuccessMessage = (
-	params?: Record<string, string | string[] | undefined>,
-) => {
-	if (!params) {
-		return undefined;
-	}
-
-	const value = params.reset;
-	if (typeof value !== "string") {
-		return undefined;
-	}
-
-	return value === "success"
-		? "Tu contraseña fue actualizada. Ingresa con tus nuevas credenciales."
-		: undefined;
-};
-
-export const metadata: Metadata = {
-	title: "Iniciar sesión | Janovix Auth",
-	description:
-		"Conecta con auth-core usando la librería Better Auth y cookies HttpOnly.",
-};
-
+/**
+ * Redirect /login to / (home page) since login is now on the index route
+ */
 export default async function LoginPage({ searchParams }: PageProps) {
 	const resolvedParams = await searchParams;
-	return (
-		<LoginView
-			redirectTo={getRedirect(resolvedParams)}
-			defaultSuccessMessage={getResetSuccessMessage(resolvedParams)}
-		/>
-	);
+	const params = new URLSearchParams();
+
+	// Preserve any query parameters
+	if (resolvedParams) {
+		Object.entries(resolvedParams).forEach(([key, value]) => {
+			if (typeof value === "string") {
+				params.set(key, value);
+			} else if (Array.isArray(value)) {
+				value.forEach((v) => params.append(key, v));
+			}
+		});
+	}
+
+	const queryString = params.toString();
+	const redirectUrl = queryString ? `/?${queryString}` : "/";
+	redirect(redirectUrl);
 }

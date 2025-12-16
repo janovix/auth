@@ -1,4 +1,6 @@
 import ClientLayout from "@/components/ClientLayout";
+import { getServerSession } from "@/lib/auth/getServerSession";
+import { SessionHydrator } from "@/lib/auth/useAuthSession";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -19,17 +21,29 @@ export const metadata: Metadata = {
 		"UI de autenticación que consume auth-core vía Better Auth: login, registro, cierre de sesión y vista de cuenta basados en cookies HttpOnly.",
 };
 
-export default function RootLayout({
+/**
+ * Root layout - fetches session on the server and hydrates it for all pages.
+ *
+ * By fetching the session here and wrapping with SessionHydrator,
+ * ALL pages and components have immediate access to the session data
+ * without any loading blink.
+ */
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
+	// Fetch session on server - this runs before any page renders
+	const session = await getServerSession();
+
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
-				<ClientLayout>{children}</ClientLayout>
+				<SessionHydrator session={session}>
+					<ClientLayout>{children}</ClientLayout>
+				</SessionHydrator>
 			</body>
 		</html>
 	);

@@ -1,6 +1,4 @@
 import { AccountView } from "@/components/auth/AccountView";
-import { getServerSession } from "@/lib/auth/getServerSession";
-import { SessionHydrator } from "@/lib/auth/useAuthSession";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,19 +8,12 @@ export const metadata: Metadata = {
 };
 
 /**
- * Account page - Server Component that fetches session before rendering.
+ * Account page - displays user session information.
  *
- * The session is fetched on the server and hydrated into the client-side
- * session store BEFORE AccountView renders. This eliminates the "blink"
- * effect where components first show no session then update.
- *
- * The middleware.ts already ensures only authenticated users reach this page.
+ * The session is already hydrated at the root layout level,
+ * so AccountView has immediate access to session data without any blink.
+ * The middleware.ts ensures only authenticated users reach this page.
  */
-export default async function AccountPage() {
-	const session = await getServerSession();
-	return (
-		<SessionHydrator session={session}>
-			<AccountView />
-		</SessionHydrator>
-	);
+export default function AccountPage() {
+	return <AccountView />;
 }

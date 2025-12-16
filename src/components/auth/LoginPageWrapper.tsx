@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AnimatedBackground } from "@/components/AnimatedBackground";
 import { LoginSkeleton } from "./LoginSkeleton";
 import { LoginView } from "./LoginView";
+import { LoginAnimationPanel } from "./LoginAnimationPanel";
 
 interface LoginPageWrapperProps {
 	redirectTo?: string;
@@ -14,7 +14,7 @@ interface LoginPageWrapperProps {
  * Client-side wrapper for login page that:
  * - Shows skeleton while loading
  * - Fades in login content when client is ready
- * - Includes animated background
+ * - Uses two-column layout (form left, animation right on larger screens)
  */
 export function LoginPageWrapper({
 	redirectTo,
@@ -37,16 +37,14 @@ export function LoginPageWrapper({
 	}, []);
 
 	return (
-		<div className="relative min-h-screen">
-			{/* Animated background - only renders client-side */}
-			<AnimatedBackground />
-
-			{/* Content layer with proper z-index */}
-			<div className="relative z-10">
+		<div className="flex min-h-screen">
+			{/* Left column - Login form */}
+			<div className="flex flex-1 flex-col items-center justify-center px-4 py-12 lg:px-8">
 				{!mounted || !showContent ? (
 					<LoginSkeleton />
 				) : (
 					<div
+						className="w-full max-w-md"
 						style={{
 							opacity: showContent ? 1 : 0,
 							transition: "opacity 0.6s ease-in-out",
@@ -59,6 +57,9 @@ export function LoginPageWrapper({
 					</div>
 				)}
 			</div>
+
+			{/* Right column - Animation panel (hidden on smaller screens) */}
+			<LoginAnimationPanel />
 		</div>
 	);
 }

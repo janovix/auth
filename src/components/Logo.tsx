@@ -141,19 +141,22 @@ function Logo({
 	imgClassName,
 	width,
 	height,
+	forceTheme,
 }: {
 	variant?: "logo" | "icon";
 	className?: string;
 	imgClassName?: string;
 	width?: number;
 	height?: number;
+	forceTheme?: "light" | "dark";
 }) {
 	const { resolvedTheme } = useTheme();
+	const theme = forceTheme || (resolvedTheme as keyof typeof IconColors);
 	return (
 		<div className={className}>
 			{variant === "logo" && (
 				<LogoPath
-					theme={resolvedTheme as keyof typeof IconColors}
+					theme={theme as keyof typeof IconColors}
 					width={width}
 					height={height}
 					className={imgClassName}
@@ -161,7 +164,7 @@ function Logo({
 			)}
 			{variant === "icon" && (
 				<IconPath
-					theme={resolvedTheme as keyof typeof IconColors}
+					theme={theme as keyof typeof IconColors}
 					width={width}
 					height={height}
 					className={imgClassName}

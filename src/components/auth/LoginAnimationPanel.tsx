@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useTheme } from "next-themes";
 import LightPillar from "../LightPillar";
 
 /**
@@ -11,6 +12,8 @@ import LightPillar from "../LightPillar";
  * - Lazy loads to avoid impacting web vitals
  */
 export function LoginAnimationPanel() {
+	const { theme, systemTheme } = useTheme();
+	const resolvedTheme = theme === "system" ? systemTheme : theme;
 	const [mounted, setMounted] = useState(false);
 	const [shouldRender, setShouldRender] = useState(false);
 	const [isVisible, setIsVisible] = useState(false);
@@ -102,6 +105,9 @@ export function LoginAnimationPanel() {
 			}}
 			aria-hidden="true"
 		>
+			{/* Theme-aware background */}
+			<div className="absolute inset-0 w-full h-full bg-background" />
+
 			{/* Animated background - full screen */}
 			<div className="absolute inset-0 w-full h-full">
 				<LightPillar

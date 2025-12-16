@@ -6,82 +6,84 @@ import { Logo } from "@/components/Logo";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 function AuthLayout({ children }: { children: React.ReactNode }) {
 	const { theme, systemTheme } = useTheme();
 	const resolvedTheme = theme === "system" ? systemTheme : theme;
 	const isDark = resolvedTheme === "dark";
+	const [hasEnoughHeight, setHasEnoughHeight] = useState(false);
+
+	// Check if viewport has enough height to accommodate tall cards (like signup)
+	useEffect(() => {
+		const checkHeight = () => {
+			// Minimum height needed: ~800px to comfortably show signup card without scrolling
+			// lg breakpoint is 1024px width, so we check both width >= 1024px AND height >= 800px
+			const isWideEnough = window.innerWidth >= 1024; // lg breakpoint
+			const isTallEnough = window.innerHeight >= 800; // Minimum height for tall cards
+			setHasEnoughHeight(isWideEnough && isTallEnough);
+		};
+
+		// Check on mount
+		checkHeight();
+
+		// Check on resize
+		window.addEventListener("resize", checkHeight);
+		return () => window.removeEventListener("resize", checkHeight);
+	}, []);
+
+	const showBackground = hasEnoughHeight;
 
 	return (
-		<div className="relative min-h-screen flex items-center justify-center overflow-hidden">
-			{/* Background animation - full screen */}
-			<div className="absolute inset-0">
-				<LoginAnimationPanel />
-			</div>
+		<div className="bg-muted flex h-svh w-full flex-col overflow-hidden relative">
+			{/* Background animation - Only shown when viewport is wide AND tall enough */}
+			{showBackground && (
+				<div className="fixed top-0 bottom-0 left-0 right-0 w-full h-full overflow-hidden z-0">
+					{/* Theme-aware background */}
+					<div className="absolute left-0 top-0 w-full h-full bg-background" />
 
-			{/* Theme-aware backdrop blur overlay */}
-			<div
-				className="absolute inset-0 backdrop-blur-xl"
-				style={{
-					backgroundColor: isDark
-						? "rgba(0, 0, 0, 0.4)"
-						: "rgba(255, 255, 255, 0.4)",
-				}}
-			/>
+					{/* Background animation */}
+					<div className="absolute left-0 top-0 w-full h-full">
+						<LoginAnimationPanel />
+					</div>
 
-			{/* Centered logo with backdrop blur */}
-			<div className="absolute top-0 left-0 right-0 flex justify-center pt-6 z-10">
-				<div
-					className="px-6 py-3 rounded-full backdrop-blur-md border"
-					style={{
-						backgroundColor: isDark
-							? "rgba(0, 0, 0, 0.3)"
-							: "rgba(255, 255, 255, 0.3)",
-						borderColor: isDark
-							? "rgba(255, 255, 255, 0.1)"
-							: "rgba(0, 0, 0, 0.1)",
-					}}
-				>
+					{/* Black curtain overlay */}
+					<div
+						className="absolute left-0 top-0 w-full h-full"
+						style={{
+							backgroundColor: "rgba(0, 0, 0, 0.3)",
+						}}
+					/>
+				</div>
+			)}
+
+			{/* Logo in top left - only visible when background is shown */}
+			{showBackground && (
+				<div className="fixed top-4 left-4 z-50">
+					<Logo variant="logo" forceTheme="dark" />
+				</div>
+			)}
+
+			{/* Theme picker - bottom right for background-enabled views */}
+			{showBackground && (
+				<div className="fixed bottom-4 right-4 z-50">
+					<ThemeSwitcher />
+				</div>
+			)}
+
+			{/* No-background layout: top bar with logo and theme picker */}
+			{!showBackground && (
+				<div className="flex items-center justify-between w-full px-4 pt-4 pb-2 relative z-10 shrink-0">
 					<Logo variant="logo" />
+					<ThemeSwitcher />
 				</div>
-			</div>
+			)}
 
-			{/* Main content area with backdrop blur */}
-			<div className="relative z-10 w-full max-w-md mx-auto px-4">
-				<div
-					className="rounded-2xl p-8 backdrop-blur-md border shadow-xl"
-					style={{
-						backgroundColor: isDark
-							? "rgba(0, 0, 0, 0.3)"
-							: "rgba(255, 255, 255, 0.3)",
-						borderColor: isDark
-							? "rgba(255, 255, 255, 0.1)"
-							: "rgba(0, 0, 0, 0.1)",
-					}}
-				>
+			{/* Main content area - scrollable */}
+			<div className={`flex-1 w-full flex flex-col items-center px-4 md:px-10 pt-4 pb-4 relative z-10 overflow-y-auto min-h-0 ${showBackground ? "justify-center lg:pt-6 lg:pb-6" : "justify-start"}`}>
+				<div className="flex w-full max-w-sm flex-col gap-4 lg:gap-6">
+					{/* Login form */}
 					{children}
-				</div>
-			</div>
-
-			{/* Privacy link at bottom with backdrop blur */}
-			<div className="absolute bottom-0 left-0 right-0 flex justify-center pb-6 z-10">
-				<div
-					className="px-6 py-3 rounded-full backdrop-blur-md border"
-					style={{
-						backgroundColor: isDark
-							? "rgba(0, 0, 0, 0.3)"
-							: "rgba(255, 255, 255, 0.3)",
-						borderColor: isDark
-							? "rgba(255, 255, 255, 0.1)"
-							: "rgba(0, 0, 0, 0.1)",
-					}}
-				>
-					<Link
-						href="/privacy"
-						className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-					>
-						Privacy Policy
-					</Link>
 				</div>
 			</div>
 		</div>
@@ -103,10 +105,16 @@ export default function ClientLayout({
 
 	return (
 		<ThemeProvider>
-			<div className="fixed bottom-4 right-4 z-50">
-				<ThemeSwitcher />
-			</div>
-			{isAuthRoute ? <AuthLayout>{children}</AuthLayout> : children}
+			{isAuthRoute ? (
+				<AuthLayout>{children}</AuthLayout>
+			) : (
+				<>
+					<div className="fixed bottom-4 right-4 z-50">
+						<ThemeSwitcher />
+					</div>
+					{children}
+				</>
+			)}
 		</ThemeProvider>
 	);
 }

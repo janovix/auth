@@ -1,28 +1,50 @@
-import { redirect } from "next/navigation";
+import { LoginPageWrapper } from "@/components/auth/LoginPageWrapper";
+import type { Metadata } from "next";
 
 type PageProps = {
 	searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-/**
- * Redirect /login to / (home page) since login is now on the index route
- */
-export default async function LoginPage({ searchParams }: PageProps) {
-	const resolvedParams = await searchParams;
-	const params = new URLSearchParams();
-
-	// Preserve any query parameters
-	if (resolvedParams) {
-		Object.entries(resolvedParams).forEach(([key, value]) => {
-			if (typeof value === "string") {
-				params.set(key, value);
-			} else if (Array.isArray(value)) {
-				value.forEach((v) => params.append(key, v));
-			}
-		});
+const getRedirect = (
+	params?: Record<string, string | string[] | undefined>,
+) => {
+	if (!params) {
+		return undefined;
 	}
 
-	const queryString = params.toString();
-	const redirectUrl = queryString ? `/?${queryString}` : "/";
-	redirect(redirectUrl);
+	const value = params.next ?? params.redirectTo;
+	return typeof value === "string" ? value : undefined;
+};
+
+const getResetSuccessMessage = (
+	params?: Record<string, string | string[] | undefined>,
+) => {
+	if (!params) {
+		return undefined;
+	}
+
+	const value = params.reset;
+	if (typeof value !== "string") {
+		return undefined;
+	}
+
+	return value === "success"
+		? "Tu contraseña fue actualizada. Ingresa con tus nuevas credenciales."
+		: undefined;
+};
+
+export const metadata: Metadata = {
+	title: "Iniciar sesión | Janovix Auth",
+	description:
+		"Conecta con auth-core usando la librería Better Auth y cookies HttpOnly.",
+};
+
+export default async function LoginPage({ searchParams }: PageProps) {
+	const resolvedParams = await searchParams;
+	return (
+		<LoginPageWrapper
+			redirectTo={getRedirect(resolvedParams)}
+			defaultSuccessMessage={getResetSuccessMessage(resolvedParams)}
+		/>
+	);
 }

@@ -1,50 +1,35 @@
-import { LoginPageWrapper } from "@/components/auth/LoginPageWrapper";
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 
 type PageProps = {
 	searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-const getRedirect = (
-	params?: Record<string, string | string[] | undefined>,
-) => {
-	if (!params) {
-		return undefined;
-	}
-
-	const value = params.next ?? params.redirectTo;
-	return typeof value === "string" ? value : undefined;
-};
-
-const getResetSuccessMessage = (
-	params?: Record<string, string | string[] | undefined>,
-) => {
-	if (!params) {
-		return undefined;
-	}
-
-	const value = params.reset;
-	if (typeof value !== "string") {
-		return undefined;
-	}
-
-	return value === "success"
-		? "Tu contraseña fue actualizada. Ingresa con tus nuevas credenciales."
-		: undefined;
-};
-
 export const metadata: Metadata = {
-	title: "Iniciar sesión | Janovix Auth",
+	title: "Janovix Auth · Better Auth Reference",
 	description:
-		"Conecta con auth-core usando la librería Better Auth y cookies HttpOnly.",
+		"UI de autenticación que consume auth-core vía Better Auth: login, registro, cierre de sesión y vista de cuenta basados en cookies HttpOnly.",
 };
 
+/**
+ * Redirect / to /login preserving any query parameters
+ */
 export default async function HomePage({ searchParams }: PageProps) {
 	const resolvedParams = await searchParams;
-	return (
-		<LoginPageWrapper
-			redirectTo={getRedirect(resolvedParams)}
-			defaultSuccessMessage={getResetSuccessMessage(resolvedParams)}
-		/>
-	);
+	const params = new URLSearchParams();
+
+	// Preserve any query parameters
+	if (resolvedParams) {
+		Object.entries(resolvedParams).forEach(([key, value]) => {
+			if (typeof value === "string") {
+				params.set(key, value);
+			} else if (Array.isArray(value)) {
+				value.forEach((v) => params.append(key, v));
+			}
+		});
+	}
+
+	const queryString = params.toString();
+	const redirectUrl = queryString ? `/login?${queryString}` : "/login";
+	redirect(redirectUrl);
 }

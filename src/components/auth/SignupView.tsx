@@ -8,7 +8,6 @@ import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 	Checkbox,
@@ -20,14 +19,27 @@ import {
 	FormMessage,
 	Input,
 } from "@/components/ui";
+import {
+	Field,
+	FieldDescription,
+	FieldGroup,
+	FieldLabel,
+} from "@/components/ui/field";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+	Building2,
+	CheckCircle2,
+	Lock,
+	Mail,
+	ShieldCheck,
+	User,
+	UserPlus,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
-import { Logo } from "@/components/Logo";
 import { authClient, type AuthClient } from "@/lib/auth/authClient";
 import {
 	getAuthCoreBaseUrl,
@@ -128,212 +140,300 @@ export const SignupView = ({
 	const isSubmitting = form.formState.isSubmitting;
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background via-background to-muted px-4 py-12">
-			<div className="w-full max-w-md space-y-8">
-				<div className="flex justify-center">
-					<Logo variant="logo" />
-				</div>
+		<div className="flex flex-col gap-4 sm:gap-6 w-full">
+			<Card>
+				<CardHeader className="text-center">
+					<CardTitle className="text-xl">Crea tu cuenta</CardTitle>
+					<CardDescription>
+						Completa el formulario para comenzar
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					{successMessage ? (
+						<Alert role="status" className="mb-6">
+							<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+							<AlertTitle>Cuenta creada exitosamente</AlertTitle>
+							<AlertDescription>{successMessage}</AlertDescription>
+						</Alert>
+					) : null}
 
-				<Card className="shadow-xl shadow-black/5">
-					<CardHeader className="space-y-4">
-						<div>
-							<CardTitle className="text-2xl">Crea tu cuenta</CardTitle>
-							<CardDescription>
-								Registro en auth-core. Entorno:{" "}
-								<span className="font-mono text-xs">
-									{environment.toUpperCase()}
-								</span>
-							</CardDescription>
-						</div>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						{successMessage ? (
-							<Alert role="status">
-								<AlertTitle>Registro completado</AlertTitle>
-								<AlertDescription>{successMessage}</AlertDescription>
-							</Alert>
-						) : null}
+					{serverError && !successMessage ? (
+						<Alert variant="destructive" role="alert" className="mb-6">
+							<AlertTitle>Error al crear la cuenta</AlertTitle>
+							<AlertDescription>{serverError}</AlertDescription>
+						</Alert>
+					) : null}
 
-						{serverError && !successMessage ? (
-							<Alert variant="destructive" role="alert">
-								<AlertTitle>No pudimos crear tu cuenta</AlertTitle>
-								<AlertDescription>{serverError}</AlertDescription>
-							</Alert>
-						) : null}
+					<Form {...form}>
+						<form
+							data-testid="signup-form"
+							onSubmit={form.handleSubmit(handleSubmit)}
+						>
+							<FieldGroup>
+								<Field>
+									<div className="grid gap-4 md:grid-cols-2">
+										<FormField
+											control={form.control}
+											name="firstName"
+											render={({ field }) => (
+												<FormItem>
+													<FieldLabel htmlFor="firstName" className="flex items-center gap-2">
+														<User className="h-4 w-4" aria-hidden="true" />
+														Nombre
+													</FieldLabel>
+													<FormControl>
+														<Input
+															id="firstName"
+															placeholder="Mariana"
+															autoComplete="given-name"
+															aria-describedby="firstName-description"
+															required
+															{...field}
+														/>
+													</FormControl>
+													<FormMessage />
+													<FieldDescription id="firstName-description" className="sr-only">
+														Tu nombre de pila
+													</FieldDescription>
+												</FormItem>
+											)}
+										/>
+										<FormField
+											control={form.control}
+											name="lastName"
+											render={({ field }) => (
+												<FormItem>
+													<FieldLabel htmlFor="lastName" className="flex items-center gap-2">
+														<User className="h-4 w-4" aria-hidden="true" />
+														Apellido
+													</FieldLabel>
+													<FormControl>
+														<Input
+															id="lastName"
+															placeholder="López"
+															autoComplete="family-name"
+															aria-describedby="lastName-description"
+															required
+															{...field}
+														/>
+													</FormControl>
+													<FormMessage />
+													<FieldDescription id="lastName-description" className="sr-only">
+														Tu apellido
+													</FieldDescription>
+												</FormItem>
+											)}
+										/>
+									</div>
+								</Field>
 
-						<Form {...form}>
-							<form
-								data-testid="signup-form"
-								onSubmit={form.handleSubmit(handleSubmit)}
-								className="space-y-5"
-							>
-								<div className="grid gap-4 md:grid-cols-2">
+								<Field>
 									<FormField
 										control={form.control}
-										name="firstName"
+										name="email"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Nombre</FormLabel>
+												<FieldLabel htmlFor="email" className="flex items-center gap-2">
+													<Mail className="h-4 w-4" aria-hidden="true" />
+													Correo electrónico
+												</FieldLabel>
 												<FormControl>
 													<Input
-														placeholder="Mariana"
-														autoComplete="given-name"
+														id="email"
+														type="email"
+														placeholder="tu@empresa.com"
+														autoComplete="email"
+														aria-describedby="email-description"
+														required
 														{...field}
 													/>
 												</FormControl>
 												<FormMessage />
+												<FieldDescription id="email-description" className="sr-only">
+													Tu dirección de correo corporativo
+												</FieldDescription>
 											</FormItem>
 										)}
 									/>
+								</Field>
+
+								<Field>
 									<FormField
 										control={form.control}
-										name="lastName"
+										name="organization"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Apellido</FormLabel>
+												<FieldLabel htmlFor="organization" className="flex items-center gap-2">
+													<Building2 className="h-4 w-4" aria-hidden="true" />
+													Organización
+													<span className="text-xs text-muted-foreground font-normal">(opcional)</span>
+												</FieldLabel>
 												<FormControl>
 													<Input
-														placeholder="López"
-														autoComplete="family-name"
+														id="organization"
+														placeholder="Nombre de tu empresa"
+														autoComplete="organization"
+														aria-describedby="organization-description"
 														{...field}
 													/>
 												</FormControl>
 												<FormMessage />
+												<FieldDescription id="organization-description" className="sr-only">
+													Nombre de tu organización o empresa
+												</FieldDescription>
 											</FormItem>
 										)}
 									/>
-								</div>
+								</Field>
 
-								<FormField
-									control={form.control}
-									name="email"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Correo corporativo</FormLabel>
-											<FormControl>
-												<Input
-													type="email"
-													placeholder="compliance@empresa.mx"
-													autoComplete="email"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="organization"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Organización (opcional)</FormLabel>
-											<FormControl>
-												<Input
-													placeholder="Nombre de tu institución"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<div className="grid gap-4 md:grid-cols-2">
+								<Field>
 									<FormField
 										control={form.control}
 										name="password"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Contraseña</FormLabel>
+												<FieldLabel htmlFor="password" className="flex items-center gap-2">
+													<Lock className="h-4 w-4" aria-hidden="true" />
+													Contraseña
+												</FieldLabel>
 												<FormControl>
 													<Input
+														id="password"
 														type="password"
-														placeholder="••••••••"
+														placeholder="Crea una contraseña segura"
 														autoComplete="new-password"
+														aria-describedby="password-requirements password-description"
+														required
 														{...field}
 													/>
 												</FormControl>
 												<FormMessage />
+												<FieldDescription id="password-description" className="sr-only">
+													La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, números y un símbolo
+												</FieldDescription>
+												<FieldDescription id="password-requirements" className="text-xs text-muted-foreground mt-1">
+													Mínimo 8 caracteres, incluye mayúsculas, números y símbolos
+												</FieldDescription>
 											</FormItem>
 										)}
 									/>
+								</Field>
+								<Field>
 									<FormField
 										control={form.control}
 										name="confirmPassword"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>Confirma tu contraseña</FormLabel>
+												<FieldLabel htmlFor="confirmPassword" className="flex items-center gap-2">
+													<Lock className="h-4 w-4" aria-hidden="true" />
+													Confirmar contraseña
+												</FieldLabel>
 												<FormControl>
 													<Input
+														id="confirmPassword"
 														type="password"
-														placeholder="••••••••"
+														placeholder="Repite tu contraseña"
 														autoComplete="new-password"
+														aria-describedby="confirmPassword-description"
+														required
 														{...field}
 													/>
 												</FormControl>
 												<FormMessage />
+												<FieldDescription id="confirmPassword-description" className="sr-only">
+													Vuelve a ingresar tu contraseña para confirmar
+												</FieldDescription>
 											</FormItem>
 										)}
 									/>
-								</div>
+								</Field>
 
-								<FormField
-									control={form.control}
-									name="acceptTerms"
-									render={({ field }) => (
-										<FormItem className="flex items-start gap-3 rounded-lg border px-4 py-3">
-											<FormControl>
-												<Checkbox
-													checked={field.value}
-													onCheckedChange={(checked) =>
-														field.onChange(checked === true)
-													}
-													aria-label="Aceptar términos y condiciones"
-												/>
-											</FormControl>
-											<div className="space-y-1 leading-none">
-												<FormLabel className="text-sm font-medium">
-													Acepto los términos, condiciones y el aviso de
-													privacidad.
-												</FormLabel>
-												<FormMessage />
-											</div>
-										</FormItem>
-									)}
-								/>
+								<Field>
+									<FormField
+										control={form.control}
+										name="acceptTerms"
+										render={({ field }) => (
+											<FormItem className="flex items-start gap-3 rounded-lg border px-4 py-3">
+												<FormControl>
+													<Checkbox
+														id="acceptTerms"
+														checked={field.value}
+														onCheckedChange={(checked) =>
+															field.onChange(checked === true)
+														}
+														aria-describedby="acceptTerms-description"
+													/>
+												</FormControl>
+												<div className="space-y-1 leading-none">
+													<FormLabel
+														htmlFor="acceptTerms"
+														className="text-sm font-medium cursor-pointer flex items-start gap-2"
+													>
+														<ShieldCheck className="h-4 w-4 mt-0.5 flex-shrink-0" aria-hidden="true" />
+														<span>
+															Acepto los{" "}
+															<Link
+																href="/privacy"
+																className="text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+																onClick={(e) => e.stopPropagation()}
+															>
+																términos y condiciones
+															</Link>{" "}
+															y el{" "}
+															<Link
+																href="/privacy"
+																className="text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+																onClick={(e) => e.stopPropagation()}
+															>
+																aviso de privacidad
+															</Link>
+														</span>
+													</FormLabel>
+													<FormMessage />
+													<FieldDescription id="acceptTerms-description" className="sr-only">
+														Debes aceptar los términos y condiciones para continuar
+													</FieldDescription>
+												</div>
+											</FormItem>
+										)}
+									/>
+								</Field>
 
-								<CardFooter className="flex flex-col gap-4 px-0 pb-0">
+								<Field>
 									<Button
 										type="submit"
 										disabled={isSubmitting}
 										className="w-full"
+										aria-busy={isSubmitting}
 									>
 										{isSubmitting ? (
 											<span className="flex items-center justify-center gap-2">
+												<UserPlus className="h-4 w-4 animate-pulse" aria-hidden="true" />
 												Creando cuenta...
 											</span>
 										) : (
-											"Crear cuenta"
+											<>
+												<UserPlus className="h-4 w-4" aria-hidden="true" />
+												Crear cuenta
+											</>
 										)}
 									</Button>
-
-									<p className="text-center text-sm text-muted-foreground">
+									<FieldDescription className="text-center">
 										¿Ya tienes cuenta?{" "}
 										<Link
 											href="/login"
-											className="font-medium text-primary underline-offset-2 hover:underline"
+											className="font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+											aria-label="Iniciar sesión con una cuenta existente"
 										>
 											Inicia sesión
 										</Link>
-									</p>
-								</CardFooter>
-							</form>
-						</Form>
-					</CardContent>
-				</Card>
-			</div>
+									</FieldDescription>
+								</Field>
+							</FieldGroup>
+						</form>
+					</Form>
+				</CardContent>
+			</Card>
 		</div>
 	);
 };

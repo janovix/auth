@@ -14,7 +14,7 @@ import {
 	CardTitle,
 	Spinner,
 } from "@/components/ui";
-import { LogOut, RefreshCw } from "lucide-react";
+import { CheckCircle2, LogOut, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -68,55 +68,59 @@ export const LogoutView = () => {
 						<div>
 							<CardTitle>Cerrar sesión</CardTitle>
 							<CardDescription>
-								Better Auth revocará tu sesión activa en auth-core y eliminará
-								la cookie HttpOnly del entorno actual.
+								Se revocará tu sesión activa y se eliminará la cookie de autenticación
 							</CardDescription>
 						</div>
 						<Badge variant="secondary">
 							Entorno · {environment.toUpperCase()}
 						</Badge>
 					</CardHeader>
-					<CardContent className="space-y-4 text-sm text-muted-foreground">
-						<div className="flex items-center gap-3 text-foreground">
-							<LogOut className="h-4 w-4" />
-							<span>
-								Endpoint:{" "}
-								<span className="font-mono text-xs">
+					<CardContent className="space-y-4 text-sm">
+						<div className="flex items-center gap-3 text-muted-foreground">
+							<LogOut className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+							<div>
+								<p className="text-xs text-muted-foreground/70 mb-0.5">Endpoint</p>
+								<p className="font-mono text-xs">
 									{baseUrl}/api/auth/sign-out
-								</span>
-							</span>
+								</p>
+							</div>
 						</div>
-						<p>
-							Recuerda que dev/preview y producción tienen dominios diferentes,
-							por lo que deberás cerrar sesión manualmente en cada entorno.
-						</p>
+						<div className="rounded-lg border border-dashed border-primary/20 bg-muted/40 p-4 text-muted-foreground">
+							<p className="text-xs">
+								Nota: Los entornos de desarrollo y producción tienen dominios diferentes,
+								por lo que deberás cerrar sesión manualmente en cada uno si es necesario.
+							</p>
+						</div>
 						{status === "running" && (
 							<div className="flex items-center gap-2 text-foreground">
-								<Spinner className="h-4 w-4" />
-								<span>Solicitando a auth-core que elimine la cookie…</span>
+								<Spinner className="h-4 w-4" aria-hidden="true" />
+								<span aria-busy="true">Cerrando sesión...</span>
 							</div>
 						)}
 						{feedback && (
 							<Alert variant={status === "error" ? "destructive" : "default"}>
+								{status === "success" && <CheckCircle2 className="h-4 w-4" aria-hidden="true" />}
 								<AlertTitle>
 									{status === "error"
-										? "No se pudo cerrar la sesión"
-										: "Sesión finalizada"}
+										? "Error al cerrar sesión"
+										: "Sesión cerrada"}
 								</AlertTitle>
 								<AlertDescription>{feedback}</AlertDescription>
 							</Alert>
 						)}
 					</CardContent>
 					<CardFooter className="flex flex-wrap gap-3">
-						<Button
-							onClick={signOut}
-							type="button"
-							variant="outline"
-							disabled={status === "running"}
-						>
-							<RefreshCw className="mr-2 h-4 w-4" />
-							Reintentar
-						</Button>
+						{status === "error" && (
+							<Button
+								onClick={signOut}
+								type="button"
+								variant="outline"
+								disabled={false}
+							>
+								<RefreshCw className="h-4 w-4" aria-hidden="true" />
+								Reintentar
+							</Button>
+						)}
 						<Button asChild>
 							<Link href="/login">Iniciar sesión nuevamente</Link>
 						</Button>

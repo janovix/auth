@@ -23,7 +23,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -34,6 +34,7 @@ import {
 	getAuthEnvironment,
 } from "@/lib/auth/authCoreConfig";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
+import { useAuthSession } from "@/lib/auth/useAuthSession";
 
 const loginSchema = z.object({
 	email: z
@@ -61,6 +62,7 @@ export const LoginView = ({
 	defaultSuccessMessage?: string;
 }) => {
 	const router = useRouter();
+	const session = useAuthSession();
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(
 		defaultSuccessMessage ?? null,
@@ -68,6 +70,13 @@ export const LoginView = ({
 
 	const environment = useMemo(() => getAuthEnvironment(), []);
 	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
+
+	// Redirect already authenticated users to their destination
+	useEffect(() => {
+		if (session.data) {
+			router.push(redirectTo || "/account");
+		}
+	}, [session.data, redirectTo, router]);
 
 	const form = useForm<LoginValues>({
 		resolver: zodResolver(loginSchema),

@@ -1,10 +1,4 @@
-import {
-	fireEvent,
-	render,
-	screen,
-	waitFor,
-	act,
-} from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -15,6 +9,28 @@ vi.mock("next/navigation", () => ({
 	useRouter: () => ({
 		push: pushMock,
 	}),
+}));
+
+// Mock useAuthSession - return no session by default (user not logged in)
+// This can be overridden in individual tests by changing mockUseAuthSession
+type SessionData = {
+	user: { id: string; name: string; email: string };
+	session: { id: string; token: string };
+} | null;
+
+type MockSession = {
+	data: SessionData;
+	isPending: boolean;
+	error: unknown;
+};
+
+let mockUseAuthSession: () => MockSession = () => ({
+	data: null,
+	isPending: false,
+	error: null,
+});
+vi.mock("@/lib/auth/useAuthSession", () => ({
+	useAuthSession: () => mockUseAuthSession(),
 }));
 
 import type { AuthClient } from "@/lib/auth/authClient";
@@ -39,6 +55,12 @@ const createClient = (): LoginClient => ({
 describe("LoginView", () => {
 	beforeEach(() => {
 		pushMock.mockReset();
+		// Reset session mock to no session (user not logged in)
+		mockUseAuthSession = () => ({
+			data: null,
+			isPending: false,
+			error: null,
+		});
 	});
 
 	it("submits credentials and redirects on success", async () => {
@@ -178,5 +200,43 @@ describe("LoginView", () => {
 		expect(errorAlert).toBeInTheDocument();
 		expect(errorAlert).toHaveTextContent(/network error/i);
 		expect(pushMock).not.toHaveBeenCalled();
+	});
+
+	it("redirects to /account when user is already logged in", async () => {
+		// Mock session with logged-in user
+		mockUseAuthSession = () => ({
+			data: {
+				user: { id: "123", name: "Ana Test", email: "ana@example.com" },
+				session: { id: "session-123", token: "token-123" },
+			},
+			isPending: false,
+			error: null,
+		});
+
+		renderWithTheme(<LoginView client={createClient()} />);
+
+		await waitFor(() => {
+			expect(pushMock).toHaveBeenCalledWith("/account");
+		});
+	});
+
+	it("redirects to custom redirectTo when user is already logged in", async () => {
+		// Mock session with logged-in user
+		mockUseAuthSession = () => ({
+			data: {
+				user: { id: "123", name: "Ana Test", email: "ana@example.com" },
+				session: { id: "session-123", token: "token-123" },
+			},
+			isPending: false,
+			error: null,
+		});
+
+		renderWithTheme(
+			<LoginView client={createClient()} redirectTo="/dashboard" />,
+		);
+
+		await waitFor(() => {
+			expect(pushMock).toHaveBeenCalledWith("/dashboard");
+		});
 	});
 });

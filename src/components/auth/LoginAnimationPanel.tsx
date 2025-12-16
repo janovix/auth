@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useTheme } from "next-themes";
 import LightPillar from "../LightPillar";
 
 /**
@@ -9,15 +8,12 @@ import LightPillar from "../LightPillar";
  * - Shows LightPillar animation in the right column on larger screens
  * - Only renders client-side with smooth fade-in
  * - Hides on small screens, mobile devices, and low-powered devices
- * - Includes theme-aware dimming layer
  * - Lazy loads to avoid impacting web vitals
  */
 export function LoginAnimationPanel() {
 	const [mounted, setMounted] = useState(false);
 	const [shouldRender, setShouldRender] = useState(false);
 	const [isVisible, setIsVisible] = useState(false);
-	const { theme, systemTheme } = useTheme();
-	const resolvedTheme = theme === "system" ? systemTheme : theme;
 
 	// Determine if device should show animated background
 	const deviceCheck = useMemo(() => {
@@ -97,12 +93,6 @@ export function LoginAnimationPanel() {
 		return null;
 	}
 
-	// Determine dimming color based on theme
-	const dimmingColor =
-		resolvedTheme === "dark"
-			? "rgba(38, 43, 48, 0.6)" // dark background with 60% opacity
-			: "rgba(255, 255, 255, 0.8)"; // light background with 80% opacity
-
 	return (
 		<div
 			className="relative hidden lg:flex lg:flex-1 lg:items-center lg:justify-center overflow-hidden"
@@ -128,15 +118,6 @@ export function LoginAnimationPanel() {
 					mixBlendMode="normal"
 				/>
 			</div>
-
-			{/* Theme-aware dimming layer */}
-			<div
-				className="absolute inset-0"
-				style={{
-					backgroundColor: dimmingColor,
-					transition: "background-color 0.3s ease-in-out",
-				}}
-			/>
 		</div>
 	);
 }

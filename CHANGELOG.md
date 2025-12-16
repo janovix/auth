@@ -1,3 +1,10 @@
+# [1.0.0-rc.4](https://github.com/janovix/auth/compare/v1.0.0-rc.3...v1.0.0-rc.4) (2025-12-16)
+
+
+### Features
+
+* **auth:** enhance LoginView with session handling and redirection ([6eeff25](https://github.com/janovix/auth/commit/6eeff25c6ac0f62eba8135df2436ca4865003ffb))
+
 # [1.0.0-rc.3](https://github.com/janovix/auth/compare/v1.0.0-rc.2...v1.0.0-rc.3) (2025-12-15)
 
 

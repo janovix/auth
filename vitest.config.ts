@@ -21,6 +21,8 @@ export default defineConfig({
 				"src/components/ui/**",
 				// Next.js App Router entrypoints/route wiring (typically thin wrappers)
 				"src/app/**",
+				// Next.js 16 proxy (middleware) - tested via integration tests
+				"src/proxy.ts",
 			],
 			thresholds: {
 				lines: 85,

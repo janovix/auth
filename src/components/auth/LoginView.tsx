@@ -23,7 +23,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -34,7 +34,6 @@ import {
 	getAuthEnvironment,
 } from "@/lib/auth/authCoreConfig";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
-import { useAuthSession } from "@/lib/auth/useAuthSession";
 
 const loginSchema = z.object({
 	email: z
@@ -52,6 +51,13 @@ type LoginClient = {
 	};
 };
 
+/**
+ * LoginView component for user authentication.
+ *
+ * Note: Route protection for authenticated users is handled by the proxy.ts
+ * middleware at the edge level. Authenticated users are redirected to /account
+ * before this component renders, so we don't need client-side session checks here.
+ */
 export const LoginView = ({
 	redirectTo,
 	client = authClient,
@@ -62,21 +68,12 @@ export const LoginView = ({
 	defaultSuccessMessage?: string;
 }) => {
 	const router = useRouter();
-	const session = useAuthSession();
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(
 		defaultSuccessMessage ?? null,
 	);
 
 	const environment = useMemo(() => getAuthEnvironment(), []);
-	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
-
-	// Redirect already authenticated users to their destination
-	useEffect(() => {
-		if (session.data) {
-			router.push(redirectTo || "/account");
-		}
-	}, [session.data, redirectTo, router]);
 
 	const form = useForm<LoginValues>({
 		resolver: zodResolver(loginSchema),

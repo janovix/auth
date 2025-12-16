@@ -20,6 +20,7 @@ import {
 	getAuthCoreBaseUrl,
 	getAuthEnvironment,
 } from "@/lib/auth/authCoreConfig";
+import type { ServerSession } from "@/lib/auth/getServerSession";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 
 const cookieDomainByEnv: Record<"dev" | "prod", string> = {
@@ -46,9 +47,21 @@ const formatExpiresIn = (value?: string | Date) => {
 	}
 };
 
-export const AccountView = () => {
-	const session = useAuthSession();
-	const data = session.data;
+type AccountViewProps = {
+	/**
+	 * Initial session data fetched on the server.
+	 * When provided, the component renders immediately with this data,
+	 * avoiding the "blink" effect of showing a loading state.
+	 */
+	initialSession?: ServerSession;
+};
+
+export const AccountView = ({ initialSession }: AccountViewProps) => {
+	const clientSession = useAuthSession();
+
+	// Use client session if available (for real-time updates),
+	// otherwise fall back to server-fetched initial session
+	const data = clientSession.data ?? initialSession;
 
 	const environment = useMemo(() => getAuthEnvironment(), []);
 	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);

@@ -8,14 +8,6 @@ const meta = {
 	component: LogoutView,
 	parameters: {
 		layout: "fullscreen",
-		// Mock Next.js router
-		nextjs: {
-			router: {
-				push: () => {},
-				replace: () => {},
-				refresh: () => {},
-			},
-		},
 	},
 	decorators: [
 		(Story) => {

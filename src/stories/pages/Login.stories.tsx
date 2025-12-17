@@ -7,13 +7,6 @@ const meta = {
 	component: LoginView,
 	parameters: {
 		layout: "fullscreen",
-		nextjs: {
-			router: {
-				push: () => {},
-				replace: () => {},
-				refresh: () => {},
-			},
-		},
 	},
 	decorators: [
 		(Story) => (

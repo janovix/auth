@@ -31,6 +31,16 @@ const preview: Preview = {
 			default: "app",
 			values: [{ name: "app", value: "transparent" }],
 		},
+		nextjs: {
+			router: {
+				push: () => {},
+				replace: () => {},
+				refresh: () => {},
+				back: () => {},
+				forward: () => {},
+				prefetch: () => Promise.resolve(),
+			},
+		},
 	},
 	decorators: [
 		(Story, context) => {

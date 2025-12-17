@@ -1,6 +1,19 @@
 "use client";
 
 import {
+	resetPassword as sdkResetPassword,
+	type AuthResult,
+} from "@algenium/auth-next/client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft, CheckCircle2, Circle, KeyRound, Lock } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
+
+import { Logo } from "@/components/Logo";
+import {
 	Alert,
 	AlertDescription,
 	AlertTitle,
@@ -23,15 +36,6 @@ import {
 	FieldGroup,
 	FieldLabel,
 } from "@/components/ui/field";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, CheckCircle2, Circle, KeyRound, Lock } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
-import { Logo } from "@/components/Logo";
-import { authClient, type AuthClient } from "@/lib/auth/authClient";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 
 const passwordSchema = z
@@ -55,15 +59,18 @@ const resetSchema = z
 	});
 
 type ResetPasswordValues = z.infer<typeof resetSchema>;
-type ResetPasswordClient = Pick<AuthClient, "resetPassword">;
+type ResetPasswordFn = (
+	token: string,
+	newPassword: string,
+) => Promise<AuthResult<{ message: string }>>;
 
 export const ResetPasswordView = ({
 	token,
-	client = authClient,
+	resetPassword = sdkResetPassword,
 	redirectDelayMs = 1800,
 }: {
 	token: string | null;
-	client?: ResetPasswordClient;
+	resetPassword?: ResetPasswordFn;
 	redirectDelayMs?: number;
 }) => {
 	const router = useRouter();
@@ -122,36 +129,29 @@ export const ResetPasswordView = ({
 		setServerError(null);
 		setSuccessMessage(null);
 
-		try {
-			const response = await client.resetPassword({
-				token,
-				newPassword: values.newPassword,
-			});
+		const result = await resetPassword(token, values.newPassword);
 
-			if (response.error) {
-				setServerError(getAuthErrorMessage(response.error));
-				return;
-			}
-
-			setSuccessMessage(
-				"Tu contraseña fue actualizada. Te llevaremos al inicio de sesión.",
-			);
-			form.reset();
-
-			if (redirectTimeoutRef.current) {
-				clearTimeout(redirectTimeoutRef.current);
-			}
-
-			redirectTimeoutRef.current = setTimeout(
-				() => {
-					router.push("/login?reset=success");
-					router.refresh();
-				},
-				Math.max(redirectDelayMs, 0),
-			);
-		} catch (error) {
-			setServerError(getAuthErrorMessage(error));
+		if (!result.success) {
+			setServerError(getAuthErrorMessage(result.error));
+			return;
 		}
+
+		setSuccessMessage(
+			"Tu contraseña fue actualizada. Te llevaremos al inicio de sesión.",
+		);
+		form.reset();
+
+		if (redirectTimeoutRef.current) {
+			clearTimeout(redirectTimeoutRef.current);
+		}
+
+		redirectTimeoutRef.current = setTimeout(
+			() => {
+				router.push("/login?reset=success");
+				router.refresh();
+			},
+			Math.max(redirectDelayMs, 0),
+		);
 	}
 
 	return (

@@ -1,6 +1,29 @@
 "use client";
 
 import {
+	signUp as sdkSignUp,
+	type SignUpCredentials,
+	type AuthResult,
+} from "@algenium/auth-next/client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+	Building2,
+	CheckCircle2,
+	Circle,
+	Lock,
+	Mail,
+	ShieldCheck,
+	User,
+	UserPlus,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { z } from "zod";
+
+import { Logo } from "@/components/Logo";
+import {
 	Alert,
 	AlertDescription,
 	AlertTitle,
@@ -25,28 +48,6 @@ import {
 	FieldGroup,
 	FieldLabel,
 } from "@/components/ui/field";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-	Building2,
-	CheckCircle2,
-	Circle,
-	Lock,
-	Mail,
-	ShieldCheck,
-	User,
-	UserPlus,
-} from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
-import { Logo } from "@/components/Logo";
-import { authClient, type AuthClient } from "@/lib/auth/authClient";
-import {
-	getAuthCoreBaseUrl,
-	getAuthEnvironment,
-} from "@/lib/auth/authCoreConfig";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 
 const passwordSchema = z
@@ -80,25 +81,19 @@ const signupSchema = z
 	});
 
 type SignupValues = z.infer<typeof signupSchema>;
-type SignupClient = {
-	signUp: {
-		email: AuthClient["signUp"]["email"];
-	};
-};
+type SignUpFn = (credentials: SignUpCredentials) => Promise<AuthResult>;
 
 export const SignupView = ({
 	redirectTo,
-	client = authClient,
+	signUp = sdkSignUp,
 }: {
 	redirectTo?: string;
-	client?: SignupClient;
+	signUp?: SignUpFn;
 }) => {
 	const router = useRouter();
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-	const environment = useMemo(() => getAuthEnvironment(), []);
-	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
 	// Always use dark theme for logo to show white letters (matching previous behavior)
 	const logoTheme = "dark" as const;
 
@@ -137,26 +132,20 @@ export const SignupView = ({
 		setServerError(null);
 		setSuccessMessage(null);
 
-		try {
-			const name =
-				`${values.firstName.trim()} ${values.lastName.trim()}`.trim();
-			const response = await client.signUp.email({
-				name,
-				email: values.email.trim(),
-				password: values.password,
-				...(redirectTo ? { callbackURL: redirectTo } : {}),
-			});
+		const name = `${values.firstName.trim()} ${values.lastName.trim()}`.trim();
+		const result = await signUp({
+			name,
+			email: values.email.trim(),
+			password: values.password,
+		});
 
-			if (response.error) {
-				setServerError(getAuthErrorMessage(response.error));
-				return;
-			}
-
-			setSuccessMessage("Cuenta creada. Redirigiendo…");
-			router.push(redirectTo || "/account");
-		} catch (error) {
-			setServerError(getAuthErrorMessage(error));
+		if (!result.success) {
+			setServerError(getAuthErrorMessage(result.error));
+			return;
 		}
+
+		setSuccessMessage("Cuenta creada. Redirigiendo…");
+		router.push(redirectTo || "/account");
 	};
 
 	const isSubmitting = form.formState.isSubmitting;

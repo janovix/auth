@@ -1,18 +1,21 @@
+import type { AuthResult } from "@algenium/auth-next/client";
+import type { Meta, StoryObj } from "@storybook/react";
+
 import { LogoutView } from "@/components/auth/LogoutView";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import type { Meta, StoryObj } from "@storybook/react";
-import { authClient } from "@/lib/auth/authClient";
+
 import { mockRouter } from "../mocks/router";
 
-// Mock auth client methods
-const mockSignOut = async () => {
+// Mock signOut function that returns immediately with success for stable visual tests
+const mockSignOut = async (): Promise<AuthResult<null>> => {
 	return Promise.resolve({
-		data: {},
+		success: true,
+		data: null,
 		error: null,
-	} as Awaited<ReturnType<typeof authClient.signOut>>);
+	});
 };
 
-const meta = {
+const meta: Meta<typeof LogoutView> = {
 	title: "Pages/Auth/Logout",
 	component: LogoutView,
 	parameters: {
@@ -22,23 +25,17 @@ const meta = {
 		},
 	},
 	decorators: [
-		(Story) => {
-			// Mock authClient.signOut to return immediately with success for stable visual tests
-			// This ensures the component stabilizes quickly to the success state
-			authClient.signOut = mockSignOut;
-
-			return (
-				<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-					<Story />
-				</ThemeProvider>
-			);
-		},
+		(Story) => (
+			<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+				<Story />
+			</ThemeProvider>
+		),
 	],
-} satisfies Meta<typeof LogoutView>;
+};
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj<typeof LogoutView>;
 
 export const Default: Story = {
-	render: () => <LogoutView />,
+	render: () => <LogoutView signOut={mockSignOut} />,
 };

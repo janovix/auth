@@ -1,6 +1,20 @@
 "use client";
 
 import {
+	signIn as sdkSignIn,
+	type SignInCredentials,
+	type AuthResult,
+} from "@algenium/auth-next/client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckCircle2, Lock, LogIn, Mail, Shield } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { Logo } from "@/components/Logo";
+import {
 	Alert,
 	AlertDescription,
 	AlertTitle,
@@ -26,22 +40,7 @@ import {
 	FieldDescription,
 	FieldGroup,
 	FieldLabel,
-	FieldSeparator,
 } from "@/components/ui/field";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, Lock, LogIn, Mail, Shield } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
-import { Logo } from "@/components/Logo";
-import { authClient, type AuthClient } from "@/lib/auth/authClient";
-import {
-	getAuthCoreBaseUrl,
-	getAuthEnvironment,
-} from "@/lib/auth/authCoreConfig";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 
 const loginSchema = z.object({
@@ -54,11 +53,7 @@ const loginSchema = z.object({
 });
 
 type LoginValues = z.infer<typeof loginSchema>;
-type LoginClient = {
-	signIn: {
-		email: AuthClient["signIn"]["email"];
-	};
-};
+type SignInFn = (credentials: SignInCredentials) => Promise<AuthResult>;
 
 /**
  * LoginView component for user authentication.
@@ -69,11 +64,11 @@ type LoginClient = {
  */
 export const LoginView = ({
 	redirectTo,
-	client = authClient,
+	signIn = sdkSignIn,
 	defaultSuccessMessage,
 }: {
 	redirectTo?: string;
-	client?: LoginClient;
+	signIn?: SignInFn;
 	defaultSuccessMessage?: string;
 }) => {
 	const router = useRouter();
@@ -82,7 +77,6 @@ export const LoginView = ({
 		defaultSuccessMessage ?? null,
 	);
 
-	const environment = useMemo(() => getAuthEnvironment(), []);
 	// Always use dark theme for logo to show white letters (matching previous behavior)
 	const logoTheme = "dark" as const;
 
@@ -99,24 +93,19 @@ export const LoginView = ({
 		setServerError(null);
 		setSuccessMessage(null);
 
-		try {
-			const response = await client.signIn.email({
-				email: values.email.trim(),
-				password: values.password,
-				rememberMe: values.rememberMe,
-				...(redirectTo ? { callbackURL: redirectTo } : {}),
-			});
+		const result = await signIn({
+			email: values.email.trim(),
+			password: values.password,
+			rememberMe: values.rememberMe,
+		});
 
-			if (response.error) {
-				setServerError(getAuthErrorMessage(response.error));
-				return;
-			}
-
-			setSuccessMessage("Acceso validado. Redirigiendo…");
-			router.push(redirectTo || "/account");
-		} catch (error) {
-			setServerError(getAuthErrorMessage(error));
+		if (!result.success) {
+			setServerError(getAuthErrorMessage(result.error));
+			return;
 		}
+
+		setSuccessMessage("Acceso validado. Redirigiendo…");
+		router.push(redirectTo || "/account");
 	};
 
 	const isSubmitting = form.formState.isSubmitting;

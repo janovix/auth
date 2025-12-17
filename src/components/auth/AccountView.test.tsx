@@ -1,11 +1,13 @@
 import {
 	AuthSessionProvider,
 	createSessionStore,
-	type AuthSessionSnapshot,
-} from "@/lib/auth/useAuthSession";
+} from "@algenium/auth-next/client";
+import type { SessionSnapshot } from "@algenium/auth-next";
 import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
+
 import { ThemeProvider } from "@/components/ThemeProvider";
+
 import { AccountView } from "./AccountView";
 
 const renderWithTheme = (ui: React.ReactElement) => {
@@ -13,15 +15,15 @@ const renderWithTheme = (ui: React.ReactElement) => {
 };
 
 const createSnapshot = (
-	overrides?: Partial<AuthSessionSnapshot>,
-): AuthSessionSnapshot => ({
+	overrides?: Partial<SessionSnapshot>,
+): SessionSnapshot => ({
 	data: null,
 	error: null,
 	isPending: false,
 	...overrides,
 });
 
-const renderWithSession = (snapshot: AuthSessionSnapshot) => {
+const renderWithSession = (snapshot: SessionSnapshot) => {
 	const store = createSessionStore(snapshot);
 	return renderWithTheme(
 		<AuthSessionProvider store={store}>

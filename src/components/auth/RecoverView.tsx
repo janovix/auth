@@ -1,6 +1,18 @@
 "use client";
 
 import {
+	recoverPassword as sdkRecoverPassword,
+	type AuthResult,
+} from "@algenium/auth-next/client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft, CheckCircle2, Mail, MailCheck } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { Logo } from "@/components/Logo";
+import {
 	Alert,
 	AlertDescription,
 	AlertTitle,
@@ -23,18 +35,6 @@ import {
 	FieldGroup,
 	FieldLabel,
 } from "@/components/ui/field";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, CheckCircle2, Mail, MailCheck } from "lucide-react";
-import Link from "next/link";
-import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Logo } from "@/components/Logo";
-import { authClient, type AuthClient } from "@/lib/auth/authClient";
-import {
-	getAuthCoreBaseUrl,
-	getAuthEnvironment,
-} from "@/lib/auth/authCoreConfig";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 
 const recoverSchema = z.object({
@@ -45,24 +45,16 @@ const recoverSchema = z.object({
 });
 
 type RecoverValues = z.infer<typeof recoverSchema>;
-type RecoverClient = Pick<AuthClient, "requestPasswordReset">;
-
-const getRuntimeOrigin = () =>
-	typeof window === "undefined" ? undefined : window.location.origin;
+type RecoverFn = (email: string) => Promise<AuthResult<{ message: string }>>;
 
 export const RecoverView = ({
-	redirectTo,
-	client = authClient,
+	recoverPassword = sdkRecoverPassword,
 }: {
-	redirectTo?: string;
-	client?: RecoverClient;
-}) => {
+	recoverPassword?: RecoverFn;
+} = {}) => {
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-	const environment = useMemo(() => getAuthEnvironment(), []);
-	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
-	const origin = getRuntimeOrigin();
 	// Always use dark theme for logo to show white letters (matching previous behavior)
 	const logoTheme = "dark" as const;
 
@@ -77,40 +69,16 @@ export const RecoverView = ({
 		setServerError(null);
 		setSuccessMessage(null);
 
-		try {
-			const resolvedRedirectTo =
-				redirectTo ?? (origin ? `${origin}/recover/reset` : "/recover/reset");
+		const result = await recoverPassword(values.email.trim());
 
-			const response = await client.requestPasswordReset({
-				email: values.email.trim(),
-				redirectTo: resolvedRedirectTo,
-			});
-
-			if (response.error) {
-				setServerError(getAuthErrorMessage(response.error));
-				return;
-			}
-
-			if (
-				response.data &&
-				typeof response.data === "object" &&
-				"status" in response.data
-			) {
-				const data = response.data as { status: boolean; message: string };
-				if (!data.status) {
-					setServerError(data.message);
-					return;
-				}
-				setSuccessMessage(data.message);
-				return;
-			}
-
-			setSuccessMessage(
-				"Si la cuenta existe, te enviaremos un correo con instrucciones para recuperar el acceso.",
-			);
-		} catch (error) {
-			setServerError(getAuthErrorMessage(error));
+		if (!result.success) {
+			setServerError(getAuthErrorMessage(result.error));
+			return;
 		}
+
+		setSuccessMessage(
+			"Si la cuenta existe, te enviaremos un correo con instrucciones para recuperar el acceso.",
+		);
 	};
 
 	const isSubmitting = form.formState.isSubmitting;

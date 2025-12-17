@@ -1,5 +1,12 @@
 "use client";
 
+import { useAuthSession } from "@algenium/auth-next/client";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
+import { AlertTriangle, Clock4, LogOut, User } from "lucide-react";
+import Link from "next/link";
+import { useMemo } from "react";
+
 import {
 	Badge,
 	Button,
@@ -10,17 +17,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui";
-import { formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale";
-import { AlertTriangle, Clock4, LogOut, User } from "lucide-react";
-import Link from "next/link";
-import { useMemo } from "react";
-
 import {
 	getAuthCoreBaseUrl,
 	getAuthEnvironment,
 } from "@/lib/auth/authCoreConfig";
-import { useAuthSession } from "@/lib/auth/useAuthSession";
 
 const cookieDomainByEnv: Record<"dev" | "prod", string> = {
 	dev: ".janovix.workers.dev",

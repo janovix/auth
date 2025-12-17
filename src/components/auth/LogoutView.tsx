@@ -1,6 +1,14 @@
 "use client";
 
 import {
+	signOut as sdkSignOut,
+	type AuthResult,
+} from "@algenium/auth-next/client";
+import { CheckCircle2, LogOut, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
+import {
 	Alert,
 	AlertDescription,
 	AlertTitle,
@@ -14,18 +22,19 @@ import {
 	CardTitle,
 	Spinner,
 } from "@/components/ui";
-import { CheckCircle2, LogOut, RefreshCw } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-
-import { authClient } from "@/lib/auth/authClient";
 import {
 	getAuthCoreBaseUrl,
 	getAuthEnvironment,
 } from "@/lib/auth/authCoreConfig";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 
-export const LogoutView = () => {
+type SignOutFn = () => Promise<AuthResult<null>>;
+
+export const LogoutView = ({
+	signOut: signOutFn = sdkSignOut,
+}: {
+	signOut?: SignOutFn;
+} = {}) => {
 	const environment = useMemo(() => getAuthEnvironment(), []);
 	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
 
@@ -34,31 +43,26 @@ export const LogoutView = () => {
 	>("idle");
 	const [feedback, setFeedback] = useState<string | null>(null);
 
-	const signOut = async () => {
+	const handleSignOut = useCallback(async () => {
 		setStatus("running");
 		setFeedback(null);
 
-		try {
-			const response = await authClient.signOut();
-			if (response.error) {
-				setStatus("error");
-				setFeedback(getAuthErrorMessage(response.error));
-				return;
-			}
-
-			setStatus("success");
-			setFeedback(
-				"Sesión cerrada. Puedes volver a iniciar sesión cuando lo necesites.",
-			);
-		} catch (error) {
+		const result = await signOutFn();
+		if (!result.success) {
 			setStatus("error");
-			setFeedback(getAuthErrorMessage(error));
+			setFeedback(getAuthErrorMessage(result.error));
+			return;
 		}
-	};
+
+		setStatus("success");
+		setFeedback(
+			"Sesión cerrada. Puedes volver a iniciar sesión cuando lo necesites.",
+		);
+	}, [signOutFn]);
 
 	useEffect(() => {
-		void signOut();
-	}, []);
+		void handleSignOut();
+	}, [handleSignOut]);
 
 	return (
 		<section className="min-h-screen bg-gradient-to-b from-background to-muted/30 px-4 py-12">
@@ -116,7 +120,7 @@ export const LogoutView = () => {
 					<CardFooter className="flex flex-wrap gap-3">
 						{status === "error" && (
 							<Button
-								onClick={signOut}
+								onClick={handleSignOut}
 								type="button"
 								variant="outline"
 								disabled={false}

@@ -1,20 +1,38 @@
+import type { AuthResult, SignInCredentials } from "@algenium/auth-next/client";
+import type { Meta, StoryObj } from "@storybook/react";
+
 import { LoginView } from "@/components/auth/LoginView";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import type { Meta, StoryObj } from "@storybook/react";
-import { authClient } from "@/lib/auth/authClient";
+
 import { mockRouter } from "../mocks/router";
 
-// Mock auth client methods
-const mockSignIn = async (_data: {
-	email: string;
-	password: string;
-	rememberMe?: boolean;
-	callbackURL?: string;
-}) => {
+// Mock signIn function that returns immediately with success
+const mockSignIn = async (
+	_credentials: SignInCredentials,
+): Promise<AuthResult> => {
 	return Promise.resolve({
-		data: {},
+		success: true,
+		data: {
+			user: {
+				id: "user-123",
+				name: "Ana García",
+				email: "ana@example.com",
+				image: null,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				emailVerified: true,
+			},
+			session: {
+				id: "session-123",
+				userId: "user-123",
+				token: "token-123",
+				expiresAt: new Date(Date.now() + 3600 * 1000),
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			},
+		},
 		error: null,
-	} as Awaited<ReturnType<typeof authClient.signIn.email>>);
+	});
 };
 
 const meta = {
@@ -27,22 +45,15 @@ const meta = {
 		},
 	},
 	decorators: [
-		(Story) => {
-			// Mock auth client for this story
-			const originalSignIn = authClient.signIn.email;
-			authClient.signIn.email =
-				mockSignIn as unknown as typeof authClient.signIn.email;
-
-			return (
-				<div className="min-h-screen flex items-center justify-center p-4 bg-background">
-					<div className="w-full max-w-md">
-						<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-							<Story />
-						</ThemeProvider>
-					</div>
+		(Story) => (
+			<div className="min-h-screen flex items-center justify-center p-4 bg-background">
+				<div className="w-full max-w-md">
+					<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+						<Story />
+					</ThemeProvider>
 				</div>
-			);
-		},
+			</div>
+		),
 	],
 } satisfies Meta<typeof LoginView>;
 
@@ -50,15 +61,18 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-	render: () => <LoginView />,
+	render: () => <LoginView signIn={mockSignIn} />,
 };
 
 export const WithRedirect: Story = {
-	render: () => <LoginView redirectTo="/dashboard" />,
+	render: () => <LoginView signIn={mockSignIn} redirectTo="/dashboard" />,
 };
 
 export const WithSuccessMessage: Story = {
 	render: () => (
-		<LoginView defaultSuccessMessage="Login successful! Redirecting..." />
+		<LoginView
+			signIn={mockSignIn}
+			defaultSuccessMessage="Login successful! Redirecting..."
+		/>
 	),
 };

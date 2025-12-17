@@ -1,13 +1,17 @@
 "use client";
-import { ThemeProvider } from "@/components/ThemeProvider";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import { LoginAnimationPanel } from "@/components/auth/LoginAnimationPanel";
-import { Logo } from "@/components/Logo";
+
 import { useTheme } from "next-themes";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+
+import { LoginAnimationPanel } from "@/components/auth/LoginAnimationPanel";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useDeviceDetection } from "@/hooks/useDeviceDetection";
+import { initAuthSdk } from "@/lib/auth/sdkConfig";
+
+// Initialize the Auth SDK on client load
+initAuthSdk();
 
 function AuthLayout({ children }: { children: React.ReactNode }) {
 	const { theme, systemTheme } = useTheme();

@@ -1,20 +1,19 @@
+import type { AuthResult } from "@algenium/auth-next/client";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { ThemeProvider } from "@/components/ThemeProvider";
 
-import type { AuthClient } from "@/lib/auth/authClient";
 import { RecoverView } from "./RecoverView";
 
 const renderWithTheme = (ui: React.ReactElement) => {
 	return render(<ThemeProvider>{ui}</ThemeProvider>);
 };
 
-type RecoverClient = Pick<AuthClient, "requestPasswordReset">;
+type RecoverFn = (email: string) => Promise<AuthResult<{ message: string }>>;
 
-const createClient = (): RecoverClient => ({
-	requestPasswordReset: vi.fn() as RecoverClient["requestPasswordReset"],
-});
+const createRecoverPassword = (): RecoverFn => vi.fn();
 
 describe("RecoverView", () => {
 	beforeEach(() => {
@@ -24,13 +23,14 @@ describe("RecoverView", () => {
 	});
 
 	it("requests a password reset email for the given address", async () => {
-		const client = createClient();
-		vi.mocked(client.requestPasswordReset).mockResolvedValue({
-			data: { status: true, message: "Email enviado" },
+		const recoverPassword = createRecoverPassword();
+		vi.mocked(recoverPassword).mockResolvedValue({
+			success: true,
+			data: { message: "Email enviado" },
 			error: null,
 		});
 
-		renderWithTheme(<RecoverView redirectTo="/login" client={client} />);
+		renderWithTheme(<RecoverView recoverPassword={recoverPassword} />);
 		const user = userEvent.setup();
 
 		await waitFor(() => {
@@ -51,27 +51,23 @@ describe("RecoverView", () => {
 		fireEvent.submit(form);
 
 		await waitFor(() => {
-			expect(client.requestPasswordReset).toHaveBeenCalledWith({
-				email: "ana@example.com",
-				redirectTo: "/login",
-			});
+			expect(recoverPassword).toHaveBeenCalledWith("ana@example.com");
 		});
+
+		// Should show success message
+		const successAlerts = await screen.findAllByTestId("recover-success-alert");
+		expect(successAlerts.length).toBeGreaterThan(0);
 	});
 
 	it("shows the error returned by auth-core", async () => {
-		const client = createClient();
-		vi.mocked(client.requestPasswordReset).mockResolvedValue({
+		const recoverPassword = createRecoverPassword();
+		vi.mocked(recoverPassword).mockResolvedValue({
+			success: false,
 			data: null,
-			error: {
-				message: "Solicitud inválida",
-				status: 400,
-				statusText: "Bad Request",
-			},
+			error: new Error("Solicitud inválida"),
 		});
 
-		renderWithTheme(
-			<RecoverView redirectTo="/recover/reset" client={client} />,
-		);
+		renderWithTheme(<RecoverView recoverPassword={recoverPassword} />);
 		const user = userEvent.setup();
 
 		await waitFor(() => {
@@ -92,7 +88,7 @@ describe("RecoverView", () => {
 		fireEvent.submit(form);
 
 		await waitFor(() => {
-			expect(client.requestPasswordReset).toHaveBeenCalled();
+			expect(recoverPassword).toHaveBeenCalled();
 		});
 
 		expect(
@@ -100,41 +96,6 @@ describe("RecoverView", () => {
 		).toBeInTheDocument();
 	});
 
-	it("handles response with status false", async () => {
-		const client = createClient();
-		vi.mocked(client.requestPasswordReset).mockResolvedValue({
-			data: { status: false, message: "Error en el servidor" },
-			error: null,
-		});
-
-		renderWithTheme(
-			<RecoverView redirectTo="/recover/reset" client={client} />,
-		);
-		const user = userEvent.setup();
-
-		await waitFor(() => {
-			const forms = screen.getAllByTestId("recover-form");
-			expect(forms.length).toBeGreaterThan(0);
-		});
-
-		const forms = screen.getAllByTestId("recover-form");
-		const form = forms[forms.length - 1];
-
-		const emailInputs = screen.getAllByLabelText(/correo/i);
-		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
-		const submitButtons = screen.getAllByRole("button", {
-			name: /enviar enlace de recuperación/i,
-		});
-		const submitButton = submitButtons[submitButtons.length - 1];
-		expect(submitButton).toHaveAttribute("type", "submit");
-		fireEvent.submit(form);
-
-		await waitFor(() => {
-			expect(client.requestPasswordReset).toHaveBeenCalled();
-		});
-
-		expect(
-			await screen.findByText(/error en el servidor/i, { exact: false }),
-		).toBeInTheDocument();
-	});
+	// Note: With the SDK, the recoverPassword function handles errors internally
+	// and always returns AuthResult, so we don't test rejected promises.
 });

@@ -1,19 +1,19 @@
+import type { AuthResult } from "@algenium/auth-next/client";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { ThemeProvider } from "@/components/ThemeProvider";
+
 import { LogoutView } from "./LogoutView";
-import { authClient } from "@/lib/auth/authClient";
 
 const renderWithTheme = (ui: React.ReactElement) => {
 	return render(<ThemeProvider>{ui}</ThemeProvider>);
 };
 
-vi.mock("@/lib/auth/authClient", () => ({
-	authClient: {
-		signOut: vi.fn(),
-	},
-}));
+type SignOutFn = () => Promise<AuthResult<null>>;
+
+const createSignOut = (): SignOutFn => vi.fn();
 
 describe("LogoutView", () => {
 	beforeEach(() => {
@@ -21,31 +21,34 @@ describe("LogoutView", () => {
 	});
 
 	it("renders logout view", () => {
-		vi.mocked(authClient.signOut).mockResolvedValue({
-			data: {},
+		const signOut = createSignOut();
+		vi.mocked(signOut).mockResolvedValue({
+			success: true,
+			data: null,
 			error: null,
 		});
 
-		renderWithTheme(<LogoutView />);
+		renderWithTheme(<LogoutView signOut={signOut} />);
 
 		const titles = screen.getAllByText(/cerrar sesión/i, { exact: false });
 		expect(titles.length).toBeGreaterThan(0);
-		// Retry button only shows on error, so we don't check for it here
 		const links = screen.getAllByRole("link", { name: /iniciar sesión/i });
 		expect(links.length).toBeGreaterThan(0);
 	});
 
 	it("shows success message when sign out succeeds", async () => {
-		vi.mocked(authClient.signOut).mockResolvedValue({
-			data: {},
+		const signOut = createSignOut();
+		vi.mocked(signOut).mockResolvedValue({
+			success: true,
+			data: null,
 			error: null,
 		});
 
-		renderWithTheme(<LogoutView />);
+		renderWithTheme(<LogoutView signOut={signOut} />);
 
 		await waitFor(
 			() => {
-				expect(authClient.signOut).toHaveBeenCalled();
+				expect(signOut).toHaveBeenCalled();
 			},
 			{ timeout: 2000 },
 		);
@@ -57,37 +60,18 @@ describe("LogoutView", () => {
 	});
 
 	it("shows error message when sign out fails", async () => {
-		vi.mocked(authClient.signOut).mockResolvedValue({
+		const signOut = createSignOut();
+		vi.mocked(signOut).mockResolvedValue({
+			success: false,
 			data: null,
-			error: { message: "Error al cerrar sesión", status: 500 },
+			error: new Error("Error al cerrar sesión"),
 		});
 
-		renderWithTheme(<LogoutView />);
+		renderWithTheme(<LogoutView signOut={signOut} />);
 
 		await waitFor(
 			() => {
-				expect(authClient.signOut).toHaveBeenCalled();
-			},
-			{ timeout: 2000 },
-		);
-
-		const errorMessages = await screen.findAllByText(
-			/error al cerrar sesión/i,
-			{
-				exact: false,
-			},
-		);
-		expect(errorMessages.length).toBeGreaterThan(0);
-	});
-
-	it("handles exception during sign out", async () => {
-		vi.mocked(authClient.signOut).mockRejectedValue(new Error("Network error"));
-
-		renderWithTheme(<LogoutView />);
-
-		await waitFor(
-			() => {
-				expect(authClient.signOut).toHaveBeenCalled();
+				expect(signOut).toHaveBeenCalled();
 			},
 			{ timeout: 2000 },
 		);
@@ -102,21 +86,24 @@ describe("LogoutView", () => {
 	});
 
 	it("allows retrying sign out", async () => {
-		vi.mocked(authClient.signOut)
+		const signOut = createSignOut();
+		vi.mocked(signOut)
 			.mockResolvedValueOnce({
+				success: false,
 				data: null,
-				error: { message: "Error", status: 500 },
+				error: new Error("Error"),
 			})
 			.mockResolvedValueOnce({
-				data: {},
+				success: true,
+				data: null,
 				error: null,
 			});
 
-		renderWithTheme(<LogoutView />);
+		renderWithTheme(<LogoutView signOut={signOut} />);
 
 		await waitFor(
 			() => {
-				expect(authClient.signOut).toHaveBeenCalledTimes(1);
+				expect(signOut).toHaveBeenCalledTimes(1);
 			},
 			{ timeout: 2000 },
 		);
@@ -138,9 +125,12 @@ describe("LogoutView", () => {
 
 		await waitFor(
 			() => {
-				expect(authClient.signOut).toHaveBeenCalledTimes(2);
+				expect(signOut).toHaveBeenCalledTimes(2);
 			},
 			{ timeout: 2000 },
 		);
 	});
+
+	// Note: With the SDK, the signOut function handles errors internally
+	// and always returns AuthResult, so we don't test rejected promises.
 });

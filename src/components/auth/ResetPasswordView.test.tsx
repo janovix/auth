@@ -1,13 +1,17 @@
+import type { AuthResult } from "@algenium/auth-next/client";
 import {
+	cleanup,
 	fireEvent,
 	render,
 	screen,
 	waitFor,
-	cleanup,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { ThemeProvider } from "@/components/ThemeProvider";
+
+import { ResetPasswordView } from "./ResetPasswordView";
 
 const pushMock = vi.fn();
 const refreshMock = vi.fn();
@@ -19,18 +23,16 @@ vi.mock("next/navigation", () => ({
 	}),
 }));
 
-import type { AuthClient } from "@/lib/auth/authClient";
-import { ResetPasswordView } from "./ResetPasswordView";
-
 const renderWithTheme = (ui: React.ReactElement) => {
 	return render(<ThemeProvider>{ui}</ThemeProvider>);
 };
 
-type ResetClient = Pick<AuthClient, "resetPassword">;
+type ResetPasswordFn = (
+	token: string,
+	newPassword: string,
+) => Promise<AuthResult<{ message: string }>>;
 
-const createClient = (): ResetClient => ({
-	resetPassword: vi.fn() as unknown as ResetClient["resetPassword"],
-});
+const createResetPassword = (): ResetPasswordFn => vi.fn();
 
 describe("ResetPasswordView", () => {
 	beforeEach(() => {
@@ -44,16 +46,17 @@ describe("ResetPasswordView", () => {
 	});
 
 	it("submits new password and redirects to login", async () => {
-		const client = createClient();
-		vi.mocked(client.resetPassword).mockResolvedValue({
-			data: { status: true },
+		const resetPassword = createResetPassword();
+		vi.mocked(resetPassword).mockResolvedValue({
+			success: true,
+			data: { message: "Password reset successful" },
 			error: null,
 		});
 
 		renderWithTheme(
 			<ResetPasswordView
 				token="token-123"
-				client={client}
+				resetPassword={resetPassword}
 				redirectDelayMs={0}
 			/>,
 		);
@@ -87,10 +90,7 @@ describe("ResetPasswordView", () => {
 		fireEvent.submit(form);
 
 		await waitFor(() => {
-			expect(client.resetPassword).toHaveBeenCalledWith({
-				token: "token-123",
-				newPassword: "Secret123!",
-			});
+			expect(resetPassword).toHaveBeenCalledWith("token-123", "Secret123!");
 		});
 
 		await waitFor(() => {
@@ -99,27 +99,22 @@ describe("ResetPasswordView", () => {
 	});
 
 	it("shows server error when auth-core rejects the token", async () => {
-		const client = createClient();
-		vi.mocked(client.resetPassword).mockResolvedValue({
+		const resetPassword = createResetPassword();
+		vi.mocked(resetPassword).mockResolvedValue({
+			success: false,
 			data: null,
-			error: {
-				message: "Token inválido",
-				status: 400,
-				statusText: "Bad Request",
-			},
+			error: new Error("Token inválido"),
 		});
 
-		const { unmount } = renderWithTheme(
-			<ResetPasswordView token="token-123" client={client} />,
+		renderWithTheme(
+			<ResetPasswordView token="token-123" resetPassword={resetPassword} />,
 		);
 
 		const user = userEvent.setup();
 
-		// Wait for form to be ready and ensure no success state
 		await waitFor(() => {
 			const forms = screen.getAllByTestId("reset-password-form");
 			expect(forms.length).toBeGreaterThan(0);
-			// Ensure no success alert is showing
 			const successAlerts = screen.queryAllByTestId("reset-success-alert");
 			expect(successAlerts.length).toBe(0);
 		});
@@ -146,7 +141,7 @@ describe("ResetPasswordView", () => {
 		fireEvent.submit(form);
 
 		await waitFor(() => {
-			expect(client.resetPassword).toHaveBeenCalled();
+			expect(resetPassword).toHaveBeenCalled();
 		});
 
 		expect(
@@ -164,8 +159,10 @@ describe("ResetPasswordView", () => {
 	});
 
 	it("shows validation error when passwords don't match", async () => {
-		const client = createClient();
-		renderWithTheme(<ResetPasswordView token="token-123" client={client} />);
+		const resetPassword = createResetPassword();
+		renderWithTheme(
+			<ResetPasswordView token="token-123" resetPassword={resetPassword} />,
+		);
 		const user = userEvent.setup();
 
 		await waitFor(() => {
@@ -195,59 +192,11 @@ describe("ResetPasswordView", () => {
 		).toBeInTheDocument();
 	});
 
-	it("handles exception during password reset", async () => {
-		const client = createClient();
-		vi.mocked(client.resetPassword).mockRejectedValue(
-			new Error("Network error"),
-		);
-
-		renderWithTheme(<ResetPasswordView token="token-123" client={client} />);
-		const user = userEvent.setup();
-
-		// Wait for form to be ready and ensure no success state
-		await waitFor(() => {
-			const forms = screen.getAllByTestId("reset-password-form");
-			expect(forms.length).toBeGreaterThan(0);
-			// Ensure no success alert is showing
-			const successAlerts = screen.queryAllByTestId("reset-success-alert");
-			expect(successAlerts.length).toBe(0);
-		});
-
-		const forms = screen.getAllByTestId("reset-password-form");
-		const form = forms[forms.length - 1];
-
-		const newPasswordInputs = screen.getAllByLabelText(/nueva contraseña/i);
-		await user.type(
-			newPasswordInputs[newPasswordInputs.length - 1],
-			"Secret123!",
-		);
-		const confirmPasswordInputs =
-			screen.getAllByLabelText(/confirmar contraseña/i);
-		await user.type(
-			confirmPasswordInputs[confirmPasswordInputs.length - 1],
-			"Secret123!",
-		);
-		const submitButtons = screen.getAllByRole("button", {
-			name: /actualizar contraseña/i,
-		});
-		const submitButton = submitButtons[submitButtons.length - 1];
-		expect(submitButton).toHaveAttribute("type", "submit");
-		fireEvent.submit(form);
-
-		await waitFor(() => {
-			expect(client.resetPassword).toHaveBeenCalled();
-		});
-
-		const errorMessages = await screen.findAllByText(/network error/i, {
-			exact: false,
-		});
-		expect(errorMessages.length).toBeGreaterThan(0);
-		expect(pushMock).not.toHaveBeenCalled();
-	});
-
 	it("shows error when submitting without token", async () => {
-		const client = createClient();
-		renderWithTheme(<ResetPasswordView token={null} client={client} />);
+		const resetPassword = createResetPassword();
+		renderWithTheme(
+			<ResetPasswordView token={null} resetPassword={resetPassword} />,
+		);
 		const user = userEvent.setup();
 
 		await waitFor(() => {
@@ -283,6 +232,9 @@ describe("ResetPasswordView", () => {
 			},
 		);
 		expect(errorMessages.length).toBeGreaterThan(0);
-		expect(client.resetPassword).not.toHaveBeenCalled();
+		expect(resetPassword).not.toHaveBeenCalled();
 	});
+
+	// Note: With the SDK, the resetPassword function handles errors internally
+	// and always returns AuthResult, so we don't test rejected promises.
 });

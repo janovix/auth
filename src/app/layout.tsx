@@ -1,8 +1,9 @@
-import ClientLayout from "@/components/ClientLayout";
-import { getServerSession } from "@/lib/auth/getServerSession";
-import { SessionHydrator } from "@/lib/auth/useAuthSession";
+import { SessionHydrator } from "@algenium/auth-next/client";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import ClientLayout from "@/components/ClientLayout";
+import { getServerSession } from "@/lib/auth/getServerSession";
 import "./globals.css";
 
 const geistSans = Geist({

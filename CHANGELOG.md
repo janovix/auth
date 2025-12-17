@@ -1,3 +1,10 @@
+# [1.0.0-rc.14](https://github.com/janovix/auth/compare/v1.0.0-rc.13...v1.0.0-rc.14) (2025-12-17)
+
+
+### Bug Fixes
+
+* **storybook:** add https:// to default env vars for Chromatic builds ([cf9f880](https://github.com/janovix/auth/commit/cf9f8802a4b8c871c054df2b70e4e0d8497c4644))
+
 # [1.0.0-rc.13](https://github.com/janovix/auth/compare/v1.0.0-rc.12...v1.0.0-rc.13) (2025-12-17)
 
 

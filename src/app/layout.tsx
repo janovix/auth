@@ -22,6 +22,9 @@ export const metadata: Metadata = {
 		"UI de autenticación que consume auth-core vía Better Auth: login, registro, cierre de sesión y vista de cuenta basados en cookies HttpOnly.",
 };
 
+// Force dynamic rendering since we use cookies and server-side session fetching
+export const dynamic = "force-dynamic";
+
 /**
  * Root layout - fetches session on the server and hydrates it for all pages.
  *

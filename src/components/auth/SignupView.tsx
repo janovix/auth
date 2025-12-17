@@ -40,6 +40,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Logo } from "@/components/Logo";
 import { authClient, type AuthClient } from "@/lib/auth/authClient";
 import {
 	getAuthCoreBaseUrl,
@@ -100,6 +101,7 @@ export const SignupView = ({
 
 	const form = useForm<SignupValues>({
 		resolver: zodResolver(signupSchema),
+		mode: "onChange",
 		defaultValues: {
 			firstName: "",
 			lastName: "",
@@ -141,6 +143,9 @@ export const SignupView = ({
 
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6 w-full">
+			<div className="flex justify-center mb-2">
+				<Logo variant="logo" />
+			</div>
 			<Card>
 				<CardHeader className="text-center">
 					<CardTitle className="text-xl">Crea tu cuenta</CardTitle>
@@ -420,6 +425,8 @@ export const SignupView = ({
 															Acepto los{" "}
 															<Link
 																href="/privacy"
+																target="_blank"
+																rel="noopener noreferrer"
 																className="text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
 																onClick={(e) => e.stopPropagation()}
 															>
@@ -428,6 +435,8 @@ export const SignupView = ({
 															y el{" "}
 															<Link
 																href="/privacy"
+																target="_blank"
+																rel="noopener noreferrer"
 																className="text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
 																onClick={(e) => e.stopPropagation()}
 															>

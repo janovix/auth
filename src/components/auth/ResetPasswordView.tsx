@@ -30,6 +30,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Logo } from "@/components/Logo";
 import { authClient, type AuthClient } from "@/lib/auth/authClient";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 
@@ -73,6 +74,7 @@ export const ResetPasswordView = ({
 
 	const form = useForm<ResetPasswordValues>({
 		resolver: zodResolver(resetSchema),
+		mode: "onChange",
 		defaultValues: {
 			newPassword: "",
 			confirmPassword: "",
@@ -135,6 +137,9 @@ export const ResetPasswordView = ({
 
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6 w-full">
+			<div className="flex justify-center mb-2">
+				<Logo variant="logo" />
+			</div>
 			<Card>
 				<CardHeader className="text-center">
 					<CardTitle className="text-xl">Restablecer contraseña</CardTitle>

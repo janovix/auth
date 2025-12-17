@@ -29,6 +29,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Logo } from "@/components/Logo";
 import { authClient, type AuthClient } from "@/lib/auth/authClient";
 import {
 	getAuthCoreBaseUrl,
@@ -114,6 +115,9 @@ export const RecoverView = ({
 
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6 w-full">
+			<div className="flex justify-center mb-2">
+				<Logo variant="logo" />
+			</div>
 			<Card>
 				<CardHeader className="text-center">
 					<CardTitle className="text-xl">Recuperar contraseña</CardTitle>

@@ -36,6 +36,7 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { Logo } from "@/components/Logo";
 import { authClient, type AuthClient } from "@/lib/auth/authClient";
 import {
 	getAuthCoreBaseUrl,
@@ -120,6 +121,9 @@ export const LoginView = ({
 
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6 w-full">
+			<div className="flex justify-center mb-2">
+				<Logo variant="logo" />
+			</div>
 			<Card>
 				<CardHeader className="text-center">
 					<CardTitle className="text-xl">Bienvenido de nuevo</CardTitle>
@@ -308,6 +312,8 @@ export const LoginView = ({
 						Al iniciar sesión, aceptas nuestros{" "}
 						<Link
 							href="/privacy"
+							target="_blank"
+							rel="noopener noreferrer"
 							className="underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
 							aria-label="Leer términos de servicio"
 						>
@@ -316,6 +322,8 @@ export const LoginView = ({
 						y{" "}
 						<Link
 							href="/privacy"
+							target="_blank"
+							rel="noopener noreferrer"
 							className="underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
 							aria-label="Leer política de privacidad"
 						>

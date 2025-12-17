@@ -61,12 +61,14 @@ const env = {
 	STORYBOOK_CRASH_REPORTS_DISABLED:
 		process.env.STORYBOOK_CRASH_REPORTS_DISABLED ?? "1",
 	NODE_OPTIONS: process.env.NODE_OPTIONS ?? "--max_old_space_size=4096",
-	// Set default auth core base URL for Storybook builds
+	// Set default auth core base URL for Storybook builds (must include https://)
 	NEXT_PUBLIC_AUTH_CORE_BASE_URL:
 		process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL ??
-		"auth-svc.janovix.workers.dev",
+		"https://auth-svc.janovix.workers.dev",
 	AUTH_CORE_BASE_URL:
-		process.env.AUTH_CORE_BASE_URL ?? "auth-svc.janovix.workers.dev",
+		process.env.AUTH_CORE_BASE_URL ?? "https://auth-svc.janovix.workers.dev",
+	NEXT_PUBLIC_AUTH_APP_URL:
+		process.env.NEXT_PUBLIC_AUTH_APP_URL ?? "https://auth.janovix.workers.dev",
 };
 
 const pnpmArgs = [

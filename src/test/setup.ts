@@ -22,17 +22,30 @@ global.ResizeObserver = class ResizeObserver {
 	}
 };
 
-// Mock window.matchMedia for next-themes
-Object.defineProperty(window, "matchMedia", {
-	writable: true,
-	value: vi.fn().mockImplementation((query) => ({
-		matches: false,
-		media: query,
-		onchange: null,
-		addListener: vi.fn(), // deprecated
-		removeListener: vi.fn(), // deprecated
-		addEventListener: vi.fn(),
-		removeEventListener: vi.fn(),
-		dispatchEvent: vi.fn(),
-	})),
-});
+// Ensure window exists for React DOM scheduler
+if (typeof window !== "undefined") {
+	// Mock window.matchMedia for next-themes
+	Object.defineProperty(window, "matchMedia", {
+		writable: true,
+		value: vi.fn().mockImplementation((query) => ({
+			matches: false,
+			media: query,
+			onchange: null,
+			addListener: vi.fn(), // deprecated
+			removeListener: vi.fn(), // deprecated
+			addEventListener: vi.fn(),
+			removeEventListener: vi.fn(),
+			dispatchEvent: vi.fn(),
+		})),
+	});
+
+	// Mock requestAnimationFrame for React DOM scheduler
+	if (typeof window.requestAnimationFrame === "undefined") {
+		window.requestAnimationFrame = vi.fn((cb) => {
+			return Number(setTimeout(cb, 0));
+		}) as typeof window.requestAnimationFrame;
+		window.cancelAnimationFrame = vi.fn((id) => {
+			clearTimeout(id);
+		}) as typeof window.cancelAnimationFrame;
+	}
+}

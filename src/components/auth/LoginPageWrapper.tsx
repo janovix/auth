@@ -22,8 +22,9 @@ export function LoginPageWrapper({
 	const [showContent, setShowContent] = useState(false);
 
 	useEffect(() => {
-		// Mark as mounted
+		// Reset state when component mounts or props change
 		setMounted(true);
+		setShowContent(false);
 
 		// Show content after a brief delay to ensure smooth transition
 		// This allows the skeleton to render first and background to initialize
@@ -31,8 +32,13 @@ export function LoginPageWrapper({
 			setShowContent(true);
 		}, 150);
 
-		return () => clearTimeout(timer);
-	}, []);
+		return () => {
+			clearTimeout(timer);
+			// Reset state on unmount to ensure clean state on remount
+			setMounted(false);
+			setShowContent(false);
+		};
+	}, [redirectTo, defaultSuccessMessage]);
 
 	return (
 		<>

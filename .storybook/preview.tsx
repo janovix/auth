@@ -18,6 +18,16 @@ export const globalTypes = {
 	},
 };
 
+// Mock router functions for Next.js navigation
+const mockRouter = {
+	push: () => {},
+	replace: () => {},
+	refresh: () => {},
+	back: () => {},
+	forward: () => {},
+	prefetch: () => Promise.resolve(),
+};
+
 const preview: Preview = {
 	parameters: {
 		actions: { argTypesRegex: "^on[A-Z].*" },
@@ -32,14 +42,7 @@ const preview: Preview = {
 			values: [{ name: "app", value: "transparent" }],
 		},
 		nextjs: {
-			router: {
-				push: () => {},
-				replace: () => {},
-				refresh: () => {},
-				back: () => {},
-				forward: () => {},
-				prefetch: () => Promise.resolve(),
-			},
+			router: mockRouter,
 		},
 	},
 	decorators: [
@@ -50,6 +53,12 @@ const preview: Preview = {
 				const root = document.documentElement;
 				root.classList.toggle("dark", theme === "dark");
 			}, [theme]);
+
+			// Ensure router mocks are available before rendering
+			if (typeof window !== "undefined") {
+				// Set router mocks in window for Storybook Next.js framework
+				(window as any).__NEXT_ROUTER_MOCKS__ = mockRouter;
+			}
 
 			return (
 				<div className="min-h-screen bg-background text-foreground p-6">

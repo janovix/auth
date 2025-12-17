@@ -7,6 +7,16 @@ const meta = {
 	component: SignupView,
 	parameters: {
 		layout: "fullscreen",
+		nextjs: {
+			router: {
+				push: () => {},
+				replace: () => {},
+				refresh: () => {},
+				back: () => {},
+				forward: () => {},
+				prefetch: () => Promise.resolve(),
+			},
+		},
 	},
 	decorators: [
 		(Story) => (

@@ -376,14 +376,14 @@ export const SignupView = ({
 													>
 														<div className="flex items-center gap-2 text-xs">
 															{passwordChecks.minLength ? (
-																<CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-500" />
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
 															) : (
 																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
 															)}
 															<span
 																className={
 																	passwordChecks.minLength
-																		? "text-green-600 dark:text-green-500"
+																		? "text-primary"
 																		: "text-muted-foreground"
 																}
 															>
@@ -392,14 +392,14 @@ export const SignupView = ({
 														</div>
 														<div className="flex items-center gap-2 text-xs">
 															{passwordChecks.hasUppercase ? (
-																<CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-500" />
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
 															) : (
 																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
 															)}
 															<span
 																className={
 																	passwordChecks.hasUppercase
-																		? "text-green-600 dark:text-green-500"
+																		? "text-primary"
 																		: "text-muted-foreground"
 																}
 															>
@@ -408,14 +408,14 @@ export const SignupView = ({
 														</div>
 														<div className="flex items-center gap-2 text-xs">
 															{passwordChecks.hasNumber ? (
-																<CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-500" />
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
 															) : (
 																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
 															)}
 															<span
 																className={
 																	passwordChecks.hasNumber
-																		? "text-green-600 dark:text-green-500"
+																		? "text-primary"
 																		: "text-muted-foreground"
 																}
 															>
@@ -424,14 +424,14 @@ export const SignupView = ({
 														</div>
 														<div className="flex items-center gap-2 text-xs">
 															{passwordChecks.hasSpecial ? (
-																<CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-500" />
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
 															) : (
 																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
 															)}
 															<span
 																className={
 																	passwordChecks.hasSpecial
-																		? "text-green-600 dark:text-green-500"
+																		? "text-primary"
 																		: "text-muted-foreground"
 																}
 															>

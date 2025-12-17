@@ -1,3 +1,10 @@
+# [1.0.0-rc.12](https://github.com/janovix/auth/compare/v1.0.0-rc.11...v1.0.0-rc.12) (2025-12-17)
+
+
+### Bug Fixes
+
+* **auth:** ensure SDK initialization before component rendering ([af33986](https://github.com/janovix/auth/commit/af33986a5ad04003efa5d0cbf53c997d8639b05b))
+
 # [1.0.0-rc.11](https://github.com/janovix/auth/compare/v1.0.0-rc.10...v1.0.0-rc.11) (2025-12-17)
 
 

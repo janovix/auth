@@ -2,9 +2,11 @@
 
 import { createAuthConfig, isAuthConfigured } from "@algenium/auth-next";
 
-import { getAuthCoreBaseUrl } from "./authCoreConfig";
-
 let initialized = false;
+
+// DEBUG: Hardcoded values to isolate environment variable issues
+const HARDCODED_AUTH_SERVICE_URL = "https://auth-svc.janovix.workers.dev";
+const HARDCODED_AUTH_APP_URL = "https://auth.janovix.workers.dev";
 
 /**
  * Initialize the Algenium Auth SDK.
@@ -15,30 +17,28 @@ let initialized = false;
  * This function is idempotent - it only initializes once.
  */
 export function initAuthSdk() {
+	// DEBUG: Log initialization attempt
+	console.log(
+		"[initAuthSdk] Called. initialized:",
+		initialized,
+		"isAuthConfigured:",
+		isAuthConfigured(),
+	);
+
 	// Only initialize once
 	if (initialized || isAuthConfigured()) {
+		console.log("[initAuthSdk] Already initialized, skipping");
 		return;
 	}
 
-	// Get the auth service URL from environment
-	const authServiceUrl = getAuthCoreBaseUrl();
+	// DEBUG: Use hardcoded values
+	const authServiceUrl = HARDCODED_AUTH_SERVICE_URL;
+	const authAppUrl = HARDCODED_AUTH_APP_URL;
 
-	// For the auth app, the authAppUrl is the current origin (client)
-	// or from environment variable (server-side rendering)
-	// This is used for password recovery redirects, etc.
-	let authAppUrl: string;
-	if (typeof window !== "undefined") {
-		authAppUrl = window.location.origin;
-	} else {
-		const envUrl = process.env.NEXT_PUBLIC_AUTH_APP_URL;
-		if (!envUrl) {
-			throw new Error(
-				"NEXT_PUBLIC_AUTH_APP_URL environment variable is not set. " +
-					"Configure it in wrangler.jsonc for Cloudflare Workers deployment.",
-			);
-		}
-		authAppUrl = envUrl;
-	}
+	console.log("[initAuthSdk] Creating config with:", {
+		authServiceUrl,
+		authAppUrl,
+	});
 
 	createAuthConfig({
 		authServiceUrl,
@@ -53,8 +53,14 @@ export function initAuthSdk() {
 	});
 
 	initialized = true;
+	console.log("[initAuthSdk] Config created successfully");
 }
 
 // Auto-initialize when this module is loaded (both server and client)
 // This ensures SDK is ready before any component tries to use it
+console.log("[sdkConfig] Module loaded, calling initAuthSdk()");
 initAuthSdk();
+console.log(
+	"[sdkConfig] After initAuthSdk(), isAuthConfigured:",
+	isAuthConfigured(),
+);

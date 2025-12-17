@@ -1,3 +1,10 @@
+# [1.0.0-rc.9](https://github.com/janovix/auth/compare/v1.0.0-rc.8...v1.0.0-rc.9) (2025-12-17)
+
+
+### Features
+
+* Add real-time password validation to auth forms ([80b4fec](https://github.com/janovix/auth/commit/80b4fecd1cf590519f72bb4061879f8abba5926e))
+
 # [1.0.0-rc.8](https://github.com/janovix/auth/compare/v1.0.0-rc.7...v1.0.0-rc.8) (2025-12-17)
 
 

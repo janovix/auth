@@ -3,12 +3,13 @@ import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import {
 	AuthSessionProvider,
 	createSessionStore,
-	getWritableSessionStore,
+	clearSession,
+	setSession,
 	SessionHydrator,
 	useAuthSession,
 	type AuthSessionSnapshot,
 } from "./useAuthSession";
-import type { ServerSession } from "./getServerSession";
+import type { Session } from "@algenium/auth-next";
 
 const createSnapshot = (
 	overrides?: Partial<AuthSessionSnapshot>,
@@ -20,6 +21,16 @@ const createSnapshot = (
 });
 
 describe("useAuthSession", () => {
+	beforeEach(() => {
+		// Clear the global session store before each test
+		clearSession();
+	});
+
+	afterEach(() => {
+		cleanup();
+		clearSession();
+	});
+
 	it("returns session data from store", () => {
 		const snapshot = createSnapshot({
 			data: {
@@ -148,7 +159,7 @@ describe("createSessionStore", () => {
 });
 
 describe("SessionHydrator", () => {
-	const mockSession: ServerSession = {
+	const mockSession: Session = {
 		user: {
 			id: "hydrated-user-123",
 			name: "Hydrated User",
@@ -170,15 +181,12 @@ describe("SessionHydrator", () => {
 
 	beforeEach(() => {
 		// Reset the session store before each test
-		getWritableSessionStore().set({
-			data: null,
-			error: null,
-			isPending: false,
-		});
+		clearSession();
 	});
 
 	afterEach(() => {
 		cleanup();
+		clearSession();
 	});
 
 	it("provides session via context to useAuthSession hook", () => {
@@ -224,29 +232,25 @@ describe("SessionHydrator", () => {
 	});
 
 	it("prefers store data over hydrated session for real-time updates", () => {
-		// Set some data in the store
-		getWritableSessionStore().set({
-			data: {
-				user: {
-					id: "store-user",
-					name: "Store User",
-					email: "store@example.com",
-					image: null,
-					createdAt: new Date(),
-					updatedAt: new Date(),
-					emailVerified: true,
-				},
-				session: {
-					id: "store-session",
-					userId: "store-user",
-					token: "store-token",
-					createdAt: new Date(),
-					updatedAt: new Date(),
-					expiresAt: new Date(Date.now() + 3600 * 1000),
-				},
+		// Set some data in the global store using setSession
+		setSession({
+			user: {
+				id: "store-user",
+				name: "Store User",
+				email: "store@example.com",
+				image: null,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				emailVerified: true,
 			},
-			error: null,
-			isPending: false,
+			session: {
+				id: "store-session",
+				userId: "store-user",
+				token: "store-token",
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				expiresAt: new Date(Date.now() + 3600 * 1000),
+			},
 		});
 
 		const SessionConsumer = () => {

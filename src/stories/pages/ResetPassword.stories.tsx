@@ -1,18 +1,21 @@
 import { ResetPasswordView } from "@/components/auth/ResetPasswordView";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import type { Meta, StoryObj } from "@storybook/react";
-import { authClient } from "@/lib/auth/authClient";
 import { mockRouter } from "../mocks/router";
+import type { AuthResult } from "@algenium/auth-next/client";
 
-// Mock auth client methods
-const mockResetPassword = async (_data: {
-	token: string;
-	newPassword: string;
-}) => {
+// Mock resetPassword function for stories
+const mockResetPassword = async (
+	_token: string,
+	_newPassword: string,
+): Promise<AuthResult<{ message: string }>> => {
+	// Simulate API delay
+	await new Promise((resolve) => setTimeout(resolve, 500));
 	return Promise.resolve({
-		data: { status: true },
+		success: true,
+		data: { message: "Password reset successfully" },
 		error: null,
-	} as Awaited<ReturnType<typeof authClient.resetPassword>>);
+	});
 };
 
 const meta = {
@@ -26,11 +29,6 @@ const meta = {
 	},
 	decorators: [
 		(Story) => {
-			// Mock auth client for this story
-			const originalResetPassword = authClient.resetPassword;
-			authClient.resetPassword =
-				mockResetPassword as unknown as typeof authClient.resetPassword;
-
 			return (
 				<div className="min-h-screen flex items-center justify-center p-4 bg-background">
 					<div className="w-full max-w-md">
@@ -50,12 +48,14 @@ type Story = StoryObj<typeof meta>;
 export const WithToken: Story = {
 	args: {
 		token: "valid-token-123",
+		resetPassword: mockResetPassword,
 	},
 };
 
 export const WithoutToken: Story = {
 	args: {
 		token: null,
+		resetPassword: mockResetPassword,
 	},
 };
 
@@ -63,5 +63,6 @@ export const WithCustomRedirectDelay: Story = {
 	args: {
 		token: "valid-token-123",
 		redirectDelayMs: 3000,
+		resetPassword: mockResetPassword,
 	},
 };

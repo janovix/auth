@@ -2,13 +2,13 @@ import { AccountView } from "@/components/auth/AccountView";
 import {
 	AuthSessionProvider,
 	createSessionStore,
-	type AuthSessionSnapshot,
-} from "@/lib/auth/useAuthSession";
+} from "@algenium/auth-next/client";
+import type { SessionSnapshot } from "@algenium/auth-next";
 import type { Meta, StoryObj } from "@storybook/react";
 
 const createSnapshot = (
-	overrides?: Partial<AuthSessionSnapshot>,
-): AuthSessionSnapshot => ({
+	overrides?: Partial<SessionSnapshot>,
+): SessionSnapshot => ({
 	data: null,
 	error: null,
 	isPending: false,

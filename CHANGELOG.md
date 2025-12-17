@@ -1,3 +1,10 @@
+# [1.0.0-rc.11](https://github.com/janovix/auth/compare/v1.0.0-rc.10...v1.0.0-rc.11) (2025-12-17)
+
+
+### Features
+
+* **auth:** integrate @algenium/auth-next SDK for auth operations ([c0c3de2](https://github.com/janovix/auth/commit/c0c3de2ef508edd59b45a45496d22e07f4ca805d))
+
 # [1.0.0-rc.10](https://github.com/janovix/auth/compare/v1.0.0-rc.9...v1.0.0-rc.10) (2025-12-17)
 
 

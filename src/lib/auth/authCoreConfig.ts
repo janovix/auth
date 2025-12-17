@@ -12,10 +12,10 @@
 export const getAuthCoreBaseUrl = (): string => {
 	// For client-side, use NEXT_PUBLIC_ prefix (build-time variable)
 	// For server-side, use the regular env var (runtime variable)
+	// During build, try both as Next.js may not distinguish properly
 	const baseUrl =
-		typeof window !== "undefined"
-			? process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL
-			: process.env.AUTH_CORE_BASE_URL;
+		process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL ||
+		process.env.AUTH_CORE_BASE_URL;
 
 	if (!baseUrl) {
 		throw new Error(

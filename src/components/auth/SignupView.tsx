@@ -99,6 +99,8 @@ export const SignupView = ({
 
 	const environment = useMemo(() => getAuthEnvironment(), []);
 	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
+	// Always use dark theme for logo to show white letters (matching previous behavior)
+	const logoTheme = "dark" as const;
 
 	const form = useForm<SignupValues>({
 		resolver: zodResolver(signupSchema),
@@ -162,7 +164,7 @@ export const SignupView = ({
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6 w-full">
 			<div className="flex justify-center mb-2">
-				<Logo variant="logo" />
+				<Logo variant="logo" forceTheme={logoTheme} />
 			</div>
 			<Card>
 				<CardHeader className="text-center">

@@ -71,6 +71,8 @@ export const ResetPasswordView = ({
 
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+	// Always use dark theme for logo to show white letters (matching previous behavior)
+	const logoTheme = "dark" as const;
 
 	const form = useForm<ResetPasswordValues>({
 		resolver: zodResolver(resetSchema),
@@ -155,7 +157,7 @@ export const ResetPasswordView = ({
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6 w-full">
 			<div className="flex justify-center mb-2">
-				<Logo variant="logo" />
+				<Logo variant="logo" forceTheme={logoTheme} />
 			</div>
 			<Card>
 				<CardHeader className="text-center">

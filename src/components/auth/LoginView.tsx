@@ -5,12 +5,6 @@ import {
 	AlertDescription,
 	AlertTitle,
 	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
 	Checkbox,
 	Form,
 	FormControl,
@@ -20,14 +14,28 @@ import {
 	FormMessage,
 	Input,
 } from "@/components/ui";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import {
+	Field,
+	FieldDescription,
+	FieldGroup,
+	FieldLabel,
+	FieldSeparator,
+} from "@/components/ui/field";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckCircle2, Lock, LogIn, Mail, Shield } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Logo } from "@/components/Logo";
 import { authClient, type AuthClient } from "@/lib/auth/authClient";
 import {
 	getAuthCoreBaseUrl,
@@ -111,150 +119,212 @@ export const LoginView = ({
 	const isSubmitting = form.formState.isSubmitting;
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background via-background to-muted px-4 py-12">
-			<div className="w-full max-w-md space-y-8">
-				<div className="flex justify-center">
-					<Logo variant="logo" />
-				</div>
+		<div className="flex flex-col gap-4 sm:gap-6 w-full">
+			<Card>
+				<CardHeader className="text-center">
+					<CardTitle className="text-xl">Bienvenido de nuevo</CardTitle>
+					<CardDescription>
+						Ingresa tus credenciales para acceder a tu cuenta
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					{successMessage ? (
+						<Alert role="status" className="mb-6">
+							<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+							<AlertTitle>Autenticación exitosa</AlertTitle>
+							<AlertDescription>{successMessage}</AlertDescription>
+						</Alert>
+					) : null}
 
-				<Card className="shadow-xl shadow-black/5">
-					<CardHeader className="space-y-4">
-						<div>
-							<CardTitle className="text-2xl">Inicia sesión</CardTitle>
-							<CardDescription>
-								Ingresa tus credenciales para continuar. Entorno:{" "}
-								<span className="font-mono text-xs">
-									{environment.toUpperCase()}
-								</span>
-							</CardDescription>
-						</div>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						{successMessage ? (
-							<Alert role="status">
-								<AlertTitle>Autenticación exitosa</AlertTitle>
-								<AlertDescription>{successMessage}</AlertDescription>
-							</Alert>
-						) : null}
+					{serverError && !successMessage ? (
+						<Alert variant="destructive" role="alert" className="mb-6">
+							<AlertTitle>Error de autenticación</AlertTitle>
+							<AlertDescription>{serverError}</AlertDescription>
+						</Alert>
+					) : null}
 
-						{serverError && !successMessage ? (
-							<Alert variant="destructive" role="alert">
-								<AlertTitle>No pudimos validar tus datos</AlertTitle>
-								<AlertDescription>{serverError}</AlertDescription>
-							</Alert>
-						) : null}
-
-						<Form {...form}>
-							<form
-								data-testid="login-form"
-								onSubmit={form.handleSubmit(handleSubmit)}
-								className="space-y-5"
-							>
-								<FormField
-									control={form.control}
-									name="email"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Correo corporativo</FormLabel>
-											<FormControl>
-												<Input
-													type="email"
-													placeholder="usuario@empresa.mx"
-													autoComplete="email"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="password"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Contraseña</FormLabel>
-											<FormControl>
-												<Input
-													type="password"
-													placeholder="••••••••"
-													autoComplete="current-password"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
-
-								<FormField
-									control={form.control}
-									name="rememberMe"
-									render={({ field }) => (
-										<FormItem className="flex items-start gap-3 rounded-lg border px-4 py-3">
-											<FormControl>
-												<Checkbox
-													checked={field.value}
-													onCheckedChange={(checked) =>
-														field.onChange(checked === true)
-													}
-													aria-label="Mantener sesión iniciada"
-												/>
-											</FormControl>
-											<div className="space-y-1 leading-none">
-												<FormLabel className="text-sm font-medium">
-													Mantener sesión iniciada
-												</FormLabel>
-											</div>
-										</FormItem>
-									)}
-								/>
-
-								<CardFooter className="flex flex-col gap-4 px-0 pb-0">
-									<Button
-										type="submit"
-										className="w-full"
-										disabled={isSubmitting}
-									>
-										{isSubmitting ? (
-											<span className="flex items-center justify-center gap-2">
-												Validando credenciales...
-											</span>
-										) : (
-											"Ingresar"
+					<Form {...form}>
+						<form
+							data-testid="login-form"
+							onSubmit={form.handleSubmit(handleSubmit)}
+						>
+							<FieldGroup>
+								<Field>
+									<FormField
+										control={form.control}
+										name="email"
+										render={({ field }) => (
+											<FormItem>
+												<FieldLabel
+													htmlFor="email"
+													className="flex items-center gap-2"
+												>
+													<Mail className="h-4 w-4" aria-hidden="true" />
+													Correo electrónico
+												</FieldLabel>
+												<FormControl>
+													<Input
+														id="email"
+														type="email"
+														placeholder="tu@empresa.com"
+														autoComplete="email"
+														aria-describedby="email-description"
+														required
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+												<FieldDescription
+													id="email-description"
+													className="sr-only"
+												>
+													Ingresa tu dirección de correo corporativo
+												</FieldDescription>
+											</FormItem>
 										)}
-									</Button>
-
-									<p className="text-center text-sm text-muted-foreground">
-										¿Aún no tienes cuenta?{" "}
-										<Link
-											href="/signup"
-											className="font-medium text-primary underline-offset-2 hover:underline"
+									/>
+								</Field>
+								<Field>
+									<div className="flex items-center">
+										<FieldLabel
+											htmlFor="password"
+											className="flex items-center gap-2"
 										>
-											Crea una desde aquí
-										</Link>
-									</p>
-
-									<p className="text-center text-sm text-muted-foreground">
-										¿Olvidaste tu contraseña?{" "}
+											<Lock className="h-4 w-4" aria-hidden="true" />
+											Contraseña
+										</FieldLabel>
 										<Link
 											href={
 												redirectTo
 													? `/recover?redirectTo=${encodeURIComponent(redirectTo)}`
 													: "/recover"
 											}
-											className="font-medium text-primary underline-offset-2 hover:underline"
+											className="ml-auto text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+											aria-label="Recuperar contraseña olvidada"
 										>
-											Recupera el acceso
+											¿Olvidaste tu contraseña?
 										</Link>
-									</p>
-								</CardFooter>
-							</form>
-						</Form>
-					</CardContent>
-				</Card>
-			</div>
+									</div>
+									<FormField
+										control={form.control}
+										name="password"
+										render={({ field }) => (
+											<FormItem>
+												<FormControl>
+													<Input
+														id="password"
+														type="password"
+														placeholder="Ingresa tu contraseña"
+														autoComplete="current-password"
+														aria-describedby="password-description"
+														required
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+												<FieldDescription
+													id="password-description"
+													className="sr-only"
+												>
+													Ingresa tu contraseña de acceso
+												</FieldDescription>
+											</FormItem>
+										)}
+									/>
+								</Field>
+								<Field>
+									<FormField
+										control={form.control}
+										name="rememberMe"
+										render={({ field }) => (
+											<FormItem className="flex items-start gap-3 rounded-lg border px-4 py-3">
+												<FormControl>
+													<Checkbox
+														id="rememberMe"
+														checked={field.value}
+														onCheckedChange={(checked) =>
+															field.onChange(checked === true)
+														}
+														aria-describedby="rememberMe-description"
+													/>
+												</FormControl>
+												<div className="space-y-1 leading-none">
+													<FormLabel
+														htmlFor="rememberMe"
+														className="text-sm font-medium cursor-pointer"
+													>
+														Recordar sesión
+													</FormLabel>
+													<FieldDescription
+														id="rememberMe-description"
+														className="text-xs text-muted-foreground"
+													>
+														Mantén tu sesión activa en este dispositivo
+													</FieldDescription>
+												</div>
+											</FormItem>
+										)}
+									/>
+								</Field>
+								<Field>
+									<Button
+										type="submit"
+										className="w-full"
+										disabled={isSubmitting}
+										aria-busy={isSubmitting}
+									>
+										{isSubmitting ? (
+											<span className="flex items-center justify-center gap-2">
+												<LogIn
+													className="h-4 w-4 animate-pulse"
+													aria-hidden="true"
+												/>
+												Iniciando sesión...
+											</span>
+										) : (
+											<>
+												<LogIn className="h-4 w-4" aria-hidden="true" />
+												Iniciar sesión
+											</>
+										)}
+									</Button>
+									<FieldDescription className="text-center">
+										¿Aún no tienes cuenta?{" "}
+										<Link
+											href="/signup"
+											className="font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+											aria-label="Crear una nueva cuenta"
+										>
+											Regístrate aquí
+										</Link>
+									</FieldDescription>
+								</Field>
+							</FieldGroup>
+						</form>
+					</Form>
+					<hr className="my-6 border-t" />
+					<FieldDescription className="px-6 text-center text-xs text-muted-foreground">
+						<Shield className="h-3 w-3 inline-block mr-1" aria-hidden="true" />
+						Al iniciar sesión, aceptas nuestros{" "}
+						<Link
+							href="/privacy"
+							className="underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+							aria-label="Leer términos de servicio"
+						>
+							Términos de Servicio
+						</Link>{" "}
+						y{" "}
+						<Link
+							href="/privacy"
+							className="underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+							aria-label="Leer política de privacidad"
+						>
+							Política de Privacidad
+						</Link>
+						.
+					</FieldDescription>
+				</CardContent>
+			</Card>
 		</div>
 	);
 };

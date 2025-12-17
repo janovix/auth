@@ -66,17 +66,19 @@ export const AccountView = () => {
 				<div className="mx-auto w-full max-w-3xl">
 					<Card>
 						<CardHeader>
-							<CardTitle>No encontramos una sesión activa</CardTitle>
+							<CardTitle>Sesión no encontrada</CardTitle>
 							<CardDescription>
-								Inicia sesión nuevamente para que auth-core emita la cookie
-								correspondiente a este entorno.
+								No se encontró una sesión activa en este entorno
 							</CardDescription>
 						</CardHeader>
-						<CardContent className="flex items-start gap-3 text-sm text-foreground">
-							<AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500" />
-							<div>
+						<CardContent className="flex items-start gap-3 text-sm">
+							<AlertTriangle
+								className="mt-0.5 h-4 w-4 text-amber-500 flex-shrink-0"
+								aria-hidden="true"
+							/>
+							<div className="text-muted-foreground">
 								<p>
-									Si vienes de un preview asegúrate de haber iniciado sesión en
+									Si vienes de un preview, asegúrate de haber iniciado sesión en
 									el mismo dominio para compartir la cookie.
 								</p>
 							</div>
@@ -103,52 +105,66 @@ export const AccountView = () => {
 				<Card>
 					<CardHeader className="flex flex-wrap items-center justify-between gap-4">
 						<div>
-							<CardTitle>Tu sesión en auth-core</CardTitle>
-							<CardDescription>
-								Información directa de /api/auth/get-session
-							</CardDescription>
+							<CardTitle>Mi cuenta</CardTitle>
+							<CardDescription>Información de tu sesión activa</CardDescription>
 						</div>
 						<Badge variant="secondary">
 							Entorno · {environment.toUpperCase()}
 						</Badge>
 					</CardHeader>
 					<CardContent className="grid gap-6 md:grid-cols-2">
-						<div className="space-y-2 text-sm text-muted-foreground">
-							<div className="flex items-center gap-2 text-foreground">
-								<User className="h-4 w-4" />
-								<span className="font-medium">{data.user.name}</span>
+						<div className="space-y-3 text-sm">
+							<div className="flex items-center gap-2">
+								<User
+									className="h-4 w-4 text-muted-foreground"
+									aria-hidden="true"
+								/>
+								<div>
+									<p className="font-medium text-foreground">
+										{data.user.name}
+									</p>
+									<p className="font-mono text-xs text-muted-foreground mt-0.5">
+										{data.user.email}
+									</p>
+								</div>
 							</div>
-							<p className="font-mono text-xs text-foreground">
-								{data.user.email}
-							</p>
-							<p>ID de usuario: {data.user.id}</p>
+							<div className="text-muted-foreground">
+								<p className="text-xs">ID de usuario</p>
+								<p className="font-mono text-xs">{data.user.id}</p>
+							</div>
 						</div>
-						<div className="space-y-2 text-sm text-muted-foreground">
-							<div className="flex items-center gap-2 text-foreground">
-								<Clock4 className="h-4 w-4" />
-								<span className="font-medium">
-									Expira {formatExpiresIn(data.session.expiresAt)}
-								</span>
+						<div className="space-y-3 text-sm">
+							<div className="flex items-center gap-2">
+								<Clock4
+									className="h-4 w-4 text-muted-foreground"
+									aria-hidden="true"
+								/>
+								<div>
+									<p className="font-medium text-foreground">
+										Expira {formatExpiresIn(data.session.expiresAt)}
+									</p>
+									<p className="text-xs text-muted-foreground mt-0.5">
+										Última actualización:{" "}
+										{normalizeDate(data.session.updatedAt)?.toLocaleString(
+											"es-MX",
+											{
+												dateStyle: "medium",
+												timeStyle: "short",
+											},
+										) ?? "—"}
+									</p>
+								</div>
 							</div>
-							<p className="font-mono text-xs text-foreground">
-								Session ID: {data.session.id}
-							</p>
-							<p>
-								Última actualización:{" "}
-								{normalizeDate(data.session.updatedAt)?.toLocaleString(
-									"es-MX",
-									{
-										dateStyle: "medium",
-										timeStyle: "short",
-									},
-								) ?? "—"}
-							</p>
+							<div className="text-muted-foreground">
+								<p className="text-xs">ID de sesión</p>
+								<p className="font-mono text-xs break-all">{data.session.id}</p>
+							</div>
 						</div>
 					</CardContent>
 					<CardFooter className="flex flex-wrap gap-3">
 						<Button asChild>
 							<Link href="/logout">
-								<LogOut className="mr-2 h-4 w-4" />
+								<LogOut className="h-4 w-4" aria-hidden="true" />
 								Cerrar sesión
 							</Link>
 						</Button>
@@ -160,34 +176,42 @@ export const AccountView = () => {
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Detalles de la cookie emitida</CardTitle>
+						<CardTitle>Configuración de seguridad</CardTitle>
 						<CardDescription>
-							Better Auth configura los atributos HttpOnly y Secure para evitar
-							fugas en el cliente.
+							Detalles de la cookie de autenticación
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="grid gap-4 md:grid-cols-2 text-sm text-muted-foreground">
+					<CardContent className="grid gap-4 md:grid-cols-2 text-sm">
 						<div>
-							<p className="font-medium text-foreground">Dominio</p>
-							<p className="font-mono text-xs">{cookieDomain}</p>
+							<p className="font-medium text-foreground mb-1">Dominio</p>
+							<p className="font-mono text-xs text-muted-foreground">
+								{cookieDomain}
+							</p>
 						</div>
 						<div>
-							<p className="font-medium text-foreground">Endpoint base</p>
-							<p className="font-mono text-xs">{baseUrl}/api/auth</p>
+							<p className="font-medium text-foreground mb-1">Endpoint base</p>
+							<p className="font-mono text-xs text-muted-foreground">
+								{baseUrl}/api/auth
+							</p>
 						</div>
 						<div>
-							<p className="font-medium text-foreground">Comparte sesión con</p>
-							<p>
+							<p className="font-medium text-foreground mb-1">
+								Alcance de la sesión
+							</p>
+							<p className="text-muted-foreground">
 								{environment === "dev"
 									? "Todas las aplicaciones bajo *.janovix.workers.dev"
 									: "Solo aplicaciones bajo el dominio actual"}
 							</p>
 						</div>
 						<div>
-							<p className="font-medium text-foreground">Recordatorio</p>
-							<p>
-								Dev/preview y producción usan dominios distintos, por lo que
-								deberás iniciar sesión de forma independiente.
+							<p className="font-medium text-foreground mb-1">
+								Nota importante
+							</p>
+							<p className="text-muted-foreground">
+								Los entornos de desarrollo y producción usan dominios distintos,
+								por lo que deberás iniciar sesión de forma independiente en cada
+								uno.
 							</p>
 						</div>
 					</CardContent>
@@ -195,32 +219,38 @@ export const AccountView = () => {
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Sesión técnica</CardTitle>
+						<CardTitle>Información técnica</CardTitle>
 						<CardDescription>
-							Información útil para depurar auth-core
+							Detalles de depuración para desarrolladores
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="space-y-3 text-sm font-mono text-muted-foreground">
+					<CardContent className="space-y-4 text-sm">
 						<div>
-							<p className="text-xs uppercase tracking-wide text-muted-foreground/70">
-								Token
+							<p className="text-xs uppercase tracking-wide text-muted-foreground/70 mb-1">
+								Token de sesión
 							</p>
-							<p className="break-all">{data.session.token}</p>
+							<p className="font-mono text-xs break-all text-muted-foreground">
+								{data.session.token}
+							</p>
 						</div>
 						{data.session.ipAddress && (
 							<div>
-								<p className="text-xs uppercase tracking-wide text-muted-foreground/70">
-									IP registrada
+								<p className="text-xs uppercase tracking-wide text-muted-foreground/70 mb-1">
+									Dirección IP
 								</p>
-								<p>{data.session.ipAddress}</p>
+								<p className="font-mono text-xs text-muted-foreground">
+									{data.session.ipAddress}
+								</p>
 							</div>
 						)}
 						{data.session.userAgent && (
 							<div>
-								<p className="text-xs uppercase tracking-wide text-muted-foreground/70">
-									User agent
+								<p className="text-xs uppercase tracking-wide text-muted-foreground/70 mb-1">
+									User Agent
 								</p>
-								<p>{data.session.userAgent}</p>
+								<p className="font-mono text-xs break-all text-muted-foreground">
+									{data.session.userAgent}
+								</p>
 							</div>
 						)}
 					</CardContent>

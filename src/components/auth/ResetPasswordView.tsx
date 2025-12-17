@@ -8,26 +8,28 @@ import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 	Form,
 	FormControl,
 	FormField,
 	FormItem,
-	FormLabel,
 	FormMessage,
 	Input,
 } from "@/components/ui";
+import {
+	Field,
+	FieldDescription,
+	FieldGroup,
+	FieldLabel,
+} from "@/components/ui/field";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { KeyRound } from "lucide-react";
+import { ArrowLeft, CheckCircle2, KeyRound, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
-import { Logo } from "@/components/Logo";
 import { authClient, type AuthClient } from "@/lib/auth/authClient";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 
@@ -132,143 +134,203 @@ export const ResetPasswordView = ({
 	}
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background via-background to-muted px-4 py-12">
-			<div className="w-full max-w-md space-y-8">
-				<div className="flex justify-center">
-					<Logo variant="logo" />
-				</div>
+		<div className="flex flex-col gap-4 sm:gap-6 w-full">
+			<Card>
+				<CardHeader className="text-center">
+					<CardTitle className="text-xl">Restablecer contraseña</CardTitle>
+					<CardDescription>
+						Define una nueva contraseña segura para tu cuenta
+					</CardDescription>
+				</CardHeader>
+				<CardContent>
+					{!token ? (
+						<Alert variant="destructive" role="alert" className="mb-6">
+							<AlertTitle>Token inválido o expirado</AlertTitle>
+							<AlertDescription>
+								Necesitas abrir el enlace enviado a tu correo. Si ya expiró,{" "}
+								<Link
+									href="/recover"
+									className="font-medium underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+									aria-label="Solicitar un nuevo enlace de recuperación"
+								>
+									solicita uno nuevo
+								</Link>
+								.
+							</AlertDescription>
+						</Alert>
+					) : null}
 
-				<Card className="shadow-xl shadow-black/5">
-					<CardHeader className="space-y-4">
-						<div>
-							<CardTitle className="text-2xl">
-								Define tu nueva contraseña
-							</CardTitle>
-							<CardDescription>
-								Usa una contraseña fuerte y única. Necesitas un token válido del
-								enlace recibido.
-							</CardDescription>
-						</div>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						{!token ? (
-							<Alert variant="destructive" role="alert">
-								<AlertTitle>No encontramos un token válido</AlertTitle>
-								<AlertDescription>
-									Necesitas abrir el enlace enviado a tu correo. Si ya expiró,{" "}
-									<Link
-										href="/recover"
-										className="font-medium underline-offset-2 hover:underline"
-									>
-										solicita uno nuevo
-									</Link>
-									.
-								</AlertDescription>
-							</Alert>
-						) : null}
+					{successMessage ? (
+						<Alert
+							role="status"
+							data-testid="reset-success-alert"
+							className="mb-6"
+						>
+							<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+							<AlertTitle>Contraseña actualizada</AlertTitle>
+							<AlertDescription>{successMessage}</AlertDescription>
+						</Alert>
+					) : null}
 
-						{successMessage ? (
-							<Alert role="status" data-testid="reset-success-alert">
-								<AlertTitle>Contraseña actualizada</AlertTitle>
-								<AlertDescription>{successMessage}</AlertDescription>
-							</Alert>
-						) : null}
+					{serverError && !successMessage ? (
+						<Alert variant="destructive" role="alert" className="mb-6">
+							<AlertTitle>Error al actualizar la contraseña</AlertTitle>
+							<AlertDescription>{serverError}</AlertDescription>
+						</Alert>
+					) : null}
 
-						{serverError && !successMessage ? (
-							<Alert variant="destructive" role="alert">
-								<AlertTitle>No pudimos actualizar tu contraseña</AlertTitle>
-								<AlertDescription>{serverError}</AlertDescription>
-							</Alert>
-						) : null}
+					<Form {...form}>
+						<form
+							data-testid="reset-password-form"
+							onSubmit={form.handleSubmit(handleSubmit)}
+						>
+							<FieldGroup>
+								<Field>
+									<FormField
+										control={form.control}
+										name="newPassword"
+										render={({ field }) => (
+											<FormItem>
+												<FieldLabel
+													htmlFor="newPassword"
+													className="flex items-center gap-2"
+												>
+													<Lock className="h-4 w-4" aria-hidden="true" />
+													Nueva contraseña
+												</FieldLabel>
+												<FormControl>
+													<Input
+														id="newPassword"
+														type="password"
+														placeholder="Crea una contraseña segura"
+														autoComplete="new-password"
+														aria-describedby="newPassword-requirements newPassword-description"
+														required
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+												<FieldDescription
+													id="newPassword-description"
+													className="sr-only"
+												>
+													La contraseña debe tener al menos 8 caracteres,
+													incluir mayúsculas, números y un símbolo
+												</FieldDescription>
+												<FieldDescription
+													id="newPassword-requirements"
+													className="text-xs text-muted-foreground mt-1"
+												>
+													Mínimo 8 caracteres, incluye mayúsculas, números y
+													símbolos
+												</FieldDescription>
+											</FormItem>
+										)}
+									/>
+								</Field>
 
-						<Form {...form}>
-							<form
-								data-testid="reset-password-form"
-								onSubmit={form.handleSubmit(handleSubmit)}
-								className="space-y-5"
-							>
-								<FormField
-									control={form.control}
-									name="newPassword"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Nueva contraseña</FormLabel>
-											<FormControl>
-												<Input
-													type="password"
-													placeholder="••••••••"
-													autoComplete="new-password"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+								<Field>
+									<FormField
+										control={form.control}
+										name="confirmPassword"
+										render={({ field }) => (
+											<FormItem>
+												<FieldLabel
+													htmlFor="confirmPassword"
+													className="flex items-center gap-2"
+												>
+													<Lock className="h-4 w-4" aria-hidden="true" />
+													Confirmar contraseña
+												</FieldLabel>
+												<FormControl>
+													<Input
+														id="confirmPassword"
+														type="password"
+														placeholder="Repite tu contraseña"
+														autoComplete="new-password"
+														aria-describedby="confirmPassword-description"
+														required
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+												<FieldDescription
+													id="confirmPassword-description"
+													className="sr-only"
+												>
+													Vuelve a ingresar tu contraseña para confirmar
+												</FieldDescription>
+											</FormItem>
+										)}
+									/>
+								</Field>
 
-								<FormField
-									control={form.control}
-									name="confirmPassword"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel>Confirma tu contraseña</FormLabel>
-											<FormControl>
-												<Input
-													type="password"
-													placeholder="••••••••"
-													autoComplete="new-password"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage />
-										</FormItem>
-									)}
-								/>
+								<Field>
+									<div className="rounded-lg border border-dashed border-primary/30 bg-muted/50 p-4 text-sm">
+										<p className="flex items-center gap-2 font-semibold text-foreground mb-2">
+											<KeyRound
+												className="h-4 w-4 text-primary"
+												aria-hidden="true"
+											/>
+											Recomendaciones de seguridad
+										</p>
+										<ul className="space-y-1.5 text-muted-foreground">
+											<li className="flex items-start gap-2">
+												<span className="text-primary mt-0.5">•</span>
+												<span>Usa al menos 8 caracteres</span>
+											</li>
+											<li className="flex items-start gap-2">
+												<span className="text-primary mt-0.5">•</span>
+												<span>Incluye mayúsculas, números y un símbolo</span>
+											</li>
+											<li className="flex items-start gap-2">
+												<span className="text-primary mt-0.5">•</span>
+												<span>No reutilices contraseñas de otros sistemas</span>
+											</li>
+										</ul>
+									</div>
+								</Field>
 
-								<div className="rounded-lg border border-dashed border-primary/30 bg-muted/50 p-4 text-sm text-muted-foreground">
-									<p className="flex items-center gap-2 font-semibold text-foreground">
-										<KeyRound className="h-4 w-4 text-primary" aria-hidden />
-										Recomendaciones
-									</p>
-									<ul className="mt-2 list-disc space-y-1 pl-6">
-										<li>Usa al menos 8 caracteres.</li>
-										<li>Incluye mayúsculas, números y un símbolo.</li>
-										<li>No reutilices contraseñas de otros sistemas.</li>
-									</ul>
-								</div>
-
-								<CardFooter className="flex flex-col gap-4 px-0 pb-0">
+								<Field>
 									<Button
 										type="submit"
 										disabled={
 											isSubmitting || !isTokenReady || Boolean(successMessage)
 										}
 										className="w-full"
+										aria-busy={isSubmitting}
 									>
 										{isSubmitting ? (
 											<span className="flex items-center justify-center gap-2">
+												<Lock
+													className="h-4 w-4 animate-pulse"
+													aria-hidden="true"
+												/>
 												Guardando contraseña...
 											</span>
 										) : (
-											"Cambiar contraseña"
+											<>
+												<Lock className="h-4 w-4" aria-hidden="true" />
+												Actualizar contraseña
+											</>
 										)}
 									</Button>
-									<p className="text-center text-sm text-muted-foreground">
-										¿Te equivocaste de cuenta?{" "}
+									<FieldDescription className="text-center">
 										<Link
 											href="/recover"
-											className="font-medium text-primary underline-offset-2 hover:underline"
+											className="inline-flex items-center gap-1 font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+											aria-label="Solicitar un nuevo enlace de recuperación"
 										>
-											Solicita un nuevo enlace
+											<ArrowLeft className="h-3 w-3" aria-hidden="true" />
+											Solicitar un nuevo enlace
 										</Link>
-										.
-									</p>
-								</CardFooter>
-							</form>
-						</Form>
-					</CardContent>
-				</Card>
-			</div>
+									</FieldDescription>
+								</Field>
+							</FieldGroup>
+						</form>
+					</Form>
+				</CardContent>
+			</Card>
 		</div>
 	);
 };

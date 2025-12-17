@@ -30,8 +30,7 @@ describe("LogoutView", () => {
 
 		const titles = screen.getAllByText(/cerrar sesión/i, { exact: false });
 		expect(titles.length).toBeGreaterThan(0);
-		const buttons = screen.getAllByRole("button", { name: /reintentar/i });
-		expect(buttons.length).toBeGreaterThan(0);
+		// Retry button only shows on error, so we don't check for it here
 		const links = screen.getAllByRole("link", { name: /iniciar sesión/i });
 		expect(links.length).toBeGreaterThan(0);
 	});
@@ -73,7 +72,7 @@ describe("LogoutView", () => {
 		);
 
 		const errorMessages = await screen.findAllByText(
-			/no se pudo cerrar la sesión/i,
+			/error al cerrar sesión/i,
 			{
 				exact: false,
 			},
@@ -94,7 +93,7 @@ describe("LogoutView", () => {
 		);
 
 		const errorMessages = await screen.findAllByText(
-			/no se pudo cerrar la sesión/i,
+			/error al cerrar sesión/i,
 			{
 				exact: false,
 			},

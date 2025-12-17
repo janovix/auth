@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 import type { AuthClient } from "@/lib/auth/authClient";
@@ -17,6 +17,12 @@ const createClient = (): RecoverClient => ({
 });
 
 describe("RecoverView", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		// Ensure clean state between tests
+		document.body.innerHTML = "";
+	});
+
 	it("requests a password reset email for the given address", async () => {
 		const client = createClient();
 		vi.mocked(client.requestPasswordReset).mockResolvedValue({
@@ -38,7 +44,7 @@ describe("RecoverView", () => {
 		const emailInputs = screen.getAllByLabelText(/correo/i);
 		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
 		const submitButtons = screen.getAllByRole("button", {
-			name: /recibir enlace/i,
+			name: /enviar enlace de recuperación/i,
 		});
 		const submitButton = submitButtons[submitButtons.length - 1];
 		expect(submitButton).toHaveAttribute("type", "submit");
@@ -63,7 +69,9 @@ describe("RecoverView", () => {
 			},
 		});
 
-		renderWithTheme(<RecoverView client={client} />);
+		renderWithTheme(
+			<RecoverView redirectTo="/recover/reset" client={client} />,
+		);
 		const user = userEvent.setup();
 
 		await waitFor(() => {
@@ -77,7 +85,7 @@ describe("RecoverView", () => {
 		const emailInputs = screen.getAllByLabelText(/correo/i);
 		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
 		const submitButtons = screen.getAllByRole("button", {
-			name: /recibir enlace/i,
+			name: /enviar enlace de recuperación/i,
 		});
 		const submitButton = submitButtons[submitButtons.length - 1];
 		expect(submitButton).toHaveAttribute("type", "submit");
@@ -99,7 +107,9 @@ describe("RecoverView", () => {
 			error: null,
 		});
 
-		renderWithTheme(<RecoverView client={client} />);
+		renderWithTheme(
+			<RecoverView redirectTo="/recover/reset" client={client} />,
+		);
 		const user = userEvent.setup();
 
 		await waitFor(() => {
@@ -112,6 +122,11 @@ describe("RecoverView", () => {
 
 		const emailInputs = screen.getAllByLabelText(/correo/i);
 		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
+		const submitButtons = screen.getAllByRole("button", {
+			name: /enviar enlace de recuperación/i,
+		});
+		const submitButton = submitButtons[submitButtons.length - 1];
+		expect(submitButton).toHaveAttribute("type", "submit");
 		fireEvent.submit(form);
 
 		await waitFor(() => {

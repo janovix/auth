@@ -2,7 +2,7 @@ import { ResetPasswordView } from "@/components/auth/ResetPasswordView";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import type { Meta, StoryObj } from "@storybook/react";
 import { mockRouter } from "../mocks/router";
-import type { AuthResult } from "@algenium/auth-next/client";
+import type { AuthResult } from "@/lib/auth/authActions";
 
 // Mock resetPassword function for stories
 const mockResetPassword = async (

@@ -4,7 +4,6 @@ import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { AuthSdkProvider } from "@/components/AuthSdkProvider";
 import { LoginAnimationPanel } from "@/components/auth/LoginAnimationPanel";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
@@ -107,18 +106,16 @@ export default function ClientLayout({
 
 	return (
 		<ThemeProvider>
-			<AuthSdkProvider>
-				{isAuthRoute ? (
-					<AuthLayout>{children}</AuthLayout>
-				) : (
-					<>
-						<div className="fixed bottom-4 right-4 z-50">
-							<ThemeSwitcher />
-						</div>
-						{children}
-					</>
-				)}
-			</AuthSdkProvider>
+			{isAuthRoute ? (
+				<AuthLayout>{children}</AuthLayout>
+			) : (
+				<>
+					<div className="fixed bottom-4 right-4 z-50">
+						<ThemeSwitcher />
+					</div>
+					{children}
+				</>
+			)}
 		</ThemeProvider>
 	);
 }

@@ -2,8 +2,8 @@ import { AccountView } from "@/components/auth/AccountView";
 import {
 	AuthSessionProvider,
 	createSessionStore,
-} from "@algenium/auth-next/client";
-import type { SessionSnapshot } from "@algenium/auth-next";
+	type SessionSnapshot,
+} from "@/lib/auth/useAuthSession";
 import type { Meta, StoryObj } from "@storybook/react";
 
 const createSnapshot = (

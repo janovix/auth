@@ -2,7 +2,7 @@ import { SignupView } from "@/components/auth/SignupView";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import type { Meta, StoryObj } from "@storybook/react";
 import { mockRouter } from "../mocks/router";
-import type { SignUpCredentials, AuthResult } from "@algenium/auth-next/client";
+import type { SignUpCredentials, AuthResult } from "@/lib/auth/authActions";
 
 // Mock signUp function for stories
 const mockSignUp = async (

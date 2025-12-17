@@ -7,13 +7,13 @@ import {
 	setSession,
 	SessionHydrator,
 	useAuthSession,
-	type AuthSessionSnapshot,
+	type SessionSnapshot,
 } from "./useAuthSession";
-import type { Session } from "@algenium/auth-next";
+import type { Session } from "./types";
 
 const createSnapshot = (
-	overrides?: Partial<AuthSessionSnapshot>,
-): AuthSessionSnapshot => ({
+	overrides?: Partial<SessionSnapshot>,
+): SessionSnapshot => ({
 	data: null,
 	error: null,
 	isPending: false,

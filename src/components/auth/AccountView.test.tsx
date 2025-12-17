@@ -1,8 +1,8 @@
 import {
 	AuthSessionProvider,
 	createSessionStore,
-} from "@algenium/auth-next/client";
-import type { SessionSnapshot } from "@algenium/auth-next";
+	type SessionSnapshot,
+} from "@/lib/auth/useAuthSession";
 import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 

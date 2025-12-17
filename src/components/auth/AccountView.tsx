@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuthSession } from "@algenium/auth-next/client";
+import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { AlertTriangle, Clock4, LogOut, User } from "lucide-react";

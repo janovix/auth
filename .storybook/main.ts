@@ -1,5 +1,9 @@
 import type { StorybookConfig } from "@storybook/nextjs";
+import { fileURLToPath } from "url";
+import path from "path";
 import webpack from "webpack";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Set default environment variables for Storybook builds
 const defaultAuthCoreBaseUrl = "auth-svc.janovix.workers.dev";
@@ -35,6 +39,14 @@ const config: StorybookConfig = {
 				),
 			}),
 		);
+
+		// Mock next/navigation to prevent router errors in Storybook
+		config.resolve = config.resolve || {};
+		config.resolve.alias = {
+			...config.resolve.alias,
+			"next/navigation": path.resolve(__dirname, "./mockNextNavigation.ts"),
+		};
+
 		return config;
 	},
 };

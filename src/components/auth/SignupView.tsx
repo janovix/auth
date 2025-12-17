@@ -356,19 +356,14 @@ export const SignupView = ({
 														type="password"
 														placeholder="Crea una contraseña segura"
 														autoComplete="new-password"
-														aria-describedby="password-requirements password-description"
+														aria-describedby={
+															password ? "password-requirements" : undefined
+														}
 														required
 														{...field}
 													/>
 												</FormControl>
 												<FormMessage />
-												<FieldDescription
-													id="password-description"
-													className="sr-only"
-												>
-													La contraseña debe tener al menos 8 caracteres,
-													incluir mayúsculas, números y un símbolo
-												</FieldDescription>
 												{password && (
 													<div
 														id="password-requirements"

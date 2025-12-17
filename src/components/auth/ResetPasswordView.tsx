@@ -228,19 +228,16 @@ export const ResetPasswordView = ({
 														type="password"
 														placeholder="Crea una contraseña segura"
 														autoComplete="new-password"
-														aria-describedby="newPassword-requirements newPassword-description"
+														aria-describedby={
+															newPassword
+																? "newPassword-requirements"
+																: undefined
+														}
 														required
 														{...field}
 													/>
 												</FormControl>
 												<FormMessage />
-												<FieldDescription
-													id="newPassword-description"
-													className="sr-only"
-												>
-													La contraseña debe tener al menos 8 caracteres,
-													incluir mayúsculas, números y un símbolo
-												</FieldDescription>
 												{newPassword && (
 													<div
 														id="newPassword-requirements"

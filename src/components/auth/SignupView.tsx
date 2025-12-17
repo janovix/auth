@@ -1,10 +1,10 @@
 "use client";
 
 import {
-	signUp as sdkSignUp,
+	signUp as localSignUp,
 	type SignUpCredentials,
 	type AuthResult,
-} from "@algenium/auth-next/client";
+} from "@/lib/auth/authActions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	Building2,
@@ -85,7 +85,7 @@ type SignUpFn = (credentials: SignUpCredentials) => Promise<AuthResult>;
 
 export const SignupView = ({
 	redirectTo,
-	signUp = sdkSignUp,
+	signUp = localSignUp,
 }: {
 	redirectTo?: string;
 	signUp?: SignUpFn;

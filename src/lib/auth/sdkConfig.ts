@@ -2,43 +2,43 @@
 
 import { createAuthConfig, isAuthConfigured } from "@algenium/auth-next";
 
-let initialized = false;
+import { getAuthCoreBaseUrl } from "./authCoreConfig";
 
-// DEBUG: Hardcoded values to isolate environment variable issues
-const HARDCODED_AUTH_SERVICE_URL = "https://auth-svc.janovix.workers.dev";
-const HARDCODED_AUTH_APP_URL = "https://auth.janovix.workers.dev";
+let initialized = false;
 
 /**
  * Initialize the Algenium Auth SDK.
  *
- * Since this IS the auth app, both authServiceUrl and authAppUrl
- * can be derived from the same environment configuration.
+ * Note: This is primarily for the SessionHydrator component from the SDK.
+ * Auth actions (signIn, signUp, etc.) now use local implementations that
+ * bypass the SDK's config system to avoid code-splitting issues.
  *
  * This function is idempotent - it only initializes once.
  */
 export function initAuthSdk() {
-	// DEBUG: Log initialization attempt
-	console.log(
-		"[initAuthSdk] Called. initialized:",
-		initialized,
-		"isAuthConfigured:",
-		isAuthConfigured(),
-	);
-
 	// Only initialize once
 	if (initialized || isAuthConfigured()) {
-		console.log("[initAuthSdk] Already initialized, skipping");
 		return;
 	}
 
-	// DEBUG: Use hardcoded values
-	const authServiceUrl = HARDCODED_AUTH_SERVICE_URL;
-	const authAppUrl = HARDCODED_AUTH_APP_URL;
+	// Get the auth service URL from environment
+	const authServiceUrl = getAuthCoreBaseUrl();
 
-	console.log("[initAuthSdk] Creating config with:", {
-		authServiceUrl,
-		authAppUrl,
-	});
+	// For the auth app, the authAppUrl is the current origin (client)
+	// or from environment variable (server-side rendering)
+	let authAppUrl: string;
+	if (typeof window !== "undefined") {
+		authAppUrl = window.location.origin;
+	} else {
+		const envUrl = process.env.NEXT_PUBLIC_AUTH_APP_URL;
+		if (!envUrl) {
+			throw new Error(
+				"NEXT_PUBLIC_AUTH_APP_URL environment variable is not set. " +
+					"Configure it in wrangler.jsonc for Cloudflare Workers deployment.",
+			);
+		}
+		authAppUrl = envUrl;
+	}
 
 	createAuthConfig({
 		authServiceUrl,
@@ -53,14 +53,8 @@ export function initAuthSdk() {
 	});
 
 	initialized = true;
-	console.log("[initAuthSdk] Config created successfully");
 }
 
 // Auto-initialize when this module is loaded (both server and client)
 // This ensures SDK is ready before any component tries to use it
-console.log("[sdkConfig] Module loaded, calling initAuthSdk()");
 initAuthSdk();
-console.log(
-	"[sdkConfig] After initAuthSdk(), isAuthConfigured:",
-	isAuthConfigured(),
-);

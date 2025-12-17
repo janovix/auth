@@ -1,9 +1,9 @@
 "use client";
 
 import {
-	signOut as sdkSignOut,
+	signOut as localSignOut,
 	type AuthResult,
-} from "@algenium/auth-next/client";
+} from "@/lib/auth/authActions";
 import { CheckCircle2, LogOut, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -31,7 +31,7 @@ import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 type SignOutFn = () => Promise<AuthResult<null>>;
 
 export const LogoutView = ({
-	signOut: signOutFn = sdkSignOut,
+	signOut: signOutFn = localSignOut,
 }: {
 	signOut?: SignOutFn;
 } = {}) => {

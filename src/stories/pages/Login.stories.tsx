@@ -1,4 +1,4 @@
-import type { AuthResult, SignInCredentials } from "@algenium/auth-next/client";
+import type { AuthResult, SignInCredentials } from "@/lib/auth/authActions";
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { LoginView } from "@/components/auth/LoginView";

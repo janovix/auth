@@ -1,10 +1,10 @@
 "use client";
 
 import {
-	signIn as sdkSignIn,
+	signIn as localSignIn,
 	type SignInCredentials,
 	type AuthResult,
-} from "@algenium/auth-next/client";
+} from "@/lib/auth/authActions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, Lock, LogIn, Mail, Shield } from "lucide-react";
 import Link from "next/link";
@@ -64,7 +64,7 @@ type SignInFn = (credentials: SignInCredentials) => Promise<AuthResult>;
  */
 export const LoginView = ({
 	redirectTo,
-	signIn = sdkSignIn,
+	signIn = localSignIn,
 	defaultSuccessMessage,
 }: {
 	redirectTo?: string;

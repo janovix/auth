@@ -1,9 +1,9 @@
 "use client";
 
 import {
-	resetPassword as sdkResetPassword,
+	resetPassword as localResetPassword,
 	type AuthResult,
-} from "@algenium/auth-next/client";
+} from "@/lib/auth/authActions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, CheckCircle2, Circle, KeyRound, Lock } from "lucide-react";
 import Link from "next/link";
@@ -66,7 +66,7 @@ type ResetPasswordFn = (
 
 export const ResetPasswordView = ({
 	token,
-	resetPassword = sdkResetPassword,
+	resetPassword = localResetPassword,
 	redirectDelayMs = 1800,
 }: {
 	token: string | null;

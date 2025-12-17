@@ -1,4 +1,4 @@
-import type { AuthResult } from "@algenium/auth-next/client";
+import type { AuthResult } from "@/lib/auth/authActions";
 import type { Meta, StoryObj } from "@storybook/react";
 
 import { RecoverView } from "@/components/auth/RecoverView";

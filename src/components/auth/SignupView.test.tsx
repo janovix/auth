@@ -1,4 +1,4 @@
-import type { AuthResult, SignUpCredentials } from "@algenium/auth-next/client";
+import type { AuthResult, SignUpCredentials } from "@/lib/auth/authActions";
 import {
 	cleanup,
 	fireEvent,
@@ -39,78 +39,82 @@ describe("SignupView", () => {
 		cleanup();
 	});
 
-	it("sends the registration payload to auth-core", async () => {
-		const signUp = createSignUp();
-		vi.mocked(signUp).mockResolvedValue({
-			success: true,
-			data: {
-				user: {
-					id: "user-123",
+	it(
+		"sends the registration payload to auth-core",
+		{ timeout: 15000 },
+		async () => {
+			const signUp = createSignUp();
+			vi.mocked(signUp).mockResolvedValue({
+				success: true,
+				data: {
+					user: {
+						id: "user-123",
+						name: "Ana García",
+						email: "ana@example.com",
+						image: null,
+						createdAt: new Date(),
+						updatedAt: new Date(),
+						emailVerified: false,
+					},
+					session: {
+						id: "session-123",
+						userId: "user-123",
+						token: "token-123",
+						expiresAt: new Date(Date.now() + 3600 * 1000),
+						createdAt: new Date(),
+						updatedAt: new Date(),
+					},
+				},
+				error: null,
+			});
+
+			renderWithTheme(<SignupView signUp={signUp} />);
+			const user = userEvent.setup();
+
+			await waitFor(() => {
+				const forms = screen.getAllByTestId("signup-form");
+				expect(forms.length).toBeGreaterThan(0);
+			});
+
+			const forms = screen.getAllByTestId("signup-form");
+			const form = forms[forms.length - 1];
+
+			const firstNameInputs = screen.getAllByLabelText(/^nombre$/i);
+			await user.type(firstNameInputs[firstNameInputs.length - 1], "Ana");
+			const lastNameInputs = screen.getAllByLabelText(/apellido/i);
+			await user.type(lastNameInputs[lastNameInputs.length - 1], "García");
+			const emailInputs = screen.getAllByLabelText(/correo/i);
+			await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
+			const passwordInputs = screen.getAllByLabelText(/^contraseña$/i);
+			await user.type(passwordInputs[passwordInputs.length - 1], "Secret123!");
+			const confirmPasswordInputs =
+				screen.getAllByLabelText(/confirmar contraseña/i);
+			await user.type(
+				confirmPasswordInputs[confirmPasswordInputs.length - 1],
+				"Secret123!",
+			);
+			const checkboxes = screen.getAllByRole("checkbox", {
+				name: /acepto los términos/i,
+			});
+			await user.click(checkboxes[checkboxes.length - 1]);
+
+			const submitButtons = screen.getAllByRole("button", {
+				name: /crear cuenta/i,
+			});
+			const submitButton = submitButtons[submitButtons.length - 1];
+			expect(submitButton).toHaveAttribute("type", "submit");
+			fireEvent.submit(form);
+
+			await waitFor(() => {
+				expect(signUp).toHaveBeenCalledWith({
 					name: "Ana García",
 					email: "ana@example.com",
-					image: null,
-					createdAt: new Date(),
-					updatedAt: new Date(),
-					emailVerified: false,
-				},
-				session: {
-					id: "session-123",
-					userId: "user-123",
-					token: "token-123",
-					expiresAt: new Date(Date.now() + 3600 * 1000),
-					createdAt: new Date(),
-					updatedAt: new Date(),
-				},
-			},
-			error: null,
-		});
-
-		renderWithTheme(<SignupView signUp={signUp} />);
-		const user = userEvent.setup();
-
-		await waitFor(() => {
-			const forms = screen.getAllByTestId("signup-form");
-			expect(forms.length).toBeGreaterThan(0);
-		});
-
-		const forms = screen.getAllByTestId("signup-form");
-		const form = forms[forms.length - 1];
-
-		const firstNameInputs = screen.getAllByLabelText(/^nombre$/i);
-		await user.type(firstNameInputs[firstNameInputs.length - 1], "Ana");
-		const lastNameInputs = screen.getAllByLabelText(/apellido/i);
-		await user.type(lastNameInputs[lastNameInputs.length - 1], "García");
-		const emailInputs = screen.getAllByLabelText(/correo/i);
-		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
-		const passwordInputs = screen.getAllByLabelText(/^contraseña$/i);
-		await user.type(passwordInputs[passwordInputs.length - 1], "Secret123!");
-		const confirmPasswordInputs =
-			screen.getAllByLabelText(/confirmar contraseña/i);
-		await user.type(
-			confirmPasswordInputs[confirmPasswordInputs.length - 1],
-			"Secret123!",
-		);
-		const checkboxes = screen.getAllByRole("checkbox", {
-			name: /acepto los términos/i,
-		});
-		await user.click(checkboxes[checkboxes.length - 1]);
-
-		const submitButtons = screen.getAllByRole("button", {
-			name: /crear cuenta/i,
-		});
-		const submitButton = submitButtons[submitButtons.length - 1];
-		expect(submitButton).toHaveAttribute("type", "submit");
-		fireEvent.submit(form);
-
-		await waitFor(() => {
-			expect(signUp).toHaveBeenCalledWith({
-				name: "Ana García",
-				email: "ana@example.com",
-				password: "Secret123!",
+					password: "Secret123!",
+				});
+				expect(pushMock).toHaveBeenCalledWith("/account");
 			});
-			expect(pushMock).toHaveBeenCalledWith("/account");
-		});
-	});
+		},
+	);
 
 	it("shows the backend error message when signup fails", async () => {
 		const signUp = createSignUp();

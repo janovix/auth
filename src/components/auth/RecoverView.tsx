@@ -1,9 +1,9 @@
 "use client";
 
 import {
-	recoverPassword as sdkRecoverPassword,
+	recoverPassword as localRecoverPassword,
 	type AuthResult,
-} from "@algenium/auth-next/client";
+} from "@/lib/auth/authActions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, CheckCircle2, Mail, MailCheck } from "lucide-react";
 import Link from "next/link";
@@ -48,7 +48,7 @@ type RecoverValues = z.infer<typeof recoverSchema>;
 type RecoverFn = (email: string) => Promise<AuthResult<{ message: string }>>;
 
 export const RecoverView = ({
-	recoverPassword = sdkRecoverPassword,
+	recoverPassword = localRecoverPassword,
 }: {
 	recoverPassword?: RecoverFn;
 } = {}) => {

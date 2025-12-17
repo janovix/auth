@@ -24,12 +24,20 @@ describe("authCoreConfig", () => {
 			expect(url).toBe("https://auth-svc.janovix.workers.dev");
 		});
 
-		it("returns URL from AUTH_CORE_BASE_URL for server-side", () => {
+		it("falls back to AUTH_CORE_BASE_URL when NEXT_PUBLIC is not set", () => {
+			// Delete NEXT_PUBLIC to test fallback behavior
+			delete process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL;
 			process.env.AUTH_CORE_BASE_URL = "https://auth-svc.janovix.ai";
-			// Mock window as undefined to simulate server-side
-			delete (global as Record<string, unknown>).window;
 			const url = getAuthCoreBaseUrl();
 			expect(url).toBe("https://auth-svc.janovix.ai");
+		});
+
+		it("prefers NEXT_PUBLIC_AUTH_CORE_BASE_URL over AUTH_CORE_BASE_URL", () => {
+			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
+				"https://auth-svc.janovix.workers.dev";
+			process.env.AUTH_CORE_BASE_URL = "https://auth-svc.janovix.ai";
+			const url = getAuthCoreBaseUrl();
+			expect(url).toBe("https://auth-svc.janovix.workers.dev");
 		});
 
 		it("throws error when URL is missing protocol", () => {

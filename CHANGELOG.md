@@ -1,3 +1,11 @@
+# [1.0.0-rc.15](https://github.com/janovix/auth/compare/v1.0.0-rc.14...v1.0.0-rc.15) (2025-12-17)
+
+
+### Features
+
+* Add minimal scrollbar styling to globals.css ([3671a68](https://github.com/janovix/auth/commit/3671a680f9967b3cab65c5809e55700b5d39a6d5))
+* Configure build env vars and dynamic rendering ([9a0180a](https://github.com/janovix/auth/commit/9a0180a044e9076acf73af2874eb0290f2e8f786))
+
 # [1.0.0-rc.14](https://github.com/janovix/auth/compare/v1.0.0-rc.13...v1.0.0-rc.14) (2025-12-17)
 
 

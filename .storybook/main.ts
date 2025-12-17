@@ -5,13 +5,17 @@ import webpack from "webpack";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Set default environment variables for Storybook builds
-const defaultAuthCoreBaseUrl = "auth-svc.janovix.workers.dev";
+// Set default environment variables for Storybook builds (must include https://)
+const defaultAuthCoreBaseUrl = "https://auth-svc.janovix.workers.dev";
+const defaultAuthAppUrl = "https://auth.janovix.workers.dev";
 if (!process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL) {
 	process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL = defaultAuthCoreBaseUrl;
 }
 if (!process.env.AUTH_CORE_BASE_URL) {
 	process.env.AUTH_CORE_BASE_URL = defaultAuthCoreBaseUrl;
+}
+if (!process.env.NEXT_PUBLIC_AUTH_APP_URL) {
+	process.env.NEXT_PUBLIC_AUTH_APP_URL = defaultAuthAppUrl;
 }
 
 const config: StorybookConfig = {
@@ -36,6 +40,9 @@ const config: StorybookConfig = {
 				),
 				"process.env.AUTH_CORE_BASE_URL": JSON.stringify(
 					process.env.AUTH_CORE_BASE_URL || defaultAuthCoreBaseUrl,
+				),
+				"process.env.NEXT_PUBLIC_AUTH_APP_URL": JSON.stringify(
+					process.env.NEXT_PUBLIC_AUTH_APP_URL || defaultAuthAppUrl,
 				),
 			}),
 		);

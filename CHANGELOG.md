@@ -1,3 +1,17 @@
+# [1.0.0-rc.8](https://github.com/janovix/auth/compare/v1.0.0-rc.7...v1.0.0-rc.8) (2025-12-17)
+
+
+### Bug Fixes
+
+* integrate device detection hook and update component logic ([18a14df](https://github.com/janovix/auth/commit/18a14df66ce7361d4366ee4c2ca448cb5f3b7c29))
+
+
+### Features
+
+* Add animated background and loading skeleton to login page ([0014170](https://github.com/janovix/auth/commit/0014170e5c83b577c34f5235020d1daece2c81fa))
+* Add login animation and two-column layout ([f8443d5](https://github.com/janovix/auth/commit/f8443d548bd741ac83a9aa292b0f4545c6ada3d4))
+* updated layout and visuals, added animated background ([27b1314](https://github.com/janovix/auth/commit/27b1314acf502c5754f313ced16e3526df5e929a))
+
 # [1.0.0-rc.7](https://github.com/janovix/auth/compare/v1.0.0-rc.6...v1.0.0-rc.7) (2025-12-16)
 
 

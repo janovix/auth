@@ -1,3 +1,10 @@
+# [1.1.0-rc.2](https://github.com/janovix/auth/compare/v1.1.0-rc.1...v1.1.0-rc.2) (2025-12-17)
+
+
+### Bug Fixes
+
+* **storybook:** add https:// to build-storybook.mjs env fallbacks ([fc38019](https://github.com/janovix/auth/commit/fc380199f45fc7ebd67fb89f0a6c7add224ba1ff))
+
 # [1.1.0-rc.1](https://github.com/janovix/auth/compare/v1.0.0...v1.1.0-rc.1) (2025-12-17)
 
 

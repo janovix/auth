@@ -248,6 +248,9 @@ export async function signOut(): Promise<AuthResult<null>> {
 	try {
 		const response = await fetch(url, {
 			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
 			credentials: "include",
 		});
 

@@ -1,3 +1,10 @@
+# [1.1.0-rc.4](https://github.com/janovix/auth/compare/v1.1.0-rc.3...v1.1.0-rc.4) (2025-12-17)
+
+
+### Bug Fixes
+
+* improved sdk avoiding code splitting ([6a01429](https://github.com/janovix/auth/commit/6a01429f57f52775828d3c440b4f6b56f8c8df8e))
+
 # [1.1.0-rc.3](https://github.com/janovix/auth/compare/v1.1.0-rc.2...v1.1.0-rc.3) (2025-12-17)
 
 

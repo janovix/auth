@@ -25,15 +25,20 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const WithToken: Story = {
-	render: () => <ResetPasswordView token="valid-token-123" />,
+	args: {
+		token: "valid-token-123",
+	},
 };
 
 export const WithoutToken: Story = {
-	render: () => <ResetPasswordView token={null} />,
+	args: {
+		token: null,
+	},
 };
 
 export const WithCustomRedirectDelay: Story = {
-	render: () => (
-		<ResetPasswordView token="valid-token-123" redirectDelayMs={3000} />
-	),
+	args: {
+		token: "valid-token-123",
+		redirectDelayMs: 3000,
+	},
 };

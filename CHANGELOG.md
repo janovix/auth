@@ -1,3 +1,11 @@
+# [1.0.0-rc.10](https://github.com/janovix/auth/compare/v1.0.0-rc.9...v1.0.0-rc.10) (2025-12-17)
+
+
+### Features
+
+* Add Storybook stories for UI components and pages ([52e2c6b](https://github.com/janovix/auth/commit/52e2c6bdef093850fa880543c0f9398303fc09a2))
+* Mock next/navigation for Storybook ([9383c12](https://github.com/janovix/auth/commit/9383c1250511db9c89ffa786cfe60aadc805347b))
+
 # [1.0.0-rc.9](https://github.com/janovix/auth/compare/v1.0.0-rc.8...v1.0.0-rc.9) (2025-12-17)
 
 

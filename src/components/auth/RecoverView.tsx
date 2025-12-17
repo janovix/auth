@@ -29,6 +29,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Logo } from "@/components/Logo";
 import { authClient, type AuthClient } from "@/lib/auth/authClient";
 import {
 	getAuthCoreBaseUrl,
@@ -62,6 +63,8 @@ export const RecoverView = ({
 	const environment = useMemo(() => getAuthEnvironment(), []);
 	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
 	const origin = getRuntimeOrigin();
+	// Always use dark theme for logo to show white letters (matching previous behavior)
+	const logoTheme = "dark" as const;
 
 	const form = useForm<RecoverValues>({
 		resolver: zodResolver(recoverSchema),
@@ -114,6 +117,9 @@ export const RecoverView = ({
 
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6 w-full">
+			<div className="flex justify-center mb-2">
+				<Logo variant="logo" forceTheme={logoTheme} />
+			</div>
 			<Card>
 				<CardHeader className="text-center">
 					<CardTitle className="text-xl">Recuperar contraseña</CardTitle>

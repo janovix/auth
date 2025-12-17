@@ -64,13 +64,6 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
 				</div>
 			)}
 
-			{/* Logo in top left - only visible when background is shown */}
-			{showBackground && (
-				<div className="fixed top-4 left-4 z-50">
-					<Logo variant="logo" forceTheme="dark" />
-				</div>
-			)}
-
 			{/* Theme picker - bottom right for background-enabled views */}
 			{showBackground && (
 				<div className="fixed bottom-4 right-4 z-50">
@@ -78,10 +71,9 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
 				</div>
 			)}
 
-			{/* No-background layout: top bar with logo and theme picker */}
+			{/* No-background layout: top bar with theme picker */}
 			{!showBackground && (
-				<div className="flex items-center justify-between w-full px-4 pt-4 pb-2 relative z-10 shrink-0">
-					<Logo variant="logo" />
+				<div className="flex items-center justify-end w-full px-4 pt-4 pb-2 relative z-10 shrink-0">
 					<ThemeSwitcher />
 				</div>
 			)}

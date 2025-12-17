@@ -186,11 +186,16 @@ describe("SignupView", () => {
 			"weak",
 		);
 
-		fireEvent.submit(form);
-
-		expect(
-			await screen.findByText(/al menos 8 caracteres/i, { exact: false }),
-		).toBeInTheDocument();
+		// With onChange validation, the error appears immediately after typing
+		// Find the error message specifically (not the description)
+		const errorMessages = await screen.findAllByText(/al menos 8 caracteres/i, {
+			exact: false,
+		});
+		// The error message should be visible (not sr-only)
+		const visibleError = errorMessages.find(
+			(el) => !el.classList.contains("sr-only"),
+		);
+		expect(visibleError).toBeInTheDocument();
 	});
 
 	it("shows error when passwords don't match", async () => {

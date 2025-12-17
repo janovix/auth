@@ -24,12 +24,13 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, CheckCircle2, KeyRound, Lock } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Circle, KeyRound, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
+import { Logo } from "@/components/Logo";
 import { authClient, type AuthClient } from "@/lib/auth/authClient";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 
@@ -70,14 +71,34 @@ export const ResetPasswordView = ({
 
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+	// Always use dark theme for logo to show white letters (matching previous behavior)
+	const logoTheme = "dark" as const;
 
 	const form = useForm<ResetPasswordValues>({
 		resolver: zodResolver(resetSchema),
+		mode: "onChange",
 		defaultValues: {
 			newPassword: "",
 			confirmPassword: "",
 		},
 	});
+
+	// Watch password field to show real-time validation
+	const newPassword = useWatch({
+		control: form.control,
+		name: "newPassword",
+	});
+
+	// Password validation rules checker
+	const passwordChecks = useMemo(() => {
+		const pwd = newPassword || "";
+		return {
+			minLength: pwd.length >= 8,
+			hasUppercase: /[A-Z]/.test(pwd),
+			hasNumber: /[0-9]/.test(pwd),
+			hasSpecial: /[!@#$%^&*(),.?":{}|<>_\-\[\]\\;'/+=]/.test(pwd),
+		};
+	}, [newPassword]);
 
 	const isSubmitting = form.formState.isSubmitting;
 	const isTokenReady = Boolean(token);
@@ -135,6 +156,9 @@ export const ResetPasswordView = ({
 
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6 w-full">
+			<div className="flex justify-center mb-2">
+				<Logo variant="logo" forceTheme={logoTheme} />
+			</div>
 			<Card>
 				<CardHeader className="text-center">
 					<CardTitle className="text-xl">Restablecer contraseña</CardTitle>
@@ -204,26 +228,87 @@ export const ResetPasswordView = ({
 														type="password"
 														placeholder="Crea una contraseña segura"
 														autoComplete="new-password"
-														aria-describedby="newPassword-requirements newPassword-description"
+														aria-describedby={
+															newPassword
+																? "newPassword-requirements"
+																: undefined
+														}
 														required
 														{...field}
 													/>
 												</FormControl>
-												<FormMessage />
-												<FieldDescription
-													id="newPassword-description"
-													className="sr-only"
-												>
-													La contraseña debe tener al menos 8 caracteres,
-													incluir mayúsculas, números y un símbolo
-												</FieldDescription>
-												<FieldDescription
-													id="newPassword-requirements"
-													className="text-xs text-muted-foreground mt-1"
-												>
-													Mínimo 8 caracteres, incluye mayúsculas, números y
-													símbolos
-												</FieldDescription>
+												{/* FormMessage hidden - validation labels provide feedback */}
+												{newPassword && (
+													<div
+														id="newPassword-requirements"
+														className="mt-2 space-y-1.5"
+													>
+														<div className="flex items-center gap-2 text-xs">
+															{passwordChecks.minLength ? (
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+															) : (
+																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
+															)}
+															<span
+																className={
+																	passwordChecks.minLength
+																		? "text-primary"
+																		: "text-muted-foreground"
+																}
+															>
+																Al menos 8 caracteres
+															</span>
+														</div>
+														<div className="flex items-center gap-2 text-xs">
+															{passwordChecks.hasUppercase ? (
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+															) : (
+																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
+															)}
+															<span
+																className={
+																	passwordChecks.hasUppercase
+																		? "text-primary"
+																		: "text-muted-foreground"
+																}
+															>
+																Incluye al menos una letra mayúscula
+															</span>
+														</div>
+														<div className="flex items-center gap-2 text-xs">
+															{passwordChecks.hasNumber ? (
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+															) : (
+																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
+															)}
+															<span
+																className={
+																	passwordChecks.hasNumber
+																		? "text-primary"
+																		: "text-muted-foreground"
+																}
+															>
+																Incluye al menos un número
+															</span>
+														</div>
+														<div className="flex items-center gap-2 text-xs">
+															{passwordChecks.hasSpecial ? (
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+															) : (
+																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
+															)}
+															<span
+																className={
+																	passwordChecks.hasSpecial
+																		? "text-primary"
+																		: "text-muted-foreground"
+																}
+															>
+																Incluye al menos un carácter especial
+															</span>
+														</div>
+													</div>
+												)}
 											</FormItem>
 										)}
 									/>

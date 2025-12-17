@@ -29,6 +29,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	Building2,
 	CheckCircle2,
+	Circle,
 	Lock,
 	Mail,
 	ShieldCheck,
@@ -38,8 +39,9 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
+import { Logo } from "@/components/Logo";
 import { authClient, type AuthClient } from "@/lib/auth/authClient";
 import {
 	getAuthCoreBaseUrl,
@@ -97,9 +99,12 @@ export const SignupView = ({
 
 	const environment = useMemo(() => getAuthEnvironment(), []);
 	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
+	// Always use dark theme for logo to show white letters (matching previous behavior)
+	const logoTheme = "dark" as const;
 
 	const form = useForm<SignupValues>({
 		resolver: zodResolver(signupSchema),
+		mode: "onChange",
 		defaultValues: {
 			firstName: "",
 			lastName: "",
@@ -110,6 +115,23 @@ export const SignupView = ({
 			acceptTerms: false,
 		},
 	});
+
+	// Watch password field to show real-time validation
+	const password = useWatch({
+		control: form.control,
+		name: "password",
+	});
+
+	// Password validation rules checker
+	const passwordChecks = useMemo(() => {
+		const pwd = password || "";
+		return {
+			minLength: pwd.length >= 8,
+			hasUppercase: /[A-Z]/.test(pwd),
+			hasNumber: /[0-9]/.test(pwd),
+			hasSpecial: /[!@#$%^&*(),.?":{}|<>_\-\[\]\\;'/+=]/.test(pwd),
+		};
+	}, [password]);
 
 	const handleSubmit = async (values: SignupValues) => {
 		setServerError(null);
@@ -141,6 +163,9 @@ export const SignupView = ({
 
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6 w-full">
+			<div className="flex justify-center mb-2">
+				<Logo variant="logo" forceTheme={logoTheme} />
+			</div>
 			<Card>
 				<CardHeader className="text-center">
 					<CardTitle className="text-xl">Crea tu cuenta</CardTitle>
@@ -331,26 +356,85 @@ export const SignupView = ({
 														type="password"
 														placeholder="Crea una contraseña segura"
 														autoComplete="new-password"
-														aria-describedby="password-requirements password-description"
+														aria-describedby={
+															password ? "password-requirements" : undefined
+														}
 														required
 														{...field}
 													/>
 												</FormControl>
-												<FormMessage />
-												<FieldDescription
-													id="password-description"
-													className="sr-only"
-												>
-													La contraseña debe tener al menos 8 caracteres,
-													incluir mayúsculas, números y un símbolo
-												</FieldDescription>
-												<FieldDescription
-													id="password-requirements"
-													className="text-xs text-muted-foreground mt-1"
-												>
-													Mínimo 8 caracteres, incluye mayúsculas, números y
-													símbolos
-												</FieldDescription>
+												{/* FormMessage hidden - validation labels provide feedback */}
+												{password && (
+													<div
+														id="password-requirements"
+														className="mt-2 space-y-1.5"
+													>
+														<div className="flex items-center gap-2 text-xs">
+															{passwordChecks.minLength ? (
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+															) : (
+																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
+															)}
+															<span
+																className={
+																	passwordChecks.minLength
+																		? "text-primary"
+																		: "text-muted-foreground"
+																}
+															>
+																Al menos 8 caracteres
+															</span>
+														</div>
+														<div className="flex items-center gap-2 text-xs">
+															{passwordChecks.hasUppercase ? (
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+															) : (
+																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
+															)}
+															<span
+																className={
+																	passwordChecks.hasUppercase
+																		? "text-primary"
+																		: "text-muted-foreground"
+																}
+															>
+																Incluye al menos una letra mayúscula
+															</span>
+														</div>
+														<div className="flex items-center gap-2 text-xs">
+															{passwordChecks.hasNumber ? (
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+															) : (
+																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
+															)}
+															<span
+																className={
+																	passwordChecks.hasNumber
+																		? "text-primary"
+																		: "text-muted-foreground"
+																}
+															>
+																Incluye al menos un número
+															</span>
+														</div>
+														<div className="flex items-center gap-2 text-xs">
+															{passwordChecks.hasSpecial ? (
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+															) : (
+																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
+															)}
+															<span
+																className={
+																	passwordChecks.hasSpecial
+																		? "text-primary"
+																		: "text-muted-foreground"
+																}
+															>
+																Incluye al menos un carácter especial
+															</span>
+														</div>
+													</div>
+												)}
 											</FormItem>
 										)}
 									/>
@@ -420,6 +504,8 @@ export const SignupView = ({
 															Acepto los{" "}
 															<Link
 																href="/privacy"
+																target="_blank"
+																rel="noopener noreferrer"
 																className="text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
 																onClick={(e) => e.stopPropagation()}
 															>
@@ -428,6 +514,8 @@ export const SignupView = ({
 															y el{" "}
 															<Link
 																href="/privacy"
+																target="_blank"
+																rel="noopener noreferrer"
 																className="text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
 																onClick={(e) => e.stopPropagation()}
 															>

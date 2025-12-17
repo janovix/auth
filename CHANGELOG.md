@@ -1,3 +1,10 @@
+# [1.0.0-rc.13](https://github.com/janovix/auth/compare/v1.0.0-rc.12...v1.0.0-rc.13) (2025-12-17)
+
+
+### Bug Fixes
+
+* **config:** require https:// protocol and remove fallbacks for clearer errors ([25a8e15](https://github.com/janovix/auth/commit/25a8e15fff93189e63f191ae19c47b0bc375e907))
+
 # [1.0.0-rc.12](https://github.com/janovix/auth/compare/v1.0.0-rc.11...v1.0.0-rc.12) (2025-12-17)
 
 

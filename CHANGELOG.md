@@ -1,3 +1,10 @@
+# [1.1.0-rc.3](https://github.com/janovix/auth/compare/v1.1.0-rc.2...v1.1.0-rc.3) (2025-12-17)
+
+
+### Bug Fixes
+
+* problems with auth sdk initialization ([4086778](https://github.com/janovix/auth/commit/4086778b80629ee46af27fb95a4aceb21e87f23a))
+
 # [1.1.0-rc.2](https://github.com/janovix/auth/compare/v1.1.0-rc.1...v1.1.0-rc.2) (2025-12-17)
 
 

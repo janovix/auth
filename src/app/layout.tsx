@@ -1,3 +1,6 @@
+// Initialize SDK before any SDK imports to ensure proper configuration
+import "@/lib/auth/sdkConfig";
+
 import { SessionHydrator } from "@algenium/auth-next/client";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";

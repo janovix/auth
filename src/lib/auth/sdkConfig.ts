@@ -55,7 +55,6 @@ export function initAuthSdk() {
 	initialized = true;
 }
 
-// Auto-initialize when this module is loaded on the client
-if (typeof window !== "undefined") {
-	initAuthSdk();
-}
+// Auto-initialize when this module is loaded (both server and client)
+// This ensures SDK is ready before any component tries to use it
+initAuthSdk();

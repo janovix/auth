@@ -1,3 +1,10 @@
+# [1.1.0-rc.6](https://github.com/janovix/auth/compare/v1.1.0-rc.5...v1.1.0-rc.6) (2025-12-17)
+
+
+### Bug Fixes
+
+* logout feature ([ae343cc](https://github.com/janovix/auth/commit/ae343cc0c2edac6515703a1d70797b93bfeae844))
+
 # [1.1.0-rc.5](https://github.com/janovix/auth/compare/v1.1.0-rc.4...v1.1.0-rc.5) (2025-12-17)
 
 

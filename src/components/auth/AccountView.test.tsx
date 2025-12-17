@@ -3,8 +3,8 @@ import {
 	createSessionStore,
 	type AuthSessionSnapshot,
 } from "@/lib/auth/useAuthSession";
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { act, cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AccountView } from "./AccountView";
 
@@ -31,6 +31,14 @@ const renderWithSession = (snapshot: AuthSessionSnapshot) => {
 };
 
 describe("AccountView", () => {
+	afterEach(async () => {
+		// Flush all React updates before cleanup
+		await act(async () => {
+			await new Promise((resolve) => setTimeout(resolve, 0));
+		});
+		cleanup();
+	});
+
 	it("shows a helper when there is no active session", () => {
 		renderWithSession(createSnapshot());
 		expect(

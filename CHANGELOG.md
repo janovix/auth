@@ -1,3 +1,10 @@
+# [1.1.0-rc.5](https://github.com/janovix/auth/compare/v1.1.0-rc.4...v1.1.0-rc.5) (2025-12-17)
+
+
+### Bug Fixes
+
+* response from success signin match ([9a128f3](https://github.com/janovix/auth/commit/9a128f3984ede41805eda33a482d2b7a11ab3887))
+
 # [1.1.0-rc.4](https://github.com/janovix/auth/compare/v1.1.0-rc.3...v1.1.0-rc.4) (2025-12-17)
 
 

@@ -12,8 +12,6 @@ import { getAuthCoreBaseUrl } from "./authCoreConfig";
 import { setSession, clearSession } from "./sessionStore";
 import type {
 	Session,
-	SessionUser,
-	SessionData,
 	SignInCredentials,
 	SignUpCredentials,
 	AuthResult,
@@ -24,8 +22,26 @@ export type { Session, SignInCredentials, SignUpCredentials, AuthResult };
 
 /**
  * Response type from Better Auth sign-in/sign-up endpoints.
+ * Note: Better Auth returns user + token, not the full session object.
  */
-type AuthResponse = {
+type SignInResponse = {
+	redirect: boolean;
+	token: string;
+	user: {
+		id: string;
+		name: string;
+		email: string;
+		image: string | null;
+		emailVerified: boolean;
+		createdAt: string;
+		updatedAt: string;
+	};
+};
+
+/**
+ * Response type from Better Auth get-session endpoint.
+ */
+type GetSessionResponse = {
 	user: {
 		id: string;
 		name: string;
@@ -45,7 +61,7 @@ type AuthResponse = {
 		ipAddress?: string;
 		userAgent?: string;
 	};
-};
+} | null;
 
 /**
  * Error response type from Better Auth.
@@ -56,30 +72,51 @@ type ErrorResponse = {
 };
 
 /**
- * Parses auth response into Session object with proper Date types.
+ * Fetches the full session after sign-in/sign-up.
+ * Better Auth's sign-in only returns user + token, so we need to fetch
+ * the full session to get session details (id, expiresAt, etc).
  */
-function parseAuthResponse(data: AuthResponse): Session {
-	return {
-		user: {
-			id: data.user.id,
-			name: data.user.name,
-			email: data.user.email,
-			image: data.user.image,
-			emailVerified: data.user.emailVerified,
-			createdAt: new Date(data.user.createdAt),
-			updatedAt: new Date(data.user.updatedAt),
-		} satisfies SessionUser,
-		session: {
-			id: data.session.id,
-			userId: data.session.userId,
-			token: data.session.token,
-			expiresAt: new Date(data.session.expiresAt),
-			createdAt: new Date(data.session.createdAt),
-			updatedAt: new Date(data.session.updatedAt),
-			ipAddress: data.session.ipAddress,
-			userAgent: data.session.userAgent,
-		} satisfies SessionData,
-	};
+async function fetchFullSession(baseUrl: string): Promise<Session> {
+	try {
+		const response = await fetch(`${baseUrl}/api/auth/get-session`, {
+			method: "GET",
+			credentials: "include",
+		});
+
+		if (!response.ok) {
+			return null;
+		}
+
+		const data = (await response.json()) as GetSessionResponse;
+
+		if (!data || !data.user || !data.session) {
+			return null;
+		}
+
+		return {
+			user: {
+				id: data.user.id,
+				name: data.user.name,
+				email: data.user.email,
+				image: data.user.image,
+				emailVerified: data.user.emailVerified,
+				createdAt: new Date(data.user.createdAt),
+				updatedAt: new Date(data.user.updatedAt),
+			},
+			session: {
+				id: data.session.id,
+				userId: data.session.userId,
+				token: data.session.token,
+				expiresAt: new Date(data.session.expiresAt),
+				createdAt: new Date(data.session.createdAt),
+				updatedAt: new Date(data.session.updatedAt),
+				ipAddress: data.session.ipAddress,
+				userAgent: data.session.userAgent,
+			},
+		};
+	} catch {
+		return null;
+	}
 }
 
 /**
@@ -119,11 +156,12 @@ export async function signIn(
 			};
 		}
 
-		const data = (await response.json()) as AuthResponse;
-		const session = parseAuthResponse(data);
+		// Sign-in was successful, now fetch the full session
+		const session = await fetchFullSession(baseUrl);
 
-		// Update session store
-		setSession(session);
+		if (session) {
+			setSession(session);
+		}
 
 		return {
 			success: true,
@@ -177,11 +215,12 @@ export async function signUp(
 			};
 		}
 
-		const data = (await response.json()) as AuthResponse;
-		const session = parseAuthResponse(data);
+		// Sign-up was successful, now fetch the full session
+		const session = await fetchFullSession(baseUrl);
 
-		// Update session store
-		setSession(session);
+		if (session) {
+			setSession(session);
+		}
 
 		return {
 			success: true,

@@ -1,4 +1,5 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { getAuthCoreBaseUrl, getAuthEnvironment } from "./authCoreConfig";
 
 describe("authCoreConfig", () => {
@@ -16,33 +17,34 @@ describe("authCoreConfig", () => {
 	describe("getAuthCoreBaseUrl", () => {
 		it("returns URL from NEXT_PUBLIC_AUTH_CORE_BASE_URL for client-side", () => {
 			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
-				"auth-svc.janovix.workers.dev";
+				"https://auth-svc.janovix.workers.dev";
 			// Mock window to simulate client-side
-			global.window = { location: {} } as any;
+			global.window = { location: {} } as unknown as Window & typeof globalThis;
 			const url = getAuthCoreBaseUrl();
 			expect(url).toBe("https://auth-svc.janovix.workers.dev");
 		});
 
 		it("returns URL from AUTH_CORE_BASE_URL for server-side", () => {
-			process.env.AUTH_CORE_BASE_URL = "auth-svc.janovix.ai";
+			process.env.AUTH_CORE_BASE_URL = "https://auth-svc.janovix.ai";
 			// Mock window as undefined to simulate server-side
-			delete (global as any).window;
+			delete (global as Record<string, unknown>).window;
 			const url = getAuthCoreBaseUrl();
 			expect(url).toBe("https://auth-svc.janovix.ai");
 		});
 
-		it("handles URL with protocol already included", () => {
+		it("throws error when URL is missing protocol", () => {
 			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
-				"https://auth-svc.janovix.workers.dev";
-			global.window = { location: {} } as any;
-			const url = getAuthCoreBaseUrl();
-			expect(url).toBe("https://auth-svc.janovix.workers.dev");
+				"auth-svc.janovix.workers.dev";
+			global.window = { location: {} } as unknown as Window & typeof globalThis;
+			expect(() => getAuthCoreBaseUrl()).toThrow(
+				'AUTH_CORE_BASE_URL must include the protocol (https://). Got: "auth-svc.janovix.workers.dev"',
+			);
 		});
 
 		it("throws error when environment variable is not set", () => {
 			delete process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL;
 			delete process.env.AUTH_CORE_BASE_URL;
-			global.window = { location: {} } as any;
+			global.window = { location: {} } as unknown as Window & typeof globalThis;
 			expect(() => getAuthCoreBaseUrl()).toThrow(
 				"AUTH_CORE_BASE_URL or NEXT_PUBLIC_AUTH_CORE_BASE_URL environment variable is not set",
 			);
@@ -51,16 +53,17 @@ describe("authCoreConfig", () => {
 
 	describe("getAuthEnvironment", () => {
 		it("returns prod for .janovix.ai URL", () => {
-			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL = "auth-svc.janovix.ai";
-			global.window = { location: {} } as any;
+			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
+				"https://auth-svc.janovix.ai";
+			global.window = { location: {} } as unknown as Window & typeof globalThis;
 			const env = getAuthEnvironment();
 			expect(env).toBe("prod");
 		});
 
 		it("returns dev for .workers.dev URL", () => {
 			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
-				"auth-svc.janovix.workers.dev";
-			global.window = { location: {} } as any;
+				"https://auth-svc.janovix.workers.dev";
+			global.window = { location: {} } as unknown as Window & typeof globalThis;
 			const env = getAuthEnvironment();
 			expect(env).toBe("dev");
 		});

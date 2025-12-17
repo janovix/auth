@@ -23,12 +23,22 @@ export function initAuthSdk() {
 	// Get the auth service URL from environment
 	const authServiceUrl = getAuthCoreBaseUrl();
 
-	// For the auth app, the authAppUrl is the current origin
+	// For the auth app, the authAppUrl is the current origin (client)
+	// or from environment variable (server-side rendering)
 	// This is used for password recovery redirects, etc.
-	const authAppUrl =
-		typeof window !== "undefined"
-			? window.location.origin
-			: process.env.NEXT_PUBLIC_AUTH_APP_URL || authServiceUrl;
+	let authAppUrl: string;
+	if (typeof window !== "undefined") {
+		authAppUrl = window.location.origin;
+	} else {
+		const envUrl = process.env.NEXT_PUBLIC_AUTH_APP_URL;
+		if (!envUrl) {
+			throw new Error(
+				"NEXT_PUBLIC_AUTH_APP_URL environment variable is not set. " +
+					"Configure it in wrangler.jsonc for Cloudflare Workers deployment.",
+			);
+		}
+		authAppUrl = envUrl;
+	}
 
 	createAuthConfig({
 		authServiceUrl,

@@ -1,13 +1,17 @@
 /**
  * Gets the auth core base URL from environment variables.
- * This should be set in wrangler.jsonc as NEXT_PUBLIC_AUTH_CORE_BASE_URL
- * for client-side access, or AUTH_CORE_BASE_URL for server-side.
+ *
+ * For Cloudflare Workers deployment, configure in wrangler.jsonc:
+ * - NEXT_PUBLIC_AUTH_CORE_BASE_URL: Used by client-side code (build-time, inlined)
+ * - AUTH_CORE_BASE_URL: Used by server-side code (runtime)
+ *
+ * URLs MUST include the protocol (https://)
  *
  * @returns The base URL for the auth core service (e.g., https://auth-svc.janovix.workers.dev)
  */
 export const getAuthCoreBaseUrl = (): string => {
-	// For client-side, use NEXT_PUBLIC_ prefix
-	// For server-side, use the regular env var
+	// For client-side, use NEXT_PUBLIC_ prefix (build-time variable)
+	// For server-side, use the regular env var (runtime variable)
 	const baseUrl =
 		typeof window !== "undefined"
 			? process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL
@@ -15,16 +19,19 @@ export const getAuthCoreBaseUrl = (): string => {
 
 	if (!baseUrl) {
 		throw new Error(
-			"AUTH_CORE_BASE_URL or NEXT_PUBLIC_AUTH_CORE_BASE_URL environment variable is not set. Please configure it in wrangler.jsonc",
+			"AUTH_CORE_BASE_URL or NEXT_PUBLIC_AUTH_CORE_BASE_URL environment variable is not set. " +
+				"Configure it in wrangler.jsonc with the full URL including https://",
 		);
 	}
 
-	// Ensure the URL includes the protocol
-	if (baseUrl.startsWith("http://") || baseUrl.startsWith("https://")) {
-		return baseUrl;
+	// Validate that the URL includes the protocol
+	if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+		throw new Error(
+			`AUTH_CORE_BASE_URL must include the protocol (https://). Got: "${baseUrl}"`,
+		);
 	}
 
-	return `https://${baseUrl}`;
+	return baseUrl;
 };
 
 /**

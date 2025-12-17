@@ -16,11 +16,19 @@
 		"enabled": true,
 	},
 	"upload_source_maps": true,
-	// Each deployment should have its own wrangler config with the appropriate AUTH_CORE_BASE_URL
-	// For dev/preview: "auth-svc.janovix.workers.dev"
-	// For production: "auth-svc.janovix.ai"
+	// Environment variables for auth configuration
+	// URLs MUST include the protocol (https://)
+	//
+	// NEXT_PUBLIC_* = Build-time variables (inlined into client JS)
+	// Regular vars = Runtime variables (available server-side)
+	//
+	// For dev/preview deployments, use this wrangler.jsonc
+	// For production, use wrangler.prod.jsonc with production URLs
 	"vars": {
-		"AUTH_CORE_BASE_URL": "auth-svc.janovix.workers.dev",
-		"NEXT_PUBLIC_AUTH_CORE_BASE_URL": "auth-svc.janovix.workers.dev",
+		// Auth service URL (auth-svc worker)
+		"AUTH_CORE_BASE_URL": "https://auth-svc.janovix.workers.dev",
+		"NEXT_PUBLIC_AUTH_CORE_BASE_URL": "https://auth-svc.janovix.workers.dev",
+		// This auth app's URL (for password recovery redirects, etc.)
+		"NEXT_PUBLIC_AUTH_APP_URL": "https://auth.janovix.workers.dev",
 	},
 }

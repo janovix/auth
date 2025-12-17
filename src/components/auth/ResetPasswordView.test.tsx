@@ -1,6 +1,12 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	cleanup,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi, afterEach } from "vitest";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 const pushMock = vi.fn();
@@ -30,6 +36,11 @@ describe("ResetPasswordView", () => {
 	beforeEach(() => {
 		pushMock.mockReset();
 		refreshMock.mockReset();
+		vi.clearAllMocks();
+	});
+
+	afterEach(() => {
+		cleanup();
 	});
 
 	it("submits new password and redirects to login", async () => {
@@ -62,14 +73,17 @@ describe("ResetPasswordView", () => {
 			newPasswordInputs[newPasswordInputs.length - 1],
 			"Secret123!",
 		);
-		const confirmPasswordInputs = screen.getAllByLabelText(
-			/confirma tu contraseña/i,
-		);
+		const confirmPasswordInputs =
+			screen.getAllByLabelText(/confirmar contraseña/i);
 		await user.type(
 			confirmPasswordInputs[confirmPasswordInputs.length - 1],
 			"Secret123!",
 		);
-
+		const submitButtons = screen.getAllByRole("button", {
+			name: /actualizar contraseña/i,
+		});
+		const submitButton = submitButtons[submitButtons.length - 1];
+		expect(submitButton).toHaveAttribute("type", "submit");
 		fireEvent.submit(form);
 
 		await waitFor(() => {
@@ -95,13 +109,19 @@ describe("ResetPasswordView", () => {
 			},
 		});
 
-		renderWithTheme(<ResetPasswordView token="token-123" client={client} />);
+		const { unmount } = renderWithTheme(
+			<ResetPasswordView token="token-123" client={client} />,
+		);
 
 		const user = userEvent.setup();
 
+		// Wait for form to be ready and ensure no success state
 		await waitFor(() => {
 			const forms = screen.getAllByTestId("reset-password-form");
 			expect(forms.length).toBeGreaterThan(0);
+			// Ensure no success alert is showing
+			const successAlerts = screen.queryAllByTestId("reset-success-alert");
+			expect(successAlerts.length).toBe(0);
 		});
 
 		const forms = screen.getAllByTestId("reset-password-form");
@@ -112,14 +132,17 @@ describe("ResetPasswordView", () => {
 			newPasswordInputs[newPasswordInputs.length - 1],
 			"Secret123!",
 		);
-		const confirmPasswordInputs = screen.getAllByLabelText(
-			/confirma tu contraseña/i,
-		);
+		const confirmPasswordInputs =
+			screen.getAllByLabelText(/confirmar contraseña/i);
 		await user.type(
 			confirmPasswordInputs[confirmPasswordInputs.length - 1],
 			"Secret123!",
 		);
-
+		const submitButtons = screen.getAllByRole("button", {
+			name: /actualizar contraseña/i,
+		});
+		const submitButton = submitButtons[submitButtons.length - 1];
+		expect(submitButton).toHaveAttribute("type", "submit");
 		fireEvent.submit(form);
 
 		await waitFor(() => {
@@ -158,9 +181,8 @@ describe("ResetPasswordView", () => {
 			newPasswordInputs[newPasswordInputs.length - 1],
 			"Secret123!",
 		);
-		const confirmPasswordInputs = screen.getAllByLabelText(
-			/confirma tu contraseña/i,
-		);
+		const confirmPasswordInputs =
+			screen.getAllByLabelText(/confirmar contraseña/i);
 		await user.type(
 			confirmPasswordInputs[confirmPasswordInputs.length - 1],
 			"Different123!",
@@ -182,9 +204,13 @@ describe("ResetPasswordView", () => {
 		renderWithTheme(<ResetPasswordView token="token-123" client={client} />);
 		const user = userEvent.setup();
 
+		// Wait for form to be ready and ensure no success state
 		await waitFor(() => {
 			const forms = screen.getAllByTestId("reset-password-form");
 			expect(forms.length).toBeGreaterThan(0);
+			// Ensure no success alert is showing
+			const successAlerts = screen.queryAllByTestId("reset-success-alert");
+			expect(successAlerts.length).toBe(0);
 		});
 
 		const forms = screen.getAllByTestId("reset-password-form");
@@ -195,14 +221,17 @@ describe("ResetPasswordView", () => {
 			newPasswordInputs[newPasswordInputs.length - 1],
 			"Secret123!",
 		);
-		const confirmPasswordInputs = screen.getAllByLabelText(
-			/confirma tu contraseña/i,
-		);
+		const confirmPasswordInputs =
+			screen.getAllByLabelText(/confirmar contraseña/i);
 		await user.type(
 			confirmPasswordInputs[confirmPasswordInputs.length - 1],
 			"Secret123!",
 		);
-
+		const submitButtons = screen.getAllByRole("button", {
+			name: /actualizar contraseña/i,
+		});
+		const submitButton = submitButtons[submitButtons.length - 1];
+		expect(submitButton).toHaveAttribute("type", "submit");
 		fireEvent.submit(form);
 
 		await waitFor(() => {
@@ -234,14 +263,17 @@ describe("ResetPasswordView", () => {
 			newPasswordInputs[newPasswordInputs.length - 1],
 			"Secret123!",
 		);
-		const confirmPasswordInputs = screen.getAllByLabelText(
-			/confirma tu contraseña/i,
-		);
+		const confirmPasswordInputs =
+			screen.getAllByLabelText(/confirmar contraseña/i);
 		await user.type(
 			confirmPasswordInputs[confirmPasswordInputs.length - 1],
 			"Secret123!",
 		);
-
+		const submitButtons = screen.getAllByRole("button", {
+			name: /actualizar contraseña/i,
+		});
+		const submitButton = submitButtons[submitButtons.length - 1];
+		expect(submitButton).toHaveAttribute("type", "submit");
 		fireEvent.submit(form);
 
 		const errorMessages = await screen.findAllByText(

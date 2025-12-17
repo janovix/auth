@@ -1,6 +1,12 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+	cleanup,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi, afterEach } from "vitest";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 const pushMock = vi.fn();
@@ -33,6 +39,11 @@ const createClient = (): SignupClient => ({
 describe("SignupView", () => {
 	beforeEach(() => {
 		pushMock.mockReset();
+		vi.clearAllMocks();
+	});
+
+	afterEach(() => {
+		cleanup();
 	});
 
 	it("sends the registration payload to auth-core", async () => {
@@ -61,15 +72,14 @@ describe("SignupView", () => {
 		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
 		const passwordInputs = screen.getAllByLabelText(/^contraseña$/i);
 		await user.type(passwordInputs[passwordInputs.length - 1], "Secret123!");
-		const confirmPasswordInputs = screen.getAllByLabelText(
-			/confirma tu contraseña/i,
-		);
+		const confirmPasswordInputs =
+			screen.getAllByLabelText(/confirmar contraseña/i);
 		await user.type(
 			confirmPasswordInputs[confirmPasswordInputs.length - 1],
 			"Secret123!",
 		);
 		const checkboxes = screen.getAllByRole("checkbox", {
-			name: /aceptar términos/i,
+			name: /acepto los términos/i,
 		});
 		await user.click(checkboxes[checkboxes.length - 1]);
 
@@ -120,15 +130,14 @@ describe("SignupView", () => {
 		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
 		const passwordInputs = screen.getAllByLabelText(/^contraseña$/i);
 		await user.type(passwordInputs[passwordInputs.length - 1], "Secret123!");
-		const confirmPasswordInputs = screen.getAllByLabelText(
-			/confirma tu contraseña/i,
-		);
+		const confirmPasswordInputs =
+			screen.getAllByLabelText(/confirmar contraseña/i);
 		await user.type(
 			confirmPasswordInputs[confirmPasswordInputs.length - 1],
 			"Secret123!",
 		);
 		const checkboxes = screen.getAllByRole("checkbox", {
-			name: /aceptar términos/i,
+			name: /acepto los términos/i,
 		});
 		await user.click(checkboxes[checkboxes.length - 1]);
 
@@ -170,9 +179,8 @@ describe("SignupView", () => {
 		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
 		const passwordInputs = screen.getAllByLabelText(/^contraseña$/i);
 		await user.type(passwordInputs[passwordInputs.length - 1], "weak");
-		const confirmPasswordInputs = screen.getAllByLabelText(
-			/confirma tu contraseña/i,
-		);
+		const confirmPasswordInputs =
+			screen.getAllByLabelText(/confirmar contraseña/i);
 		await user.type(
 			confirmPasswordInputs[confirmPasswordInputs.length - 1],
 			"weak",
@@ -200,9 +208,8 @@ describe("SignupView", () => {
 
 		const passwordInputs = screen.getAllByLabelText(/^contraseña$/i);
 		await user.type(passwordInputs[passwordInputs.length - 1], "Secret123!");
-		const confirmPasswordInputs = screen.getAllByLabelText(
-			/confirma tu contraseña/i,
-		);
+		const confirmPasswordInputs =
+			screen.getAllByLabelText(/confirmar contraseña/i);
 		await user.type(
 			confirmPasswordInputs[confirmPasswordInputs.length - 1],
 			"Different123!",
@@ -240,15 +247,14 @@ describe("SignupView", () => {
 		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
 		const passwordInputs = screen.getAllByLabelText(/^contraseña$/i);
 		await user.type(passwordInputs[passwordInputs.length - 1], "Secret123!");
-		const confirmPasswordInputs = screen.getAllByLabelText(
-			/confirma tu contraseña/i,
-		);
+		const confirmPasswordInputs =
+			screen.getAllByLabelText(/confirmar contraseña/i);
 		await user.type(
 			confirmPasswordInputs[confirmPasswordInputs.length - 1],
 			"Secret123!",
 		);
 		const checkboxes = screen.getAllByRole("checkbox", {
-			name: /aceptar términos/i,
+			name: /acepto los términos/i,
 		});
 		await user.click(checkboxes[checkboxes.length - 1]);
 

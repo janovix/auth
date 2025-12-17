@@ -7,12 +7,14 @@ import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useDeviceDetection } from "@/hooks/useDeviceDetection";
 
 function AuthLayout({ children }: { children: React.ReactNode }) {
 	const { theme, systemTheme } = useTheme();
 	const resolvedTheme = theme === "system" ? systemTheme : theme;
 	const isDark = resolvedTheme === "dark";
 	const [hasEnoughHeight, setHasEnoughHeight] = useState(false);
+	const deviceInfo = useDeviceDetection();
 
 	// Check if viewport has enough height to accommodate tall cards (like signup)
 	useEffect(() => {
@@ -32,7 +34,12 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
 		return () => window.removeEventListener("resize", checkHeight);
 	}, []);
 
-	const showBackground = hasEnoughHeight;
+	// Show background if:
+	// 1. Viewport is wide (>=1024px) and tall (>=800px) enough, OR
+	// 2. iOS device with enough performance (even on smaller screens)
+	//    This allows iOS devices to see the animation even on portrait orientation
+	const showBackground =
+		hasEnoughHeight || (deviceInfo.isIOS && deviceInfo.hasEnoughPerformance);
 
 	return (
 		<div className="bg-muted flex h-svh w-full flex-col overflow-hidden relative">

@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import LightPillar from "../LightPillar";
+import { useDeviceDetection } from "@/hooks/useDeviceDetection";
 
 /**
  * LoginAnimationPanel component that:
  * - Shows LightPillar animation in the right column on larger screens
  * - Only renders client-side with smooth fade-in
- * - Hides on small screens, mobile devices, and low-powered devices
+ * - Shows on iOS devices (if high-end or has enough performance)
+ * - Hides on low-powered devices and when reduced motion is preferred
  * - Lazy loads to avoid impacting web vitals
  */
 export function LoginAnimationPanel() {
@@ -17,48 +19,10 @@ export function LoginAnimationPanel() {
 	const [mounted, setMounted] = useState(false);
 	const [shouldRender, setShouldRender] = useState(false);
 	const [isVisible, setIsVisible] = useState(false);
+	const deviceInfo = useDeviceDetection();
 
 	// Determine if device should show animated background
-	const deviceCheck = useMemo(() => {
-		if (typeof window === "undefined") return false;
-
-		// Check screen size - hide on mobile/small screens (use md breakpoint ~768px)
-		const isSmallScreen = window.innerWidth < 768;
-		if (isSmallScreen) return false;
-
-		// Check for mobile device indicators
-		const isMobile =
-			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-				navigator.userAgent,
-			) || "ontouchstart" in window;
-
-		if (isMobile) return false;
-
-		// Check device memory (if available) - hide on low-powered devices
-		const hasLowMemory =
-			// @ts-expect-error - navigator.deviceMemory is not in all browsers
-			navigator.deviceMemory !== undefined &&
-			// @ts-expect-error
-			navigator.deviceMemory < 4;
-
-		if (hasLowMemory) return false;
-
-		// Check for reduced motion preference
-		const prefersReducedMotion = window.matchMedia(
-			"(prefers-reduced-motion: reduce)",
-		).matches;
-
-		if (prefersReducedMotion) return false;
-
-		// Check hardware concurrency (CPU cores) - hide on devices with < 4 cores
-		const hasLowConcurrency =
-			navigator.hardwareConcurrency !== undefined &&
-			navigator.hardwareConcurrency < 4;
-
-		if (hasLowConcurrency) return false;
-
-		return true;
-	}, []);
+	const deviceCheck = deviceInfo.hasEnoughPerformance;
 
 	useEffect(() => {
 		// Mark as mounted on client

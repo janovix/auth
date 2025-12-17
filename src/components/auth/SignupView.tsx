@@ -29,7 +29,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	Building2,
 	CheckCircle2,
-	Circle,
 	Lock,
 	Mail,
 	ShieldCheck,
@@ -39,7 +38,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Logo } from "@/components/Logo";
 import { authClient, type AuthClient } from "@/lib/auth/authClient";
@@ -115,23 +114,6 @@ export const SignupView = ({
 			acceptTerms: false,
 		},
 	});
-
-	// Watch password field to show real-time validation
-	const password = useWatch({
-		control: form.control,
-		name: "password",
-	});
-
-	// Password validation rules checker
-	const passwordChecks = useMemo(() => {
-		const pwd = password || "";
-		return {
-			minLength: pwd.length >= 8,
-			hasUppercase: /[A-Z]/.test(pwd),
-			hasNumber: /[0-9]/.test(pwd),
-			hasSpecial: /[!@#$%^&*(),.?":{}|<>_\-\[\]\\;'/+=]/.test(pwd),
-		};
-	}, [password]);
 
 	const handleSubmit = async (values: SignupValues) => {
 		setServerError(null);
@@ -356,85 +338,26 @@ export const SignupView = ({
 														type="password"
 														placeholder="Crea una contraseña segura"
 														autoComplete="new-password"
-														aria-describedby={
-															password ? "password-requirements" : undefined
-														}
+														aria-describedby="password-requirements password-description"
 														required
 														{...field}
 													/>
 												</FormControl>
 												<FormMessage />
-												{password && (
-													<div
-														id="password-requirements"
-														className="mt-2 space-y-1.5"
-													>
-														<div className="flex items-center gap-2 text-xs">
-															{passwordChecks.minLength ? (
-																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-															) : (
-																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
-															)}
-															<span
-																className={
-																	passwordChecks.minLength
-																		? "text-primary"
-																		: "text-muted-foreground"
-																}
-															>
-																Al menos 8 caracteres
-															</span>
-														</div>
-														<div className="flex items-center gap-2 text-xs">
-															{passwordChecks.hasUppercase ? (
-																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-															) : (
-																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
-															)}
-															<span
-																className={
-																	passwordChecks.hasUppercase
-																		? "text-primary"
-																		: "text-muted-foreground"
-																}
-															>
-																Incluye al menos una letra mayúscula
-															</span>
-														</div>
-														<div className="flex items-center gap-2 text-xs">
-															{passwordChecks.hasNumber ? (
-																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-															) : (
-																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
-															)}
-															<span
-																className={
-																	passwordChecks.hasNumber
-																		? "text-primary"
-																		: "text-muted-foreground"
-																}
-															>
-																Incluye al menos un número
-															</span>
-														</div>
-														<div className="flex items-center gap-2 text-xs">
-															{passwordChecks.hasSpecial ? (
-																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-															) : (
-																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
-															)}
-															<span
-																className={
-																	passwordChecks.hasSpecial
-																		? "text-primary"
-																		: "text-muted-foreground"
-																}
-															>
-																Incluye al menos un carácter especial
-															</span>
-														</div>
-													</div>
-												)}
+												<FieldDescription
+													id="password-description"
+													className="sr-only"
+												>
+													La contraseña debe tener al menos 8 caracteres,
+													incluir mayúsculas, números y un símbolo
+												</FieldDescription>
+												<FieldDescription
+													id="password-requirements"
+													className="text-xs text-muted-foreground mt-1"
+												>
+													Mínimo 8 caracteres, incluye mayúsculas, números y
+													símbolos
+												</FieldDescription>
 											</FormItem>
 										)}
 									/>

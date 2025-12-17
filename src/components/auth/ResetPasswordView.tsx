@@ -237,7 +237,7 @@ export const ResetPasswordView = ({
 														{...field}
 													/>
 												</FormControl>
-												<FormMessage />
+												{/* FormMessage hidden - validation labels provide feedback */}
 												{newPassword && (
 													<div
 														id="newPassword-requirements"

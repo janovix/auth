@@ -363,7 +363,7 @@ export const SignupView = ({
 														{...field}
 													/>
 												</FormControl>
-												<FormMessage />
+												{/* FormMessage hidden - validation labels provide feedback */}
 												{password && (
 													<div
 														id="password-requirements"

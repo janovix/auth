@@ -84,53 +84,6 @@
 
 * **auth:** implement Next.js 16 proxy for session management and enhance AccountView with server-side session fetching ([b54a560](https://github.com/janovix/auth/commit/b54a56063a77ac0147b5e891db76839ca8b5b230))
 
-# [1.0.0-rc.4](https://github.com/janovix/auth/compare/v1.0.0-rc.3...v1.0.0-rc.4) (2025-12-16)
-
-
-### Features
-
-* **auth:** enhance LoginView with session handling and redirection ([6eeff25](https://github.com/janovix/auth/commit/6eeff25c6ac0f62eba8135df2436ca4865003ffb))
-
-# [1.0.0-rc.3](https://github.com/janovix/auth/compare/v1.0.0-rc.2...v1.0.0-rc.3) (2025-12-15)
-
-
-### Bug Fixes
-
-* **auth:** use auth-svc.janovix.workers.dev for dev/preview environments ([1b55b37](https://github.com/janovix/auth/commit/1b55b3780646eae003e48fbb809d574a91119cc0))
-* **storybook:** install webpack as dev dependency for DefinePlugin ([c5253f9](https://github.com/janovix/auth/commit/c5253f9c9031db3f648d5f733e09bcdefb7b788c))
-* **storybook:** set AUTH_CORE_BASE_URL environment variables for Storybook builds ([9015436](https://github.com/janovix/auth/commit/9015436bb962c493029db33473970f658e9b905d))
-
-# [1.0.0-rc.2](https://github.com/janovix/auth/compare/v1.0.0-rc.1...v1.0.0-rc.2) (2025-12-15)
-
-
-### Features
-
-* Add auth pages and components ([6374275](https://github.com/janovix/auth/commit/6374275d8b6b270937e0d54c11188d213c0c307f))
-* Add error handling and improve tests for auth components ([f7b60f6](https://github.com/janovix/auth/commit/f7b60f647f238846c5367dfb467ac31e23c8e65e))
-* Add tests for auth components and utilities ([4d1b7c9](https://github.com/janovix/auth/commit/4d1b7c9fe227f4b3ad6f65b7360d4952cf4c70cd))
-
-# 1.0.0-rc.1 (2025-12-15)
-
-
-### Bug Fixes
-
-* format issues ([41debbb](https://github.com/janovix/auth/commit/41debbb46b22d30a2679747e73a6b413bcefc0b7))
-
-# 1.0.0 (2025-12-14)
-
-
-### Bug Fixes
-
-* adding cf build script ([e4304da](https://github.com/algtools/next-template/commit/e4304dae686a6cabe53f20a6a88d73f6d6d1dbbe))
-* update CI workflow to skip Chromatic publishing on 'dev' branch ([17b1390](https://github.com/algtools/next-template/commit/17b1390591887196d224e5b7e6f214b824b93372))
-
-
-### Features
-
-* Add core functionality ([1cfb1d8](https://github.com/algtools/next-template/commit/1cfb1d8bb6bd41aa3e7d2808b143d41c56d183dd))
-* add TodoApp component with local storage support and UI enhancements ([dd9a9e6](https://github.com/algtools/next-template/commit/dd9a9e68c5bccca24531aa595efd47143bc59ba4))
-* integrate storybook ([72c57c8](https://github.com/algtools/next-template/commit/72c57c8bc2114ba1bfa9e993f479edf5198ec87c))
-* Integrate SWR for data fetching and update TodoApp ([ee15a61](https://github.com/algtools/next-template/commit/ee15a6143cea5dacef562c97ee6ed7cd8f7241e6))
 
 # [1.0.0-rc.4](https://github.com/algtools/next-template/compare/v1.0.0-rc.3...v1.0.0-rc.4) (2025-12-14)
 
@@ -164,6 +117,22 @@
 ### Features
 
 * add TodoApp component with local storage support and UI enhancements ([dd9a9e6](https://github.com/algtools/next-template/commit/dd9a9e68c5bccca24531aa595efd47143bc59ba4))
+* Integrate SWR for data fetching and update TodoApp ([ee15a61](https://github.com/algtools/next-template/commit/ee15a6143cea5dacef562c97ee6ed7cd8f7241e6))
+
+# 1.0.0 (2025-12-14)
+
+
+### Bug Fixes
+
+* adding cf build script ([e4304da](https://github.com/algtools/next-template/commit/e4304dae686a6cabe53f20a6a88d73f6d6d1dbbe))
+* update CI workflow to skip Chromatic publishing on 'dev' branch ([17b1390](https://github.com/algtools/next-template/commit/17b1390591887196d224e5b7e6f214b824b93372))
+
+
+### Features
+
+* Add core functionality ([1cfb1d8](https://github.com/algtools/next-template/commit/1cfb1d8bb6bd41aa3e7d2808b143d41c56d183dd))
+* add TodoApp component with local storage support and UI enhancements ([dd9a9e6](https://github.com/algtools/next-template/commit/dd9a9e68c5bccca24531aa595efd47143bc59ba4))
+* integrate storybook ([72c57c8](https://github.com/algtools/next-template/commit/72c57c8bc2114ba1bfa9e993f479edf5198ec87c))
 * Integrate SWR for data fetching and update TodoApp ([ee15a61](https://github.com/algtools/next-template/commit/ee15a6143cea5dacef562c97ee6ed7cd8f7241e6))
 
 # Changelog

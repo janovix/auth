@@ -198,3 +198,29 @@
 		letter-spacing: var(--tracking-normal);
 	}
 }
+
+@layer utilities {
+	/* Global minimal scrollbar styling (no class required). */
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: #cbd5e0 transparent;
+	}
+
+	*::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+	}
+
+	*::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	*::-webkit-scrollbar-thumb {
+		background: #cbd5e0;
+		border-radius: 4px;
+	}
+
+	*::-webkit-scrollbar-thumb:hover {
+		background: #a0aec0;
+	}
+}

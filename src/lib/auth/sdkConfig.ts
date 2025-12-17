@@ -1,16 +1,25 @@
 "use client";
 
-import { createAuthConfig } from "@algenium/auth-next";
+import { createAuthConfig, isAuthConfigured } from "@algenium/auth-next";
 
 import { getAuthCoreBaseUrl } from "./authCoreConfig";
+
+let initialized = false;
 
 /**
  * Initialize the Algenium Auth SDK.
  *
  * Since this IS the auth app, both authServiceUrl and authAppUrl
  * can be derived from the same environment configuration.
+ *
+ * This function is idempotent - it only initializes once.
  */
 export function initAuthSdk() {
+	// Only initialize once
+	if (initialized || isAuthConfigured()) {
+		return;
+	}
+
 	// Get the auth service URL from environment
 	const authServiceUrl = getAuthCoreBaseUrl();
 
@@ -32,4 +41,11 @@ export function initAuthSdk() {
 			recover: "/recover",
 		},
 	});
+
+	initialized = true;
+}
+
+// Auto-initialize when this module is loaded on the client
+if (typeof window !== "undefined") {
+	initAuthSdk();
 }

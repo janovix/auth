@@ -4,14 +4,11 @@ import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { AuthSdkProvider } from "@/components/AuthSdkProvider";
 import { LoginAnimationPanel } from "@/components/auth/LoginAnimationPanel";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useDeviceDetection } from "@/hooks/useDeviceDetection";
-import { initAuthSdk } from "@/lib/auth/sdkConfig";
-
-// Initialize the Auth SDK on client load
-initAuthSdk();
 
 function AuthLayout({ children }: { children: React.ReactNode }) {
 	const { theme, systemTheme } = useTheme();
@@ -110,16 +107,18 @@ export default function ClientLayout({
 
 	return (
 		<ThemeProvider>
-			{isAuthRoute ? (
-				<AuthLayout>{children}</AuthLayout>
-			) : (
-				<>
-					<div className="fixed bottom-4 right-4 z-50">
-						<ThemeSwitcher />
-					</div>
-					{children}
-				</>
-			)}
+			<AuthSdkProvider>
+				{isAuthRoute ? (
+					<AuthLayout>{children}</AuthLayout>
+				) : (
+					<>
+						<div className="fixed bottom-4 right-4 z-50">
+							<ThemeSwitcher />
+						</div>
+						{children}
+					</>
+				)}
+			</AuthSdkProvider>
 		</ThemeProvider>
 	);
 }

@@ -1,32 +1,11 @@
 import type { Preview } from "@storybook/react";
 import { useEffect } from "react";
 
+// Import setup file to initialize router mocks before any components render
+import "./setup";
+
 import "../src/app/globals.css";
-
-export const globalTypes = {
-	theme: {
-		description: "Global theme for components (light/dark)",
-		defaultValue: "light",
-		toolbar: {
-			icon: "mirror",
-			items: [
-				{ value: "light", title: "Light" },
-				{ value: "dark", title: "Dark" },
-			],
-			dynamicTitle: true,
-		},
-	},
-};
-
-// Mock router functions for Next.js navigation
-const mockRouter = {
-	push: () => {},
-	replace: () => {},
-	refresh: () => {},
-	back: () => {},
-	forward: () => {},
-	prefetch: () => Promise.resolve(),
-};
+import { mockRouter } from "../src/stories/mocks/router";
 
 const preview: Preview = {
 	parameters: {
@@ -53,12 +32,6 @@ const preview: Preview = {
 				const root = document.documentElement;
 				root.classList.toggle("dark", theme === "dark");
 			}, [theme]);
-
-			// Ensure router mocks are available before rendering
-			if (typeof window !== "undefined") {
-				// Set router mocks in window for Storybook Next.js framework
-				(window as any).__NEXT_ROUTER_MOCKS__ = mockRouter;
-			}
 
 			return (
 				<div className="min-h-screen bg-background text-foreground p-6">

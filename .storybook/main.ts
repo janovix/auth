@@ -15,7 +15,9 @@ const config: StorybookConfig = {
 	addons: ["@storybook/addon-links", "@storybook/addon-a11y"],
 	framework: {
 		name: "@storybook/nextjs",
-		options: {},
+		options: {
+			nextConfigPath: "../next.config.ts",
+		},
 	},
 	docs: {
 		autodocs: "tag",

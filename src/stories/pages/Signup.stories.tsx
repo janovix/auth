@@ -2,16 +2,7 @@ import { SignupView } from "@/components/auth/SignupView";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import type { Meta, StoryObj } from "@storybook/react";
 import { authClient } from "@/lib/auth/authClient";
-
-// Mock router functions
-const mockRouter = {
-	push: () => {},
-	replace: () => {},
-	refresh: () => {},
-	back: () => {},
-	forward: () => {},
-	prefetch: () => Promise.resolve(),
-};
+import { mockRouter } from "../mocks/router";
 
 // Mock auth client methods
 const mockSignUp = async (_data: {
@@ -37,11 +28,6 @@ const meta = {
 	},
 	decorators: [
 		(Story) => {
-			// Ensure router mocks are available before rendering
-			if (typeof window !== "undefined") {
-				(window as any).__NEXT_ROUTER_MOCKS__ = mockRouter;
-			}
-
 			// Mock auth client for this story
 			const originalSignUp = authClient.signUp.email;
 			authClient.signUp.email =

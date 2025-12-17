@@ -3,14 +3,18 @@
 /**
  * Auth actions re-exported from the auth-next-sdk.
  *
+ * IMPORTANT: We import sdkConfig first to ensure the SDK is initialized
+ * in the client bundle. The SDK now uses globalThis with Symbol.for()
+ * to store config, which survives across code-splitting chunks.
+ *
  * This module re-exports the SDK's auth functions which properly update
  * the session store used by useAuthSession(). This ensures that after
  * login/logout/signup, the session state is immediately reflected in
  * all components using the useAuthSession hook.
- *
- * The SDK functions use the configuration from createAuthConfig() and
- * make direct fetch calls to the auth service endpoints.
  */
+
+// Initialize SDK in this client bundle
+import "./sdkConfig";
 
 export {
 	signIn,

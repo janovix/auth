@@ -24,11 +24,11 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, CheckCircle2, KeyRound, Lock } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Circle, KeyRound, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { Logo } from "@/components/Logo";
 import { authClient, type AuthClient } from "@/lib/auth/authClient";
@@ -82,6 +82,23 @@ export const ResetPasswordView = ({
 			confirmPassword: "",
 		},
 	});
+
+	// Watch password field to show real-time validation
+	const newPassword = useWatch({
+		control: form.control,
+		name: "newPassword",
+	});
+
+	// Password validation rules checker
+	const passwordChecks = useMemo(() => {
+		const pwd = newPassword || "";
+		return {
+			minLength: pwd.length >= 8,
+			hasUppercase: /[A-Z]/.test(pwd),
+			hasNumber: /[0-9]/.test(pwd),
+			hasSpecial: /[!@#$%^&*(),.?":{}|<>_\-\[\]\\;'/+=]/.test(pwd),
+		};
+	}, [newPassword]);
 
 	const isSubmitting = form.formState.isSubmitting;
 	const isTokenReady = Boolean(token);
@@ -211,26 +228,87 @@ export const ResetPasswordView = ({
 														type="password"
 														placeholder="Crea una contraseña segura"
 														autoComplete="new-password"
-														aria-describedby="newPassword-requirements newPassword-description"
+														aria-describedby={
+															newPassword
+																? "newPassword-requirements"
+																: undefined
+														}
 														required
 														{...field}
 													/>
 												</FormControl>
 												<FormMessage />
-												<FieldDescription
-													id="newPassword-description"
-													className="sr-only"
-												>
-													La contraseña debe tener al menos 8 caracteres,
-													incluir mayúsculas, números y un símbolo
-												</FieldDescription>
-												<FieldDescription
-													id="newPassword-requirements"
-													className="text-xs text-muted-foreground mt-1"
-												>
-													Mínimo 8 caracteres, incluye mayúsculas, números y
-													símbolos
-												</FieldDescription>
+												{newPassword && (
+													<div
+														id="newPassword-requirements"
+														className="mt-2 space-y-1.5"
+													>
+														<div className="flex items-center gap-2 text-xs">
+															{passwordChecks.minLength ? (
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+															) : (
+																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
+															)}
+															<span
+																className={
+																	passwordChecks.minLength
+																		? "text-primary"
+																		: "text-muted-foreground"
+																}
+															>
+																Al menos 8 caracteres
+															</span>
+														</div>
+														<div className="flex items-center gap-2 text-xs">
+															{passwordChecks.hasUppercase ? (
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+															) : (
+																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
+															)}
+															<span
+																className={
+																	passwordChecks.hasUppercase
+																		? "text-primary"
+																		: "text-muted-foreground"
+																}
+															>
+																Incluye al menos una letra mayúscula
+															</span>
+														</div>
+														<div className="flex items-center gap-2 text-xs">
+															{passwordChecks.hasNumber ? (
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+															) : (
+																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
+															)}
+															<span
+																className={
+																	passwordChecks.hasNumber
+																		? "text-primary"
+																		: "text-muted-foreground"
+																}
+															>
+																Incluye al menos un número
+															</span>
+														</div>
+														<div className="flex items-center gap-2 text-xs">
+															{passwordChecks.hasSpecial ? (
+																<CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+															) : (
+																<Circle className="h-3.5 w-3.5 text-muted-foreground" />
+															)}
+															<span
+																className={
+																	passwordChecks.hasSpecial
+																		? "text-primary"
+																		: "text-muted-foreground"
+																}
+															>
+																Incluye al menos un carácter especial
+															</span>
+														</div>
+													</div>
+												)}
 											</FormItem>
 										)}
 									/>

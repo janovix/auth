@@ -5,10 +5,10 @@ import {
 	type SignInCredentials,
 	type AuthResult,
 } from "@/lib/auth/authActions";
+import { getAuthRedirectUrl } from "@/lib/auth/redirectConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, Lock, LogIn, Mail, Shield } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -71,7 +71,6 @@ export const LoginView = ({
 	signIn?: SignInFn;
 	defaultSuccessMessage?: string;
 }) => {
-	const router = useRouter();
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(
 		defaultSuccessMessage ?? null,
@@ -105,7 +104,8 @@ export const LoginView = ({
 		}
 
 		setSuccessMessage("Acceso validado. Redirigiendo…");
-		router.push(redirectTo || "/account");
+		// Use window.location for external redirects (cross-origin)
+		window.location.href = getAuthRedirectUrl(redirectTo);
 	};
 
 	const isSubmitting = form.formState.isSubmitting;
@@ -191,7 +191,7 @@ export const LoginView = ({
 										<Link
 											href={
 												redirectTo
-													? `/recover?redirectTo=${encodeURIComponent(redirectTo)}`
+													? `/recover?redirect_to=${encodeURIComponent(redirectTo)}`
 													: "/recover"
 											}
 											className="ml-auto text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"

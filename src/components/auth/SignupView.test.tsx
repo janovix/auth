@@ -13,13 +13,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 
 import { SignupView } from "./SignupView";
 
-const pushMock = vi.fn();
-
-vi.mock("next/navigation", () => ({
-	useRouter: () => ({
-		push: pushMock,
-	}),
-}));
+// Mock window.location
+const originalLocation = window.location;
 
 const renderWithTheme = (ui: React.ReactElement) => {
 	return render(<ThemeProvider>{ui}</ThemeProvider>);
@@ -31,8 +26,12 @@ const createSignUp = (): SignUpFn => vi.fn();
 
 describe("SignupView", () => {
 	beforeEach(() => {
-		pushMock.mockReset();
 		vi.clearAllMocks();
+		// Mock window.location.href as a writable property
+		Object.defineProperty(window, "location", {
+			value: { ...originalLocation, href: "" },
+			writable: true,
+		});
 	});
 
 	afterEach(() => {
@@ -68,7 +67,9 @@ describe("SignupView", () => {
 				error: null,
 			});
 
-			renderWithTheme(<SignupView signUp={signUp} />);
+			renderWithTheme(
+				<SignupView redirectTo="https://app.example.com" signUp={signUp} />,
+			);
 			const user = userEvent.setup();
 
 			await waitFor(() => {
@@ -111,7 +112,7 @@ describe("SignupView", () => {
 					email: "ana@example.com",
 					password: "Secret123!",
 				});
-				expect(pushMock).toHaveBeenCalledWith("/account");
+				expect(window.location.href).toBe("https://app.example.com");
 			});
 		},
 	);
@@ -168,7 +169,8 @@ describe("SignupView", () => {
 		expect(
 			await screen.findByText(/usuario existente/i, { exact: false }),
 		).toBeInTheDocument();
-		expect(pushMock).not.toHaveBeenCalled();
+		// Should not redirect on error
+		expect(window.location.href).toBe("");
 	});
 
 	it("shows validation errors for invalid password", async () => {

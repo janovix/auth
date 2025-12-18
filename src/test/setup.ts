@@ -9,6 +9,9 @@ if (!process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL) {
 if (!process.env.NEXT_PUBLIC_AUTH_APP_URL) {
 	process.env.NEXT_PUBLIC_AUTH_APP_URL = "https://auth.example.workers.dev";
 }
+if (!process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL) {
+	process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL = "https://app.example.workers.dev";
+}
 
 // Mock ResizeObserver for tests
 global.ResizeObserver = class ResizeObserver {

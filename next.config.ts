@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
 		// Cloudflare Workers should set these as build environment variables
 		NEXT_PUBLIC_AUTH_CORE_BASE_URL: process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL,
 		NEXT_PUBLIC_AUTH_APP_URL: process.env.NEXT_PUBLIC_AUTH_APP_URL,
+		NEXT_PUBLIC_AUTH_REDIRECT_URL: process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL,
 	},
 };
 

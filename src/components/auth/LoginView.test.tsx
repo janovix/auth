@@ -7,13 +7,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 
 import { LoginView } from "./LoginView";
 
-const pushMock = vi.fn();
-
-vi.mock("next/navigation", () => ({
-	useRouter: () => ({
-		push: pushMock,
-	}),
-}));
+// Mock window.location
+const originalLocation = window.location;
 
 const renderWithTheme = (ui: React.ReactElement) => {
 	return render(<ThemeProvider>{ui}</ThemeProvider>);
@@ -25,7 +20,11 @@ const createSignIn = (): SignInFn => vi.fn();
 
 describe("LoginView", () => {
 	beforeEach(() => {
-		pushMock.mockReset();
+		// Mock window.location.href as a writable property
+		Object.defineProperty(window, "location", {
+			value: { ...originalLocation, href: "" },
+			writable: true,
+		});
 	});
 
 	it("submits credentials and redirects on success", async () => {
@@ -54,7 +53,9 @@ describe("LoginView", () => {
 			error: null,
 		});
 
-		renderWithTheme(<LoginView redirectTo="/account" signIn={signIn} />);
+		renderWithTheme(
+			<LoginView redirectTo="https://app.example.com" signIn={signIn} />,
+		);
 		const user = userEvent.setup();
 
 		const forms = screen.getAllByTestId("login-form");
@@ -82,7 +83,7 @@ describe("LoginView", () => {
 				password: "Secret123!",
 				rememberMe: false,
 			});
-			expect(pushMock).toHaveBeenCalledWith("/account");
+			expect(window.location.href).toBe("https://app.example.com");
 		});
 	});
 
@@ -130,7 +131,8 @@ describe("LoginView", () => {
 		const errorAlert = await screen.findByRole("alert", {}, { timeout: 3000 });
 		expect(errorAlert).toBeInTheDocument();
 		expect(errorAlert).toHaveTextContent(/credenciales inválidas/i);
-		expect(pushMock).not.toHaveBeenCalled();
+		// Should not redirect on error
+		expect(window.location.href).toBe("");
 	});
 
 	it("shows default success message when provided", () => {

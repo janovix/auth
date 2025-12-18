@@ -65,7 +65,12 @@ export const Default: Story = {
 };
 
 export const WithRedirect: Story = {
-	render: () => <LoginView signIn={mockSignIn} redirectTo="/dashboard" />,
+	render: () => (
+		<LoginView
+			signIn={mockSignIn}
+			redirectTo="https://app.example.workers.dev/dashboard"
+		/>
+	),
 };
 
 export const WithSuccessMessage: Story = {

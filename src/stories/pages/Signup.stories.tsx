@@ -70,7 +70,7 @@ export const Default: Story = {
 
 export const WithRedirect: Story = {
 	args: {
-		redirectTo: "/dashboard",
+		redirectTo: "https://app.example.workers.dev/dashboard",
 		signUp: mockSignUp,
 	},
 };

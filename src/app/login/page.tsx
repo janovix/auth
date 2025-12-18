@@ -12,7 +12,7 @@ const getRedirect = (
 		return undefined;
 	}
 
-	const value = params.next ?? params.redirectTo;
+	const value = params.redirect_to;
 	return typeof value === "string" ? value : undefined;
 };
 

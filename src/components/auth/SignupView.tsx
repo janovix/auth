@@ -5,6 +5,7 @@ import {
 	type SignUpCredentials,
 	type AuthResult,
 } from "@/lib/auth/authActions";
+import { getAuthRedirectUrl } from "@/lib/auth/redirectConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	Building2,
@@ -17,7 +18,6 @@ import {
 	UserPlus,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
@@ -90,7 +90,6 @@ export const SignupView = ({
 	redirectTo?: string;
 	signUp?: SignUpFn;
 }) => {
-	const router = useRouter();
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -145,7 +144,8 @@ export const SignupView = ({
 		}
 
 		setSuccessMessage("Cuenta creada. Redirigiendo…");
-		router.push(redirectTo || "/account");
+		// Use window.location for external redirects (cross-origin)
+		window.location.href = getAuthRedirectUrl(redirectTo);
 	};
 
 	const isSubmitting = form.formState.isSubmitting;

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
+import { getDefaultRedirectUrl } from "@/lib/auth/redirectConfig";
+
 /**
  * Next.js Middleware for optimistic route protection.
  *
@@ -36,13 +38,14 @@ export function middleware(request: NextRequest) {
 	if (isProtectedRoute && !sessionCookie) {
 		const loginUrl = new URL("/", request.url);
 		// Preserve the original destination for post-login redirect
-		loginUrl.searchParams.set("next", pathname);
+		loginUrl.searchParams.set("redirect_to", pathname);
 		return NextResponse.redirect(loginUrl);
 	}
 
 	// Redirect authenticated users away from auth routes (login, signup, etc.)
 	if (isAuthRoute && sessionCookie) {
-		return NextResponse.redirect(new URL("/account", request.url));
+		// Redirect to the default redirect URL (external app)
+		return NextResponse.redirect(getDefaultRedirectUrl());
 	}
 
 	return NextResponse.next();

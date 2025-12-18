@@ -17,18 +17,18 @@ describe("authCoreConfig", () => {
 	describe("getAuthCoreBaseUrl", () => {
 		it("returns URL from NEXT_PUBLIC_AUTH_CORE_BASE_URL", () => {
 			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
-				"https://auth-svc.janovix.workers.dev";
+				"https://auth-svc.example.workers.dev";
 			global.window = { location: {} } as unknown as Window & typeof globalThis;
 			const url = getAuthCoreBaseUrl();
-			expect(url).toBe("https://auth-svc.janovix.workers.dev");
+			expect(url).toBe("https://auth-svc.example.workers.dev");
 		});
 
 		it("throws error when URL is missing protocol", () => {
 			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
-				"auth-svc.janovix.workers.dev";
+				"auth-svc.example.workers.dev";
 			global.window = { location: {} } as unknown as Window & typeof globalThis;
 			expect(() => getAuthCoreBaseUrl()).toThrow(
-				'NEXT_PUBLIC_AUTH_CORE_BASE_URL must include the protocol (https://). Got: "auth-svc.janovix.workers.dev"',
+				'NEXT_PUBLIC_AUTH_CORE_BASE_URL must include the protocol (https://). Got: "auth-svc.example.workers.dev"',
 			);
 		});
 
@@ -52,7 +52,7 @@ describe("authCoreConfig", () => {
 
 		it("returns dev for .workers.dev URL", () => {
 			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
-				"https://auth-svc.janovix.workers.dev";
+				"https://auth-svc.example.workers.dev";
 			global.window = { location: {} } as unknown as Window & typeof globalThis;
 			const env = getAuthEnvironment();
 			expect(env).toBe("dev");

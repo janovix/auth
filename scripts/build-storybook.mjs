@@ -64,9 +64,9 @@ const env = {
 	// Set default auth core base URL for Storybook builds (must include https://)
 	NEXT_PUBLIC_AUTH_CORE_BASE_URL:
 		process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL ??
-		"https://auth-svc.janovix.workers.dev",
+		"https://auth-svc.example.workers.dev",
 	NEXT_PUBLIC_AUTH_APP_URL:
-		process.env.NEXT_PUBLIC_AUTH_APP_URL ?? "https://auth.janovix.workers.dev",
+		process.env.NEXT_PUBLIC_AUTH_APP_URL ?? "https://auth.example.workers.dev",
 };
 
 const pnpmArgs = [

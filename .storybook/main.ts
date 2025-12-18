@@ -6,8 +6,8 @@ import webpack from "webpack";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Set default environment variables for Storybook builds (must include https://)
-const defaultAuthCoreBaseUrl = "https://auth-svc.janovix.workers.dev";
-const defaultAuthAppUrl = "https://auth.janovix.workers.dev";
+const defaultAuthCoreBaseUrl = "https://auth-svc.example.workers.dev";
+const defaultAuthAppUrl = "https://auth.example.workers.dev";
 if (!process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL) {
 	process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL = defaultAuthCoreBaseUrl;
 }

@@ -6,7 +6,7 @@
  *
  * URLs MUST include the protocol (https://)
  *
- * @returns The base URL for the auth core service (e.g., https://auth-svc.janovix.workers.dev)
+ * @returns The base URL for the auth core service (e.g., https://auth-svc.example.workers.dev)
  */
 export const getAuthCoreBaseUrl = (): string => {
 	const baseUrl = process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL;

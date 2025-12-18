@@ -6,9 +6,6 @@ if (!process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL) {
 	process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
 		"https://auth-svc.janovix.workers.dev";
 }
-if (!process.env.AUTH_CORE_BASE_URL) {
-	process.env.AUTH_CORE_BASE_URL = "https://auth-svc.janovix.workers.dev";
-}
 if (!process.env.NEXT_PUBLIC_AUTH_APP_URL) {
 	process.env.NEXT_PUBLIC_AUTH_APP_URL = "https://auth.janovix.workers.dev";
 }

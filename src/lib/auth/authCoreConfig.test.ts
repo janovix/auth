@@ -15,27 +15,10 @@ describe("authCoreConfig", () => {
 	});
 
 	describe("getAuthCoreBaseUrl", () => {
-		it("returns URL from NEXT_PUBLIC_AUTH_CORE_BASE_URL for client-side", () => {
+		it("returns URL from NEXT_PUBLIC_AUTH_CORE_BASE_URL", () => {
 			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
 				"https://auth-svc.janovix.workers.dev";
-			// Mock window to simulate client-side
 			global.window = { location: {} } as unknown as Window & typeof globalThis;
-			const url = getAuthCoreBaseUrl();
-			expect(url).toBe("https://auth-svc.janovix.workers.dev");
-		});
-
-		it("falls back to AUTH_CORE_BASE_URL when NEXT_PUBLIC is not set", () => {
-			// Delete NEXT_PUBLIC to test fallback behavior
-			delete process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL;
-			process.env.AUTH_CORE_BASE_URL = "https://auth-svc.janovix.ai";
-			const url = getAuthCoreBaseUrl();
-			expect(url).toBe("https://auth-svc.janovix.ai");
-		});
-
-		it("prefers NEXT_PUBLIC_AUTH_CORE_BASE_URL over AUTH_CORE_BASE_URL", () => {
-			process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
-				"https://auth-svc.janovix.workers.dev";
-			process.env.AUTH_CORE_BASE_URL = "https://auth-svc.janovix.ai";
 			const url = getAuthCoreBaseUrl();
 			expect(url).toBe("https://auth-svc.janovix.workers.dev");
 		});
@@ -45,16 +28,15 @@ describe("authCoreConfig", () => {
 				"auth-svc.janovix.workers.dev";
 			global.window = { location: {} } as unknown as Window & typeof globalThis;
 			expect(() => getAuthCoreBaseUrl()).toThrow(
-				'AUTH_CORE_BASE_URL must include the protocol (https://). Got: "auth-svc.janovix.workers.dev"',
+				'NEXT_PUBLIC_AUTH_CORE_BASE_URL must include the protocol (https://). Got: "auth-svc.janovix.workers.dev"',
 			);
 		});
 
 		it("throws error when environment variable is not set", () => {
 			delete process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL;
-			delete process.env.AUTH_CORE_BASE_URL;
 			global.window = { location: {} } as unknown as Window & typeof globalThis;
 			expect(() => getAuthCoreBaseUrl()).toThrow(
-				"AUTH_CORE_BASE_URL or NEXT_PUBLIC_AUTH_CORE_BASE_URL environment variable is not set",
+				"NEXT_PUBLIC_AUTH_CORE_BASE_URL environment variable is not set",
 			);
 		});
 	});

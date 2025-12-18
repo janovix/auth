@@ -65,8 +65,6 @@ const env = {
 	NEXT_PUBLIC_AUTH_CORE_BASE_URL:
 		process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL ??
 		"https://auth-svc.janovix.workers.dev",
-	AUTH_CORE_BASE_URL:
-		process.env.AUTH_CORE_BASE_URL ?? "https://auth-svc.janovix.workers.dev",
 	NEXT_PUBLIC_AUTH_APP_URL:
 		process.env.NEXT_PUBLIC_AUTH_APP_URL ?? "https://auth.janovix.workers.dev",
 };
@@ -114,7 +112,7 @@ function handleChunk(chunk) {
 			if (!successKillTimer) {
 				successKillTimer = setInterval(async () => {
 					if (child.exitCode != null) return;
-					// Once we’ve seen success, 2s of silence is enough to consider it done.
+					// Once we've seen success, 2s of silence is enough to consider it done.
 					if (Date.now() - lastOutputAt >= 2000) {
 						forcedSuccessExit = true;
 						await killProcessTree(child.pid);

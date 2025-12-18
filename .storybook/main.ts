@@ -11,9 +11,6 @@ const defaultAuthAppUrl = "https://auth.janovix.workers.dev";
 if (!process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL) {
 	process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL = defaultAuthCoreBaseUrl;
 }
-if (!process.env.AUTH_CORE_BASE_URL) {
-	process.env.AUTH_CORE_BASE_URL = defaultAuthCoreBaseUrl;
-}
 if (!process.env.NEXT_PUBLIC_AUTH_APP_URL) {
 	process.env.NEXT_PUBLIC_AUTH_APP_URL = defaultAuthAppUrl;
 }
@@ -37,9 +34,6 @@ const config: StorybookConfig = {
 			new webpack.DefinePlugin({
 				"process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL": JSON.stringify(
 					process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL || defaultAuthCoreBaseUrl,
-				),
-				"process.env.AUTH_CORE_BASE_URL": JSON.stringify(
-					process.env.AUTH_CORE_BASE_URL || defaultAuthCoreBaseUrl,
 				),
 				"process.env.NEXT_PUBLIC_AUTH_APP_URL": JSON.stringify(
 					process.env.NEXT_PUBLIC_AUTH_APP_URL || defaultAuthAppUrl,

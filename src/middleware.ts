@@ -27,24 +27,17 @@ export function middleware(request: NextRequest) {
 	const sessionCookie = getSessionCookie(request);
 
 	// Define route protection rules
-	const isProtectedRoute = pathname.startsWith("/account");
-	const isAuthRoute =
-		pathname === "/" ||
-		pathname.startsWith("/login") ||
-		pathname.startsWith("/signup") ||
-		pathname.startsWith("/recover");
+	const isAccountRoute = pathname.startsWith("/account");
 
-	// Redirect unauthenticated users away from protected routes
-	if (isProtectedRoute && !sessionCookie) {
-		const loginUrl = new URL("/", request.url);
-		// Preserve the original destination for post-login redirect
-		loginUrl.searchParams.set("redirect_to", pathname);
+	// Redirect unauthenticated users away from account routes
+	if (isAccountRoute && !sessionCookie) {
+		const loginUrl = new URL("/login", request.url);
 		return NextResponse.redirect(loginUrl);
 	}
 
-	// Redirect authenticated users away from auth routes (login, signup, etc.)
-	if (isAuthRoute && sessionCookie) {
-		// Redirect to the default redirect URL (external app)
+	// Redirect authenticated users to the default redirect URL
+	// (except for /account which is the only allowed route for authenticated users in this app)
+	if (!isAccountRoute && sessionCookie) {
 		return NextResponse.redirect(getDefaultRedirectUrl());
 	}
 
@@ -52,6 +45,8 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-	// Apply middleware to protected and auth routes
-	matcher: ["/account/:path*", "/", "/login", "/signup", "/recover/:path*"],
+	// Apply middleware to all routes except static files and api
+	matcher: [
+		"/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+	],
 };

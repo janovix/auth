@@ -1,11 +1,12 @@
 "use client";
 
+import { signOut } from "@/lib/auth/authActions";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { AlertTriangle, Clock4, LogOut, User } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import {
 	Badge,
@@ -16,6 +17,7 @@ import {
 	CardFooter,
 	CardHeader,
 	CardTitle,
+	Spinner,
 } from "@/components/ui";
 import {
 	getAuthCoreBaseUrl,
@@ -56,9 +58,21 @@ const formatExpiresIn = (value?: string | Date) => {
 export const AccountView = () => {
 	const session = useAuthSession();
 	const data = session.data;
+	const [isLoggingOut, setIsLoggingOut] = useState(false);
 
 	const environment = useMemo(() => getAuthEnvironment(), []);
 	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
+
+	const handleLogout = useCallback(async () => {
+		setIsLoggingOut(true);
+		try {
+			await signOut();
+			// Redirect to login page after logout
+			window.location.href = "/login";
+		} catch {
+			setIsLoggingOut(false);
+		}
+	}, []);
 
 	if (!data) {
 		return (
@@ -162,14 +176,18 @@ export const AccountView = () => {
 						</div>
 					</CardContent>
 					<CardFooter className="flex flex-wrap gap-3">
-						<Button asChild>
-							<Link href="/logout">
-								<LogOut className="h-4 w-4" aria-hidden="true" />
-								Cerrar sesión
-							</Link>
-						</Button>
-						<Button variant="outline" asChild>
-							<Link href="/login">Cambiar de usuario</Link>
+						<Button onClick={handleLogout} disabled={isLoggingOut}>
+							{isLoggingOut ? (
+								<>
+									<Spinner className="h-4 w-4" aria-hidden="true" />
+									Cerrando sesión...
+								</>
+							) : (
+								<>
+									<LogOut className="h-4 w-4" aria-hidden="true" />
+									Cerrar sesión
+								</>
+							)}
 						</Button>
 					</CardFooter>
 				</Card>

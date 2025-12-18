@@ -1,13 +1,13 @@
 "use client";
 
 /**
- * Local auth actions for the auth app.
+ * Auth actions using Better Auth client.
  *
- * These functions make direct fetch calls to the auth service and update
- * the local session store. This approach is simpler and doesn't have
- * code-splitting issues.
+ * Uses Better Auth client for core auth operations, and direct fetch
+ * for password recovery (not exposed in client).
  */
 
+import { authClient } from "./authClient";
 import { getAuthCoreBaseUrl } from "./authCoreConfig";
 import { setSession, clearSession } from "./sessionStore";
 import type {
@@ -21,102 +21,65 @@ import type {
 export type { Session, SignInCredentials, SignUpCredentials, AuthResult };
 
 /**
- * Response type from Better Auth sign-in/sign-up endpoints.
- * Note: Better Auth returns user + token, not the full session object.
+ * Helper to convert Better Auth session response to our Session type.
  */
-type SignInResponse = {
-	redirect: boolean;
-	token: string;
+function toSession(data: {
 	user: {
 		id: string;
 		name: string;
 		email: string;
-		image: string | null;
+		image?: string | null;
 		emailVerified: boolean;
-		createdAt: string;
-		updatedAt: string;
-	};
-};
-
-/**
- * Response type from Better Auth get-session endpoint.
- */
-type GetSessionResponse = {
-	user: {
-		id: string;
-		name: string;
-		email: string;
-		image: string | null;
-		emailVerified: boolean;
-		createdAt: string;
-		updatedAt: string;
+		createdAt: Date;
+		updatedAt: Date;
 	};
 	session: {
 		id: string;
 		userId: string;
 		token: string;
-		expiresAt: string;
-		createdAt: string;
-		updatedAt: string;
-		ipAddress?: string;
-		userAgent?: string;
+		expiresAt: Date;
+		createdAt: Date;
+		updatedAt: Date;
+		ipAddress?: string | null;
+		userAgent?: string | null;
 	};
-} | null;
-
-/**
- * Error response type from Better Auth.
- */
-type ErrorResponse = {
-	message?: string;
-	error?: string;
-};
-
-/**
- * Fetches the full session after sign-in/sign-up.
- * Better Auth's sign-in only returns user + token, so we need to fetch
- * the full session to get session details (id, expiresAt, etc).
- */
-async function fetchFullSession(baseUrl: string): Promise<Session> {
-	try {
-		const response = await fetch(`${baseUrl}/api/auth/get-session`, {
-			method: "GET",
-			credentials: "include",
-		});
-
-		if (!response.ok) {
-			return null;
-		}
-
-		const data = (await response.json()) as GetSessionResponse;
-
-		if (!data || !data.user || !data.session) {
-			return null;
-		}
-
-		return {
-			user: {
-				id: data.user.id,
-				name: data.user.name,
-				email: data.user.email,
-				image: data.user.image,
-				emailVerified: data.user.emailVerified,
-				createdAt: new Date(data.user.createdAt),
-				updatedAt: new Date(data.user.updatedAt),
-			},
-			session: {
-				id: data.session.id,
-				userId: data.session.userId,
-				token: data.session.token,
-				expiresAt: new Date(data.session.expiresAt),
-				createdAt: new Date(data.session.createdAt),
-				updatedAt: new Date(data.session.updatedAt),
-				ipAddress: data.session.ipAddress,
-				userAgent: data.session.userAgent,
-			},
-		};
-	} catch {
-		return null;
-	}
+}): Session {
+	return {
+		user: {
+			id: data.user.id,
+			name: data.user.name,
+			email: data.user.email,
+			image: data.user.image ?? null,
+			emailVerified: data.user.emailVerified,
+			createdAt:
+				data.user.createdAt instanceof Date
+					? data.user.createdAt
+					: new Date(data.user.createdAt),
+			updatedAt:
+				data.user.updatedAt instanceof Date
+					? data.user.updatedAt
+					: new Date(data.user.updatedAt),
+		},
+		session: {
+			id: data.session.id,
+			userId: data.session.userId,
+			token: data.session.token,
+			expiresAt:
+				data.session.expiresAt instanceof Date
+					? data.session.expiresAt
+					: new Date(data.session.expiresAt),
+			createdAt:
+				data.session.createdAt instanceof Date
+					? data.session.createdAt
+					: new Date(data.session.createdAt),
+			updatedAt:
+				data.session.updatedAt instanceof Date
+					? data.session.updatedAt
+					: new Date(data.session.updatedAt),
+			ipAddress: data.session.ipAddress ?? undefined,
+			userAgent: data.session.userAgent ?? undefined,
+		},
+	};
 }
 
 /**
@@ -127,41 +90,36 @@ async function fetchFullSession(baseUrl: string): Promise<Session> {
 export async function signIn(
 	credentials: SignInCredentials,
 ): Promise<AuthResult> {
-	const baseUrl = getAuthCoreBaseUrl();
-	const url = `${baseUrl}/api/auth/sign-in/email`;
-
 	try {
-		const response = await fetch(url, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			credentials: "include",
-			body: JSON.stringify({
-				email: credentials.email,
-				password: credentials.password,
-				rememberMe: credentials.rememberMe ?? false,
-			}),
+		const result = await authClient.signIn.email({
+			email: credentials.email,
+			password: credentials.password,
+			rememberMe: credentials.rememberMe ?? false,
 		});
 
-		if (!response.ok) {
-			const errorData = (await response
-				.json()
-				.catch(() => ({}))) as ErrorResponse;
-			const message = errorData.message || errorData.error || "Sign in failed";
+		if (result.error) {
 			return {
 				success: false,
 				data: null,
-				error: new Error(message),
+				error: new Error(result.error.message || "Sign in failed"),
 			};
 		}
 
-		// Sign-in was successful, now fetch the full session
-		const session = await fetchFullSession(baseUrl);
+		// Fetch full session after sign-in
+		const sessionResult = await authClient.getSession();
 
-		if (session) {
-			setSession(session);
+		if (sessionResult.error || !sessionResult.data) {
+			// Sign-in succeeded but couldn't get session
+			// User is still authenticated via cookies
+			return {
+				success: true,
+				data: null,
+				error: null,
+			};
 		}
+
+		const session = toSession(sessionResult.data);
+		setSession(session);
 
 		return {
 			success: true,
@@ -185,42 +143,36 @@ export async function signIn(
 export async function signUp(
 	credentials: SignUpCredentials,
 ): Promise<AuthResult> {
-	const baseUrl = getAuthCoreBaseUrl();
-	const url = `${baseUrl}/api/auth/sign-up/email`;
-
 	try {
-		const response = await fetch(url, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			credentials: "include",
-			body: JSON.stringify({
-				email: credentials.email,
-				password: credentials.password,
-				name: credentials.name,
-				image: credentials.image,
-			}),
+		const result = await authClient.signUp.email({
+			email: credentials.email,
+			password: credentials.password,
+			name: credentials.name,
+			image: credentials.image,
 		});
 
-		if (!response.ok) {
-			const errorData = (await response
-				.json()
-				.catch(() => ({}))) as ErrorResponse;
-			const message = errorData.message || errorData.error || "Sign up failed";
+		if (result.error) {
 			return {
 				success: false,
 				data: null,
-				error: new Error(message),
+				error: new Error(result.error.message || "Sign up failed"),
 			};
 		}
 
-		// Sign-up was successful, now fetch the full session
-		const session = await fetchFullSession(baseUrl);
+		// Fetch full session after sign-up
+		const sessionResult = await authClient.getSession();
 
-		if (session) {
-			setSession(session);
+		if (sessionResult.error || !sessionResult.data) {
+			// Sign-up succeeded but couldn't get session
+			return {
+				success: true,
+				data: null,
+				error: null,
+			};
 		}
+
+		const session = toSession(sessionResult.data);
+		setSession(session);
 
 		return {
 			success: true,
@@ -242,30 +194,17 @@ export async function signUp(
  * Automatically clears the session store.
  */
 export async function signOut(): Promise<AuthResult<null>> {
-	const baseUrl = getAuthCoreBaseUrl();
-	const url = `${baseUrl}/api/auth/sign-out`;
-
 	try {
-		const response = await fetch(url, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			credentials: "include",
-		});
+		const result = await authClient.signOut();
 
-		// Clear session regardless of response (user wants to sign out)
+		// Clear session regardless of result
 		clearSession();
 
-		if (!response.ok) {
-			const errorData = (await response
-				.json()
-				.catch(() => ({}))) as ErrorResponse;
-			const message = errorData.message || errorData.error || "Sign out failed";
+		if (result.error) {
 			return {
 				success: false,
 				data: null,
-				error: new Error(message),
+				error: new Error(result.error.message || "Sign out failed"),
 			};
 		}
 
@@ -275,7 +214,7 @@ export async function signOut(): Promise<AuthResult<null>> {
 			error: null,
 		};
 	} catch (err) {
-		// Still clear session even on network error
+		// Still clear session even on error
 		clearSession();
 		return {
 			success: false,
@@ -286,27 +225,36 @@ export async function signOut(): Promise<AuthResult<null>> {
 }
 
 /**
+ * Error response type from Better Auth.
+ */
+type ErrorResponse = {
+	message?: string;
+	error?: string;
+};
+
+/**
  * Sends a password recovery email to the specified address.
+ *
+ * Note: Uses direct fetch as Better Auth client doesn't expose this method.
  */
 export async function recoverPassword(
 	email: string,
 ): Promise<AuthResult<{ message: string }>> {
-	const baseUrl = getAuthCoreBaseUrl();
-
-	// Get current origin for redirect URL
-	const redirectTo =
-		typeof window !== "undefined"
-			? `${window.location.origin}/recover/reset`
-			: `${process.env.NEXT_PUBLIC_AUTH_APP_URL}/recover/reset`;
-
-	const url = `${baseUrl}/api/auth/forget-password`;
-
 	try {
-		const response = await fetch(url, {
+		const baseUrl = getAuthCoreBaseUrl();
+
+		// Get current origin for redirect URL
+		const redirectTo =
+			typeof window !== "undefined"
+				? `${window.location.origin}/recover/reset`
+				: `${process.env.NEXT_PUBLIC_AUTH_APP_URL}/recover/reset`;
+
+		const response = await fetch(`${baseUrl}/api/auth/forget-password`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
+			credentials: "include",
 			body: JSON.stringify({
 				email,
 				redirectTo,
@@ -342,20 +290,22 @@ export async function recoverPassword(
 
 /**
  * Resets the user's password using a recovery token.
+ *
+ * Note: Uses direct fetch as Better Auth client doesn't expose this method.
  */
 export async function resetPassword(
 	token: string,
 	newPassword: string,
 ): Promise<AuthResult<{ message: string }>> {
-	const baseUrl = getAuthCoreBaseUrl();
-	const url = `${baseUrl}/api/auth/reset-password`;
-
 	try {
-		const response = await fetch(url, {
+		const baseUrl = getAuthCoreBaseUrl();
+
+		const response = await fetch(`${baseUrl}/api/auth/reset-password`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
+			credentials: "include",
 			body: JSON.stringify({
 				token,
 				newPassword,

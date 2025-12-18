@@ -1,3 +1,10 @@
+# [1.1.0-rc.7](https://github.com/janovix/auth/compare/v1.1.0-rc.6...v1.1.0-rc.7) (2025-12-18)
+
+
+### Features
+
+* add redirect_to param and NEXT_PUBLIC_AUTH_REDIRECT_URL support ([ccef396](https://github.com/janovix/auth/commit/ccef3960ca09ee2279742f9de27c30fce1f45d55))
+
 # [1.1.0-rc.6](https://github.com/janovix/auth/compare/v1.1.0-rc.5...v1.1.0-rc.6) (2025-12-17)
 
 

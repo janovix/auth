@@ -24,11 +24,4 @@
 	//
 	// For dev/preview deployments, use this wrangler.jsonc
 	// For production, use wrangler.prod.jsonc with production URLs
-	"vars": {
-		// Auth service URL (auth-svc worker)
-		"AUTH_CORE_BASE_URL": "https://auth-svc.janovix.workers.dev",
-		"NEXT_PUBLIC_AUTH_CORE_BASE_URL": "https://auth-svc.janovix.workers.dev",
-		// This auth app's URL (for password recovery redirects, etc.)
-		"NEXT_PUBLIC_AUTH_APP_URL": "https://auth.janovix.workers.dev",
-	},
 }

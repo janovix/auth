@@ -2,8 +2,8 @@ import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
 
 // Set default environment variables for tests (must include https://)
-if (!process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL) {
-	process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL =
+if (!process.env.NEXT_PUBLIC_AUTH_SERVICE_URL) {
+	process.env.NEXT_PUBLIC_AUTH_SERVICE_URL =
 		"https://auth-svc.example.workers.dev";
 }
 if (!process.env.NEXT_PUBLIC_AUTH_APP_URL) {

@@ -12,7 +12,7 @@ Integrate Better Auth session management in this Next.js app for Cloudflare Work
 FIRST: Remove any existing session/auth management (SessionGuard components, auth context providers, protected route wrappers). We use middleware-only protection.
 
 ENVIRONMENT VARIABLES (add to .env.local or build stage in cloudflare dashboard):
-NEXT_PUBLIC_AUTH_CORE_BASE_URL=https://auth-svc.example.workers.dev
+NEXT_PUBLIC_AUTH_SERVICE_URL=https://auth-svc.example.workers.dev
 NEXT_PUBLIC_AUTH_APP_URL=https://auth.example.workers.dev
 
 INSTALL DEPENDENCIES:
@@ -22,7 +22,7 @@ CREATE src/lib/auth/ WITH THESE FILES:
 
 config.ts:
 export const getAuthCoreBaseUrl = (): string => {
-  return process.env.NEXT_PUBLIC_AUTH_CORE_BASE_URL || "https://auth-svc.example.workers.dev";
+  return process.env.NEXT_PUBLIC_AUTH_SERVICE_URL || "https://auth-svc.example.workers.dev";
 };
 export const getAuthAppUrl = (): string => {
   return process.env.NEXT_PUBLIC_AUTH_APP_URL || "https://auth.example.workers.dev";

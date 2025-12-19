@@ -1,3 +1,10 @@
+# [1.1.0-rc.8](https://github.com/janovix/auth/compare/v1.1.0-rc.7...v1.1.0-rc.8) (2025-12-19)
+
+
+### Bug Fixes
+
+* **middleware:** validate session with auth service ([e8e7c80](https://github.com/janovix/auth/commit/e8e7c802be91e1e8e271c724444f051ab8b4eaf2))
+
 # [1.1.0-rc.7](https://github.com/janovix/auth/compare/v1.1.0-rc.6...v1.1.0-rc.7) (2025-12-18)
 
 

@@ -1,22 +1,11 @@
 import type { Preview } from "@storybook/react";
 import { useEffect } from "react";
 
-import "../src/app/globals.css";
+// Import setup file to initialize router mocks before any components render
+import "./setup";
 
-export const globalTypes = {
-	theme: {
-		description: "Global theme for components (light/dark)",
-		defaultValue: "light",
-		toolbar: {
-			icon: "mirror",
-			items: [
-				{ value: "light", title: "Light" },
-				{ value: "dark", title: "Dark" },
-			],
-			dynamicTitle: true,
-		},
-	},
-};
+import "../src/app/globals.css";
+import { mockRouter } from "../src/stories/mocks/router";
 
 const preview: Preview = {
 	parameters: {
@@ -30,6 +19,9 @@ const preview: Preview = {
 		backgrounds: {
 			default: "app",
 			values: [{ name: "app", value: "transparent" }],
+		},
+		nextjs: {
+			router: mockRouter,
 		},
 	},
 	decorators: [

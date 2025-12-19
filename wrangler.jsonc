@@ -16,4 +16,12 @@
 		"enabled": true,
 	},
 	"upload_source_maps": true,
+	// Environment variables for auth configuration
+	// URLs MUST include the protocol (https://)
+	//
+	// NEXT_PUBLIC_* = Build-time variables (inlined into client JS)
+	// Regular vars = Runtime variables (available server-side)
+	//
+	// For dev/preview deployments, use this wrangler.jsonc
+	// For production, use wrangler.prod.jsonc with production URLs
 }

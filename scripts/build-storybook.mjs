@@ -61,6 +61,15 @@ const env = {
 	STORYBOOK_CRASH_REPORTS_DISABLED:
 		process.env.STORYBOOK_CRASH_REPORTS_DISABLED ?? "1",
 	NODE_OPTIONS: process.env.NODE_OPTIONS ?? "--max_old_space_size=4096",
+	// Set default auth URLs for Storybook builds (must include https://)
+	NEXT_PUBLIC_AUTH_SERVICE_URL:
+		process.env.NEXT_PUBLIC_AUTH_SERVICE_URL ??
+		"https://auth-svc.example.workers.dev",
+	NEXT_PUBLIC_AUTH_APP_URL:
+		process.env.NEXT_PUBLIC_AUTH_APP_URL ?? "https://auth.example.workers.dev",
+	NEXT_PUBLIC_AUTH_REDIRECT_URL:
+		process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL ??
+		"https://app.example.workers.dev",
 };
 
 const pnpmArgs = [
@@ -106,7 +115,7 @@ function handleChunk(chunk) {
 			if (!successKillTimer) {
 				successKillTimer = setInterval(async () => {
 					if (child.exitCode != null) return;
-					// Once we’ve seen success, 2s of silence is enough to consider it done.
+					// Once we've seen success, 2s of silence is enough to consider it done.
 					if (Date.now() - lastOutputAt >= 2000) {
 						forcedSuccessExit = true;
 						await killProcessTree(child.pid);

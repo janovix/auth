@@ -1,3 +1,10 @@
+# [1.1.0-rc.9](https://github.com/janovix/auth/compare/v1.1.0-rc.8...v1.1.0-rc.9) (2025-12-19)
+
+
+### Bug Fixes
+
+* update password reset to use Better Auth client methods ([76c9938](https://github.com/janovix/auth/commit/76c99380108bc800cc04f31f8efa34be877601dd))
+
 # [1.1.0-rc.8](https://github.com/janovix/auth/compare/v1.1.0-rc.7...v1.1.0-rc.8) (2025-12-19)
 
 

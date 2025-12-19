@@ -68,15 +68,19 @@ export const ResetPasswordView = ({
 	token,
 	resetPassword = localResetPassword,
 	redirectDelayMs = 1800,
+	initialError,
 }: {
 	token: string | null;
 	resetPassword?: ResetPasswordFn;
 	redirectDelayMs?: number;
+	initialError?: string | null;
 }) => {
 	const router = useRouter();
 	const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-	const [serverError, setServerError] = useState<string | null>(null);
+	const [serverError, setServerError] = useState<string | null>(
+		initialError ?? null,
+	);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 	// Always use dark theme for logo to show white letters (matching previous behavior)
 	const logoTheme = "dark" as const;

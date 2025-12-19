@@ -3,12 +3,11 @@
 /**
  * Auth actions using Better Auth client.
  *
- * Uses Better Auth client for core auth operations, and direct fetch
- * for password recovery (not exposed in client).
+ * All authentication operations use the Better Auth client instance
+ * configured in authClient.ts.
  */
 
 import { authClient } from "./authClient";
-import { getAuthCoreBaseUrl } from "./authCoreConfig";
 import { setSession, clearSession } from "./sessionStore";
 import type {
 	Session,
@@ -225,52 +224,31 @@ export async function signOut(): Promise<AuthResult<null>> {
 }
 
 /**
- * Error response type from Better Auth.
- */
-type ErrorResponse = {
-	message?: string;
-	error?: string;
-};
-
-/**
  * Sends a password recovery email to the specified address.
  *
- * Note: Uses direct fetch as Better Auth client doesn't expose this method.
+ * Uses Better Auth client's requestPasswordReset method.
+ * See: https://www.better-auth.com/docs/authentication/email-password#request-password-reset
  */
 export async function recoverPassword(
 	email: string,
 ): Promise<AuthResult<{ message: string }>> {
 	try {
-		const baseUrl = getAuthCoreBaseUrl();
-
 		// Get current origin for redirect URL
 		const redirectTo =
 			typeof window !== "undefined"
 				? `${window.location.origin}/recover/reset`
 				: `${process.env.NEXT_PUBLIC_AUTH_APP_URL}/recover/reset`;
 
-		const response = await fetch(`${baseUrl}/api/auth/forget-password`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			credentials: "include",
-			body: JSON.stringify({
-				email,
-				redirectTo,
-			}),
+		const result = await authClient.requestPasswordReset({
+			email,
+			redirectTo,
 		});
 
-		if (!response.ok) {
-			const errorData = (await response
-				.json()
-				.catch(() => ({}))) as ErrorResponse;
-			const message =
-				errorData.message || errorData.error || "Password recovery failed";
+		if (result.error) {
 			return {
 				success: false,
 				data: null,
-				error: new Error(message),
+				error: new Error(result.error.message || "Password recovery failed"),
 			};
 		}
 
@@ -291,37 +269,24 @@ export async function recoverPassword(
 /**
  * Resets the user's password using a recovery token.
  *
- * Note: Uses direct fetch as Better Auth client doesn't expose this method.
+ * Uses Better Auth client's resetPassword method.
+ * See: https://www.better-auth.com/docs/authentication/email-password#request-password-reset
  */
 export async function resetPassword(
 	token: string,
 	newPassword: string,
 ): Promise<AuthResult<{ message: string }>> {
 	try {
-		const baseUrl = getAuthCoreBaseUrl();
-
-		const response = await fetch(`${baseUrl}/api/auth/reset-password`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			credentials: "include",
-			body: JSON.stringify({
-				token,
-				newPassword,
-			}),
+		const result = await authClient.resetPassword({
+			token,
+			newPassword,
 		});
 
-		if (!response.ok) {
-			const errorData = (await response
-				.json()
-				.catch(() => ({}))) as ErrorResponse;
-			const message =
-				errorData.message || errorData.error || "Password reset failed";
+		if (result.error) {
 			return {
 				success: false,
 				data: null,
-				error: new Error(message),
+				error: new Error(result.error.message || "Password reset failed"),
 			};
 		}
 

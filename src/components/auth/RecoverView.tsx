@@ -91,7 +91,7 @@ export const RecoverView = ({
 	}, [cooldownSeconds]);
 
 	const startCooldown = useCallback(() => {
-		setCooldownSeconds(60);
+		setCooldownSeconds(30);
 	}, []);
 
 	// Always use dark theme for logo to show white letters (matching previous behavior)
@@ -134,7 +134,7 @@ export const RecoverView = ({
 		}
 
 		setSuccessMessage(
-			"Revisa tu bandeja de entrada y spam. Si no recibes el correo, puedes solicitar uno nuevo después de unos minutos.",
+			"Revisa tu bandeja de entrada y spam. Si no recibes el correo, puedes solicitar uno nuevo después de unos segundos.",
 		);
 		resetTurnstile();
 		startCooldown();

@@ -97,10 +97,15 @@ export async function signIn(
 		});
 
 		if (result.error) {
+			// Preserve error status and message for email verification handling
+			const error = new Error(result.error.message || "Sign in failed");
+			if (result.error.status) {
+				(error as Error & { status?: number }).status = result.error.status;
+			}
 			return {
 				success: false,
 				data: null,
-				error: new Error(result.error.message || "Sign in failed"),
+				error,
 			};
 		}
 
@@ -311,6 +316,57 @@ export async function resetPassword(
 			success: false,
 			data: null,
 			error: err instanceof Error ? err : new Error("Password reset failed"),
+		};
+	}
+}
+
+/**
+ * Sends an email verification link to the specified email address.
+ *
+ * Uses Better Auth client's sendVerificationEmail method.
+ * See: https://www.better-auth.com/docs/authentication/email-verification
+ *
+ * @param email - The email address to send the verification link to
+ * @param callbackURL - The URL to redirect to after verification (defaults to login page)
+ */
+export async function sendVerificationEmail(
+	email: string,
+	callbackURL?: string,
+): Promise<AuthResult<{ message: string }>> {
+	try {
+		const defaultCallbackURL =
+			typeof window !== "undefined"
+				? `${window.location.origin}/verify?success=true`
+				: `${process.env.NEXT_PUBLIC_AUTH_APP_URL}/verify?success=true`;
+
+		const result = await authClient.sendVerificationEmail({
+			email,
+			callbackURL: callbackURL || defaultCallbackURL,
+		});
+
+		if (result.error) {
+			return {
+				success: false,
+				data: null,
+				error: new Error(
+					result.error.message || "Failed to send verification email",
+				),
+			};
+		}
+
+		return {
+			success: true,
+			data: { message: "Verification email sent" },
+			error: null,
+		};
+	} catch (err) {
+		return {
+			success: false,
+			data: null,
+			error:
+				err instanceof Error
+					? err
+					: new Error("Failed to send verification email"),
 		};
 	}
 }

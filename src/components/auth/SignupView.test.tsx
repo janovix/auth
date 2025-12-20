@@ -53,7 +53,7 @@ describe("SignupView", () => {
 						image: null,
 						createdAt: new Date(),
 						updatedAt: new Date(),
-						emailVerified: false,
+						emailVerified: true, // Already verified - should redirect immediately
 					},
 					session: {
 						id: "session-123",

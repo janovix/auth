@@ -2,6 +2,7 @@
 
 import {
 	signUp as localSignUp,
+	sendVerificationEmail,
 	type SignUpCredentials,
 	type AuthResult,
 } from "@/lib/auth/authActions";
@@ -92,6 +93,11 @@ export const SignupView = ({
 }) => {
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+	const [needsVerification, setNeedsVerification] = useState(false);
+	const [userEmail, setUserEmail] = useState<string | null>(null);
+	const [isResending, setIsResending] = useState(false);
+	const [resendMessage, setResendMessage] = useState<string | null>(null);
+	const [resendError, setResendError] = useState<string | null>(null);
 
 	// Always use dark theme for logo to show white letters (matching previous behavior)
 	const logoTheme = "dark" as const;
@@ -130,11 +136,15 @@ export const SignupView = ({
 	const handleSubmit = async (values: SignupValues) => {
 		setServerError(null);
 		setSuccessMessage(null);
+		setNeedsVerification(false);
+		setResendMessage(null);
+		setResendError(null);
 
+		const email = values.email.trim();
 		const name = `${values.firstName.trim()} ${values.lastName.trim()}`.trim();
 		const result = await signUp({
 			name,
-			email: values.email.trim(),
+			email,
 			password: values.password,
 		});
 
@@ -143,9 +153,46 @@ export const SignupView = ({
 			return;
 		}
 
+		// Check if email verification is needed
+		if (result.data?.user.emailVerified === false) {
+			setNeedsVerification(true);
+			setUserEmail(email);
+			setSuccessMessage(
+				"Cuenta creada exitosamente. Por favor verifica tu correo electrónico.",
+			);
+			return;
+		}
+
 		setSuccessMessage("Cuenta creada. Redirigiendo…");
 		// Use window.location for external redirects (cross-origin)
 		window.location.href = getAuthRedirectUrl(redirectTo);
+	};
+
+	const handleResendVerification = async () => {
+		if (!userEmail) {
+			return;
+		}
+
+		setIsResending(true);
+		setResendMessage(null);
+		setResendError(null);
+
+		const result = await sendVerificationEmail(
+			userEmail,
+			`${window.location.origin}/verify?success=true`,
+		);
+
+		if (!result.success) {
+			setResendError(
+				result.error?.message || "Error al reenviar el correo de verificación",
+			);
+		} else {
+			setResendMessage(
+				"Correo de verificación reenviado. Revisa tu bandeja de entrada.",
+			);
+		}
+
+		setIsResending(false);
 	};
 
 	const isSubmitting = form.formState.isSubmitting;
@@ -164,11 +211,58 @@ export const SignupView = ({
 				</CardHeader>
 				<CardContent>
 					{successMessage ? (
-						<Alert role="status" className="mb-6">
-							<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-							<AlertTitle>Cuenta creada exitosamente</AlertTitle>
-							<AlertDescription>{successMessage}</AlertDescription>
-						</Alert>
+						<div className="mb-6 space-y-4">
+							<Alert role="status">
+								<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+								<AlertTitle>Cuenta creada exitosamente</AlertTitle>
+								<AlertDescription>{successMessage}</AlertDescription>
+							</Alert>
+							{needsVerification && userEmail ? (
+								<div className="space-y-3">
+									<Alert>
+										<Mail className="h-4 w-4" aria-hidden="true" />
+										<AlertTitle>Verifica tu correo electrónico</AlertTitle>
+										<AlertDescription>
+											Hemos enviado un enlace de verificación a{" "}
+											<strong>{userEmail}</strong>. Por favor, revisa tu bandeja
+											de entrada y haz clic en el enlace para verificar tu
+											cuenta.
+										</AlertDescription>
+									</Alert>
+									<Button
+										onClick={handleResendVerification}
+										disabled={isResending}
+										variant="outline"
+										className="w-full"
+									>
+										<Mail className="mr-2 h-4 w-4" />
+										{isResending
+											? "Enviando..."
+											: "Reenviar correo de verificación"}
+									</Button>
+									{resendMessage && (
+										<Alert role="status">
+											<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+											<AlertDescription>{resendMessage}</AlertDescription>
+										</Alert>
+									)}
+									{resendError && (
+										<Alert variant="destructive" role="alert">
+											<AlertDescription>{resendError}</AlertDescription>
+										</Alert>
+									)}
+									<div className="text-center text-sm text-muted-foreground">
+										¿Ya verificaste tu correo?{" "}
+										<Link
+											href="/login"
+											className="text-primary underline-offset-4 hover:underline"
+										>
+											Inicia sesión
+										</Link>
+									</div>
+								</div>
+							) : null}
+						</div>
 					) : null}
 
 					{serverError && !successMessage ? (

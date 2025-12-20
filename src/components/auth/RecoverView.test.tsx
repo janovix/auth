@@ -167,4 +167,46 @@ describe("RecoverView", () => {
 
 	// Note: With the SDK, the recoverPassword function handles errors internally
 	// and always returns AuthResult, so we don't test rejected promises.
+
+	describe("cooldown timer", () => {
+		it("disables the button with countdown after successful submission", async () => {
+			const recoverPassword = createRecoverPassword();
+			vi.mocked(recoverPassword).mockResolvedValue({
+				success: true,
+				data: { message: "Email enviado" },
+				error: null,
+			});
+
+			renderWithTheme(<RecoverView recoverPassword={recoverPassword} />);
+			const user = userEvent.setup();
+
+			await waitFor(() => {
+				const forms = screen.getAllByTestId("recover-form");
+				expect(forms.length).toBeGreaterThan(0);
+			});
+
+			const forms = screen.getAllByTestId("recover-form");
+			const form = forms[forms.length - 1];
+
+			const emailInputs = screen.getAllByLabelText(/correo/i);
+			await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
+			fireEvent.submit(form);
+
+			await waitFor(() => {
+				expect(recoverPassword).toHaveBeenCalled();
+			});
+
+			// Button should now show the cooldown
+			await waitFor(() => {
+				const submitButtons = screen.getAllByRole("button");
+				const submitButton = submitButtons.find(
+					(btn) =>
+						btn.textContent?.includes("Reenviar en") ||
+						btn.textContent?.includes("60s"),
+				);
+				expect(submitButton).toBeDefined();
+				expect(submitButton).toBeDisabled();
+			});
+		});
+	});
 });

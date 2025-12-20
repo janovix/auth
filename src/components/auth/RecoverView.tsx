@@ -14,7 +14,7 @@ import {
 	ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -68,10 +68,31 @@ export const RecoverView = ({
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 	const [turnstileToken, setTurnstileToken] = useState<string>("");
 	const [turnstileError, setTurnstileError] = useState<string | null>(null);
+	const [cooldownSeconds, setCooldownSeconds] = useState<number>(0);
 	const turnstileRef = useRef<TurnstileInstance>(null);
 
 	// Turnstile is only enabled if site key is configured
 	const isTurnstileEnabled = !!turnstileSiteKey;
+
+	// Cooldown timer effect
+	useEffect(() => {
+		if (cooldownSeconds <= 0) return;
+
+		const timer = setInterval(() => {
+			setCooldownSeconds((prev) => {
+				if (prev <= 1) {
+					return 0;
+				}
+				return prev - 1;
+			});
+		}, 1000);
+
+		return () => clearInterval(timer);
+	}, [cooldownSeconds]);
+
+	const startCooldown = useCallback(() => {
+		setCooldownSeconds(60);
+	}, []);
 
 	// Always use dark theme for logo to show white letters (matching previous behavior)
 	const logoTheme = "dark" as const;
@@ -116,11 +137,13 @@ export const RecoverView = ({
 			"Revisa tu bandeja de entrada y spam. Si no recibes el correo, puedes solicitar uno nuevo después de unos minutos.",
 		);
 		resetTurnstile();
+		startCooldown();
 	};
 
 	const isSubmitting = form.formState.isSubmitting;
+	const isCooldownActive = cooldownSeconds > 0;
 	const isButtonDisabled =
-		isSubmitting || (isTurnstileEnabled && !turnstileToken);
+		isSubmitting || isCooldownActive || (isTurnstileEnabled && !turnstileToken);
 
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6 w-full">
@@ -260,6 +283,10 @@ export const RecoverView = ({
 													aria-hidden="true"
 												/>
 												Enviando enlace...
+											</span>
+										) : isCooldownActive ? (
+											<span className="flex items-center justify-center gap-2">
+												Reenviar en {cooldownSeconds}s
 											</span>
 										) : (
 											<>

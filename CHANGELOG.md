@@ -1,3 +1,10 @@
+# [1.1.0-rc.12](https://github.com/janovix/auth/compare/v1.1.0-rc.11...v1.1.0-rc.12) (2025-12-20)
+
+
+### Features
+
+* add email verification UI support ([0e6178e](https://github.com/janovix/auth/commit/0e6178e31eeeb9f4468b31881e6a5016174aa8d3))
+
 # [1.1.0-rc.11](https://github.com/janovix/auth/compare/v1.1.0-rc.10...v1.1.0-rc.11) (2025-12-20)
 
 

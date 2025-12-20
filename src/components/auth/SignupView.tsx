@@ -19,7 +19,8 @@ import {
 	UserPlus,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 
@@ -84,6 +85,8 @@ const signupSchema = z
 type SignupValues = z.infer<typeof signupSchema>;
 type SignUpFn = (credentials: SignUpCredentials) => Promise<AuthResult>;
 
+const VERIFICATION_REDIRECT_DELAY_SECONDS = 10;
+
 export const SignupView = ({
 	redirectTo,
 	signUp = localSignUp,
@@ -91,6 +94,9 @@ export const SignupView = ({
 	redirectTo?: string;
 	signUp?: SignUpFn;
 }) => {
+	const router = useRouter();
+	const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 	const [needsVerification, setNeedsVerification] = useState(false);
@@ -98,9 +104,37 @@ export const SignupView = ({
 	const [isResending, setIsResending] = useState(false);
 	const [resendMessage, setResendMessage] = useState<string | null>(null);
 	const [resendError, setResendError] = useState<string | null>(null);
+	const [redirectCountdown, setRedirectCountdown] = useState<number>(0);
 
 	// Always use dark theme for logo to show white letters (matching previous behavior)
 	const logoTheme = "dark" as const;
+
+	// Cleanup redirect timeout on unmount
+	useEffect(() => {
+		return () => {
+			if (redirectTimeoutRef.current) {
+				clearTimeout(redirectTimeoutRef.current);
+			}
+		};
+	}, []);
+
+	// Countdown effect for verification redirect
+	useEffect(() => {
+		if (!needsVerification || redirectCountdown <= 0) return;
+
+		const timer = setInterval(() => {
+			setRedirectCountdown((prev) => {
+				if (prev <= 1) {
+					// Redirect to login when countdown reaches 0
+					router.push("/login");
+					return 0;
+				}
+				return prev - 1;
+			});
+		}, 1000);
+
+		return () => clearInterval(timer);
+	}, [needsVerification, redirectCountdown, router]);
 
 	const form = useForm<SignupValues>({
 		resolver: zodResolver(signupSchema),
@@ -160,6 +194,8 @@ export const SignupView = ({
 			setSuccessMessage(
 				"Se ha enviado un email de verificación a tu correo. Deberás verificar tu correo antes de iniciar sesión.",
 			);
+			// Start countdown to redirect to login
+			setRedirectCountdown(VERIFICATION_REDIRECT_DELAY_SECONDS);
 			return;
 		}
 
@@ -255,13 +291,29 @@ export const SignupView = ({
 											<AlertDescription>{resendError}</AlertDescription>
 										</Alert>
 									)}
+									{/* Countdown and redirect info */}
+									<div className="rounded-lg border border-dashed border-primary/20 bg-muted/40 p-4 text-center text-sm">
+										{redirectCountdown > 0 ? (
+											<p className="text-muted-foreground">
+												Serás redirigido al inicio de sesión en{" "}
+												<strong className="text-foreground">
+													{redirectCountdown} segundo
+													{redirectCountdown !== 1 ? "s" : ""}
+												</strong>
+											</p>
+										) : (
+											<p className="text-muted-foreground">
+												Redirigiendo al inicio de sesión...
+											</p>
+										)}
+									</div>
 									<div className="text-center text-sm text-muted-foreground">
 										¿Ya verificaste tu correo?{" "}
 										<Link
 											href="/login"
-											className="text-primary underline-offset-4 hover:underline"
+											className="font-medium text-primary underline-offset-4 hover:underline"
 										>
-											Inicia sesión
+											Ir a iniciar sesión ahora
 										</Link>
 									</div>
 								</div>

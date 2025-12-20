@@ -1,3 +1,10 @@
+# [1.1.0-rc.11](https://github.com/janovix/auth/compare/v1.1.0-rc.10...v1.1.0-rc.11) (2025-12-20)
+
+
+### Features
+
+* **auth:** add 60s cooldown timer on password reset request ([bca6da2](https://github.com/janovix/auth/commit/bca6da21820778f29b055b56a563d772b602eff5))
+
 # [1.1.0-rc.10](https://github.com/janovix/auth/compare/v1.1.0-rc.9...v1.1.0-rc.10) (2025-12-20)
 
 

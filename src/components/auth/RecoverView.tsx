@@ -77,7 +77,7 @@ export const RecoverView = ({
 		}
 
 		setSuccessMessage(
-			"Si la cuenta existe, te enviaremos un correo con instrucciones para recuperar el acceso.",
+			"Revisa tu bandeja de entrada y spam. Si no recibes el correo, puedes solicitar uno nuevo después de unos minutos.",
 		);
 	};
 
@@ -104,13 +104,7 @@ export const RecoverView = ({
 						>
 							<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
 							<AlertTitle>Solicitud enviada</AlertTitle>
-							<AlertDescription>
-								{successMessage}
-								<span className="mt-2 block text-xs text-muted-foreground">
-									Revisa tu bandeja de entrada y spam. Si no recibes el correo,
-									puedes solicitar uno nuevo después de unos minutos.
-								</span>
-							</AlertDescription>
+							<AlertDescription>{successMessage}</AlertDescription>
 						</Alert>
 					) : null}
 

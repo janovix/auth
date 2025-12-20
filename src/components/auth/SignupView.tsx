@@ -158,7 +158,7 @@ export const SignupView = ({
 			setNeedsVerification(true);
 			setUserEmail(email);
 			setSuccessMessage(
-				"Cuenta creada exitosamente. Por favor verifica tu correo electrónico.",
+				"Se ha enviado un email de verificación a tu correo. Deberás verificar tu correo antes de iniciar sesión.",
 			);
 			return;
 		}
@@ -214,7 +214,11 @@ export const SignupView = ({
 						<div className="mb-6 space-y-4">
 							<Alert role="status">
 								<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-								<AlertTitle>Cuenta creada exitosamente</AlertTitle>
+								<AlertTitle>
+									{needsVerification
+										? "Cuenta creada — Verificación pendiente"
+										: "Cuenta creada exitosamente"}
+								</AlertTitle>
 								<AlertDescription>{successMessage}</AlertDescription>
 							</Alert>
 							{needsVerification && userEmail ? (
@@ -224,9 +228,9 @@ export const SignupView = ({
 										<AlertTitle>Verifica tu correo electrónico</AlertTitle>
 										<AlertDescription>
 											Hemos enviado un enlace de verificación a{" "}
-											<strong>{userEmail}</strong>. Por favor, revisa tu bandeja
-											de entrada y haz clic en el enlace para verificar tu
-											cuenta.
+											<strong>{userEmail}</strong>. Revisa tu bandeja de entrada
+											(y la carpeta de spam) y haz clic en el enlace para
+											verificar tu cuenta antes de iniciar sesión.
 										</AlertDescription>
 									</Alert>
 									<Button

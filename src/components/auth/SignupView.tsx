@@ -187,8 +187,9 @@ export const SignupView = ({
 			return;
 		}
 
-		// Check if email verification is needed
-		if (result.data?.user.emailVerified === false) {
+		// Check if email verification is needed (emailVerified can be false, null, or undefined)
+		const isEmailVerified = result.data?.user.emailVerified === true;
+		if (!isEmailVerified) {
 			setNeedsVerification(true);
 			setUserEmail(email);
 			setSuccessMessage(
@@ -199,6 +200,7 @@ export const SignupView = ({
 			return;
 		}
 
+		// Email is already verified, redirect immediately
 		setSuccessMessage("Cuenta creada. Redirigiendo…");
 		// Use window.location for external redirects (cross-origin)
 		window.location.href = getAuthRedirectUrl(redirectTo);

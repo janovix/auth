@@ -1,3 +1,10 @@
+# [1.1.0-rc.10](https://github.com/janovix/auth/compare/v1.1.0-rc.9...v1.1.0-rc.10) (2025-12-20)
+
+
+### Features
+
+* add Turnstile widget to password recovery form ([609b15d](https://github.com/janovix/auth/commit/609b15d1226500a35b7e6338f18353831e10d27b))
+
 # [1.1.0-rc.9](https://github.com/janovix/auth/compare/v1.1.0-rc.8...v1.1.0-rc.9) (2025-12-19)
 
 

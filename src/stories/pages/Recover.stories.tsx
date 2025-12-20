@@ -9,6 +9,7 @@ import { mockRouter } from "../mocks/router";
 // Mock recoverPassword function that returns immediately with success
 const mockRecoverPassword = async (
 	_email: string,
+	_turnstileToken?: string,
 ): Promise<AuthResult<{ message: string }>> => {
 	return Promise.resolve({
 		success: true,
@@ -16,6 +17,9 @@ const mockRecoverPassword = async (
 		error: null,
 	});
 };
+
+// Demo Turnstile site key (Cloudflare's test key that always passes)
+const DEMO_TURNSTILE_SITE_KEY = "1x00000000000000000000AA";
 
 const meta: Meta<typeof RecoverView> = {
 	title: "Pages/Auth/Recover",
@@ -44,4 +48,14 @@ type Story = StoryObj<typeof RecoverView>;
 
 export const Default: Story = {
 	render: () => <RecoverView recoverPassword={mockRecoverPassword} />,
+};
+
+export const WithTurnstile: Story = {
+	name: "With Turnstile Verification",
+	render: () => (
+		<RecoverView
+			recoverPassword={mockRecoverPassword}
+			turnstileSiteKey={DEMO_TURNSTILE_SITE_KEY}
+		/>
+	),
 };

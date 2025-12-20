@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom/vitest";
+import React from "react";
 import { vi } from "vitest";
 
 // Set default environment variables for tests (must include https://)
@@ -12,6 +13,24 @@ if (!process.env.NEXT_PUBLIC_AUTH_APP_URL) {
 if (!process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL) {
 	process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL = "https://app.example.workers.dev";
 }
+
+// Mock Turnstile component for tests
+vi.mock("@marsidev/react-turnstile", () => ({
+	Turnstile: vi.fn(({ onSuccess, siteKey }) => {
+		// Auto-verify in tests by calling onSuccess after a brief delay
+		React.useEffect(() => {
+			if (onSuccess) {
+				const timer = setTimeout(() => onSuccess("mock-turnstile-token"), 50);
+				return () => clearTimeout(timer);
+			}
+		}, [onSuccess]);
+
+		return React.createElement("div", {
+			"data-testid": "turnstile-widget",
+			"data-site-key": siteKey,
+		});
+	}),
+}));
 
 // Mock ResizeObserver for tests
 global.ResizeObserver = class ResizeObserver {

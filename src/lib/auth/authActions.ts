@@ -226,11 +226,15 @@ export async function signOut(): Promise<AuthResult<null>> {
 /**
  * Sends a password recovery email to the specified address.
  *
- * Uses Better Auth client's requestPasswordReset method.
+ * Uses Better Auth client's requestPasswordReset method with Turnstile verification.
  * See: https://www.better-auth.com/docs/authentication/email-password#request-password-reset
+ *
+ * @param email - The email address to send the recovery link to
+ * @param turnstileToken - Optional Cloudflare Turnstile token for bot protection
  */
 export async function recoverPassword(
 	email: string,
+	turnstileToken?: string,
 ): Promise<AuthResult<{ message: string }>> {
 	try {
 		// Get current origin for redirect URL
@@ -242,6 +246,13 @@ export async function recoverPassword(
 		const result = await authClient.requestPasswordReset({
 			email,
 			redirectTo,
+			fetchOptions: turnstileToken
+				? {
+						body: {
+							turnstileToken,
+						},
+					}
+				: undefined,
 		});
 
 		if (result.error) {

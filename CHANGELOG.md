@@ -1,3 +1,10 @@
+# [1.1.0-rc.17](https://github.com/janovix/auth/compare/v1.1.0-rc.16...v1.1.0-rc.17) (2025-12-20)
+
+
+### Bug Fixes
+
+* **signup:** hide form fields after successful signup with verification ([fcf26fc](https://github.com/janovix/auth/commit/fcf26fce6f68011b05959bad2e8c1f3a79c9f013))
+
 # [1.1.0-rc.16](https://github.com/janovix/auth/compare/v1.1.0-rc.15...v1.1.0-rc.16) (2025-12-20)
 
 

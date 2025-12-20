@@ -1,3 +1,10 @@
+# [1.1.0-rc.15](https://github.com/janovix/auth/compare/v1.1.0-rc.14...v1.1.0-rc.15) (2025-12-20)
+
+
+### Features
+
+* **signup:** add 10s countdown before redirect to login after signup ([2fe25ce](https://github.com/janovix/auth/commit/2fe25ce7fb39588e0fdcc87d94e8e008a8f93efa))
+
 # [1.1.0-rc.14](https://github.com/janovix/auth/compare/v1.1.0-rc.13...v1.1.0-rc.14) (2025-12-20)
 
 

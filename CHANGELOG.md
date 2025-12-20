@@ -1,3 +1,10 @@
+# [1.1.0-rc.16](https://github.com/janovix/auth/compare/v1.1.0-rc.15...v1.1.0-rc.16) (2025-12-20)
+
+
+### Bug Fixes
+
+* **verify:** add /verify to auth layout for consistent styling ([02b1c14](https://github.com/janovix/auth/commit/02b1c145eabccc71fdba79dc294c4a2d123be843))
+
 # [1.1.0-rc.15](https://github.com/janovix/auth/compare/v1.1.0-rc.14...v1.1.0-rc.15) (2025-12-20)
 
 

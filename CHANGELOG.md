@@ -1,3 +1,10 @@
+# [1.1.0-rc.13](https://github.com/janovix/auth/compare/v1.1.0-rc.12...v1.1.0-rc.13) (2025-12-20)
+
+
+### Bug Fixes
+
+* add __name polyfill for next-themes esbuild compatibility ([98336f6](https://github.com/janovix/auth/commit/98336f6c0f064a72b633fafb949d91c93d967269))
+
 # [1.1.0-rc.12](https://github.com/janovix/auth/compare/v1.1.0-rc.11...v1.1.0-rc.12) (2025-12-20)
 
 

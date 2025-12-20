@@ -1,3 +1,10 @@
+# [1.1.0-rc.14](https://github.com/janovix/auth/compare/v1.1.0-rc.13...v1.1.0-rc.14) (2025-12-20)
+
+
+### Features
+
+* **auth:** improve verify email UI and signup verification message ([e8314ff](https://github.com/janovix/auth/commit/e8314ff26626f2125807e7150d4e2cae7e13c1a9))
+
 # [1.1.0-rc.13](https://github.com/janovix/auth/compare/v1.1.0-rc.12...v1.1.0-rc.13) (2025-12-20)
 
 

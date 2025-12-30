@@ -13,6 +13,19 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 
 import { SignupView } from "./SignupView";
 
+// Mock next/navigation
+const mockPush = vi.fn();
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		push: mockPush,
+		refresh: vi.fn(),
+		back: vi.fn(),
+		forward: vi.fn(),
+		replace: vi.fn(),
+		prefetch: vi.fn(),
+	}),
+}));
+
 // Mock window.location
 const originalLocation = window.location;
 
@@ -27,6 +40,7 @@ const createSignUp = (): SignUpFn => vi.fn();
 describe("SignupView", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockPush.mockClear();
 		// Mock window.location.href as a writable property
 		Object.defineProperty(window, "location", {
 			value: { ...originalLocation, href: "" },
@@ -53,7 +67,7 @@ describe("SignupView", () => {
 						image: null,
 						createdAt: new Date(),
 						updatedAt: new Date(),
-						emailVerified: false,
+						emailVerified: true, // Already verified - should redirect immediately
 					},
 					session: {
 						id: "session-123",

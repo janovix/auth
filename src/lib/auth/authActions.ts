@@ -3,12 +3,11 @@
 /**
  * Auth actions using Better Auth client.
  *
- * Uses Better Auth client for core auth operations, and direct fetch
- * for password recovery (not exposed in client).
+ * All authentication operations use the Better Auth client instance
+ * configured in authClient.ts.
  */
 
 import { authClient } from "./authClient";
-import { getAuthCoreBaseUrl } from "./authCoreConfig";
 import { setSession, clearSession } from "./sessionStore";
 import type {
 	Session,
@@ -98,10 +97,15 @@ export async function signIn(
 		});
 
 		if (result.error) {
+			// Preserve error status and message for email verification handling
+			const error = new Error(result.error.message || "Sign in failed");
+			if (result.error.status) {
+				(error as Error & { status?: number }).status = result.error.status;
+			}
 			return {
 				success: false,
 				data: null,
-				error: new Error(result.error.message || "Sign in failed"),
+				error,
 			};
 		}
 
@@ -225,52 +229,42 @@ export async function signOut(): Promise<AuthResult<null>> {
 }
 
 /**
- * Error response type from Better Auth.
- */
-type ErrorResponse = {
-	message?: string;
-	error?: string;
-};
-
-/**
  * Sends a password recovery email to the specified address.
  *
- * Note: Uses direct fetch as Better Auth client doesn't expose this method.
+ * Uses Better Auth client's requestPasswordReset method with Turnstile verification.
+ * See: https://www.better-auth.com/docs/authentication/email-password#request-password-reset
+ *
+ * @param email - The email address to send the recovery link to
+ * @param turnstileToken - Optional Cloudflare Turnstile token for bot protection
  */
 export async function recoverPassword(
 	email: string,
+	turnstileToken?: string,
 ): Promise<AuthResult<{ message: string }>> {
 	try {
-		const baseUrl = getAuthCoreBaseUrl();
-
 		// Get current origin for redirect URL
 		const redirectTo =
 			typeof window !== "undefined"
 				? `${window.location.origin}/recover/reset`
 				: `${process.env.NEXT_PUBLIC_AUTH_APP_URL}/recover/reset`;
 
-		const response = await fetch(`${baseUrl}/api/auth/forget-password`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			credentials: "include",
-			body: JSON.stringify({
-				email,
-				redirectTo,
-			}),
+		const result = await authClient.requestPasswordReset({
+			email,
+			redirectTo,
+			fetchOptions: turnstileToken
+				? {
+						body: {
+							turnstileToken,
+						},
+					}
+				: undefined,
 		});
 
-		if (!response.ok) {
-			const errorData = (await response
-				.json()
-				.catch(() => ({}))) as ErrorResponse;
-			const message =
-				errorData.message || errorData.error || "Password recovery failed";
+		if (result.error) {
 			return {
 				success: false,
 				data: null,
-				error: new Error(message),
+				error: new Error(result.error.message || "Password recovery failed"),
 			};
 		}
 
@@ -291,37 +285,24 @@ export async function recoverPassword(
 /**
  * Resets the user's password using a recovery token.
  *
- * Note: Uses direct fetch as Better Auth client doesn't expose this method.
+ * Uses Better Auth client's resetPassword method.
+ * See: https://www.better-auth.com/docs/authentication/email-password#request-password-reset
  */
 export async function resetPassword(
 	token: string,
 	newPassword: string,
 ): Promise<AuthResult<{ message: string }>> {
 	try {
-		const baseUrl = getAuthCoreBaseUrl();
-
-		const response = await fetch(`${baseUrl}/api/auth/reset-password`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			credentials: "include",
-			body: JSON.stringify({
-				token,
-				newPassword,
-			}),
+		const result = await authClient.resetPassword({
+			token,
+			newPassword,
 		});
 
-		if (!response.ok) {
-			const errorData = (await response
-				.json()
-				.catch(() => ({}))) as ErrorResponse;
-			const message =
-				errorData.message || errorData.error || "Password reset failed";
+		if (result.error) {
 			return {
 				success: false,
 				data: null,
-				error: new Error(message),
+				error: new Error(result.error.message || "Password reset failed"),
 			};
 		}
 
@@ -335,6 +316,57 @@ export async function resetPassword(
 			success: false,
 			data: null,
 			error: err instanceof Error ? err : new Error("Password reset failed"),
+		};
+	}
+}
+
+/**
+ * Sends an email verification link to the specified email address.
+ *
+ * Uses Better Auth client's sendVerificationEmail method.
+ * See: https://www.better-auth.com/docs/authentication/email-verification
+ *
+ * @param email - The email address to send the verification link to
+ * @param callbackURL - The URL to redirect to after verification (defaults to login page)
+ */
+export async function sendVerificationEmail(
+	email: string,
+	callbackURL?: string,
+): Promise<AuthResult<{ message: string }>> {
+	try {
+		const defaultCallbackURL =
+			typeof window !== "undefined"
+				? `${window.location.origin}/verify?success=true`
+				: `${process.env.NEXT_PUBLIC_AUTH_APP_URL}/verify?success=true`;
+
+		const result = await authClient.sendVerificationEmail({
+			email,
+			callbackURL: callbackURL || defaultCallbackURL,
+		});
+
+		if (result.error) {
+			return {
+				success: false,
+				data: null,
+				error: new Error(
+					result.error.message || "Failed to send verification email",
+				),
+			};
+		}
+
+		return {
+			success: true,
+			data: { message: "Verification email sent" },
+			error: null,
+		};
+	} catch (err) {
+		return {
+			success: false,
+			data: null,
+			error:
+				err instanceof Error
+					? err
+					: new Error("Failed to send verification email"),
 		};
 	}
 }

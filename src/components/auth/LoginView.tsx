@@ -2,6 +2,7 @@
 
 import {
 	signIn as localSignIn,
+	sendVerificationEmail,
 	type SignInCredentials,
 	type AuthResult,
 } from "@/lib/auth/authActions";
@@ -75,6 +76,11 @@ export const LoginView = ({
 	const [successMessage, setSuccessMessage] = useState<string | null>(
 		defaultSuccessMessage ?? null,
 	);
+	const [needsVerification, setNeedsVerification] = useState(false);
+	const [userEmail, setUserEmail] = useState<string | null>(null);
+	const [isResending, setIsResending] = useState(false);
+	const [resendMessage, setResendMessage] = useState<string | null>(null);
+	const [resendError, setResendError] = useState<string | null>(null);
 
 	// Always use dark theme for logo to show white letters (matching previous behavior)
 	const logoTheme = "dark" as const;
@@ -91,21 +97,67 @@ export const LoginView = ({
 	const handleSubmit = async (values: LoginValues) => {
 		setServerError(null);
 		setSuccessMessage(null);
+		setNeedsVerification(false);
+		setResendMessage(null);
+		setResendError(null);
 
+		const email = values.email.trim();
 		const result = await signIn({
-			email: values.email.trim(),
+			email,
 			password: values.password,
 			rememberMe: values.rememberMe,
 		});
 
 		if (!result.success) {
-			setServerError(getAuthErrorMessage(result.error));
+			// Check if error is due to unverified email (403 status)
+			const error = result.error;
+			if (
+				error &&
+				typeof error === "object" &&
+				"status" in error &&
+				error.status === 403
+			) {
+				setNeedsVerification(true);
+				setUserEmail(email);
+				setServerError(
+					"Por favor verifica tu correo electrónico antes de iniciar sesión.",
+				);
+			} else {
+				setServerError(getAuthErrorMessage(result.error));
+			}
 			return;
 		}
 
 		setSuccessMessage("Acceso validado. Redirigiendo…");
 		// Use window.location for external redirects (cross-origin)
 		window.location.href = getAuthRedirectUrl(redirectTo);
+	};
+
+	const handleResendVerification = async () => {
+		if (!userEmail) {
+			return;
+		}
+
+		setIsResending(true);
+		setResendMessage(null);
+		setResendError(null);
+
+		const result = await sendVerificationEmail(
+			userEmail,
+			`${window.location.origin}/verify?success=true`,
+		);
+
+		if (!result.success) {
+			setResendError(
+				result.error?.message || "Error al reenviar el correo de verificación",
+			);
+		} else {
+			setResendMessage(
+				"Correo de verificación reenviado. Revisa tu bandeja de entrada.",
+			);
+		}
+
+		setIsResending(false);
 	};
 
 	const isSubmitting = form.formState.isSubmitting;
@@ -132,10 +184,38 @@ export const LoginView = ({
 					) : null}
 
 					{serverError && !successMessage ? (
-						<Alert variant="destructive" role="alert" className="mb-6">
-							<AlertTitle>Error de autenticación</AlertTitle>
-							<AlertDescription>{serverError}</AlertDescription>
-						</Alert>
+						<div className="mb-6 space-y-4">
+							<Alert variant="destructive" role="alert">
+								<AlertTitle>Error de autenticación</AlertTitle>
+								<AlertDescription>{serverError}</AlertDescription>
+							</Alert>
+							{needsVerification && userEmail ? (
+								<div className="space-y-3">
+									<Button
+										onClick={handleResendVerification}
+										disabled={isResending}
+										variant="outline"
+										className="w-full"
+									>
+										<Mail className="mr-2 h-4 w-4" />
+										{isResending
+											? "Enviando..."
+											: "Reenviar correo de verificación"}
+									</Button>
+									{resendMessage && (
+										<Alert role="status">
+											<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+											<AlertDescription>{resendMessage}</AlertDescription>
+										</Alert>
+									)}
+									{resendError && (
+										<Alert variant="destructive" role="alert">
+											<AlertDescription>{resendError}</AlertDescription>
+										</Alert>
+									)}
+								</div>
+							) : null}
+						</div>
 					) : null}
 
 					<Form {...form}>

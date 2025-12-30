@@ -44,6 +44,76 @@
 * Mock next/navigation for Storybook ([9383c12](https://github.com/janovix/auth/commit/9383c1250511db9c89ffa786cfe60aadc805347b))
 * updated layout and visuals, added animated background ([27b1314](https://github.com/janovix/auth/commit/27b1314acf502c5754f313ced16e3526df5e929a))
 
+# [1.1.0-rc.17](https://github.com/janovix/auth/compare/v1.1.0-rc.16...v1.1.0-rc.17) (2025-12-20)
+
+
+### Bug Fixes
+
+* **signup:** hide form fields after successful signup with verification ([fcf26fc](https://github.com/janovix/auth/commit/fcf26fce6f68011b05959bad2e8c1f3a79c9f013))
+
+# [1.1.0-rc.16](https://github.com/janovix/auth/compare/v1.1.0-rc.15...v1.1.0-rc.16) (2025-12-20)
+
+
+### Bug Fixes
+
+* **verify:** add /verify to auth layout for consistent styling ([02b1c14](https://github.com/janovix/auth/commit/02b1c145eabccc71fdba79dc294c4a2d123be843))
+
+# [1.1.0-rc.15](https://github.com/janovix/auth/compare/v1.1.0-rc.14...v1.1.0-rc.15) (2025-12-20)
+
+
+### Features
+
+* **signup:** add 10s countdown before redirect to login after signup ([2fe25ce](https://github.com/janovix/auth/commit/2fe25ce7fb39588e0fdcc87d94e8e008a8f93efa))
+
+# [1.1.0-rc.14](https://github.com/janovix/auth/compare/v1.1.0-rc.13...v1.1.0-rc.14) (2025-12-20)
+
+
+### Features
+
+* **auth:** improve verify email UI and signup verification message ([e8314ff](https://github.com/janovix/auth/commit/e8314ff26626f2125807e7150d4e2cae7e13c1a9))
+
+# [1.1.0-rc.13](https://github.com/janovix/auth/compare/v1.1.0-rc.12...v1.1.0-rc.13) (2025-12-20)
+
+
+### Bug Fixes
+
+* add __name polyfill for next-themes esbuild compatibility ([98336f6](https://github.com/janovix/auth/commit/98336f6c0f064a72b633fafb949d91c93d967269))
+
+# [1.1.0-rc.12](https://github.com/janovix/auth/compare/v1.1.0-rc.11...v1.1.0-rc.12) (2025-12-20)
+
+
+### Features
+
+* add email verification UI support ([0e6178e](https://github.com/janovix/auth/commit/0e6178e31eeeb9f4468b31881e6a5016174aa8d3))
+
+# [1.1.0-rc.11](https://github.com/janovix/auth/compare/v1.1.0-rc.10...v1.1.0-rc.11) (2025-12-20)
+
+
+### Features
+
+* **auth:** add 60s cooldown timer on password reset request ([bca6da2](https://github.com/janovix/auth/commit/bca6da21820778f29b055b56a563d772b602eff5))
+
+# [1.1.0-rc.10](https://github.com/janovix/auth/compare/v1.1.0-rc.9...v1.1.0-rc.10) (2025-12-20)
+
+
+### Features
+
+* add Turnstile widget to password recovery form ([609b15d](https://github.com/janovix/auth/commit/609b15d1226500a35b7e6338f18353831e10d27b))
+
+# [1.1.0-rc.9](https://github.com/janovix/auth/compare/v1.1.0-rc.8...v1.1.0-rc.9) (2025-12-19)
+
+
+### Bug Fixes
+
+* update password reset to use Better Auth client methods ([76c9938](https://github.com/janovix/auth/commit/76c99380108bc800cc04f31f8efa34be877601dd))
+
+# [1.1.0-rc.8](https://github.com/janovix/auth/compare/v1.1.0-rc.7...v1.1.0-rc.8) (2025-12-19)
+
+
+### Bug Fixes
+
+* **middleware:** validate session with auth service ([e8e7c80](https://github.com/janovix/auth/commit/e8e7c802be91e1e8e271c724444f051ab8b4eaf2))
+
 # [1.1.0-rc.7](https://github.com/janovix/auth/compare/v1.1.0-rc.6...v1.1.0-rc.7) (2025-12-18)
 
 

@@ -5,9 +5,16 @@ import {
 	type AuthResult,
 } from "@/lib/auth/authActions";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, CheckCircle2, Mail, MailCheck } from "lucide-react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import {
+	ArrowLeft,
+	CheckCircle2,
+	Mail,
+	MailCheck,
+	ShieldCheck,
+} from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -45,15 +52,47 @@ const recoverSchema = z.object({
 });
 
 type RecoverValues = z.infer<typeof recoverSchema>;
-type RecoverFn = (email: string) => Promise<AuthResult<{ message: string }>>;
+type RecoverFn = (
+	email: string,
+	turnstileToken?: string,
+) => Promise<AuthResult<{ message: string }>>;
 
 export const RecoverView = ({
 	recoverPassword = localRecoverPassword,
+	turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
 }: {
 	recoverPassword?: RecoverFn;
+	turnstileSiteKey?: string;
 } = {}) => {
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
+	const [turnstileToken, setTurnstileToken] = useState<string>("");
+	const [turnstileError, setTurnstileError] = useState<string | null>(null);
+	const [cooldownSeconds, setCooldownSeconds] = useState<number>(0);
+	const turnstileRef = useRef<TurnstileInstance>(null);
+
+	// Turnstile is only enabled if site key is configured
+	const isTurnstileEnabled = !!turnstileSiteKey;
+
+	// Cooldown timer effect
+	useEffect(() => {
+		if (cooldownSeconds <= 0) return;
+
+		const timer = setInterval(() => {
+			setCooldownSeconds((prev) => {
+				if (prev <= 1) {
+					return 0;
+				}
+				return prev - 1;
+			});
+		}, 1000);
+
+		return () => clearInterval(timer);
+	}, [cooldownSeconds]);
+
+	const startCooldown = useCallback(() => {
+		setCooldownSeconds(30);
+	}, []);
 
 	// Always use dark theme for logo to show white letters (matching previous behavior)
 	const logoTheme = "dark" as const;
@@ -65,23 +104,46 @@ export const RecoverView = ({
 		},
 	});
 
+	const resetTurnstile = () => {
+		setTurnstileToken("");
+		setTurnstileError(null);
+		if (turnstileRef.current?.reset) {
+			turnstileRef.current.reset();
+		}
+	};
+
 	const handleSubmit = async (values: RecoverValues) => {
 		setServerError(null);
 		setSuccessMessage(null);
 
-		const result = await recoverPassword(values.email.trim());
+		// Validate Turnstile if enabled
+		if (isTurnstileEnabled && !turnstileToken) {
+			setServerError("Por favor, completa la verificación de seguridad.");
+			return;
+		}
+
+		const result = await recoverPassword(
+			values.email.trim(),
+			isTurnstileEnabled ? turnstileToken : undefined,
+		);
 
 		if (!result.success) {
 			setServerError(getAuthErrorMessage(result.error));
+			resetTurnstile();
 			return;
 		}
 
 		setSuccessMessage(
-			"Si la cuenta existe, te enviaremos un correo con instrucciones para recuperar el acceso.",
+			"Revisa tu bandeja de entrada y spam. Si no recibes el correo, puedes solicitar uno nuevo después de unos segundos.",
 		);
+		resetTurnstile();
+		startCooldown();
 	};
 
 	const isSubmitting = form.formState.isSubmitting;
+	const isCooldownActive = cooldownSeconds > 0;
+	const isButtonDisabled =
+		isSubmitting || isCooldownActive || (isTurnstileEnabled && !turnstileToken);
 
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6 w-full">
@@ -104,13 +166,7 @@ export const RecoverView = ({
 						>
 							<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
 							<AlertTitle>Solicitud enviada</AlertTitle>
-							<AlertDescription>
-								{successMessage}
-								<span className="mt-2 block text-xs text-muted-foreground">
-									Revisa tu bandeja de entrada y spam. Si no recibes el correo,
-									puedes solicitar uno nuevo después de unos minutos.
-								</span>
-							</AlertDescription>
+							<AlertDescription>{successMessage}</AlertDescription>
 						</Alert>
 					) : null}
 
@@ -176,11 +232,48 @@ export const RecoverView = ({
 									</div>
 								</Field>
 
+								{isTurnstileEnabled ? (
+									<Field>
+										<div className="flex flex-col items-center gap-2">
+											<div className="flex items-center gap-2 text-sm text-muted-foreground">
+												<ShieldCheck className="h-4 w-4" aria-hidden="true" />
+												<span>Verificación de seguridad</span>
+											</div>
+											<Turnstile
+												ref={turnstileRef}
+												siteKey={turnstileSiteKey!}
+												onSuccess={(token) => {
+													setTurnstileToken(token);
+													setTurnstileError(null);
+												}}
+												onError={() => {
+													setTurnstileError(
+														"Error en la verificación. Intenta de nuevo.",
+													);
+													setTurnstileToken("");
+												}}
+												onExpire={() => {
+													setTurnstileToken("");
+												}}
+												options={{
+													theme: "auto",
+													size: "normal",
+												}}
+											/>
+											{turnstileError && (
+												<p className="text-sm text-destructive">
+													{turnstileError}
+												</p>
+											)}
+										</div>
+									</Field>
+								) : null}
+
 								<Field>
 									<Button
 										type="submit"
 										className="w-full"
-										disabled={isSubmitting}
+										disabled={isButtonDisabled}
 										aria-busy={isSubmitting}
 									>
 										{isSubmitting ? (
@@ -190,6 +283,10 @@ export const RecoverView = ({
 													aria-hidden="true"
 												/>
 												Enviando enlace...
+											</span>
+										) : isCooldownActive ? (
+											<span className="flex items-center justify-center gap-2">
+												Reenviar en {cooldownSeconds}s
 											</span>
 										) : (
 											<>

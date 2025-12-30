@@ -102,7 +102,8 @@ export default function ClientLayout({
 		pathname === "/" ||
 		pathname.startsWith("/login") ||
 		pathname.startsWith("/signup") ||
-		pathname.startsWith("/recover");
+		pathname.startsWith("/recover") ||
+		pathname.startsWith("/verify");
 
 	return (
 		<ThemeProvider>

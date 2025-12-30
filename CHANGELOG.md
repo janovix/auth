@@ -1,3 +1,24 @@
+# [1.2.0-rc.1](https://github.com/janovix/auth/compare/v1.1.0...v1.2.0-rc.1) (2025-12-30)
+
+
+### Bug Fixes
+
+* add __name polyfill for next-themes esbuild compatibility ([98336f6](https://github.com/janovix/auth/commit/98336f6c0f064a72b633fafb949d91c93d967269))
+* **middleware:** validate session with auth service ([e8e7c80](https://github.com/janovix/auth/commit/e8e7c802be91e1e8e271c724444f051ab8b4eaf2))
+* **signup:** hide form fields after successful signup with verification ([fcf26fc](https://github.com/janovix/auth/commit/fcf26fce6f68011b05959bad2e8c1f3a79c9f013))
+* update password reset to use Better Auth client methods ([76c9938](https://github.com/janovix/auth/commit/76c99380108bc800cc04f31f8efa34be877601dd))
+* **verify:** add /verify to auth layout for consistent styling ([02b1c14](https://github.com/janovix/auth/commit/02b1c145eabccc71fdba79dc294c4a2d123be843))
+
+
+### Features
+
+* add email verification UI support ([0e6178e](https://github.com/janovix/auth/commit/0e6178e31eeeb9f4468b31881e6a5016174aa8d3))
+* add Turnstile widget to password recovery form ([609b15d](https://github.com/janovix/auth/commit/609b15d1226500a35b7e6338f18353831e10d27b))
+* **auth:** add 60s cooldown timer on password reset request ([bca6da2](https://github.com/janovix/auth/commit/bca6da21820778f29b055b56a563d772b602eff5))
+* **auth:** improve verify email UI and signup verification message ([e8314ff](https://github.com/janovix/auth/commit/e8314ff26626f2125807e7150d4e2cae7e13c1a9))
+* **auth:** integrate organizationClient plugin into authClient configuration ([b0d608d](https://github.com/janovix/auth/commit/b0d608d4af233489a31fbc759b1be098835b7340))
+* **signup:** add 10s countdown before redirect to login after signup ([2fe25ce](https://github.com/janovix/auth/commit/2fe25ce7fb39588e0fdcc87d94e8e008a8f93efa))
+
 # [1.1.0](https://github.com/janovix/auth/compare/v1.0.0...v1.1.0) (2025-12-19)
 
 

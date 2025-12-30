@@ -1,6 +1,7 @@
 "use client";
 
 import { createAuthClient } from "better-auth/client";
+import { organizationClient } from "better-auth/client/plugins";
 
 import { getAuthCoreBaseUrl } from "./authCoreConfig";
 
@@ -18,6 +19,7 @@ export const authClient = createAuthClient({
 	fetchOptions: {
 		credentials: "include",
 	},
+	plugins: [organizationClient()],
 });
 
 export type AuthClient = typeof authClient;

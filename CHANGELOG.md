@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/janovix/auth/compare/v1.1.0...v1.2.0) (2025-12-30)
+
+
+### Features
+
+* **auth:** integrate organizationClient plugin into authClient configuration ([b0d608d](https://github.com/janovix/auth/commit/b0d608d4af233489a31fbc759b1be098835b7340))
+
 # [1.1.0](https://github.com/janovix/auth/compare/v1.0.0...v1.1.0) (2025-12-19)
 
 

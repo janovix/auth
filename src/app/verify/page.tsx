@@ -6,8 +6,8 @@ type PageProps = {
 };
 
 export const metadata: Metadata = {
-	title: "Verificar correo | Janovix Auth",
-	description: "Verifica tu correo electrónico para completar el registro.",
+	title: "Verificar correo | Janovix",
+	description: "Confirma tu correo para completar el registro en Janovix.",
 };
 
 const getVerificationStatus = (

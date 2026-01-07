@@ -17,9 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Janovix Auth · Better Auth Reference",
+	title: "Janovix",
 	description:
-		"UI de autenticación que consume auth-core vía Better Auth: login, registro, cierre de sesión y vista de cuenta basados en cookies HttpOnly.",
+		"Acceso y gestión de cuenta en Janovix: inicio de sesión, registro, recuperación de contraseña y sesión.",
 };
 
 // Force dynamic rendering since we use cookies and server-side session fetching

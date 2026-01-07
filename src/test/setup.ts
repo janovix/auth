@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom/vitest";
+import React from "react";
 import { vi } from "vitest";
 
 // Set default environment variables for tests (must include https://)
@@ -12,7 +13,24 @@ if (!process.env.NEXT_PUBLIC_AUTH_APP_URL) {
 if (!process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL) {
 	process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL = "https://app.example.workers.dev";
 }
+// Mock Turnstile component for tests
+vi.mock("@marsidev/react-turnstile", () => ({
+	Turnstile: vi.fn(({ onSuccess, siteKey }) => {
+		// Auto-verify in tests by calling onSuccess immediately.
+		// Using setTimeout here can leave pending timers that fire after Vitest
+		// tears down JSDOM, causing "window is not defined" unhandled errors.
+		React.useEffect(() => {
+			if (onSuccess) {
+				onSuccess("mock-turnstile-token");
+			}
+		}, [onSuccess]);
 
+		return React.createElement("div", {
+			"data-testid": "turnstile-widget",
+			"data-site-key": siteKey,
+		});
+	}),
+}));
 // Mock ResizeObserver for tests
 global.ResizeObserver = class ResizeObserver {
 	observe() {

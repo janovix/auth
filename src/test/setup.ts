@@ -17,11 +17,12 @@ if (!process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL) {
 // Mock Turnstile component for tests
 vi.mock("@marsidev/react-turnstile", () => ({
 	Turnstile: vi.fn(({ onSuccess, siteKey }) => {
-		// Auto-verify in tests by calling onSuccess after a brief delay
+		// Auto-verify in tests by calling onSuccess immediately.
+		// Using setTimeout here can leave pending timers that fire after Vitest
+		// tears down JSDOM, causing "window is not defined" unhandled errors.
 		React.useEffect(() => {
 			if (onSuccess) {
-				const timer = setTimeout(() => onSuccess("mock-turnstile-token"), 50);
-				return () => clearTimeout(timer);
+				onSuccess("mock-turnstile-token");
 			}
 		}, [onSuccess]);
 

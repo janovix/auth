@@ -24,9 +24,8 @@ const getError = (params?: Record<string, string | string[] | undefined>) => {
 };
 
 export const metadata: Metadata = {
-	title: "Restablecer contraseña | Janovix Auth",
-	description:
-		"Define una nueva contraseña usando el token de restablecimiento emitido por auth-core.",
+	title: "Restablecer contraseña | Janovix",
+	description: "Crea una nueva contraseña para tu cuenta de Janovix.",
 };
 
 export default async function ResetPasswordPage({ searchParams }: PageProps) {

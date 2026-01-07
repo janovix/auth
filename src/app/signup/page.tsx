@@ -17,9 +17,8 @@ const getRedirect = (
 };
 
 export const metadata: Metadata = {
-	title: "Crear cuenta | Janovix Auth",
-	description:
-		"Registra usuarios usando los endpoints /api/auth/* de auth-core administrados por Better Auth.",
+	title: "Crear cuenta | Janovix",
+	description: "Crea tu cuenta en Janovix para empezar.",
 };
 
 export default async function SignupPage({ searchParams }: PageProps) {

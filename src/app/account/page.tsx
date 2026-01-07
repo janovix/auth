@@ -2,9 +2,8 @@ import { AccountView } from "@/components/auth/AccountView";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Mi sesión | Janovix Auth",
-	description:
-		"Consulta los datos emitidos por auth-core (usuario, sesión y cookies) para validar la integración de Better Auth.",
+	title: "Mi sesión | Janovix",
+	description: "Revisa tu sesión y la información de tu cuenta en Janovix.",
 };
 
 /**

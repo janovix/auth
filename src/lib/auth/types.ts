@@ -43,24 +43,11 @@ export type SessionSnapshot = {
 };
 
 /**
- * Credentials for email/password sign in.
- */
-export type SignInCredentials = {
-	email: string;
-	password: string;
-	/**
-	 * Whether to remember the user (longer session).
-	 * @default false
-	 */
-	rememberMe?: boolean;
-};
-
-/**
- * Credentials for email/password sign up.
+ * Credentials for passwordless sign up.
+ * Password is auto-generated internally - users never see or use it.
  */
 export type SignUpCredentials = {
 	email: string;
-	password: string;
 	name: string;
 	/**
 	 * Optional profile image URL.

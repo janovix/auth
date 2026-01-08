@@ -1,5 +1,7 @@
+import { GlobalAuroraBackground } from "@/components/aurora";
 import { SignupView } from "@/components/auth/SignupView";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuroraProvider } from "@/contexts/aurora-context";
 import type { Meta, StoryObj } from "@storybook/react";
 import { mockRouter } from "../mocks/router";
 import type { SignUpCredentials, AuthResult } from "@/lib/auth/authActions";
@@ -47,13 +49,16 @@ const meta = {
 	decorators: [
 		(Story) => {
 			return (
-				<div className="min-h-screen flex items-center justify-center p-4 bg-background">
-					<div className="w-full max-w-2xl">
-						<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-							<Story />
-						</ThemeProvider>
-					</div>
-				</div>
+				<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+					<AuroraProvider>
+						<div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+							<GlobalAuroraBackground />
+							<div className="w-full max-w-md relative z-10">
+								<Story />
+							</div>
+						</div>
+					</AuroraProvider>
+				</ThemeProvider>
 			);
 		},
 	],

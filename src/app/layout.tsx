@@ -17,9 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Janovix Auth · Better Auth Reference",
+	title: "Janovix",
 	description:
-		"UI de autenticación que consume auth-core vía Better Auth: login, registro, cierre de sesión y vista de cuenta basados en cookies HttpOnly.",
+		"Acceso y gestión de cuenta en Janovix: inicio de sesión, registro, recuperación de contraseña y sesión.",
 };
 
 // Force dynamic rendering since we use cookies and server-side session fetching
@@ -42,6 +42,14 @@ export default async function RootLayout({
 
 	return (
 		<html lang="en" suppressHydrationWarning>
+			<head>
+				{/* Polyfill for esbuild's __name helper used by next-themes */}
+				<script
+					dangerouslySetInnerHTML={{
+						__html: `if(typeof __name==="undefined"){window.__name=function(e){return e}}`,
+					}}
+				/>
+			</head>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>

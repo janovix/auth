@@ -3,7 +3,7 @@
 import { signOut } from "@/lib/auth/authActions";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { formatDistanceToNow } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, enUS } from "date-fns/locale";
 import { AlertTriangle, Clock4, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
@@ -23,10 +23,11 @@ import {
 	getAuthCoreBaseUrl,
 	getAuthEnvironment,
 } from "@/lib/auth/authCoreConfig";
+import { useLanguage } from "@/contexts/language-context";
 
 const cookieDomainByEnv: Record<"dev" | "prod", string> = {
 	dev: ".janovix.workers.dev",
-	prod: ".janovix.ai",
+	prod: ".janovix.com",
 };
 
 const normalizeDate = (value?: string | Date) => {
@@ -34,18 +35,6 @@ const normalizeDate = (value?: string | Date) => {
 		return undefined;
 	}
 	return value instanceof Date ? value : new Date(value);
-};
-
-const formatExpiresIn = (value?: string | Date) => {
-	const dateValue = normalizeDate(value);
-	if (!dateValue) {
-		return "—";
-	}
-	try {
-		return formatDistanceToNow(dateValue, { addSuffix: true, locale: es });
-	} catch {
-		return "—";
-	}
 };
 
 /**
@@ -56,12 +45,29 @@ const formatExpiresIn = (value?: string | Date) => {
  * before this component renders, preventing any loading "blink".
  */
 export const AccountView = () => {
+	const { t, language } = useLanguage();
 	const session = useAuthSession();
 	const data = session.data;
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 
 	const environment = useMemo(() => getAuthEnvironment(), []);
 	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
+	const locale = language === "es" ? es : enUS;
+
+	const formatExpiresIn = useCallback(
+		(value?: string | Date) => {
+			const dateValue = normalizeDate(value);
+			if (!dateValue) {
+				return "—";
+			}
+			try {
+				return formatDistanceToNow(dateValue, { addSuffix: true, locale });
+			} catch {
+				return "—";
+			}
+		},
+		[locale],
+	);
 
 	const handleLogout = useCallback(async () => {
 		setIsLoggingOut(true);
@@ -80,9 +86,9 @@ export const AccountView = () => {
 				<div className="mx-auto w-full max-w-3xl">
 					<Card>
 						<CardHeader>
-							<CardTitle>Sesión no encontrada</CardTitle>
+							<CardTitle>{t("account.noSession.title")}</CardTitle>
 							<CardDescription>
-								No se encontró una sesión activa en este entorno
+								{t("account.noSession.description")}
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="flex items-start gap-3 text-sm">
@@ -91,18 +97,15 @@ export const AccountView = () => {
 								aria-hidden="true"
 							/>
 							<div className="text-muted-foreground">
-								<p>
-									Si vienes de un preview, asegúrate de haber iniciado sesión en
-									el mismo dominio para compartir la cookie.
-								</p>
+								<p>{t("account.noSession.previewNote")}</p>
 							</div>
 						</CardContent>
 						<CardFooter className="flex flex-wrap gap-3">
 							<Button asChild>
-								<Link href="/login">Iniciar sesión</Link>
+								<Link href="/login">{t("account.noSession.login")}</Link>
 							</Button>
 							<Button variant="outline" asChild>
-								<Link href="/signup">Crear cuenta</Link>
+								<Link href="/signup">{t("account.noSession.signup")}</Link>
 							</Button>
 						</CardFooter>
 					</Card>
@@ -119,11 +122,11 @@ export const AccountView = () => {
 				<Card>
 					<CardHeader className="flex flex-wrap items-center justify-between gap-4">
 						<div>
-							<CardTitle>Mi cuenta</CardTitle>
-							<CardDescription>Información de tu sesión activa</CardDescription>
+							<CardTitle>{t("account.title")}</CardTitle>
+							<CardDescription>{t("account.description")}</CardDescription>
 						</div>
 						<Badge variant="secondary">
-							Entorno · {environment.toUpperCase()}
+							{t("account.environment")} · {environment.toUpperCase()}
 						</Badge>
 					</CardHeader>
 					<CardContent className="grid gap-6 md:grid-cols-2">
@@ -143,7 +146,7 @@ export const AccountView = () => {
 								</div>
 							</div>
 							<div className="text-muted-foreground">
-								<p className="text-xs">ID de usuario</p>
+								<p className="text-xs">{t("account.userId")}</p>
 								<p className="font-mono text-xs">{data.user.id}</p>
 							</div>
 						</div>
@@ -155,12 +158,15 @@ export const AccountView = () => {
 								/>
 								<div>
 									<p className="font-medium text-foreground">
-										Expira {formatExpiresIn(data.session.expiresAt)}
+										{t("account.expires").replace(
+											"{time}",
+											formatExpiresIn(data.session.expiresAt),
+										)}
 									</p>
 									<p className="text-xs text-muted-foreground mt-0.5">
-										Última actualización:{" "}
+										{t("account.lastUpdate")}{" "}
 										{normalizeDate(data.session.updatedAt)?.toLocaleString(
-											"es-MX",
+											language === "es" ? "es-MX" : "en-US",
 											{
 												dateStyle: "medium",
 												timeStyle: "short",
@@ -170,7 +176,7 @@ export const AccountView = () => {
 								</div>
 							</div>
 							<div className="text-muted-foreground">
-								<p className="text-xs">ID de sesión</p>
+								<p className="text-xs">{t("account.sessionId")}</p>
 								<p className="font-mono text-xs break-all">{data.session.id}</p>
 							</div>
 						</div>
@@ -180,12 +186,12 @@ export const AccountView = () => {
 							{isLoggingOut ? (
 								<>
 									<Spinner className="h-4 w-4" aria-hidden="true" />
-									Cerrando sesión...
+									{t("account.loggingOut")}
 								</>
 							) : (
 								<>
 									<LogOut className="h-4 w-4" aria-hidden="true" />
-									Cerrar sesión
+									{t("account.logout")}
 								</>
 							)}
 						</Button>
@@ -194,42 +200,44 @@ export const AccountView = () => {
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Configuración de seguridad</CardTitle>
+						<CardTitle>{t("account.security.title")}</CardTitle>
 						<CardDescription>
-							Detalles de la cookie de autenticación
+							{t("account.security.description")}
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="grid gap-4 md:grid-cols-2 text-sm">
 						<div>
-							<p className="font-medium text-foreground mb-1">Dominio</p>
+							<p className="font-medium text-foreground mb-1">
+								{t("account.security.domain")}
+							</p>
 							<p className="font-mono text-xs text-muted-foreground">
 								{cookieDomain}
 							</p>
 						</div>
 						<div>
-							<p className="font-medium text-foreground mb-1">Endpoint base</p>
+							<p className="font-medium text-foreground mb-1">
+								{t("account.security.endpoint")}
+							</p>
 							<p className="font-mono text-xs text-muted-foreground">
 								{baseUrl}/api/auth
 							</p>
 						</div>
 						<div>
 							<p className="font-medium text-foreground mb-1">
-								Alcance de la sesión
+								{t("account.security.scope")}
 							</p>
 							<p className="text-muted-foreground">
 								{environment === "dev"
-									? "Todas las aplicaciones bajo *.janovix.workers.dev"
-									: "Solo aplicaciones bajo el dominio actual"}
+									? t("account.security.scopeDev")
+									: t("account.security.scopeProd")}
 							</p>
 						</div>
 						<div>
 							<p className="font-medium text-foreground mb-1">
-								Nota importante
+								{t("account.security.note")}
 							</p>
 							<p className="text-muted-foreground">
-								Los entornos de desarrollo y producción usan dominios distintos,
-								por lo que deberás iniciar sesión de forma independiente en cada
-								uno.
+								{t("account.security.noteText")}
 							</p>
 						</div>
 					</CardContent>
@@ -237,15 +245,15 @@ export const AccountView = () => {
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Información técnica</CardTitle>
+						<CardTitle>{t("account.technical.title")}</CardTitle>
 						<CardDescription>
-							Detalles de depuración para desarrolladores
+							{t("account.technical.description")}
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4 text-sm">
 						<div>
 							<p className="text-xs uppercase tracking-wide text-muted-foreground/70 mb-1">
-								Token de sesión
+								{t("account.technical.token")}
 							</p>
 							<p className="font-mono text-xs break-all text-muted-foreground">
 								{data.session.token}
@@ -254,7 +262,7 @@ export const AccountView = () => {
 						{data.session.ipAddress && (
 							<div>
 								<p className="text-xs uppercase tracking-wide text-muted-foreground/70 mb-1">
-									Dirección IP
+									{t("account.technical.ip")}
 								</p>
 								<p className="font-mono text-xs text-muted-foreground">
 									{data.session.ipAddress}
@@ -264,7 +272,7 @@ export const AccountView = () => {
 						{data.session.userAgent && (
 							<div>
 								<p className="text-xs uppercase tracking-wide text-muted-foreground/70 mb-1">
-									User Agent
+									{t("account.technical.userAgent")}
 								</p>
 								<p className="font-mono text-xs break-all text-muted-foreground">
 									{data.session.userAgent}

@@ -34,7 +34,7 @@ export const getAuthCoreBaseUrl = (): string => {
  */
 export const getAuthEnvironment = (): "dev" | "prod" => {
 	const baseUrl = getAuthCoreBaseUrl();
-	if (baseUrl.includes(".janovix.ai")) {
+	if (baseUrl.includes(".janovix.com")) {
 		return "prod";
 	}
 	return "dev";

@@ -1,14 +1,29 @@
-import type { AuthResult, SignInCredentials } from "@/lib/auth/authActions";
+import type { AuthResult } from "@/lib/auth/authActions";
 import type { Meta, StoryObj } from "@storybook/react";
 
+import { GlobalAuroraBackground } from "@/components/aurora";
 import { LoginView } from "@/components/auth/LoginView";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuroraProvider } from "@/contexts/aurora-context";
 
 import { mockRouter } from "../mocks/router";
 
-// Mock signIn function that returns immediately with success
-const mockSignIn = async (
-	_credentials: SignInCredentials,
+// Mock sendOtp function that returns success
+const mockSendOtp = async (
+	_email: string,
+	_type: "sign-in",
+): Promise<AuthResult<{ message: string }>> => {
+	return Promise.resolve({
+		success: true,
+		data: { message: "OTP sent" },
+		error: null,
+	});
+};
+
+// Mock signInWithOtp function that returns success
+const mockSignInWithOtp = async (
+	_email: string,
+	_otp: string,
 ): Promise<AuthResult> => {
 	return Promise.resolve({
 		success: true,
@@ -46,13 +61,16 @@ const meta = {
 	},
 	decorators: [
 		(Story) => (
-			<div className="min-h-screen flex items-center justify-center p-4 bg-background">
-				<div className="w-full max-w-md">
-					<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-						<Story />
-					</ThemeProvider>
-				</div>
-			</div>
+			<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+				<AuroraProvider>
+					<div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+						<GlobalAuroraBackground />
+						<div className="w-full max-w-md relative z-10">
+							<Story />
+						</div>
+					</div>
+				</AuroraProvider>
+			</ThemeProvider>
 		),
 	],
 } satisfies Meta<typeof LoginView>;
@@ -61,13 +79,16 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-	render: () => <LoginView signIn={mockSignIn} />,
+	render: () => (
+		<LoginView sendOtp={mockSendOtp} signInWithOtp={mockSignInWithOtp} />
+	),
 };
 
 export const WithRedirect: Story = {
 	render: () => (
 		<LoginView
-			signIn={mockSignIn}
+			sendOtp={mockSendOtp}
+			signInWithOtp={mockSignInWithOtp}
 			redirectTo="https://app.example.workers.dev/dashboard"
 		/>
 	),
@@ -76,7 +97,8 @@ export const WithRedirect: Story = {
 export const WithSuccessMessage: Story = {
 	render: () => (
 		<LoginView
-			signIn={mockSignIn}
+			sendOtp={mockSendOtp}
+			signInWithOtp={mockSignInWithOtp}
 			defaultSuccessMessage="Login successful! Redirecting..."
 		/>
 	),

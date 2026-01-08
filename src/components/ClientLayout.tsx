@@ -1,93 +1,41 @@
 "use client";
 
-import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 
-import { LoginAnimationPanel } from "@/components/auth/LoginAnimationPanel";
+import { GlobalAuroraBackground } from "@/components/aurora";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import { useDeviceDetection } from "@/hooks/useDeviceDetection";
+import { AuroraProvider } from "@/contexts/aurora-context";
+import { LanguageProvider } from "@/contexts/language-context";
+
+function SettingsBar() {
+	return (
+		<div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
+			<LanguageSwitcher />
+			<ThemeSwitcher />
+		</div>
+	);
+}
 
 function AuthLayout({ children }: { children: React.ReactNode }) {
-	const { theme, systemTheme } = useTheme();
-	const resolvedTheme = theme === "system" ? systemTheme : theme;
-	const isDark = resolvedTheme === "dark";
-	const [hasEnoughHeight, setHasEnoughHeight] = useState(false);
-	const deviceInfo = useDeviceDetection();
-
-	// Check if viewport has enough height to accommodate tall cards (like signup)
-	useEffect(() => {
-		const checkHeight = () => {
-			// Minimum height needed: ~800px to comfortably show signup card without scrolling
-			// lg breakpoint is 1024px width, so we check both width >= 1024px AND height >= 800px
-			const isWideEnough = window.innerWidth >= 1024; // lg breakpoint
-			const isTallEnough = window.innerHeight >= 800; // Minimum height for tall cards
-			setHasEnoughHeight(isWideEnough && isTallEnough);
-		};
-
-		// Check on mount
-		checkHeight();
-
-		// Check on resize
-		window.addEventListener("resize", checkHeight);
-		return () => window.removeEventListener("resize", checkHeight);
-	}, []);
-
-	// Show background if:
-	// 1. Viewport is wide (>=1024px) and tall (>=800px) enough, OR
-	// 2. iOS device with enough performance (even on smaller screens)
-	//    This allows iOS devices to see the animation even on portrait orientation
-	const showBackground =
-		hasEnoughHeight || (deviceInfo.isIOS && deviceInfo.hasEnoughPerformance);
-
 	return (
-		<div className="bg-muted flex h-svh w-full flex-col overflow-hidden relative">
-			{/* Background animation - Only shown when viewport is wide AND tall enough */}
-			{showBackground && (
-				<div className="fixed top-0 bottom-0 left-0 right-0 w-full h-full overflow-hidden z-0">
-					{/* Theme-aware background */}
-					<div className="absolute left-0 top-0 w-full h-full bg-background" />
+		<AuroraProvider>
+			<div className="flex h-svh w-full flex-col overflow-hidden relative">
+				{/* Aurora background - always shown on auth pages */}
+				<GlobalAuroraBackground />
 
-					{/* Background animation */}
-					<div className="absolute left-0 top-0 w-full h-full">
-						<LoginAnimationPanel />
+				{/* Language and Theme pickers - bottom right */}
+				<SettingsBar />
+
+				{/* Main content area - scrollable, centered */}
+				<div className="flex-1 w-full flex flex-col items-center justify-center px-4 md:px-10 py-8 relative z-10 overflow-y-auto min-h-0">
+					<div className="flex w-full max-w-sm flex-col gap-4 lg:gap-6 animate-form-fade-in">
+						{children}
 					</div>
-
-					{/* Black curtain overlay */}
-					<div
-						className="absolute left-0 top-0 w-full h-full"
-						style={{
-							backgroundColor: "rgba(0, 0, 0, 0.3)",
-						}}
-					/>
-				</div>
-			)}
-
-			{/* Theme picker - bottom right for background-enabled views */}
-			{showBackground && (
-				<div className="fixed bottom-4 right-4 z-50">
-					<ThemeSwitcher />
-				</div>
-			)}
-
-			{/* No-background layout: top bar with theme picker */}
-			{!showBackground && (
-				<div className="flex items-center justify-end w-full px-4 pt-4 pb-2 relative z-10 shrink-0">
-					<ThemeSwitcher />
-				</div>
-			)}
-
-			{/* Main content area - scrollable */}
-			<div
-				className={`flex-1 w-full flex flex-col items-center px-4 md:px-10 pt-4 pb-4 relative z-10 overflow-y-auto min-h-0 ${showBackground ? "justify-center lg:pt-6 lg:pb-6" : "justify-start"}`}
-			>
-				<div className="flex w-full max-w-sm flex-col gap-4 lg:gap-6">
-					{/* Login form */}
-					{children}
 				</div>
 			</div>
-		</div>
+		</AuroraProvider>
 	);
 }
 
@@ -102,20 +50,21 @@ export default function ClientLayout({
 		pathname === "/" ||
 		pathname.startsWith("/login") ||
 		pathname.startsWith("/signup") ||
-		pathname.startsWith("/recover");
+		pathname.startsWith("/recover") ||
+		pathname.startsWith("/verify");
 
 	return (
 		<ThemeProvider>
-			{isAuthRoute ? (
-				<AuthLayout>{children}</AuthLayout>
-			) : (
-				<>
-					<div className="fixed bottom-4 right-4 z-50">
-						<ThemeSwitcher />
-					</div>
-					{children}
-				</>
-			)}
+			<LanguageProvider>
+				{isAuthRoute ? (
+					<AuthLayout>{children}</AuthLayout>
+				) : (
+					<>
+						<SettingsBar />
+						{children}
+					</>
+				)}
+			</LanguageProvider>
 		</ThemeProvider>
 	);
 }

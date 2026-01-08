@@ -27,7 +27,7 @@ import { useLanguage } from "@/contexts/language-context";
 
 const cookieDomainByEnv: Record<"dev" | "prod", string> = {
 	dev: ".janovix.workers.dev",
-	prod: ".janovix.ai",
+	prod: ".janovix.com",
 };
 
 const normalizeDate = (value?: string | Date) => {

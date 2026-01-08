@@ -1,0 +1,1 @@
+export { GlobalAuroraBackground } from "./GlobalAuroraBackground";

@@ -10,14 +10,19 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuroraProvider } from "@/contexts/aurora-context";
 
 import { LoginView } from "./LoginView";
 
 // Mock window.location
 const originalLocation = window.location;
 
-const renderWithTheme = (ui: React.ReactElement) => {
-	return render(<ThemeProvider>{ui}</ThemeProvider>);
+const renderWithProviders = (ui: React.ReactElement) => {
+	return render(
+		<ThemeProvider>
+			<AuroraProvider>{ui}</AuroraProvider>
+		</ThemeProvider>,
+	);
 };
 
 type SendOtpFn = (
@@ -52,7 +57,7 @@ describe("LoginView", () => {
 			error: null,
 		});
 
-		renderWithTheme(
+		renderWithProviders(
 			<LoginView sendOtp={sendOtp} signInWithOtp={signInWithOtp} />,
 		);
 		const user = userEvent.setup();
@@ -114,7 +119,7 @@ describe("LoginView", () => {
 			error: null,
 		});
 
-		renderWithTheme(
+		renderWithProviders(
 			<LoginView
 				redirectTo="https://app.example.com"
 				sendOtp={sendOtp}
@@ -161,7 +166,7 @@ describe("LoginView", () => {
 			error: new Error("Usuario no encontrado"),
 		});
 
-		renderWithTheme(
+		renderWithProviders(
 			<LoginView sendOtp={sendOtp} signInWithOtp={signInWithOtp} />,
 		);
 		const user = userEvent.setup();
@@ -192,7 +197,7 @@ describe("LoginView", () => {
 		const sendOtp = createSendOtp();
 		const signInWithOtp = createSignInWithOtp();
 
-		renderWithTheme(
+		renderWithProviders(
 			<LoginView
 				defaultSuccessMessage="Login exitoso"
 				sendOtp={sendOtp}
@@ -215,7 +220,7 @@ describe("LoginView", () => {
 			error: null,
 		});
 
-		renderWithTheme(
+		renderWithProviders(
 			<LoginView sendOtp={sendOtp} signInWithOtp={signInWithOtp} />,
 		);
 		const user = userEvent.setup();

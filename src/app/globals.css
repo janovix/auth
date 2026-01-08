@@ -224,3 +224,83 @@
 		background: #a0aec0;
 	}
 }
+
+/* Aurora background animations */
+@keyframes aurora-1 {
+	0%,
+	100% {
+		transform: translate(0, 0) scale(1);
+	}
+	25% {
+		transform: translate(30px, 20px) scale(1.05);
+	}
+	50% {
+		transform: translate(-20px, 40px) scale(0.95);
+	}
+	75% {
+		transform: translate(40px, -10px) scale(1.02);
+	}
+}
+
+@keyframes aurora-2 {
+	0%,
+	100% {
+		transform: translate(0, 0) scale(1);
+	}
+	25% {
+		transform: translate(-40px, 30px) scale(0.98);
+	}
+	50% {
+		transform: translate(30px, -20px) scale(1.04);
+	}
+	75% {
+		transform: translate(-20px, -30px) scale(1);
+	}
+}
+
+@keyframes aurora-3 {
+	0%,
+	100% {
+		transform: translate(0, 0) scale(1);
+	}
+	25% {
+		transform: translate(50px, -30px) scale(1.03);
+	}
+	50% {
+		transform: translate(-30px, 20px) scale(0.97);
+	}
+	75% {
+		transform: translate(20px, 40px) scale(1.01);
+	}
+}
+
+/* Form fade animations */
+@keyframes form-fade-in {
+	0% {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes form-fade-out {
+	0% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+	100% {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+}
+
+.animate-form-fade-in {
+	animation: form-fade-in 0.4s ease-out forwards;
+}
+
+.animate-form-fade-out {
+	animation: form-fade-out 0.3s ease-in forwards;
+}

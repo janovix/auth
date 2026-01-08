@@ -37,9 +37,6 @@ type VerifyEmailViewProps = {
  * so this page mainly serves as a success confirmation or error display.
  */
 export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
-	// Always use dark theme for logo to show white letters
-	const logoTheme = "dark" as const;
-
 	// Determine the current state for card description
 	const getDescription = () => {
 		if (success) {
@@ -54,7 +51,7 @@ export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6 w-full">
 			<div className="flex justify-center mb-2">
-				<Logo variant="logo" forceTheme={logoTheme} />
+				<Logo variant="logo" />
 			</div>
 			<Card>
 				<CardHeader className="text-center">

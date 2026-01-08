@@ -102,9 +102,6 @@ export const SignupView = ({
 	const [otpError, setOtpError] = useState<string | null>(null);
 	const [otpNeedsResend, setOtpNeedsResend] = useState(false);
 
-	// Always use dark theme for logo to show white letters
-	const logoTheme = "dark" as const;
-
 	// Set aurora page profile to signup (pink/purple) on mount
 	useEffect(() => {
 		setPageProfile("signup");
@@ -323,7 +320,7 @@ export const SignupView = ({
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6 w-full">
 			<div className="flex justify-center mb-2">
-				<Logo variant="logo" forceTheme={logoTheme} />
+				<Logo variant="logo" />
 			</div>
 			<Card>
 				<CardHeader className="text-center">

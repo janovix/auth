@@ -116,9 +116,6 @@ export const LoginView = ({
 	const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
 	const redirectUrlRef = useRef<string>("");
 
-	// Always use dark theme for logo to show white letters
-	const logoTheme = "dark" as const;
-
 	// Set aurora page profile to login on mount
 	useEffect(() => {
 		setPageProfile("login");
@@ -297,7 +294,7 @@ export const LoginView = ({
 	if (showSuccessAnimation) {
 		return (
 			<div className="flex flex-col items-center justify-center gap-6 w-full min-h-[200px]">
-				<Logo variant="logo" forceTheme={logoTheme} />
+				<Logo variant="logo" />
 				<LoginSuccessAnimation
 					onComplete={handleSuccessComplete}
 					delay={2000}
@@ -311,7 +308,7 @@ export const LoginView = ({
 			className={`flex flex-col gap-4 sm:gap-6 w-full transition-opacity duration-300`}
 		>
 			<div className="flex justify-center mb-2">
-				<Logo variant="logo" forceTheme={logoTheme} />
+				<Logo variant="logo" />
 			</div>
 			<Card>
 				<CardHeader className="text-center">

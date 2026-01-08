@@ -1,7 +1,7 @@
 "use client";
 
 import { createAuthClient } from "better-auth/client";
-import { organizationClient } from "better-auth/client/plugins";
+import { emailOTPClient } from "better-auth/client/plugins";
 
 import { getAuthCoreBaseUrl } from "./authCoreConfig";
 
@@ -13,13 +13,17 @@ import { getAuthCoreBaseUrl } from "./authCoreConfig";
  *
  * The `credentials: "include"` option is critical for cross-origin
  * cookie-based authentication between auth app and auth-svc.
+ *
+ * Plugins:
+ * - emailOTPClient: Enables OTP-based email verification instead of link-based,
+ *   preserving the user's flow and redirectTo parameters during signup.
  */
 export const authClient = createAuthClient({
 	baseURL: getAuthCoreBaseUrl(),
 	fetchOptions: {
 		credentials: "include",
 	},
-	plugins: [organizationClient()],
+	plugins: [emailOTPClient()],
 });
 
 export type AuthClient = typeof authClient;

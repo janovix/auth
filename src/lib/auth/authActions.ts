@@ -5,19 +5,18 @@
  *
  * All authentication operations use the Better Auth client instance
  * configured in authClient.ts.
+ *
+ * This app uses passwordless OTP-based authentication:
+ * - Sign-in: User enters email → receives OTP → enters OTP → session created
+ * - Sign-up: User enters email + name → receives OTP → enters OTP → email verified → redirect to login
  */
 
 import { authClient } from "./authClient";
 import { setSession, clearSession } from "./sessionStore";
-import type {
-	Session,
-	SignInCredentials,
-	SignUpCredentials,
-	AuthResult,
-} from "./types";
+import type { Session, SignUpCredentials, AuthResult } from "./types";
 
 // Re-export types for convenience
-export type { Session, SignInCredentials, SignUpCredentials, AuthResult };
+export type { Session, SignUpCredentials, AuthResult };
 
 /**
  * Helper to convert Better Auth session response to our Session type.
@@ -82,30 +81,31 @@ function toSession(data: {
 }
 
 /**
- * Signs in a user with email and password.
+ * Signs in a user with email and OTP (passwordless).
+ *
+ * This is a two-step process:
+ * 1. Call sendVerificationOtp(email, "sign-in") to send the OTP
+ * 2. Call signInWithOtp(email, otp) to complete sign-in
  *
  * On success, automatically updates the session store.
+ * If the user doesn't exist, they will be automatically registered.
  */
-export async function signIn(
-	credentials: SignInCredentials,
+export async function signInWithOtp(
+	email: string,
+	otp: string,
 ): Promise<AuthResult> {
 	try {
-		const result = await authClient.signIn.email({
-			email: credentials.email,
-			password: credentials.password,
-			rememberMe: credentials.rememberMe ?? false,
+		const result = await authClient.signIn.emailOtp({
+			email,
+			otp,
 		});
 
 		if (result.error) {
-			// Preserve error status and message for email verification handling
-			const error = new Error(result.error.message || "Sign in failed");
-			if (result.error.status) {
-				(error as Error & { status?: number }).status = result.error.status;
-			}
+			const errorMessage = result.error.message || "Sign in failed";
 			return {
 				success: false,
 				data: null,
-				error,
+				error: createOtpError(errorMessage),
 			};
 		}
 
@@ -131,26 +131,45 @@ export async function signIn(
 			error: null,
 		};
 	} catch (err) {
+		const errorMessage = err instanceof Error ? err.message : "Sign in failed";
 		return {
 			success: false,
 			data: null,
-			error: err instanceof Error ? err : new Error("Sign in failed"),
+			error: createOtpError(errorMessage),
 		};
 	}
 }
 
 /**
- * Signs up a new user with email and password.
+ * Generates a cryptographically secure random password.
+ * Used internally for passwordless signup - users never see or use this password.
+ */
+function generateSecurePassword(): string {
+	const chars =
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+	const array = new Uint8Array(32);
+	crypto.getRandomValues(array);
+	return Array.from(array, (byte) => chars[byte % chars.length]).join("");
+}
+
+/**
+ * Signs up a new user with email and name (passwordless).
  *
- * On success, automatically updates the session store (user is logged in).
+ * The system auto-generates a secure password that the user never sees.
+ * After signup, an OTP is sent to verify the email.
+ * Users sign in using OTP, not password.
  */
 export async function signUp(
 	credentials: SignUpCredentials,
 ): Promise<AuthResult> {
 	try {
+		// Generate a secure random password - user will never use it
+		// Sign-in is always via OTP
+		const autoPassword = generateSecurePassword();
+
 		const result = await authClient.signUp.email({
 			email: credentials.email,
-			password: credentials.password,
+			password: autoPassword,
 			name: credentials.name,
 			image: credentials.image,
 		});
@@ -228,145 +247,235 @@ export async function signOut(): Promise<AuthResult<null>> {
 	}
 }
 
+// Password recovery functions removed - this is a passwordless system.
+// Users sign in via OTP codes sent to their email.
+
 /**
- * Sends a password recovery email to the specified address.
- *
- * Uses Better Auth client's requestPasswordReset method with Turnstile verification.
- * See: https://www.better-auth.com/docs/authentication/email-password#request-password-reset
- *
- * @param email - The email address to send the recovery link to
- * @param turnstileToken - Optional Cloudflare Turnstile token for bot protection
+ * OTP verification type options.
  */
-export async function recoverPassword(
+export type OtpType = "email-verification" | "sign-in" | "forget-password";
+
+/**
+ * Sends a verification OTP to the specified email address.
+ *
+ * Uses Better Auth client's emailOtp.sendVerificationOtp method.
+ * This keeps users in the app during verification, preserving redirectTo.
+ * See: https://www.better-auth.com/docs/plugins/email-otp
+ *
+ * @param email - The email address to send the OTP to
+ * @param type - The type of OTP (defaults to email-verification)
+ */
+export async function sendVerificationOtp(
 	email: string,
-	turnstileToken?: string,
+	type: OtpType = "email-verification",
 ): Promise<AuthResult<{ message: string }>> {
 	try {
-		// Get current origin for redirect URL
-		const redirectTo =
-			typeof window !== "undefined"
-				? `${window.location.origin}/recover/reset`
-				: `${process.env.NEXT_PUBLIC_AUTH_APP_URL}/recover/reset`;
-
-		const result = await authClient.requestPasswordReset({
+		const result = await authClient.emailOtp.sendVerificationOtp({
 			email,
-			redirectTo,
-			fetchOptions: turnstileToken
-				? {
-						body: {
-							turnstileToken,
-						},
-					}
-				: undefined,
+			type,
 		});
 
 		if (result.error) {
 			return {
 				success: false,
 				data: null,
-				error: new Error(result.error.message || "Password recovery failed"),
+				error: new Error(result.error.message || "Failed to send OTP"),
 			};
 		}
 
 		return {
 			success: true,
-			data: { message: "Recovery email sent" },
+			data: { message: "OTP sent successfully" },
 			error: null,
 		};
 	} catch (err) {
 		return {
 			success: false,
 			data: null,
-			error: err instanceof Error ? err : new Error("Password recovery failed"),
+			error: err instanceof Error ? err : new Error("Failed to send OTP"),
 		};
 	}
 }
 
 /**
- * Resets the user's password using a recovery token.
- *
- * Uses Better Auth client's resetPassword method.
- * See: https://www.better-auth.com/docs/authentication/email-password#request-password-reset
+ * OTP Error types returned by Better Auth.
+ * These can be detected from the error message to provide better UX.
  */
-export async function resetPassword(
-	token: string,
-	newPassword: string,
+export type OtpErrorCode =
+	| "EXPIRED"
+	| "INVALID"
+	| "TOO_MANY_ATTEMPTS"
+	| "UNKNOWN";
+
+/**
+ * Extended error interface for OTP verification errors.
+ * Includes error code for specific error handling in the UI.
+ */
+export interface OtpVerificationError extends Error {
+	code: OtpErrorCode;
+}
+
+/**
+ * Detects the OTP error type from an error message.
+ * Better Auth returns errors like "OTP expired", "Invalid OTP", etc.
+ */
+function detectOtpErrorCode(message: string): OtpErrorCode {
+	const lowerMsg = message.toLowerCase();
+
+	if (lowerMsg.includes("expired") || lowerMsg.includes("expirado")) {
+		return "EXPIRED";
+	}
+	if (
+		lowerMsg.includes("too many") ||
+		lowerMsg.includes("attempts") ||
+		lowerMsg.includes("intentos")
+	) {
+		return "TOO_MANY_ATTEMPTS";
+	}
+	if (
+		lowerMsg.includes("invalid") ||
+		lowerMsg.includes("incorrect") ||
+		lowerMsg.includes("wrong")
+	) {
+		return "INVALID";
+	}
+
+	return "UNKNOWN";
+}
+
+/**
+ * Creates an OtpVerificationError with the appropriate error code.
+ */
+function createOtpError(message: string): OtpVerificationError {
+	const error = new Error(message) as OtpVerificationError;
+	error.code = detectOtpErrorCode(message);
+	return error;
+}
+
+/**
+ * Verifies the user's email using an OTP code.
+ *
+ * Uses Better Auth client's emailOtp.verifyEmail method.
+ * On success, the user's email is marked as verified in the database.
+ *
+ * IMPORTANT: According to Better Auth documentation, verifyEmail() only marks
+ * the email as verified - it does NOT create or refresh a session.
+ * After verification, the user should sign in to get a valid session.
+ *
+ * Error Handling:
+ * - Returns OtpVerificationError with `code` property for specific error types
+ * - Codes: "EXPIRED", "INVALID", "TOO_MANY_ATTEMPTS", "UNKNOWN"
+ *
+ * See: https://www.better-auth.com/docs/plugins/email-otp
+ *
+ * @param email - The email address being verified
+ * @param otp - The OTP code entered by the user
+ */
+export async function verifyEmailWithOtp(
+	email: string,
+	otp: string,
 ): Promise<AuthResult<{ message: string }>> {
 	try {
-		const result = await authClient.resetPassword({
-			token,
-			newPassword,
+		const result = await authClient.emailOtp.verifyEmail({
+			email,
+			otp,
 		});
 
 		if (result.error) {
+			const errorMessage = result.error.message || "Invalid OTP";
 			return {
 				success: false,
 				data: null,
-				error: new Error(result.error.message || "Password reset failed"),
+				error: createOtpError(errorMessage),
 			};
 		}
 
+		// Email verification succeeded in database.
+		// NOTE: verifyEmail() does NOT create a session according to Better Auth docs.
+		// The user needs to sign in after verification to get a valid session.
+		// We clear any stale local session state to ensure clean login flow.
+		clearSession();
+
 		return {
 			success: true,
-			data: { message: "Password reset successfully" },
+			data: {
+				message: "Email verified successfully",
+			},
 			error: null,
 		};
 	} catch (err) {
+		const errorMessage =
+			err instanceof Error ? err.message : "Email verification failed";
 		return {
 			success: false,
 			data: null,
-			error: err instanceof Error ? err : new Error("Password reset failed"),
+			error: createOtpError(errorMessage),
 		};
 	}
 }
 
 /**
- * Sends an email verification link to the specified email address.
- *
- * Uses Better Auth client's sendVerificationEmail method.
- * See: https://www.better-auth.com/docs/authentication/email-verification
- *
- * @param email - The email address to send the verification link to
- * @param callbackURL - The URL to redirect to after verification (defaults to login page)
+ * Checks if an error is an expired OTP error.
  */
-export async function sendVerificationEmail(
-	email: string,
-	callbackURL?: string,
-): Promise<AuthResult<{ message: string }>> {
-	try {
-		const defaultCallbackURL =
-			typeof window !== "undefined"
-				? `${window.location.origin}/verify?success=true`
-				: `${process.env.NEXT_PUBLIC_AUTH_APP_URL}/verify?success=true`;
+export function isOtpExpiredError(error: Error | null | undefined): boolean {
+	if (!error) return false;
+	return (error as OtpVerificationError).code === "EXPIRED";
+}
 
-		const result = await authClient.sendVerificationEmail({
-			email,
-			callbackURL: callbackURL || defaultCallbackURL,
-		});
+/**
+ * Checks if an error is a too many attempts error.
+ */
+export function isOtpTooManyAttemptsError(
+	error: Error | null | undefined,
+): boolean {
+	if (!error) return false;
+	return (error as OtpVerificationError).code === "TOO_MANY_ATTEMPTS";
+}
+
+/**
+ * Updates the current user's profile.
+ *
+ * Uses Better Auth client's updateUser method.
+ *
+ * @param updates - The fields to update (name, image)
+ */
+export async function updateProfile(updates: {
+	name?: string;
+	image?: string;
+}): Promise<AuthResult<Session>> {
+	try {
+		const result = await authClient.updateUser(updates);
 
 		if (result.error) {
 			return {
 				success: false,
 				data: null,
-				error: new Error(
-					result.error.message || "Failed to send verification email",
-				),
+				error: new Error(result.error.message || "Update failed"),
+			};
+		}
+
+		// Refresh session to get updated user data
+		const sessionResult = await authClient.getSession();
+		if (sessionResult.data) {
+			const session = toSession(sessionResult.data);
+			setSession(session);
+			return {
+				success: true,
+				data: session,
+				error: null,
 			};
 		}
 
 		return {
 			success: true,
-			data: { message: "Verification email sent" },
+			data: null,
 			error: null,
 		};
 	} catch (err) {
 		return {
 			success: false,
 			data: null,
-			error:
-				err instanceof Error
-					? err
-					: new Error("Failed to send verification email"),
+			error: err instanceof Error ? err : new Error("Update failed"),
 		};
 	}
 }

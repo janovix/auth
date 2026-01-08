@@ -1,7 +1,13 @@
-import type { AuthResult, SignInCredentials } from "@/lib/auth/authActions";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import type { AuthResult } from "@/lib/auth/authActions";
+import {
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
 
@@ -14,9 +20,14 @@ const renderWithTheme = (ui: React.ReactElement) => {
 	return render(<ThemeProvider>{ui}</ThemeProvider>);
 };
 
-type SignInFn = (credentials: SignInCredentials) => Promise<AuthResult>;
+type SendOtpFn = (
+	email: string,
+	type: "sign-in",
+) => Promise<AuthResult<{ message: string }>>;
+type SignInWithOtpFn = (email: string, otp: string) => Promise<AuthResult>;
 
-const createSignIn = (): SignInFn => vi.fn();
+const createSendOtp = (): SendOtpFn => vi.fn();
+const createSignInWithOtp = (): SignInWithOtpFn => vi.fn();
 
 describe("LoginView", () => {
 	beforeEach(() => {
@@ -27,9 +38,59 @@ describe("LoginView", () => {
 		});
 	});
 
-	it("submits credentials and redirects on success", async () => {
-		const signIn = createSignIn();
-		vi.mocked(signIn).mockResolvedValue({
+	afterEach(() => {
+		cleanup();
+	});
+
+	it("sends OTP and shows OTP input on success", async () => {
+		const sendOtp = createSendOtp();
+		const signInWithOtp = createSignInWithOtp();
+
+		vi.mocked(sendOtp).mockResolvedValue({
+			success: true,
+			data: { message: "OTP sent" },
+			error: null,
+		});
+
+		renderWithTheme(
+			<LoginView sendOtp={sendOtp} signInWithOtp={signInWithOtp} />,
+		);
+		const user = userEvent.setup();
+
+		// Enter email and submit
+		const emailInputs = screen.getAllByPlaceholderText("tu@empresa.com");
+		const emailInput = emailInputs[emailInputs.length - 1];
+		await user.type(emailInput, "ana@example.com");
+
+		const submitButtons = screen.getAllByRole("button", {
+			name: /enviar código/i,
+		});
+		const submitButton = submitButtons[submitButtons.length - 1];
+		fireEvent.click(submitButton);
+
+		await waitFor(() => {
+			expect(sendOtp).toHaveBeenCalledWith("ana@example.com", "sign-in");
+		});
+
+		// Should show OTP input after sending
+		await waitFor(() => {
+			expect(
+				screen.getByLabelText(/código de verificación/i),
+			).toBeInTheDocument();
+		});
+	});
+
+	it("verifies OTP and redirects on success", async () => {
+		const sendOtp = createSendOtp();
+		const signInWithOtp = createSignInWithOtp();
+
+		vi.mocked(sendOtp).mockResolvedValue({
+			success: true,
+			data: { message: "OTP sent" },
+			error: null,
+		});
+
+		vi.mocked(signInWithOtp).mockResolvedValue({
 			success: true,
 			data: {
 				user: {
@@ -54,92 +115,88 @@ describe("LoginView", () => {
 		});
 
 		renderWithTheme(
-			<LoginView redirectTo="https://app.example.com" signIn={signIn} />,
+			<LoginView
+				redirectTo="https://app.example.com"
+				sendOtp={sendOtp}
+				signInWithOtp={signInWithOtp}
+			/>,
 		);
 		const user = userEvent.setup();
 
-		const forms = screen.getAllByTestId("login-form");
-		const form = forms[0];
+		// Step 1: Enter email
 		const emailInputs = screen.getAllByPlaceholderText("tu@empresa.com");
-		await user.type(emailInputs[0], "ana@example.com");
-		const passwordInputs = screen.getAllByPlaceholderText(
-			/ingresa tu contraseña/i,
-		);
-		await user.type(passwordInputs[0], "Secret123!");
-		const checkboxes = screen.getAllByRole("checkbox", {
-			name: /recordar sesión/i,
-		});
-		await user.click(checkboxes[0]);
+		const emailInput = emailInputs[emailInputs.length - 1];
+		await user.type(emailInput, "ana@example.com");
+
 		const submitButtons = screen.getAllByRole("button", {
-			name: /iniciar sesión/i,
+			name: /enviar código/i,
 		});
-		const submitButton = submitButtons[0];
-		expect(submitButton).toHaveAttribute("type", "submit");
-		fireEvent.submit(form);
+		const submitButton = submitButtons[submitButtons.length - 1];
+		fireEvent.click(submitButton);
+
+		// Wait for OTP input to appear
+		await waitFor(() => {
+			expect(
+				screen.getByLabelText(/código de verificación/i),
+			).toBeInTheDocument();
+		});
+
+		// Step 2: Enter OTP (6 digits)
+		const otpInput = screen.getByLabelText(/código de verificación/i);
+		await user.type(otpInput, "123456");
 
 		await waitFor(() => {
-			expect(signIn).toHaveBeenCalledWith({
-				email: "ana@example.com",
-				password: "Secret123!",
-				rememberMe: false,
-			});
+			expect(signInWithOtp).toHaveBeenCalledWith("ana@example.com", "123456");
 			expect(window.location.href).toBe("https://app.example.com");
 		});
 	});
 
-	it("shows the error returned by auth-core", async () => {
-		const signIn = createSignIn();
-		vi.mocked(signIn).mockResolvedValue({
+	it("shows error when OTP sending fails", async () => {
+		const sendOtp = createSendOtp();
+		const signInWithOtp = createSignInWithOtp();
+
+		vi.mocked(sendOtp).mockResolvedValue({
 			success: false,
 			data: null,
-			error: new Error("Credenciales inválidas"),
+			error: new Error("Usuario no encontrado"),
 		});
 
-		renderWithTheme(<LoginView signIn={signIn} />);
+		renderWithTheme(
+			<LoginView sendOtp={sendOtp} signInWithOtp={signInWithOtp} />,
+		);
 		const user = userEvent.setup();
 
-		await waitFor(() => {
-			const forms = screen.getAllByTestId("login-form");
-			expect(forms.length).toBeGreaterThan(0);
-		});
-
-		const forms = screen.getAllByTestId("login-form");
-		const form = forms[forms.length - 1];
-
 		const emailInputs = screen.getAllByPlaceholderText("tu@empresa.com");
-		await user.type(emailInputs[emailInputs.length - 1], "ana@example.com");
-		const passwordInputs = screen.getAllByPlaceholderText(
-			/ingresa tu contraseña/i,
-		);
-		await user.type(passwordInputs[passwordInputs.length - 1], "Secret123!");
+		const emailInput = emailInputs[emailInputs.length - 1];
+		await user.type(emailInput, "ana@example.com");
 
 		const submitButtons = screen.getAllByRole("button", {
-			name: /iniciar sesión/i,
+			name: /enviar código/i,
 		});
 		const submitButton = submitButtons[submitButtons.length - 1];
-		expect(submitButton).toHaveAttribute("type", "submit");
+		fireEvent.click(submitButton);
 
-		fireEvent.submit(form);
+		await waitFor(() => {
+			expect(sendOtp).toHaveBeenCalled();
+		});
 
-		await waitFor(
-			() => {
-				expect(signIn).toHaveBeenCalled();
-			},
-			{ timeout: 3000 },
-		);
-
-		const errorAlert = await screen.findByRole("alert", {}, { timeout: 3000 });
+		const errorAlert = await screen.findByRole("alert");
 		expect(errorAlert).toBeInTheDocument();
-		expect(errorAlert).toHaveTextContent(/credenciales inválidas/i);
-		// Should not redirect on error
-		expect(window.location.href).toBe("");
+		// Should not show OTP input on error
+		expect(
+			screen.queryByLabelText(/código de verificación/i),
+		).not.toBeInTheDocument();
 	});
 
 	it("shows default success message when provided", () => {
+		const sendOtp = createSendOtp();
+		const signInWithOtp = createSignInWithOtp();
+
 		renderWithTheme(
 			<LoginView
 				defaultSuccessMessage="Login exitoso"
-				signIn={createSignIn()}
+				sendOtp={sendOtp}
+				signInWithOtp={signInWithOtp}
 			/>,
 		);
 
@@ -148,9 +205,48 @@ describe("LoginView", () => {
 		).toBeInTheDocument();
 	});
 
-	// Note: With the SDK, the signIn function handles errors internally
-	// and always returns AuthResult, so we don't test rejected promises.
+	it("allows changing email after OTP is sent", async () => {
+		const sendOtp = createSendOtp();
+		const signInWithOtp = createSignInWithOtp();
 
-	// Note: Redirect for already logged-in users is now handled by proxy.ts middleware
-	// at the edge level, before the page renders. No client-side redirect tests needed.
+		vi.mocked(sendOtp).mockResolvedValue({
+			success: true,
+			data: { message: "OTP sent" },
+			error: null,
+		});
+
+		renderWithTheme(
+			<LoginView sendOtp={sendOtp} signInWithOtp={signInWithOtp} />,
+		);
+		const user = userEvent.setup();
+
+		// Send OTP
+		const emailInputs = screen.getAllByPlaceholderText("tu@empresa.com");
+		const emailInput = emailInputs[emailInputs.length - 1];
+		await user.type(emailInput, "ana@example.com");
+		const submitButtons = screen.getAllByRole("button", {
+			name: /enviar código/i,
+		});
+		const submitButton = submitButtons[submitButtons.length - 1];
+		fireEvent.click(submitButton);
+
+		// Wait for OTP view
+		await waitFor(() => {
+			expect(
+				screen.getByLabelText(/código de verificación/i),
+			).toBeInTheDocument();
+		});
+
+		// Click "Change email" button
+		const changeEmailButton = screen.getByRole("button", {
+			name: /cambiar correo/i,
+		});
+		await user.click(changeEmailButton);
+
+		// Should go back to email input
+		await waitFor(() => {
+			const inputs = screen.getAllByPlaceholderText("tu@empresa.com");
+			expect(inputs.length).toBeGreaterThan(0);
+		});
+	});
 });

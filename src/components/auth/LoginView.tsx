@@ -1,16 +1,24 @@
 "use client";
 
 import {
-	signIn as localSignIn,
-	sendVerificationEmail,
-	type SignInCredentials,
+	sendVerificationOtp as localSendOtp,
+	signInWithOtp as localSignInWithOtp,
+	isOtpExpiredError,
+	isOtpTooManyAttemptsError,
 	type AuthResult,
 } from "@/lib/auth/authActions";
 import { getAuthRedirectUrl } from "@/lib/auth/redirectConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, Lock, LogIn, Mail, Shield } from "lucide-react";
+import {
+	AlertTriangle,
+	CheckCircle2,
+	Loader2,
+	Mail,
+	RefreshCw,
+	Shield,
+} from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -20,12 +28,10 @@ import {
 	AlertDescription,
 	AlertTitle,
 	Button,
-	Checkbox,
 	Form,
 	FormControl,
 	FormField,
 	FormItem,
-	FormLabel,
 	FormMessage,
 	Input,
 } from "@/components/ui";
@@ -42,122 +48,181 @@ import {
 	FieldGroup,
 	FieldLabel,
 } from "@/components/ui/field";
+import {
+	InputOTP,
+	InputOTPGroup,
+	InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 
-const loginSchema = z.object({
+const emailSchema = z.object({
 	email: z
 		.string()
 		.min(1, "El correo es obligatorio.")
 		.email("Ingresa un correo válido."),
-	password: z.string().min(1, "La contraseña es obligatoria."),
-	rememberMe: z.boolean(),
 });
 
-type LoginValues = z.infer<typeof loginSchema>;
-type SignInFn = (credentials: SignInCredentials) => Promise<AuthResult>;
+type EmailValues = z.infer<typeof emailSchema>;
+type SendOtpFn = (
+	email: string,
+	type: "sign-in",
+) => Promise<AuthResult<{ message: string }>>;
+type SignInWithOtpFn = (email: string, otp: string) => Promise<AuthResult>;
+
+const OTP_LENGTH = 6;
 
 /**
- * LoginView component for user authentication.
+ * LoginView component for passwordless OTP-based authentication.
+ *
+ * Flow:
+ * 1. User enters email
+ * 2. OTP is sent to email
+ * 3. User enters 6-digit OTP
+ * 4. Session is created (user is auto-created if new)
  *
  * Note: Route protection for authenticated users is handled by the proxy.ts
  * middleware at the edge level. Authenticated users are redirected to /account
- * before this component renders, so we don't need client-side session checks here.
+ * before this component renders.
  */
 export const LoginView = ({
 	redirectTo,
-	signIn = localSignIn,
+	sendOtp = localSendOtp,
+	signInWithOtp = localSignInWithOtp,
 	defaultSuccessMessage,
 }: {
 	redirectTo?: string;
-	signIn?: SignInFn;
+	sendOtp?: SendOtpFn;
+	signInWithOtp?: SignInWithOtpFn;
 	defaultSuccessMessage?: string;
 }) => {
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(
 		defaultSuccessMessage ?? null,
 	);
-	const [needsVerification, setNeedsVerification] = useState(false);
-	const [userEmail, setUserEmail] = useState<string | null>(null);
-	const [isResending, setIsResending] = useState(false);
-	const [resendMessage, setResendMessage] = useState<string | null>(null);
-	const [resendError, setResendError] = useState<string | null>(null);
 
-	// Always use dark theme for logo to show white letters (matching previous behavior)
+	// OTP flow state
+	const [otpSent, setOtpSent] = useState(false);
+	const [userEmail, setUserEmail] = useState<string | null>(null);
+	const [otpValue, setOtpValue] = useState("");
+	const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+	const [otpError, setOtpError] = useState<string | null>(null);
+	const [otpNeedsResend, setOtpNeedsResend] = useState(false);
+	const [isResending, setIsResending] = useState(false);
+
+	// Always use dark theme for logo to show white letters
 	const logoTheme = "dark" as const;
 
-	const form = useForm<LoginValues>({
-		resolver: zodResolver(loginSchema),
+	const form = useForm<EmailValues>({
+		resolver: zodResolver(emailSchema),
 		defaultValues: {
 			email: "",
-			password: "",
-			rememberMe: true,
 		},
 	});
 
-	const handleSubmit = async (values: LoginValues) => {
+	const handleSendOtp = async (values: EmailValues) => {
 		setServerError(null);
 		setSuccessMessage(null);
-		setNeedsVerification(false);
-		setResendMessage(null);
-		setResendError(null);
+		setOtpError(null);
+		setOtpNeedsResend(false);
 
 		const email = values.email.trim();
-		const result = await signIn({
-			email,
-			password: values.password,
-			rememberMe: values.rememberMe,
-		});
+		const result = await sendOtp(email, "sign-in");
 
 		if (!result.success) {
-			// Check if error is due to unverified email (403 status)
-			const error = result.error;
-			if (
-				error &&
-				typeof error === "object" &&
-				"status" in error &&
-				error.status === 403
-			) {
-				setNeedsVerification(true);
-				setUserEmail(email);
-				setServerError(
-					"Por favor verifica tu correo electrónico antes de iniciar sesión.",
-				);
-			} else {
-				setServerError(getAuthErrorMessage(result.error));
-			}
+			setServerError(getAuthErrorMessage(result.error));
 			return;
 		}
 
-		setSuccessMessage("Acceso validado. Redirigiendo…");
-		// Use window.location for external redirects (cross-origin)
-		window.location.href = getAuthRedirectUrl(redirectTo);
+		setUserEmail(email);
+		setOtpSent(true);
+		setSuccessMessage(
+			"Te enviamos un código de 6 dígitos. Revisa tu correo y spam.",
+		);
 	};
 
-	const handleResendVerification = async () => {
+	// Handle OTP verification and sign-in
+	const handleVerifyOtp = useCallback(async () => {
+		if (!userEmail || otpValue.length !== OTP_LENGTH) {
+			return;
+		}
+
+		setIsVerifyingOtp(true);
+		setOtpError(null);
+		setOtpNeedsResend(false);
+
+		const result = await signInWithOtp(userEmail, otpValue);
+
+		if (!result.success) {
+			const isExpired = isOtpExpiredError(result.error);
+			const isTooManyAttempts = isOtpTooManyAttemptsError(result.error);
+
+			if (isExpired) {
+				setOtpError(
+					"El código ha expirado. Los códigos son válidos por 5 minutos. Solicita uno nuevo.",
+				);
+				setOtpNeedsResend(true);
+				setOtpValue("");
+			} else if (isTooManyAttempts) {
+				setOtpError(
+					"Has excedido el número de intentos. Por seguridad, solicita un nuevo código.",
+				);
+				setOtpNeedsResend(true);
+				setOtpValue("");
+			} else {
+				setOtpError(
+					result.error?.message || "Código incorrecto. Inténtalo de nuevo.",
+				);
+			}
+
+			setIsVerifyingOtp(false);
+			return;
+		}
+
+		// Success! Redirect to the target URL
+		setSuccessMessage("Acceso validado. Redirigiendo…");
+		window.location.href = getAuthRedirectUrl(redirectTo);
+	}, [userEmail, otpValue, signInWithOtp, redirectTo]);
+
+	// Auto-submit when OTP is complete
+	useEffect(() => {
+		if (otpValue.length === OTP_LENGTH && userEmail && !isVerifyingOtp) {
+			handleVerifyOtp();
+		}
+	}, [otpValue, userEmail, isVerifyingOtp, handleVerifyOtp]);
+
+	const handleResendOtp = async () => {
 		if (!userEmail) {
 			return;
 		}
 
 		setIsResending(true);
-		setResendMessage(null);
-		setResendError(null);
+		setOtpError(null);
+		setOtpNeedsResend(false);
+		setOtpValue("");
 
-		const result = await sendVerificationEmail(
-			userEmail,
-			`${window.location.origin}/verify?success=true`,
-		);
+		const result = await sendOtp(userEmail, "sign-in");
 
 		if (!result.success) {
-			setResendError(
-				result.error?.message || "Error al reenviar el correo de verificación",
+			setOtpError(
+				result.error?.message ||
+					"Error al reenviar el código. Intenta de nuevo.",
 			);
 		} else {
-			setResendMessage(
-				"Correo de verificación reenviado. Revisa tu bandeja de entrada.",
+			setSuccessMessage(
+				"Nuevo código enviado. Revisa tu correo (válido por 5 minutos).",
 			);
 		}
 
 		setIsResending(false);
+	};
+
+	const handleBackToEmail = () => {
+		setOtpSent(false);
+		setUserEmail(null);
+		setOtpValue("");
+		setOtpError(null);
+		setOtpNeedsResend(false);
+		setSuccessMessage(null);
 	};
 
 	const isSubmitting = form.formState.isSubmitting;
@@ -169,214 +234,207 @@ export const LoginView = ({
 			</div>
 			<Card>
 				<CardHeader className="text-center">
-					<CardTitle className="text-xl">Bienvenido de nuevo</CardTitle>
+					<CardTitle className="text-xl">Bienvenido</CardTitle>
 					<CardDescription>
-						Ingresa tus credenciales para acceder a tu cuenta
+						{otpSent
+							? "Ingresa el código que enviamos a tu correo"
+							: "Ingresa tu correo para recibir un código de acceso"}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					{successMessage ? (
+					{successMessage && !otpError ? (
 						<Alert role="status" className="mb-6">
 							<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-							<AlertTitle>Autenticación exitosa</AlertTitle>
+							<AlertTitle>
+								{otpSent ? "Código enviado" : "Autenticación exitosa"}
+							</AlertTitle>
 							<AlertDescription>{successMessage}</AlertDescription>
 						</Alert>
 					) : null}
 
-					{serverError && !successMessage ? (
-						<div className="mb-6 space-y-4">
-							<Alert variant="destructive" role="alert">
-								<AlertTitle>Error de autenticación</AlertTitle>
-								<AlertDescription>{serverError}</AlertDescription>
-							</Alert>
-							{needsVerification && userEmail ? (
-								<div className="space-y-3">
-									<Button
-										onClick={handleResendVerification}
-										disabled={isResending}
-										variant="outline"
-										className="w-full"
-									>
-										<Mail className="mr-2 h-4 w-4" />
-										{isResending
-											? "Enviando..."
-											: "Reenviar correo de verificación"}
-									</Button>
-									{resendMessage && (
-										<Alert role="status">
-											<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-											<AlertDescription>{resendMessage}</AlertDescription>
-										</Alert>
-									)}
-									{resendError && (
-										<Alert variant="destructive" role="alert">
-											<AlertDescription>{resendError}</AlertDescription>
-										</Alert>
-									)}
-								</div>
-							) : null}
-						</div>
+					{serverError && !otpSent ? (
+						<Alert variant="destructive" role="alert" className="mb-6">
+							<AlertTitle>Error</AlertTitle>
+							<AlertDescription>{serverError}</AlertDescription>
+						</Alert>
 					) : null}
 
-					<Form {...form}>
-						<form
-							data-testid="login-form"
-							onSubmit={form.handleSubmit(handleSubmit)}
-						>
-							<FieldGroup>
-								<Field>
-									<FormField
-										control={form.control}
-										name="email"
-										render={({ field }) => (
-											<FormItem>
-												<FieldLabel
-													htmlFor="email"
-													className="flex items-center gap-2"
-												>
-													<Mail className="h-4 w-4" aria-hidden="true" />
-													Correo electrónico
-												</FieldLabel>
-												<FormControl>
-													<Input
-														id="email"
-														type="email"
-														placeholder="tu@empresa.com"
-														autoComplete="email"
-														aria-describedby="email-description"
-														required
-														{...field}
-													/>
-												</FormControl>
-												<FormMessage />
-												<FieldDescription
-													id="email-description"
-													className="sr-only"
-												>
-													Ingresa tu dirección de correo corporativo
-												</FieldDescription>
-											</FormItem>
-										)}
-									/>
-								</Field>
-								<Field>
-									<div className="flex items-center">
-										<FieldLabel
-											htmlFor="password"
-											className="flex items-center gap-2"
-										>
-											<Lock className="h-4 w-4" aria-hidden="true" />
-											Contraseña
-										</FieldLabel>
-										<Link
-											href={
-												redirectTo
-													? `/recover?redirect_to=${encodeURIComponent(redirectTo)}`
-													: "/recover"
-											}
-											className="ml-auto text-sm text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-											aria-label="Recuperar contraseña olvidada"
-										>
-											¿Olvidaste tu contraseña?
-										</Link>
-									</div>
-									<FormField
-										control={form.control}
-										name="password"
-										render={({ field }) => (
-											<FormItem>
-												<FormControl>
-													<Input
-														id="password"
-														type="password"
-														placeholder="Ingresa tu contraseña"
-														autoComplete="current-password"
-														aria-describedby="password-description"
-														required
-														{...field}
-													/>
-												</FormControl>
-												<FormMessage />
-												<FieldDescription
-													id="password-description"
-													className="sr-only"
-												>
-													Ingresa tu contraseña de acceso
-												</FieldDescription>
-											</FormItem>
-										)}
-									/>
-								</Field>
-								<Field>
-									<FormField
-										control={form.control}
-										name="rememberMe"
-										render={({ field }) => (
-											<FormItem className="flex items-start gap-3 rounded-lg border px-4 py-3">
-												<FormControl>
-													<Checkbox
-														id="rememberMe"
-														checked={field.value}
-														onCheckedChange={(checked) =>
-															field.onChange(checked === true)
-														}
-														aria-describedby="rememberMe-description"
-													/>
-												</FormControl>
-												<div className="space-y-1 leading-none">
-													<FormLabel
-														htmlFor="rememberMe"
-														className="text-sm font-medium cursor-pointer"
+					{!otpSent ? (
+						// Step 1: Email input
+						<Form {...form}>
+							<form
+								data-testid="login-form"
+								onSubmit={form.handleSubmit(handleSendOtp)}
+							>
+								<FieldGroup>
+									<Field>
+										<FormField
+											control={form.control}
+											name="email"
+											render={({ field }) => (
+												<FormItem>
+													<FieldLabel
+														htmlFor="email"
+														className="flex items-center gap-2"
 													>
-														Recordar sesión
-													</FormLabel>
+														<Mail className="h-4 w-4" aria-hidden="true" />
+														Correo electrónico
+													</FieldLabel>
+													<FormControl>
+														<Input
+															id="email"
+															type="email"
+															placeholder="tu@empresa.com"
+															autoComplete="email"
+															aria-describedby="email-description"
+															required
+															{...field}
+														/>
+													</FormControl>
+													<FormMessage />
 													<FieldDescription
-														id="rememberMe-description"
-														className="text-xs text-muted-foreground"
+														id="email-description"
+														className="sr-only"
 													>
-														Mantén tu sesión activa en este dispositivo
+														Ingresa tu dirección de correo
 													</FieldDescription>
-												</div>
-											</FormItem>
-										)}
-									/>
-								</Field>
-								<Field>
-									<Button
-										type="submit"
-										className="w-full"
-										disabled={isSubmitting}
-										aria-busy={isSubmitting}
-									>
-										{isSubmitting ? (
-											<span className="flex items-center justify-center gap-2">
-												<LogIn
-													className="h-4 w-4 animate-pulse"
-													aria-hidden="true"
-												/>
-												Iniciando sesión...
-											</span>
-										) : (
-											<>
-												<LogIn className="h-4 w-4" aria-hidden="true" />
-												Iniciar sesión
-											</>
-										)}
-									</Button>
-									<FieldDescription className="text-center">
-										¿Aún no tienes cuenta?{" "}
-										<Link
-											href="/signup"
-											className="font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-											aria-label="Crear una nueva cuenta"
+												</FormItem>
+											)}
+										/>
+									</Field>
+									<Field>
+										<Button
+											type="submit"
+											className="w-full"
+											disabled={isSubmitting}
+											aria-busy={isSubmitting}
 										>
-											Regístrate aquí
-										</Link>
-									</FieldDescription>
-								</Field>
-							</FieldGroup>
-						</form>
-					</Form>
+											{isSubmitting ? (
+												<span className="flex items-center justify-center gap-2">
+													<Mail
+														className="h-4 w-4 animate-pulse"
+														aria-hidden="true"
+													/>
+													Enviando código...
+												</span>
+											) : (
+												<>
+													<Mail className="h-4 w-4" aria-hidden="true" />
+													Enviar código de acceso
+												</>
+											)}
+										</Button>
+										<FieldDescription className="text-center">
+											¿Aún no tienes cuenta?{" "}
+											<Link
+												href="/signup"
+												className="font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
+												aria-label="Crear una nueva cuenta"
+											>
+												Regístrate aquí
+											</Link>
+										</FieldDescription>
+									</Field>
+								</FieldGroup>
+							</form>
+						</Form>
+					) : (
+						// Step 2: OTP input
+						<div className="space-y-4">
+							<Alert>
+								<Mail className="h-4 w-4" aria-hidden="true" />
+								<AlertTitle>Código enviado</AlertTitle>
+								<AlertDescription>
+									Enviamos un código de 6 dígitos a <strong>{userEmail}</strong>
+									. Revisa tu bandeja de entrada y spam.
+								</AlertDescription>
+							</Alert>
+
+							{/* OTP Input */}
+							<div className="flex flex-col items-center gap-4">
+								<InputOTP
+									maxLength={OTP_LENGTH}
+									value={otpValue}
+									onChange={setOtpValue}
+									disabled={isVerifyingOtp}
+									aria-label="Código de verificación"
+								>
+									<InputOTPGroup>
+										<InputOTPSlot index={0} />
+										<InputOTPSlot index={1} />
+										<InputOTPSlot index={2} />
+										<InputOTPSlot index={3} />
+										<InputOTPSlot index={4} />
+										<InputOTPSlot index={5} />
+									</InputOTPGroup>
+								</InputOTP>
+
+								{isVerifyingOtp && (
+									<div className="flex items-center gap-2 text-sm text-muted-foreground">
+										<Loader2 className="h-4 w-4 animate-spin" />
+										Verificando...
+									</div>
+								)}
+							</div>
+
+							{otpError && (
+								<Alert variant="destructive" role="alert">
+									{otpNeedsResend && (
+										<AlertTriangle className="h-4 w-4" aria-hidden="true" />
+									)}
+									<AlertTitle>
+										{otpNeedsResend
+											? "Código expirado o inválido"
+											: "Error de verificación"}
+									</AlertTitle>
+									<AlertDescription>{otpError}</AlertDescription>
+								</Alert>
+							)}
+
+							{/* Resend button */}
+							{otpNeedsResend ? (
+								<Button
+									onClick={handleResendOtp}
+									disabled={isResending}
+									className="w-full"
+								>
+									{isResending ? (
+										<>
+											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+											Enviando nuevo código...
+										</>
+									) : (
+										<>
+											<RefreshCw className="mr-2 h-4 w-4" />
+											Solicitar nuevo código
+										</>
+									)}
+								</Button>
+							) : (
+								<Button
+									onClick={handleResendOtp}
+									disabled={isResending || isVerifyingOtp}
+									variant="outline"
+									className="w-full"
+								>
+									<Mail className="mr-2 h-4 w-4" />
+									{isResending ? "Enviando..." : "Reenviar código"}
+								</Button>
+							)}
+
+							<div className="text-center text-sm text-muted-foreground">
+								¿Correo incorrecto?{" "}
+								<button
+									type="button"
+									onClick={handleBackToEmail}
+									className="font-medium text-primary underline-offset-4 hover:underline"
+								>
+									Cambiar correo
+								</button>
+							</div>
+						</div>
+					)}
+
 					<hr className="my-6 border-t" />
 					<FieldDescription className="px-6 text-center text-xs text-muted-foreground">
 						<Shield className="h-3 w-3 inline-block mr-1" aria-hidden="true" />

@@ -1,17 +1,13 @@
 "use client";
 
-import { sendVerificationEmail } from "@/lib/auth/authActions";
 import {
 	ArrowLeft,
 	CheckCircle2,
 	LogIn,
-	Mail,
 	MailCheck,
-	RefreshCw,
 	XCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 
 import { Logo } from "@/components/Logo";
 import {
@@ -33,42 +29,16 @@ type VerifyEmailViewProps = {
 	email?: string;
 };
 
-export const VerifyEmailView = ({
-	success,
-	error,
-	email,
-}: VerifyEmailViewProps) => {
-	const [isResending, setIsResending] = useState(false);
-	const [resendMessage, setResendMessage] = useState<string | null>(null);
-	const [resendError, setResendError] = useState<string | null>(null);
-
+/**
+ * VerifyEmailView - Success/error page for email verification.
+ *
+ * This page is shown after successful OTP verification or if there's an error.
+ * Note: Email verification now uses OTP codes entered inline in the signup flow,
+ * so this page mainly serves as a success confirmation or error display.
+ */
+export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
 	// Always use dark theme for logo to show white letters
 	const logoTheme = "dark" as const;
-
-	const handleResend = async () => {
-		if (!email) {
-			setResendError("No se proporcionó un correo electrónico");
-			return;
-		}
-
-		setIsResending(true);
-		setResendMessage(null);
-		setResendError(null);
-
-		const result = await sendVerificationEmail(email);
-
-		if (!result.success) {
-			setResendError(
-				result.error?.message || "Error al reenviar el correo de verificación",
-			);
-		} else {
-			setResendMessage(
-				"Correo de verificación reenviado. Revisa tu bandeja de entrada.",
-			);
-		}
-
-		setIsResending(false);
-	};
 
 	// Determine the current state for card description
 	const getDescription = () => {
@@ -78,7 +48,7 @@ export const VerifyEmailView = ({
 		if (error) {
 			return "Hubo un problema al verificar tu correo electrónico";
 		}
-		return "Verificando tu correo electrónico...";
+		return "Estado de verificación de correo";
 	};
 
 	return (
@@ -143,110 +113,39 @@ export const VerifyEmailView = ({
 										<XCircle className="h-4 w-4" aria-hidden="true" />
 										<AlertTitle>Error de verificación</AlertTitle>
 										<AlertDescription>
-											{error === "invalid_token"
-												? "El enlace de verificación no es válido o ha expirado. Por favor, solicita un nuevo enlace de verificación."
-												: "No se pudo verificar tu correo electrónico. Por favor, intenta nuevamente o solicita un nuevo enlace."}
+											No se pudo verificar tu correo electrónico. Por favor,
+											inicia sesión o regístrate nuevamente para recibir un
+											código de verificación.
 										</AlertDescription>
 									</Alert>
 								</Field>
 
-								{email ? (
-									<>
-										<Field>
-											<div className="flex items-start gap-3 rounded-lg border border-dashed border-primary/20 bg-muted/40 p-4 text-sm">
-												<Mail
-													className="h-5 w-5 text-primary mt-0.5 flex-shrink-0"
-													aria-hidden="true"
-												/>
-												<p className="text-muted-foreground">
-													Si necesitas un nuevo enlace de verificación, puedes
-													solicitarlo a continuación. El enlace se enviará a{" "}
-													<strong className="text-foreground">{email}</strong>.
-												</p>
-											</div>
-										</Field>
-
-										<Field>
-											<Button
-												onClick={handleResend}
-												disabled={isResending}
-												className="w-full"
-												variant="outline"
-												aria-busy={isResending}
-											>
-												{isResending ? (
-													<span className="flex items-center justify-center gap-2">
-														<RefreshCw
-															className="h-4 w-4 animate-spin"
-															aria-hidden="true"
-														/>
-														Enviando...
-													</span>
-												) : (
-													<>
-														<Mail className="h-4 w-4" aria-hidden="true" />
-														Reenviar correo de verificación
-													</>
-												)}
-											</Button>
-										</Field>
-
-										{resendMessage ? (
-											<Field>
-												<Alert role="status">
-													<CheckCircle2
-														className="h-4 w-4"
-														aria-hidden="true"
-													/>
-													<AlertTitle>Correo enviado</AlertTitle>
-													<AlertDescription>{resendMessage}</AlertDescription>
-												</Alert>
-											</Field>
-										) : null}
-
-										{resendError ? (
-											<Field>
-												<Alert variant="destructive" role="alert">
-													<XCircle className="h-4 w-4" aria-hidden="true" />
-													<AlertDescription>{resendError}</AlertDescription>
-												</Alert>
-											</Field>
-										) : null}
-									</>
-								) : null}
+								<Field>
+									<Button asChild className="w-full">
+										<Link href="/login">
+											<LogIn className="h-4 w-4" aria-hidden="true" />
+											Ir a iniciar sesión
+										</Link>
+									</Button>
+								</Field>
 
 								<Field>
 									<FieldDescription className="text-center">
 										<Link
-											href="/login"
+											href="/signup"
 											className="inline-flex items-center gap-1 font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-											aria-label="Volver al inicio de sesión"
+											aria-label="Crear una cuenta nueva"
 										>
-											<ArrowLeft className="h-3 w-3" aria-hidden="true" />
-											Volver al inicio de sesión
+											¿No tienes cuenta? Regístrate
 										</Link>
 									</FieldDescription>
 								</Field>
 							</>
 						) : null}
 
-						{/* Loading/Pending State */}
+						{/* Default State - No success or error */}
 						{!success && !error ? (
 							<>
-								<Field>
-									<Alert role="status">
-										<Mail
-											className="h-4 w-4 animate-pulse"
-											aria-hidden="true"
-										/>
-										<AlertTitle>Verificando...</AlertTitle>
-										<AlertDescription>
-											Por favor espera mientras verificamos tu correo
-											electrónico. Esto puede tomar unos segundos.
-										</AlertDescription>
-									</Alert>
-								</Field>
-
 								<Field>
 									<div className="flex items-start gap-3 rounded-lg border border-dashed border-primary/20 bg-muted/40 p-4 text-sm">
 										<MailCheck
@@ -254,8 +153,9 @@ export const VerifyEmailView = ({
 											aria-hidden="true"
 										/>
 										<p className="text-muted-foreground">
-											Si fuiste redirigido aquí desde tu correo electrónico, la
-											verificación se completará automáticamente.
+											La verificación de correo se realiza mediante un código
+											OTP enviado a tu email durante el registro. Inicia sesión
+											para continuar.
 										</p>
 									</div>
 								</Field>

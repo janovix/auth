@@ -1,7 +1,7 @@
 {
 	"name": "auth",
-	"version": "1.2.0-rc.6",
-	"description": "Build a full-stack web application with Next.js.",
+  "version": "1.2.0-rc.6",
+  "description": "Build a full-stack web application with Next.js.",
 	"cloudflare": {
 		"label": "Next.js Framework Starter",
 		"products": [

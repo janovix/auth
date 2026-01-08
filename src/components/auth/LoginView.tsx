@@ -114,7 +114,6 @@ export const LoginView = ({
 
 	// Success animation state
 	const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-	const [userName, setUserName] = useState<string | undefined>(undefined);
 	const redirectUrlRef = useRef<string>("");
 
 	// Always use dark theme for logo to show white letters
@@ -237,7 +236,6 @@ export const LoginView = ({
 
 		// Success! Show animation then redirect
 		setStateModifier("success"); // Green aurora on success
-		setUserName(result.data?.user?.name ?? undefined);
 		redirectUrlRef.current = getAuthRedirectUrl(redirectTo);
 		setShowSuccessAnimation(true);
 	}, [userEmail, otpValue, signInWithOtp, redirectTo, setStateModifier]);
@@ -305,9 +303,8 @@ export const LoginView = ({
 				<Card className="animate-fade-in">
 					<CardContent className="pt-6">
 						<LoginSuccessAnimation
-							userName={userName}
 							onComplete={handleSuccessComplete}
-							delay={2500}
+							delay={2000}
 						/>
 					</CardContent>
 				</Card>

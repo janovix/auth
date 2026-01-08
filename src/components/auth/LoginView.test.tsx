@@ -156,9 +156,9 @@ describe("LoginView", () => {
 			expect(signInWithOtp).toHaveBeenCalledWith("ana@example.com", "123456");
 		});
 
-		// Should show success animation with welcome message
+		// Should show success animation with redirecting message
 		await waitFor(() => {
-			expect(screen.getByText(/bienvenido/i)).toBeInTheDocument();
+			expect(screen.getByText(/redirigiendo/i)).toBeInTheDocument();
 		});
 
 		// Advance timers to trigger redirect after success animation

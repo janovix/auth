@@ -1,7 +1,7 @@
 "use client";
 
 import { createAuthClient } from "better-auth/client";
-import { emailOTPClient } from "better-auth/client/plugins";
+import { emailOTPClient, organizationClient } from "better-auth/client/plugins";
 
 import { getAuthCoreBaseUrl } from "./authCoreConfig";
 
@@ -17,13 +17,14 @@ import { getAuthCoreBaseUrl } from "./authCoreConfig";
  * Plugins:
  * - emailOTPClient: Enables OTP-based email verification instead of link-based,
  *   preserving the user's flow and redirectTo parameters during signup.
+ * - organizationClient: Enables organization management (required by aml-janovix).
  */
 export const authClient = createAuthClient({
 	baseURL: getAuthCoreBaseUrl(),
 	fetchOptions: {
 		credentials: "include",
 	},
-	plugins: [emailOTPClient()],
+	plugins: [emailOTPClient(), organizationClient()],
 });
 
 export type AuthClient = typeof authClient;

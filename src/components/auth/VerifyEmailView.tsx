@@ -22,6 +22,7 @@ import {
 	CardTitle,
 } from "@/components/ui";
 import { Field, FieldDescription, FieldGroup } from "@/components/ui/field";
+import { useLanguage } from "@/contexts/language-context";
 
 type VerifyEmailViewProps = {
 	success?: boolean;
@@ -37,15 +38,17 @@ type VerifyEmailViewProps = {
  * so this page mainly serves as a success confirmation or error display.
  */
 export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
+	const { t } = useLanguage();
+
 	// Determine the current state for card description
 	const getDescription = () => {
 		if (success) {
-			return "Tu correo electrónico ha sido verificado exitosamente";
+			return t("verify.success.description");
 		}
 		if (error) {
-			return "Hubo un problema al verificar tu correo electrónico";
+			return t("verify.error.description");
 		}
-		return "Estado de verificación de correo";
+		return t("verify.default.description");
 	};
 
 	return (
@@ -55,7 +58,7 @@ export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
 			</div>
 			<Card>
 				<CardHeader className="text-center">
-					<CardTitle className="text-xl">Verificación de correo</CardTitle>
+					<CardTitle className="text-xl">{t("verify.title")}</CardTitle>
 					<CardDescription>{getDescription()}</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -66,10 +69,9 @@ export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
 								<Field>
 									<Alert role="status" data-testid="verify-success-alert">
 										<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-										<AlertTitle>Verificación exitosa</AlertTitle>
+										<AlertTitle>{t("verify.success.title")}</AlertTitle>
 										<AlertDescription>
-											Tu correo electrónico ha sido verificado correctamente. Ya
-											puedes iniciar sesión con tu cuenta.
+											{t("verify.success.message")}
 										</AlertDescription>
 									</Alert>
 								</Field>
@@ -81,8 +83,7 @@ export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
 											aria-hidden="true"
 										/>
 										<p className="text-muted-foreground">
-											Tu cuenta está lista para usar. Ahora puedes acceder a
-											todas las funcionalidades de la plataforma.
+											{t("verify.success.ready")}
 										</p>
 									</div>
 								</Field>
@@ -91,7 +92,7 @@ export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
 									<Button asChild className="w-full">
 										<Link href="/login">
 											<LogIn className="h-4 w-4" aria-hidden="true" />
-											Ir a iniciar sesión
+											{t("verify.success.button")}
 										</Link>
 									</Button>
 								</Field>
@@ -108,11 +109,9 @@ export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
 										data-testid="verify-error-alert"
 									>
 										<XCircle className="h-4 w-4" aria-hidden="true" />
-										<AlertTitle>Error de verificación</AlertTitle>
+										<AlertTitle>{t("verify.error.title")}</AlertTitle>
 										<AlertDescription>
-											No se pudo verificar tu correo electrónico. Por favor,
-											inicia sesión o regístrate nuevamente para recibir un
-											código de verificación.
+											{t("verify.error.message")}
 										</AlertDescription>
 									</Alert>
 								</Field>
@@ -121,7 +120,7 @@ export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
 									<Button asChild className="w-full">
 										<Link href="/login">
 											<LogIn className="h-4 w-4" aria-hidden="true" />
-											Ir a iniciar sesión
+											{t("verify.success.button")}
 										</Link>
 									</Button>
 								</Field>
@@ -131,9 +130,8 @@ export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
 										<Link
 											href="/signup"
 											className="inline-flex items-center gap-1 font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-											aria-label="Crear una cuenta nueva"
 										>
-											¿No tienes cuenta? Regístrate
+											{t("verify.error.noAccount")}
 										</Link>
 									</FieldDescription>
 								</Field>
@@ -150,9 +148,7 @@ export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
 											aria-hidden="true"
 										/>
 										<p className="text-muted-foreground">
-											La verificación de correo se realiza mediante un código
-											OTP enviado a tu email durante el registro. Inicia sesión
-											para continuar.
+											{t("verify.default.message")}
 										</p>
 									</div>
 								</Field>
@@ -162,10 +158,9 @@ export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
 										<Link
 											href="/login"
 											className="inline-flex items-center gap-1 font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-											aria-label="Volver al inicio de sesión"
 										>
 											<ArrowLeft className="h-3 w-3" aria-hidden="true" />
-											Volver al inicio de sesión
+											{t("verify.default.backToLogin")}
 										</Link>
 									</FieldDescription>
 								</Field>

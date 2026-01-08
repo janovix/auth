@@ -3,9 +3,20 @@
 import { usePathname } from "next/navigation";
 
 import { GlobalAuroraBackground } from "@/components/aurora";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { AuroraProvider } from "@/contexts/aurora-context";
+import { LanguageProvider } from "@/contexts/language-context";
+
+function SettingsBar() {
+	return (
+		<div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
+			<LanguageSwitcher />
+			<ThemeSwitcher />
+		</div>
+	);
+}
 
 function AuthLayout({ children }: { children: React.ReactNode }) {
 	return (
@@ -14,10 +25,8 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
 				{/* Aurora background - always shown on auth pages */}
 				<GlobalAuroraBackground />
 
-				{/* Theme picker - bottom right */}
-				<div className="fixed bottom-4 right-4 z-50">
-					<ThemeSwitcher />
-				</div>
+				{/* Language and Theme pickers - bottom right */}
+				<SettingsBar />
 
 				{/* Main content area - scrollable, centered */}
 				<div className="flex-1 w-full flex flex-col items-center justify-center px-4 md:px-10 py-8 relative z-10 overflow-y-auto min-h-0">
@@ -46,16 +55,16 @@ export default function ClientLayout({
 
 	return (
 		<ThemeProvider>
-			{isAuthRoute ? (
-				<AuthLayout>{children}</AuthLayout>
-			) : (
-				<>
-					<div className="fixed bottom-4 right-4 z-50">
-						<ThemeSwitcher />
-					</div>
-					{children}
-				</>
-			)}
+			<LanguageProvider>
+				{isAuthRoute ? (
+					<AuthLayout>{children}</AuthLayout>
+				) : (
+					<>
+						<SettingsBar />
+						{children}
+					</>
+				)}
+			</LanguageProvider>
 		</ThemeProvider>
 	);
 }

@@ -34,15 +34,15 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 				</Button>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent
+				side="top"
 				align="center"
-				sideOffset={4}
-				avoidCollisions={false}
-				className="min-w-0 w-14"
+				sideOffset={8}
+				className="min-w-[3.5rem]"
 			>
 				<DropdownMenuItem
 					onClick={() => setLanguage("es")}
 					className={cn(
-						"justify-center text-xs font-semibold",
+						"justify-center text-xs font-semibold cursor-pointer",
 						language === "es" && "bg-accent",
 					)}
 				>
@@ -51,7 +51,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 				<DropdownMenuItem
 					onClick={() => setLanguage("en")}
 					className={cn(
-						"justify-center text-xs font-semibold",
+						"justify-center text-xs font-semibold cursor-pointer",
 						language === "en" && "bg-accent",
 					)}
 				>

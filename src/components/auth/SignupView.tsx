@@ -59,20 +59,14 @@ import {
 } from "@/components/ui/input-otp";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 import { useAurora } from "@/contexts/aurora-context";
+import { useLanguage } from "@/contexts/language-context";
 
-const signupSchema = z.object({
-	firstName: z.string().min(1, "Tu nombre es obligatorio."),
-	lastName: z.string().min(1, "Tu apellido es obligatorio."),
-	email: z
-		.string()
-		.min(1, "El correo es obligatorio.")
-		.email("Ingresa un correo válido."),
-	acceptTerms: z.boolean().refine((value) => value, {
-		message: "Debes aceptar los términos y condiciones.",
-	}),
-});
-
-type SignupValues = z.infer<typeof signupSchema>;
+type SignupValues = {
+	firstName: string;
+	lastName: string;
+	email: string;
+	acceptTerms: boolean;
+};
 type SignUpFn = (credentials: SignUpCredentials) => Promise<AuthResult>;
 
 const OTP_LENGTH = 6;
@@ -84,6 +78,7 @@ export const SignupView = ({
 	redirectTo?: string;
 	signUp?: SignUpFn;
 }) => {
+	const { t } = useLanguage();
 	const { setPageProfile, setStateModifier } = useAurora();
 	const router = useRouter();
 	const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -102,8 +97,22 @@ export const SignupView = ({
 	const [otpError, setOtpError] = useState<string | null>(null);
 	const [otpNeedsResend, setOtpNeedsResend] = useState(false);
 
-	// Always use dark theme for logo to show white letters
-	const logoTheme = "dark" as const;
+	// Create schema with translations
+	const signupSchema = useMemo(
+		() =>
+			z.object({
+				firstName: z.string().min(1, t("signup.firstName.required")),
+				lastName: z.string().min(1, t("signup.lastName.required")),
+				email: z
+					.string()
+					.min(1, t("signup.email.required"))
+					.email(t("signup.email.invalid")),
+				acceptTerms: z.boolean().refine((value) => value, {
+					message: t("signup.terms.required"),
+				}),
+			}),
+		[t],
+	);
 
 	// Set aurora page profile to signup (pink/purple) on mount
 	useEffect(() => {
@@ -200,15 +209,13 @@ export const SignupView = ({
 			// which automatically sends the OTP when the user signs up.
 			setNeedsVerification(true);
 			setUserEmail(email);
-			setSuccessMessage(
-				"Hemos enviado un código de 6 dígitos a tu correo. Ingrésalo a continuación para verificar tu cuenta.",
-			);
+			setSuccessMessage(t("signup.success.message"));
 			setStateModifier("default"); // Back to pink/purple after OTP sent
 			return;
 		}
 
 		// Email is already verified, redirect to login
-		setSuccessMessage("Cuenta creada. Redirigiendo al inicio de sesión…");
+		setSuccessMessage(t("signup.success.redirect"));
 		setStateModifier("success"); // Green aurora on success
 		const loginUrl = redirectTo
 			? `/login?redirect_to=${encodeURIComponent(redirectTo)}`
@@ -238,24 +245,18 @@ export const SignupView = ({
 			const isTooManyAttempts = isOtpTooManyAttemptsError(result.error);
 
 			if (isExpired) {
-				setOtpError(
-					"El código ha expirado. Los códigos son válidos por 5 minutos. Solicita uno nuevo.",
-				);
+				setOtpError(t("signup.otp.expired"));
 				setOtpNeedsResend(true);
 				setOtpValue(""); // Clear the expired OTP
 				otpAtErrorRef.current = ""; // Capture OTP value at time of error (empty after clear)
 			} else if (isTooManyAttempts) {
-				setOtpError(
-					"Has excedido el número de intentos. Por seguridad, solicita un nuevo código.",
-				);
+				setOtpError(t("signup.otp.tooManyAttempts"));
 				setOtpNeedsResend(true);
 				setOtpValue(""); // Clear the OTP
 				otpAtErrorRef.current = ""; // Capture OTP value at time of error (empty after clear)
 			} else {
 				// Invalid OTP or unknown error - show message from server
-				setOtpError(
-					result.error?.message || "Código incorrecto. Inténtalo de nuevo.",
-				);
+				setOtpError(result.error?.message || t("signup.otp.invalid"));
 				otpAtErrorRef.current = otpValue; // Capture current OTP value at time of error
 			}
 
@@ -266,9 +267,7 @@ export const SignupView = ({
 
 		// Verification successful!
 		// User needs to sign in via OTP to get a session
-		setSuccessMessage(
-			"¡Correo verificado! Por favor inicia sesión para continuar.",
-		);
+		setSuccessMessage(t("signup.otp.verified"));
 		setStateModifier("success"); // Green aurora on success
 
 		// Short delay to show the success message before redirecting to login
@@ -279,7 +278,7 @@ export const SignupView = ({
 				: "/login";
 			router.push(loginUrl);
 		}, 1500);
-	}, [userEmail, otpValue, redirectTo, router, setStateModifier]);
+	}, [userEmail, otpValue, redirectTo, router, setStateModifier, t]);
 
 	// Auto-submit when OTP is complete
 	useEffect(() => {
@@ -304,14 +303,10 @@ export const SignupView = ({
 		const result = await sendVerificationOtp(userEmail, "email-verification");
 
 		if (!result.success) {
-			setResendError(
-				result.error?.message || "Error al reenviar el código de verificación",
-			);
+			setResendError(result.error?.message || t("signup.otp.resendError"));
 			setStateModifier("error"); // Red aurora on error
 		} else {
-			setResendMessage(
-				"Nuevo código enviado. Revisa tu correo (válido por 5 minutos).",
-			);
+			setResendMessage(t("signup.otp.resendSuccess"));
 			setStateModifier("default"); // Back to pink/purple after success
 		}
 
@@ -323,14 +318,12 @@ export const SignupView = ({
 	return (
 		<div className="flex flex-col gap-4 sm:gap-6 w-full">
 			<div className="flex justify-center mb-2">
-				<Logo variant="logo" forceTheme={logoTheme} />
+				<Logo variant="logo" />
 			</div>
 			<Card>
 				<CardHeader className="text-center">
-					<CardTitle className="text-xl">Crea tu cuenta</CardTitle>
-					<CardDescription>
-						Completa el formulario para comenzar
-					</CardDescription>
+					<CardTitle className="text-xl">{t("signup.title")}</CardTitle>
+					<CardDescription>{t("signup.description")}</CardDescription>
 				</CardHeader>
 				<CardContent>
 					{successMessage ? (
@@ -339,8 +332,8 @@ export const SignupView = ({
 								<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
 								<AlertTitle>
 									{needsVerification
-										? "Cuenta creada — Verificación pendiente"
-										: "Cuenta creada exitosamente"}
+										? t("signup.success.title")
+										: t("signup.success.titleDone")}
 								</AlertTitle>
 								<AlertDescription>{successMessage}</AlertDescription>
 							</Alert>
@@ -348,11 +341,12 @@ export const SignupView = ({
 								<div className="space-y-4">
 									<Alert>
 										<Mail className="h-4 w-4" aria-hidden="true" />
-										<AlertTitle>Ingresa el código de verificación</AlertTitle>
+										<AlertTitle>{t("signup.otp.title")}</AlertTitle>
 										<AlertDescription>
-											Enviamos un código de 6 dígitos a{" "}
-											<strong>{userEmail}</strong>. Revisa tu bandeja de entrada
-											(y la carpeta de spam).
+											{t("signup.otp.description").replace(
+												"{email}",
+												userEmail,
+											)}
 										</AlertDescription>
 									</Alert>
 
@@ -363,7 +357,7 @@ export const SignupView = ({
 											value={otpValue}
 											onChange={setOtpValue}
 											disabled={isVerifyingOtp}
-											aria-label="Código de verificación"
+											aria-label={t("login.otp.label")}
 										>
 											<InputOTPGroup>
 												<InputOTPSlot index={0} />
@@ -378,7 +372,7 @@ export const SignupView = ({
 										{isVerifyingOtp && (
 											<div className="flex items-center gap-2 text-sm text-muted-foreground">
 												<Loader2 className="h-4 w-4 animate-spin" />
-												Verificando...
+												{t("signup.otp.verifying")}
 											</div>
 										)}
 									</div>
@@ -393,8 +387,8 @@ export const SignupView = ({
 											)}
 											<AlertTitle>
 												{otpNeedsResend
-													? "Código expirado o inválido"
-													: "Error de verificación"}
+													? t("signup.otp.expiredTitle")
+													: t("signup.otp.errorTitle")}
 											</AlertTitle>
 											<AlertDescription>{otpError}</AlertDescription>
 										</Alert>
@@ -410,12 +404,12 @@ export const SignupView = ({
 											{isResending ? (
 												<>
 													<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-													Enviando nuevo código...
+													{t("signup.otp.resendNew")}
 												</>
 											) : (
 												<>
 													<RefreshCw className="mr-2 h-4 w-4" />
-													Solicitar nuevo código
+													{t("signup.otp.requestNew")}
 												</>
 											)}
 										</Button>
@@ -427,7 +421,9 @@ export const SignupView = ({
 											className="w-full"
 										>
 											<Mail className="mr-2 h-4 w-4" />
-											{isResending ? "Enviando..." : "Reenviar código"}
+											{isResending
+												? t("signup.otp.resending")
+												: t("signup.otp.resend")}
 										</Button>
 									)}
 
@@ -444,7 +440,7 @@ export const SignupView = ({
 									)}
 
 									<div className="text-center text-sm text-muted-foreground">
-										¿Necesitas cambiar tu correo?{" "}
+										{t("signup.otp.changeEmail")}{" "}
 										<button
 											type="button"
 											onClick={() => {
@@ -458,7 +454,7 @@ export const SignupView = ({
 											}}
 											className="font-medium text-primary underline-offset-4 hover:underline"
 										>
-											Volver al formulario
+											{t("signup.otp.backToForm")}
 										</button>
 									</div>
 								</div>
@@ -468,7 +464,7 @@ export const SignupView = ({
 
 					{serverError && !successMessage ? (
 						<Alert variant="destructive" role="alert" className="mb-6">
-							<AlertTitle>Error al crear la cuenta</AlertTitle>
+							<AlertTitle>{t("signup.error.title")}</AlertTitle>
 							<AlertDescription>{serverError}</AlertDescription>
 						</Alert>
 					) : null}
@@ -493,12 +489,12 @@ export const SignupView = ({
 															className="flex items-center gap-2"
 														>
 															<User className="h-4 w-4" aria-hidden="true" />
-															Nombre
+															{t("signup.firstName.label")}
 														</FieldLabel>
 														<FormControl>
 															<Input
 																id="firstName"
-																placeholder="Mariana"
+																placeholder={t("signup.firstName.placeholder")}
 																autoComplete="given-name"
 																aria-describedby="firstName-description"
 																required
@@ -510,7 +506,7 @@ export const SignupView = ({
 															id="firstName-description"
 															className="sr-only"
 														>
-															Tu nombre de pila
+															{t("signup.firstName.description")}
 														</FieldDescription>
 													</FormItem>
 												)}
@@ -525,12 +521,12 @@ export const SignupView = ({
 															className="flex items-center gap-2"
 														>
 															<User className="h-4 w-4" aria-hidden="true" />
-															Apellido
+															{t("signup.lastName.label")}
 														</FieldLabel>
 														<FormControl>
 															<Input
 																id="lastName"
-																placeholder="López"
+																placeholder={t("signup.lastName.placeholder")}
 																autoComplete="family-name"
 																aria-describedby="lastName-description"
 																required
@@ -542,7 +538,7 @@ export const SignupView = ({
 															id="lastName-description"
 															className="sr-only"
 														>
-															Tu apellido
+															{t("signup.lastName.description")}
 														</FieldDescription>
 													</FormItem>
 												)}
@@ -561,13 +557,13 @@ export const SignupView = ({
 														className="flex items-center gap-2"
 													>
 														<Mail className="h-4 w-4" aria-hidden="true" />
-														Correo electrónico
+														{t("signup.email.label")}
 													</FieldLabel>
 													<FormControl>
 														<Input
 															id="email"
 															type="email"
-															placeholder="tu@empresa.com"
+															placeholder={t("signup.email.placeholder")}
 															autoComplete="email"
 															aria-describedby="email-description"
 															required
@@ -579,7 +575,7 @@ export const SignupView = ({
 														id="email-description"
 														className="sr-only"
 													>
-														Tu dirección de correo corporativo
+														{t("signup.email.description")}
 													</FieldDescription>
 												</FormItem>
 											)}
@@ -612,7 +608,7 @@ export const SignupView = ({
 																aria-hidden="true"
 															/>
 															<span>
-																Acepto los{" "}
+																{t("signup.terms.label")}{" "}
 																<Link
 																	href="/privacy"
 																	target="_blank"
@@ -620,9 +616,9 @@ export const SignupView = ({
 																	className="text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
 																	onClick={(e) => e.stopPropagation()}
 																>
-																	términos y condiciones
+																	{t("signup.terms.termsAndConditions")}
 																</Link>{" "}
-																y el{" "}
+																{t("signup.terms.andThe")}{" "}
 																<Link
 																	href="/privacy"
 																	target="_blank"
@@ -630,7 +626,7 @@ export const SignupView = ({
 																	className="text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
 																	onClick={(e) => e.stopPropagation()}
 																>
-																	aviso de privacidad
+																	{t("signup.terms.privacyNotice")}
 																</Link>
 															</span>
 														</FormLabel>
@@ -639,8 +635,7 @@ export const SignupView = ({
 															id="acceptTerms-description"
 															className="sr-only"
 														>
-															Debes aceptar los términos y condiciones para
-															continuar
+															{t("signup.terms.description")}
 														</FieldDescription>
 													</div>
 												</FormItem>
@@ -661,23 +656,22 @@ export const SignupView = ({
 														className="h-4 w-4 animate-pulse"
 														aria-hidden="true"
 													/>
-													Creando cuenta...
+													{t("signup.button.creating")}
 												</span>
 											) : (
 												<>
 													<UserPlus className="h-4 w-4" aria-hidden="true" />
-													Crear cuenta
+													{t("signup.button.create")}
 												</>
 											)}
 										</Button>
 										<FieldDescription className="text-center">
-											¿Ya tienes cuenta?{" "}
+											{t("signup.hasAccount")}{" "}
 											<Link
 												href="/login"
 												className="font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-												aria-label="Iniciar sesión con una cuenta existente"
 											>
-												Inicia sesión
+												{t("signup.loginLink")}
 											</Link>
 										</FieldDescription>
 									</Field>

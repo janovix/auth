@@ -8,7 +8,9 @@ const meta: Meta<typeof ThemeSwitcher> = {
 	decorators: [
 		(Story) => (
 			<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-				<Story />
+				<div className="p-4">
+					<Story />
+				</div>
 			</ThemeProvider>
 		),
 	],
@@ -20,4 +22,15 @@ type Story = StoryObj<typeof ThemeSwitcher>;
 
 export const Default: Story = {
 	render: () => <ThemeSwitcher />,
+};
+
+export const WithDescription: Story = {
+	render: () => (
+		<div className="flex flex-col gap-4">
+			<ThemeSwitcher />
+			<p className="text-sm text-muted-foreground">
+				Choose between System, Light, or Dark theme
+			</p>
+		</div>
+	),
 };

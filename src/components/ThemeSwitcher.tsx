@@ -1,22 +1,16 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
+import { ThemeSwitcher as ShadcnThemeSwitcher } from "@/components/ui/shadcn-io/theme-switcher";
 
-export function ThemeSwitcher() {
+export function ThemeSwitcher({ className }: { className?: string }) {
 	const { theme, setTheme } = useTheme();
 
 	return (
-		<Button
-			variant="outline"
-			size="icon"
-			onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-			aria-label="Toggle theme"
-		>
-			<Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-			<Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-			<span className="sr-only">Toggle theme</span>
-		</Button>
+		<ShadcnThemeSwitcher
+			value={theme as "light" | "dark" | "system"}
+			onChange={setTheme}
+			className={className}
+		/>
 	);
 }

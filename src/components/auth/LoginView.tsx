@@ -18,7 +18,7 @@ import {
 	Shield,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -55,16 +55,10 @@ import {
 } from "@/components/ui/input-otp";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 import { useAurora } from "@/contexts/aurora-context";
+import { useLanguage } from "@/contexts/language-context";
 import { LoginSuccessAnimation } from "./LoginSuccessAnimation";
 
-const emailSchema = z.object({
-	email: z
-		.string()
-		.min(1, "El correo es obligatorio.")
-		.email("Ingresa un correo válido."),
-});
-
-type EmailValues = z.infer<typeof emailSchema>;
+type EmailValues = { email: string };
 type SendOtpFn = (
 	email: string,
 	type: "sign-in",
@@ -97,10 +91,23 @@ export const LoginView = ({
 	signInWithOtp?: SignInWithOtpFn;
 	defaultSuccessMessage?: string;
 }) => {
+	const { t } = useLanguage();
 	const { setPageProfile, setStateModifier } = useAurora();
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(
 		defaultSuccessMessage ?? null,
+	);
+
+	// Create schema with translations
+	const emailSchema = useMemo(
+		() =>
+			z.object({
+				email: z
+					.string()
+					.min(1, t("login.email.required"))
+					.email(t("login.email.invalid")),
+			}),
+		[t],
 	);
 
 	// OTP flow state
@@ -115,9 +122,6 @@ export const LoginView = ({
 	// Success animation state
 	const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
 	const redirectUrlRef = useRef<string>("");
-
-	// Always use dark theme for logo to show white letters
-	const logoTheme = "dark" as const;
 
 	// Set aurora page profile to login on mount
 	useEffect(() => {
@@ -184,9 +188,7 @@ export const LoginView = ({
 
 		setUserEmail(email);
 		setOtpSent(true);
-		setSuccessMessage(
-			"Te enviamos un código de 6 dígitos. Revisa tu correo y spam.",
-		);
+		setSuccessMessage(t("login.success.message"));
 		setStateModifier("default"); // Back to purple after OTP sent
 	};
 
@@ -209,23 +211,17 @@ export const LoginView = ({
 			const isTooManyAttempts = isOtpTooManyAttemptsError(result.error);
 
 			if (isExpired) {
-				setOtpError(
-					"El código ha expirado. Los códigos son válidos por 5 minutos. Solicita uno nuevo.",
-				);
+				setOtpError(t("login.otp.expired"));
 				setOtpNeedsResend(true);
 				setOtpValue("");
 				otpAtErrorRef.current = ""; // Capture OTP value at time of error (empty after clear)
 			} else if (isTooManyAttempts) {
-				setOtpError(
-					"Has excedido el número de intentos. Por seguridad, solicita un nuevo código.",
-				);
+				setOtpError(t("login.otp.tooManyAttempts"));
 				setOtpNeedsResend(true);
 				setOtpValue("");
 				otpAtErrorRef.current = ""; // Capture OTP value at time of error (empty after clear)
 			} else {
-				setOtpError(
-					result.error?.message || "Código incorrecto. Inténtalo de nuevo.",
-				);
+				setOtpError(result.error?.message || t("login.otp.invalid"));
 				otpAtErrorRef.current = otpValue; // Capture current OTP value at time of error
 			}
 
@@ -238,7 +234,7 @@ export const LoginView = ({
 		setStateModifier("success"); // Green aurora on success
 		redirectUrlRef.current = getAuthRedirectUrl(redirectTo);
 		setShowSuccessAnimation(true);
-	}, [userEmail, otpValue, signInWithOtp, redirectTo, setStateModifier]);
+	}, [userEmail, otpValue, signInWithOtp, redirectTo, setStateModifier, t]);
 
 	// Handle redirect after success animation completes
 	const handleSuccessComplete = useCallback(() => {
@@ -266,15 +262,10 @@ export const LoginView = ({
 		const result = await sendOtp(userEmail, "sign-in");
 
 		if (!result.success) {
-			setOtpError(
-				result.error?.message ||
-					"Error al reenviar el código. Intenta de nuevo.",
-			);
+			setOtpError(result.error?.message || t("login.otp.resendError"));
 			setStateModifier("error"); // Red aurora on error
 		} else {
-			setSuccessMessage(
-				"Nuevo código enviado. Revisa tu correo (válido por 5 minutos).",
-			);
+			setSuccessMessage(t("login.otp.resendSuccess"));
 			setStateModifier("default"); // Back to purple after success
 		}
 
@@ -297,7 +288,7 @@ export const LoginView = ({
 	if (showSuccessAnimation) {
 		return (
 			<div className="flex flex-col items-center justify-center gap-6 w-full min-h-[200px]">
-				<Logo variant="logo" forceTheme={logoTheme} />
+				<Logo variant="logo" />
 				<LoginSuccessAnimation
 					onComplete={handleSuccessComplete}
 					delay={2000}
@@ -311,15 +302,15 @@ export const LoginView = ({
 			className={`flex flex-col gap-4 sm:gap-6 w-full transition-opacity duration-300`}
 		>
 			<div className="flex justify-center mb-2">
-				<Logo variant="logo" forceTheme={logoTheme} />
+				<Logo variant="logo" />
 			</div>
 			<Card>
 				<CardHeader className="text-center">
-					<CardTitle className="text-xl">Bienvenido</CardTitle>
+					<CardTitle className="text-xl">{t("login.title")}</CardTitle>
 					<CardDescription>
 						{otpSent
-							? "Ingresa el código que enviamos a tu correo"
-							: "Ingresa tu correo para recibir un código de acceso"}
+							? t("login.description.otp")
+							: t("login.description.email")}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -327,7 +318,9 @@ export const LoginView = ({
 						<Alert role="status" className="mb-6">
 							<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
 							<AlertTitle>
-								{otpSent ? "Código enviado" : "Autenticación exitosa"}
+								{otpSent
+									? t("login.success.codeSent")
+									: t("login.success.auth")}
 							</AlertTitle>
 							<AlertDescription>{successMessage}</AlertDescription>
 						</Alert>
@@ -335,7 +328,7 @@ export const LoginView = ({
 
 					{serverError && !otpSent ? (
 						<Alert variant="destructive" role="alert" className="mb-6">
-							<AlertTitle>Error</AlertTitle>
+							<AlertTitle>{t("login.error")}</AlertTitle>
 							<AlertDescription>{serverError}</AlertDescription>
 						</Alert>
 					) : null}
@@ -359,13 +352,13 @@ export const LoginView = ({
 														className="flex items-center gap-2"
 													>
 														<Mail className="h-4 w-4" aria-hidden="true" />
-														Correo electrónico
+														{t("login.email.label")}
 													</FieldLabel>
 													<FormControl>
 														<Input
 															id="email"
 															type="email"
-															placeholder="tu@empresa.com"
+															placeholder={t("login.email.placeholder")}
 															autoComplete="email"
 															aria-describedby="email-description"
 															required
@@ -377,7 +370,7 @@ export const LoginView = ({
 														id="email-description"
 														className="sr-only"
 													>
-														Ingresa tu dirección de correo
+														{t("login.email.description")}
 													</FieldDescription>
 												</FormItem>
 											)}
@@ -396,23 +389,22 @@ export const LoginView = ({
 														className="h-4 w-4 animate-pulse"
 														aria-hidden="true"
 													/>
-													Enviando código...
+													{t("login.button.sending")}
 												</span>
 											) : (
 												<>
 													<Mail className="h-4 w-4" aria-hidden="true" />
-													Enviar código de acceso
+													{t("login.button.send")}
 												</>
 											)}
 										</Button>
 										<FieldDescription className="text-center">
-											¿Aún no tienes cuenta?{" "}
+											{t("login.noAccount")}{" "}
 											<Link
 												href="/signup"
 												className="font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-												aria-label="Crear una nueva cuenta"
 											>
-												Regístrate aquí
+												{t("login.signupLink")}
 											</Link>
 										</FieldDescription>
 									</Field>
@@ -424,10 +416,12 @@ export const LoginView = ({
 						<div className="space-y-4">
 							<Alert>
 								<Mail className="h-4 w-4" aria-hidden="true" />
-								<AlertTitle>Código enviado</AlertTitle>
+								<AlertTitle>{t("login.otp.sent")}</AlertTitle>
 								<AlertDescription>
-									Enviamos un código de 6 dígitos a <strong>{userEmail}</strong>
-									. Revisa tu bandeja de entrada y spam.
+									{t("login.otp.sentDescription").replace(
+										"{email}",
+										userEmail || "",
+									)}
 								</AlertDescription>
 							</Alert>
 
@@ -438,7 +432,7 @@ export const LoginView = ({
 									value={otpValue}
 									onChange={setOtpValue}
 									disabled={isVerifyingOtp}
-									aria-label="Código de verificación"
+									aria-label={t("login.otp.label")}
 								>
 									<InputOTPGroup>
 										<InputOTPSlot index={0} />
@@ -453,7 +447,7 @@ export const LoginView = ({
 								{isVerifyingOtp && (
 									<div className="flex items-center gap-2 text-sm text-muted-foreground">
 										<Loader2 className="h-4 w-4 animate-spin" />
-										Verificando...
+										{t("login.otp.verifying")}
 									</div>
 								)}
 							</div>
@@ -465,8 +459,8 @@ export const LoginView = ({
 									)}
 									<AlertTitle>
 										{otpNeedsResend
-											? "Código expirado o inválido"
-											: "Error de verificación"}
+											? t("login.otp.expiredTitle")
+											: t("login.otp.errorTitle")}
 									</AlertTitle>
 									<AlertDescription>{otpError}</AlertDescription>
 								</Alert>
@@ -482,12 +476,12 @@ export const LoginView = ({
 									{isResending ? (
 										<>
 											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-											Enviando nuevo código...
+											{t("login.otp.resendNew")}
 										</>
 									) : (
 										<>
 											<RefreshCw className="mr-2 h-4 w-4" />
-											Solicitar nuevo código
+											{t("login.otp.requestNew")}
 										</>
 									)}
 								</Button>
@@ -499,18 +493,20 @@ export const LoginView = ({
 									className="w-full"
 								>
 									<Mail className="mr-2 h-4 w-4" />
-									{isResending ? "Enviando..." : "Reenviar código"}
+									{isResending
+										? t("login.otp.resending")
+										: t("login.otp.resend")}
 								</Button>
 							)}
 
 							<div className="text-center text-sm text-muted-foreground">
-								¿Correo incorrecto?{" "}
+								{t("login.wrongEmail")}{" "}
 								<button
 									type="button"
 									onClick={handleBackToEmail}
 									className="font-medium text-primary underline-offset-4 hover:underline"
 								>
-									Cambiar correo
+									{t("login.changeEmail")}
 								</button>
 							</div>
 						</div>
@@ -519,25 +515,23 @@ export const LoginView = ({
 					<hr className="my-6 border-t" />
 					<FieldDescription className="px-6 text-center text-xs text-muted-foreground">
 						<Shield className="h-3 w-3 inline-block mr-1" aria-hidden="true" />
-						Al iniciar sesión, aceptas nuestros{" "}
+						{t("login.terms")}{" "}
 						<Link
 							href="/privacy"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-							aria-label="Leer términos de servicio"
 						>
-							Términos de Servicio
+							{t("login.termsOfService")}
 						</Link>{" "}
-						y{" "}
+						{t("login.and")}{" "}
 						<Link
 							href="/privacy"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-							aria-label="Leer política de privacidad"
 						>
-							Política de Privacidad
+							{t("login.privacyPolicy")}
 						</Link>
 						.
 					</FieldDescription>

@@ -1,3 +1,10 @@
+# [1.2.0-rc.4](https://github.com/janovix/auth/compare/v1.2.0-rc.3...v1.2.0-rc.4) (2026-01-08)
+
+
+### Bug Fixes
+
+* restore organizationClient plugin for aml-janovix compatibility ([a62e2c2](https://github.com/janovix/auth/commit/a62e2c2829deef44484b98c076a627091e5ff8d3))
+
 # [1.2.0-rc.3](https://github.com/janovix/auth/compare/v1.2.0-rc.2...v1.2.0-rc.3) (2026-01-08)
 
 

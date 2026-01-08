@@ -6,15 +6,15 @@ import {
 	useState,
 	useRef,
 	useCallback,
+	useEffect,
 	type ReactNode,
 } from "react";
 
-export type AuroraMode =
-	| "login" // purple (default)
-	| "signup" // purple/pink
-	| "error" // red
-	| "loading" // blue (faster animation)
-	| "success"; // green
+// Page profiles define the base aurora appearance for each page
+export type PageProfile = "login" | "signup";
+
+// State modifiers change colors but not blob positions
+export type StateModifier = "default" | "error" | "loading" | "success";
 
 interface RGB {
 	r: number;
@@ -31,17 +31,35 @@ interface ColorPalette {
 	blob3End: RGB;
 }
 
+interface BlobPosition {
+	top?: string;
+	bottom?: string;
+	left?: string;
+	right?: string;
+	width: string;
+	height: string;
+}
+
+interface BlobPositions {
+	blob1: BlobPosition;
+	blob2: BlobPosition;
+	blob3: BlobPosition;
+}
+
 interface AuroraContextType {
-	mode: AuroraMode;
-	setMode: (mode: AuroraMode) => void;
+	pageProfile: PageProfile;
+	setPageProfile: (profile: PageProfile) => void;
+	stateModifier: StateModifier;
+	setStateModifier: (modifier: StateModifier) => void;
 	currentPalette: ColorPalette;
-	animationSpeed: number; // multiplier for animation duration
+	blobPositions: BlobPositions;
+	animationSpeed: number;
 }
 
 const AuroraContext = createContext<AuroraContextType | undefined>(undefined);
 
-// Color palettes for each mode
-export const auroraColorPalettes: Record<AuroraMode, ColorPalette> = {
+// Color palettes for each page profile (base colors)
+export const pageColorPalettes: Record<PageProfile, ColorPalette> = {
 	// Login: Pure purple
 	login: {
 		blob1Start: { r: 168, g: 85, b: 247 }, // purple-500
@@ -60,6 +78,29 @@ export const auroraColorPalettes: Record<AuroraMode, ColorPalette> = {
 		blob3Start: { r: 219, g: 39, b: 119 }, // pink-600
 		blob3End: { r: 168, g: 85, b: 247 }, // purple-500
 	},
+};
+
+// Blob positions for each page profile (creates different "form" for each page)
+export const pageBlobPositions: Record<PageProfile, BlobPositions> = {
+	// Login: Centered, balanced layout
+	login: {
+		blob1: { top: "-200px", left: "-100px", width: "600px", height: "600px" },
+		blob2: { top: "-100px", right: "-200px", width: "500px", height: "500px" },
+		blob3: { bottom: "-300px", left: "33%", width: "700px", height: "700px" },
+	},
+	// Signup: Shifted layout for visual distinction
+	signup: {
+		blob1: { top: "-150px", left: "-200px", width: "700px", height: "700px" },
+		blob2: { top: "-250px", right: "-100px", width: "550px", height: "550px" },
+		blob3: { bottom: "-200px", left: "20%", width: "600px", height: "600px" },
+	},
+};
+
+// State modifier color palettes (override page colors for specific states)
+export const stateColorPalettes: Record<
+	Exclude<StateModifier, "default">,
+	ColorPalette
+> = {
 	// Error: Red
 	error: {
 		blob1Start: { r: 239, g: 68, b: 68 }, // red-500
@@ -89,10 +130,9 @@ export const auroraColorPalettes: Record<AuroraMode, ColorPalette> = {
 	},
 };
 
-// Animation speeds for each mode (multiplier - lower = faster)
-export const auroraAnimationSpeeds: Record<AuroraMode, number> = {
-	login: 1,
-	signup: 1,
+// Animation speeds for each state modifier (multiplier - lower = faster)
+export const stateAnimationSpeeds: Record<StateModifier, number> = {
+	default: 1,
 	error: 1,
 	loading: 0.5, // 2x faster
 	success: 1,
@@ -129,27 +169,40 @@ function easeInOutCubic(t: number): number {
 	return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
-const TRANSITION_DURATION = 600; // ms
+const COLOR_TRANSITION_DURATION = 600; // ms
 
 export function AuroraProvider({ children }: { children: ReactNode }) {
-	const [mode, setModeState] = useState<AuroraMode>("login");
+	const [pageProfile, setPageProfileState] = useState<PageProfile>("login");
+	const [stateModifier, setStateModifierState] =
+		useState<StateModifier>("default");
 	const [currentPalette, setCurrentPalette] = useState<ColorPalette>(
-		auroraColorPalettes.login,
+		pageColorPalettes.login,
 	);
-	const [animationSpeed, setAnimationSpeed] = useState<number>(
-		auroraAnimationSpeeds.login,
+	const [blobPositions, setBlobPositions] = useState<BlobPositions>(
+		pageBlobPositions.login,
 	);
+	const [animationSpeed, setAnimationSpeed] = useState<number>(1);
 
 	// Animation refs
 	const animationRef = useRef<number | null>(null);
 	const transitionStartTime = useRef<number | null>(null);
-	const fromPalette = useRef<ColorPalette>(auroraColorPalettes.login);
-	const toPalette = useRef<ColorPalette>(auroraColorPalettes.login);
+	const fromPalette = useRef<ColorPalette>(pageColorPalettes.login);
+	const toPalette = useRef<ColorPalette>(pageColorPalettes.login);
 
-	const setMode = useCallback(
-		(newMode: AuroraMode) => {
-			if (newMode === mode) return;
+	// Get target palette based on page profile and state modifier
+	const getTargetPalette = useCallback(
+		(profile: PageProfile, modifier: StateModifier): ColorPalette => {
+			if (modifier !== "default") {
+				return stateColorPalettes[modifier];
+			}
+			return pageColorPalettes[profile];
+		},
+		[],
+	);
 
+	// Animate color transition
+	const animateColorTransition = useCallback(
+		(targetPalette: ColorPalette) => {
 			// Cancel any ongoing animation
 			if (animationRef.current) {
 				cancelAnimationFrame(animationRef.current);
@@ -157,19 +210,14 @@ export function AuroraProvider({ children }: { children: ReactNode }) {
 
 			// Start transition from current visible palette
 			fromPalette.current = currentPalette;
-			toPalette.current = auroraColorPalettes[newMode];
+			toPalette.current = targetPalette;
 			transitionStartTime.current = performance.now();
 
-			// Update animation speed immediately
-			setAnimationSpeed(auroraAnimationSpeeds[newMode]);
-			setModeState(newMode);
-
-			// Animate colors
-			const animateTransition = (currentTime: number) => {
+			const animate = (currentTime: number) => {
 				if (!transitionStartTime.current) return;
 
 				const elapsed = currentTime - transitionStartTime.current;
-				const progress = Math.min(elapsed / TRANSITION_DURATION, 1);
+				const progress = Math.min(elapsed / COLOR_TRANSITION_DURATION, 1);
 				const easedProgress = easeInOutCubic(progress);
 
 				const interpolated = interpolatePalette(
@@ -181,24 +229,71 @@ export function AuroraProvider({ children }: { children: ReactNode }) {
 				setCurrentPalette(interpolated);
 
 				if (progress < 1) {
-					animationRef.current = requestAnimationFrame(animateTransition);
+					animationRef.current = requestAnimationFrame(animate);
 				} else {
-					setCurrentPalette(auroraColorPalettes[newMode]);
+					setCurrentPalette(targetPalette);
 					animationRef.current = null;
 				}
 			};
 
-			animationRef.current = requestAnimationFrame(animateTransition);
+			animationRef.current = requestAnimationFrame(animate);
 		},
-		[mode, currentPalette],
+		[currentPalette],
 	);
+
+	// Set page profile (changes both colors and blob positions)
+	const setPageProfile = useCallback(
+		(profile: PageProfile) => {
+			if (profile === pageProfile) return;
+
+			setPageProfileState(profile);
+			// Reset state modifier when changing pages
+			setStateModifierState("default");
+			setAnimationSpeed(stateAnimationSpeeds.default);
+
+			// Update blob positions immediately (CSS transitions will handle the animation)
+			setBlobPositions(pageBlobPositions[profile]);
+
+			// Animate color change
+			const targetPalette = pageColorPalettes[profile];
+			animateColorTransition(targetPalette);
+		},
+		[pageProfile, animateColorTransition],
+	);
+
+	// Set state modifier (only changes colors, not positions)
+	const setStateModifier = useCallback(
+		(modifier: StateModifier) => {
+			if (modifier === stateModifier) return;
+
+			setStateModifierState(modifier);
+			setAnimationSpeed(stateAnimationSpeeds[modifier]);
+
+			// Animate color change
+			const targetPalette = getTargetPalette(pageProfile, modifier);
+			animateColorTransition(targetPalette);
+		},
+		[stateModifier, pageProfile, getTargetPalette, animateColorTransition],
+	);
+
+	// Cleanup on unmount
+	useEffect(() => {
+		return () => {
+			if (animationRef.current) {
+				cancelAnimationFrame(animationRef.current);
+			}
+		};
+	}, []);
 
 	return (
 		<AuroraContext.Provider
 			value={{
-				mode,
-				setMode,
+				pageProfile,
+				setPageProfile,
+				stateModifier,
+				setStateModifier,
 				currentPalette,
+				blobPositions,
 				animationSpeed,
 			}}
 		>
@@ -214,3 +309,20 @@ export function useAurora() {
 	}
 	return context;
 }
+
+// Legacy compatibility: map old mode names to new API
+export type AuroraMode =
+	| "login"
+	| "signup"
+	| "error"
+	| "loading"
+	| "success"
+	| "default";
+
+// Export palettes for tests
+export const auroraColorPalettes = {
+	...pageColorPalettes,
+	...stateColorPalettes,
+};
+
+export const auroraAnimationSpeeds = stateAnimationSpeeds;

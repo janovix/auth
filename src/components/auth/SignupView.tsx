@@ -84,7 +84,7 @@ export const SignupView = ({
 	redirectTo?: string;
 	signUp?: SignUpFn;
 }) => {
-	const { setMode } = useAurora();
+	const { setPageProfile, setStateModifier } = useAurora();
 	const router = useRouter();
 	const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -105,13 +105,10 @@ export const SignupView = ({
 	// Always use dark theme for logo to show white letters
 	const logoTheme = "dark" as const;
 
-	// Set aurora mode to signup (pink/purple) on mount and cleanup on unmount
+	// Set aurora page profile to signup (pink/purple) on mount
 	useEffect(() => {
-		setMode("signup");
-		return () => {
-			setMode("login");
-		};
-	}, [setMode]);
+		setPageProfile("signup");
+	}, [setPageProfile]);
 
 	// Cleanup redirect timeout on unmount
 	useEffect(() => {
@@ -153,12 +150,12 @@ export const SignupView = ({
 			formValuesString !== formValuesAtErrorRef.current
 		) {
 			setServerError(null);
-			setMode("signup"); // Reset to pink/purple when editing form
+			setStateModifier("default"); // Reset to pink/purple when editing form
 			formValuesAtErrorRef.current = null;
 		}
-	}, [formValuesString, serverError, needsVerification, setMode]);
+	}, [formValuesString, serverError, needsVerification, setStateModifier]);
 
-	// Reset aurora to signup mode when OTP value changes (clears error state)
+	// Reset aurora to default when OTP value changes (clears error state)
 	useEffect(() => {
 		// Only clear error if OTP has actually changed since the error was set
 		if (
@@ -167,10 +164,10 @@ export const SignupView = ({
 			otpValue !== otpAtErrorRef.current
 		) {
 			setOtpError(null);
-			setMode("signup"); // Reset to pink/purple when editing OTP
+			setStateModifier("default"); // Reset to pink/purple when editing OTP
 			otpAtErrorRef.current = null;
 		}
-	}, [otpValue, otpError, setMode]);
+	}, [otpValue, otpError, setStateModifier]);
 
 	const handleSubmit = async (values: SignupValues) => {
 		setServerError(null);
@@ -179,7 +176,7 @@ export const SignupView = ({
 		setResendMessage(null);
 		setResendError(null);
 		formValuesAtErrorRef.current = null;
-		setMode("loading"); // Blue aurora while loading
+		setStateModifier("loading"); // Blue aurora while loading
 
 		const email = values.email.trim();
 		const name = `${values.firstName.trim()} ${values.lastName.trim()}`.trim();
@@ -191,7 +188,7 @@ export const SignupView = ({
 		if (!result.success) {
 			setServerError(getAuthErrorMessage(result.error));
 			formValuesAtErrorRef.current = JSON.stringify(values); // Capture form values at time of error
-			setMode("error"); // Red aurora on error
+			setStateModifier("error"); // Red aurora on error
 			return;
 		}
 
@@ -206,13 +203,13 @@ export const SignupView = ({
 			setSuccessMessage(
 				"Hemos enviado un código de 6 dígitos a tu correo. Ingrésalo a continuación para verificar tu cuenta.",
 			);
-			setMode("signup"); // Back to pink/purple after OTP sent
+			setStateModifier("default"); // Back to pink/purple after OTP sent
 			return;
 		}
 
 		// Email is already verified, redirect to login
 		setSuccessMessage("Cuenta creada. Redirigiendo al inicio de sesión…");
-		setMode("success"); // Green aurora on success
+		setStateModifier("success"); // Green aurora on success
 		const loginUrl = redirectTo
 			? `/login?redirect_to=${encodeURIComponent(redirectTo)}`
 			: "/login";
@@ -231,7 +228,7 @@ export const SignupView = ({
 		setOtpError(null);
 		setOtpNeedsResend(false);
 		otpAtErrorRef.current = null;
-		setMode("loading"); // Blue aurora while verifying
+		setStateModifier("loading"); // Blue aurora while verifying
 
 		const result = await verifyEmailWithOtp(userEmail, otpValue);
 
@@ -263,7 +260,7 @@ export const SignupView = ({
 			}
 
 			setIsVerifyingOtp(false);
-			setMode("error"); // Red aurora on error
+			setStateModifier("error"); // Red aurora on error
 			return;
 		}
 
@@ -272,7 +269,7 @@ export const SignupView = ({
 		setSuccessMessage(
 			"¡Correo verificado! Por favor inicia sesión para continuar.",
 		);
-		setMode("success"); // Green aurora on success
+		setStateModifier("success"); // Green aurora on success
 
 		// Short delay to show the success message before redirecting to login
 		setTimeout(() => {
@@ -282,7 +279,7 @@ export const SignupView = ({
 				: "/login";
 			router.push(loginUrl);
 		}, 1500);
-	}, [userEmail, otpValue, redirectTo, router, setMode]);
+	}, [userEmail, otpValue, redirectTo, router, setStateModifier]);
 
 	// Auto-submit when OTP is complete
 	useEffect(() => {
@@ -302,7 +299,7 @@ export const SignupView = ({
 		setOtpValue(""); // Clear current OTP
 		setOtpError(null);
 		setOtpNeedsResend(false); // Reset the needs-resend state
-		setMode("loading"); // Blue aurora while resending
+		setStateModifier("loading"); // Blue aurora while resending
 
 		const result = await sendVerificationOtp(userEmail, "email-verification");
 
@@ -310,12 +307,12 @@ export const SignupView = ({
 			setResendError(
 				result.error?.message || "Error al reenviar el código de verificación",
 			);
-			setMode("error"); // Red aurora on error
+			setStateModifier("error"); // Red aurora on error
 		} else {
 			setResendMessage(
 				"Nuevo código enviado. Revisa tu correo (válido por 5 minutos).",
 			);
-			setMode("signup"); // Back to pink/purple after success
+			setStateModifier("default"); // Back to pink/purple after success
 		}
 
 		setIsResending(false);
@@ -457,7 +454,7 @@ export const SignupView = ({
 												setOtpError(null);
 												setOtpNeedsResend(false);
 												setSuccessMessage(null);
-												setMode("signup"); // Reset to pink/purple when going back
+												setStateModifier("default"); // Reset to pink/purple when going back
 											}}
 											className="font-medium text-primary underline-offset-4 hover:underline"
 										>

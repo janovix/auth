@@ -96,7 +96,7 @@ export const LoginView = ({
 	signInWithOtp?: SignInWithOtpFn;
 	defaultSuccessMessage?: string;
 }) => {
-	const { setMode } = useAurora();
+	const { setPageProfile, setStateModifier } = useAurora();
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(
 		defaultSuccessMessage ?? null,
@@ -114,13 +114,10 @@ export const LoginView = ({
 	// Always use dark theme for logo to show white letters
 	const logoTheme = "dark" as const;
 
-	// Set aurora mode to login on mount and cleanup on unmount
+	// Set aurora page profile to login on mount
 	useEffect(() => {
-		setMode("login");
-		return () => {
-			setMode("login");
-		};
-	}, [setMode]);
+		setPageProfile("login");
+	}, [setPageProfile]);
 
 	const form = useForm<EmailValues>({
 		resolver: zodResolver(emailSchema),
@@ -133,7 +130,7 @@ export const LoginView = ({
 	const emailAtErrorRef = useRef<string | null>(null);
 	const otpAtErrorRef = useRef<string | null>(null);
 
-	// Reset aurora to login mode when user starts typing (clears error state)
+	// Reset aurora to default when user starts typing (clears error state)
 	const emailValue = form.watch("email");
 	useEffect(() => {
 		// Only clear error if the email has actually changed since the error was set
@@ -143,12 +140,12 @@ export const LoginView = ({
 			emailValue !== emailAtErrorRef.current
 		) {
 			setServerError(null);
-			setMode("login"); // Reset to purple when editing form
+			setStateModifier("default"); // Reset to purple when editing form
 			emailAtErrorRef.current = null;
 		}
-	}, [emailValue, serverError, setMode]);
+	}, [emailValue, serverError, setStateModifier]);
 
-	// Reset aurora to login mode when OTP value changes (clears error state)
+	// Reset aurora to default when OTP value changes (clears error state)
 	useEffect(() => {
 		// Only clear error if the OTP has actually changed since the error was set
 		if (
@@ -157,10 +154,10 @@ export const LoginView = ({
 			otpValue !== otpAtErrorRef.current
 		) {
 			setOtpError(null);
-			setMode("login"); // Reset to purple when editing OTP
+			setStateModifier("default"); // Reset to purple when editing OTP
 			otpAtErrorRef.current = null;
 		}
-	}, [otpValue, otpError, setMode]);
+	}, [otpValue, otpError, setStateModifier]);
 
 	const handleSendOtp = async (values: EmailValues) => {
 		setServerError(null);
@@ -168,7 +165,7 @@ export const LoginView = ({
 		setOtpError(null);
 		setOtpNeedsResend(false);
 		emailAtErrorRef.current = null;
-		setMode("loading"); // Blue aurora while loading
+		setStateModifier("loading"); // Blue aurora while loading
 
 		const email = values.email.trim();
 		const result = await sendOtp(email, "sign-in");
@@ -176,7 +173,7 @@ export const LoginView = ({
 		if (!result.success) {
 			setServerError(getAuthErrorMessage(result.error));
 			emailAtErrorRef.current = email; // Capture email at time of error
-			setMode("error"); // Red aurora on error
+			setStateModifier("error"); // Red aurora on error
 			return;
 		}
 
@@ -185,7 +182,7 @@ export const LoginView = ({
 		setSuccessMessage(
 			"Te enviamos un código de 6 dígitos. Revisa tu correo y spam.",
 		);
-		setMode("login"); // Back to purple after OTP sent
+		setStateModifier("default"); // Back to purple after OTP sent
 	};
 
 	// Handle OTP verification and sign-in
@@ -198,7 +195,7 @@ export const LoginView = ({
 		setOtpError(null);
 		setOtpNeedsResend(false);
 		otpAtErrorRef.current = null;
-		setMode("loading"); // Blue aurora while verifying
+		setStateModifier("loading"); // Blue aurora while verifying
 
 		const result = await signInWithOtp(userEmail, otpValue);
 
@@ -228,15 +225,15 @@ export const LoginView = ({
 			}
 
 			setIsVerifyingOtp(false);
-			setMode("error"); // Red aurora on error
+			setStateModifier("error"); // Red aurora on error
 			return;
 		}
 
 		// Success! Redirect to the target URL
 		setSuccessMessage("Acceso validado. Redirigiendo…");
-		setMode("success"); // Green aurora on success
+		setStateModifier("success"); // Green aurora on success
 		window.location.href = getAuthRedirectUrl(redirectTo);
-	}, [userEmail, otpValue, signInWithOtp, redirectTo, setMode]);
+	}, [userEmail, otpValue, signInWithOtp, redirectTo, setStateModifier]);
 
 	// Auto-submit when OTP is complete
 	useEffect(() => {
@@ -254,7 +251,7 @@ export const LoginView = ({
 		setOtpError(null);
 		setOtpNeedsResend(false);
 		setOtpValue("");
-		setMode("loading"); // Blue aurora while resending
+		setStateModifier("loading"); // Blue aurora while resending
 
 		const result = await sendOtp(userEmail, "sign-in");
 
@@ -263,12 +260,12 @@ export const LoginView = ({
 				result.error?.message ||
 					"Error al reenviar el código. Intenta de nuevo.",
 			);
-			setMode("error"); // Red aurora on error
+			setStateModifier("error"); // Red aurora on error
 		} else {
 			setSuccessMessage(
 				"Nuevo código enviado. Revisa tu correo (válido por 5 minutos).",
 			);
-			setMode("login"); // Back to purple after success
+			setStateModifier("default"); // Back to purple after success
 		}
 
 		setIsResending(false);
@@ -281,7 +278,7 @@ export const LoginView = ({
 		setOtpError(null);
 		setOtpNeedsResend(false);
 		setSuccessMessage(null);
-		setMode("login"); // Reset to purple when going back
+		setStateModifier("default"); // Reset to purple when going back
 	};
 
 	const isSubmitting = form.formState.isSubmitting;

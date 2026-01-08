@@ -1,3 +1,11 @@
+# [1.2.0-rc.6](https://github.com/janovix/auth/compare/v1.2.0-rc.5...v1.2.0-rc.6) (2026-01-08)
+
+
+### Features
+
+* Add internationalization and language switcher ([74f5fc0](https://github.com/janovix/auth/commit/74f5fc0838bb1dc28ddec4e94c652258355e56d1))
+* Implement shadcn-ui theme switcher component ([cc6d5ab](https://github.com/janovix/auth/commit/cc6d5ab134fe95429271213ea2995ef708837976))
+
 # [1.2.0-rc.5](https://github.com/janovix/auth/compare/v1.2.0-rc.4...v1.2.0-rc.5) (2026-01-08)
 
 

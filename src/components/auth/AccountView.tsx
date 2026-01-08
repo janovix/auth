@@ -3,7 +3,7 @@
 import { signOut } from "@/lib/auth/authActions";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { formatDistanceToNow } from "date-fns";
-import { es, enUS } from "date-fns/locale";
+import { es, enUS, ptBR } from "date-fns/locale";
 import { AlertTriangle, Clock4, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
@@ -52,7 +52,7 @@ export const AccountView = () => {
 
 	const environment = useMemo(() => getAuthEnvironment(), []);
 	const baseUrl = useMemo(() => getAuthCoreBaseUrl(), []);
-	const locale = language === "es" ? es : enUS;
+	const locale = language === "es" ? es : language === "pt" ? ptBR : enUS;
 
 	const formatExpiresIn = useCallback(
 		(value?: string | Date) => {
@@ -166,7 +166,11 @@ export const AccountView = () => {
 									<p className="text-xs text-muted-foreground mt-0.5">
 										{t("account.lastUpdate")}{" "}
 										{normalizeDate(data.session.updatedAt)?.toLocaleString(
-											language === "es" ? "es-MX" : "en-US",
+											language === "es"
+												? "es-MX"
+												: language === "pt"
+													? "pt-BR"
+													: "en-US",
 											{
 												dateStyle: "medium",
 												timeStyle: "short",

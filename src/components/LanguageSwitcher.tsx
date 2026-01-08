@@ -15,6 +15,12 @@ export type LanguageSwitcherProps = {
 	className?: string;
 };
 
+const languageLabels: Record<"en" | "es" | "pt", string> = {
+	en: "EN",
+	es: "ES",
+	pt: "PT",
+};
+
 export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 	const { language, setLanguage } = useLanguage();
 
@@ -29,7 +35,7 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 						className,
 					)}
 				>
-					{language === "en" ? "EN" : "ES"}
+					{languageLabels[language]}
 					<ChevronDown className="size-3 opacity-60" />
 				</Button>
 			</DropdownMenuTrigger>
@@ -39,6 +45,15 @@ export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
 				sideOffset={8}
 				className="min-w-[3.5rem]"
 			>
+				<DropdownMenuItem
+					onClick={() => setLanguage("pt")}
+					className={cn(
+						"justify-center text-xs font-semibold cursor-pointer",
+						language === "pt" && "bg-accent",
+					)}
+				>
+					PT
+				</DropdownMenuItem>
 				<DropdownMenuItem
 					onClick={() => setLanguage("es")}
 					className={cn(

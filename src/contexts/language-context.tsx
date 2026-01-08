@@ -3,7 +3,7 @@
 import type React from "react";
 import { createContext, useContext, useState, useEffect } from "react";
 
-type Language = "en" | "es";
+type Language = "en" | "es" | "pt";
 
 interface LanguageContextType {
 	language: Language;
@@ -323,6 +323,161 @@ const translations = {
 		"account.technical.ip": "Dirección IP",
 		"account.technical.userAgent": "User Agent",
 	},
+	pt: {
+		// Login page
+		"login.title": "Bem-vindo",
+		"login.description.email":
+			"Digite seu e-mail para receber um código de acesso",
+		"login.description.otp": "Digite o código que enviamos para seu e-mail",
+		"login.email.label": "Endereço de e-mail",
+		"login.email.placeholder": "voce@empresa.com",
+		"login.email.required": "O e-mail é obrigatório.",
+		"login.email.invalid": "Digite um e-mail válido.",
+		"login.email.description": "Digite seu endereço de e-mail",
+		"login.button.send": "Enviar código de acesso",
+		"login.button.sending": "Enviando código...",
+		"login.noAccount": "Ainda não tem conta?",
+		"login.signupLink": "Cadastre-se aqui",
+		"login.otp.sent": "Código enviado",
+		"login.otp.sentDescription":
+			"Enviamos um código de 6 dígitos para {email}. Verifique sua caixa de entrada e spam.",
+		"login.otp.label": "Código de verificação",
+		"login.otp.verifying": "Verificando...",
+		"login.otp.expired":
+			"O código expirou. Os códigos são válidos por 5 minutos. Solicite um novo.",
+		"login.otp.tooManyAttempts":
+			"Você excedeu o número de tentativas. Por segurança, solicite um novo código.",
+		"login.otp.invalid": "Código incorreto. Tente novamente.",
+		"login.otp.expiredTitle": "Código expirado ou inválido",
+		"login.otp.errorTitle": "Erro de verificação",
+		"login.otp.resendNew": "Enviando novo código...",
+		"login.otp.requestNew": "Solicitar novo código",
+		"login.otp.resend": "Reenviar código",
+		"login.otp.resending": "Enviando...",
+		"login.otp.resendError": "Erro ao reenviar o código. Tente novamente.",
+		"login.otp.resendSuccess":
+			"Novo código enviado. Verifique seu e-mail (válido por 5 minutos).",
+		"login.wrongEmail": "E-mail incorreto?",
+		"login.changeEmail": "Alterar e-mail",
+		"login.terms": "Ao entrar, você aceita nossos",
+		"login.termsOfService": "Termos de Serviço",
+		"login.and": "e",
+		"login.privacyPolicy": "Política de Privacidade",
+		"login.success.codeSent": "Código enviado",
+		"login.success.auth": "Autenticação bem-sucedida",
+		"login.success.message":
+			"Enviamos um código de 6 dígitos. Verifique seu e-mail e spam.",
+		"login.error": "Erro",
+
+		// Signup page
+		"signup.title": "Crie sua conta",
+		"signup.description": "Preencha o formulário para começar",
+		"signup.firstName.label": "Nome",
+		"signup.firstName.placeholder": "Maria",
+		"signup.firstName.required": "O nome é obrigatório.",
+		"signup.firstName.description": "Seu primeiro nome",
+		"signup.lastName.label": "Sobrenome",
+		"signup.lastName.placeholder": "Silva",
+		"signup.lastName.required": "O sobrenome é obrigatório.",
+		"signup.lastName.description": "Seu sobrenome",
+		"signup.email.label": "Endereço de e-mail",
+		"signup.email.placeholder": "voce@empresa.com",
+		"signup.email.required": "O e-mail é obrigatório.",
+		"signup.email.invalid": "Digite um e-mail válido.",
+		"signup.email.description": "Seu endereço de e-mail corporativo",
+		"signup.terms.label": "Aceito os",
+		"signup.terms.termsAndConditions": "termos e condições",
+		"signup.terms.andThe": "e o",
+		"signup.terms.privacyNotice": "aviso de privacidade",
+		"signup.terms.required": "Você deve aceitar os termos e condições.",
+		"signup.terms.description":
+			"Você deve aceitar os termos e condições para continuar",
+		"signup.button.create": "Criar conta",
+		"signup.button.creating": "Criando conta...",
+		"signup.hasAccount": "Já tem conta?",
+		"signup.loginLink": "Entrar",
+		"signup.success.title": "Conta criada — Verificação pendente",
+		"signup.success.titleDone": "Conta criada com sucesso",
+		"signup.success.message":
+			"Enviamos um código de 6 dígitos para seu e-mail. Digite-o abaixo para verificar sua conta.",
+		"signup.success.redirect": "Conta criada. Redirecionando para o login…",
+		"signup.otp.title": "Digite o código de verificação",
+		"signup.otp.description":
+			"Enviamos um código de 6 dígitos para {email}. Verifique sua caixa de entrada (e a pasta de spam).",
+		"signup.otp.verifying": "Verificando...",
+		"signup.otp.expired":
+			"O código expirou. Os códigos são válidos por 5 minutos. Solicite um novo.",
+		"signup.otp.tooManyAttempts":
+			"Você excedeu o número de tentativas. Por segurança, solicite um novo código.",
+		"signup.otp.invalid": "Código incorreto. Tente novamente.",
+		"signup.otp.expiredTitle": "Código expirado ou inválido",
+		"signup.otp.errorTitle": "Erro de verificação",
+		"signup.otp.resendNew": "Enviando novo código...",
+		"signup.otp.requestNew": "Solicitar novo código",
+		"signup.otp.resend": "Reenviar código",
+		"signup.otp.resending": "Enviando...",
+		"signup.otp.resendError": "Erro ao reenviar o código de verificação",
+		"signup.otp.resendSuccess":
+			"Novo código enviado. Verifique seu e-mail (válido por 5 minutos).",
+		"signup.otp.changeEmail": "Precisa alterar seu e-mail?",
+		"signup.otp.backToForm": "Voltar ao formulário",
+		"signup.otp.verified":
+			"E-mail verificado! Por favor, entre para continuar.",
+		"signup.error.title": "Erro ao criar a conta",
+
+		// Verify email page
+		"verify.title": "Verificação de e-mail",
+		"verify.success.description": "Seu e-mail foi verificado com sucesso",
+		"verify.error.description": "Houve um problema ao verificar seu e-mail",
+		"verify.default.description": "Status de verificação de e-mail",
+		"verify.success.title": "Verificação bem-sucedida",
+		"verify.success.message":
+			"Seu e-mail foi verificado corretamente. Agora você pode entrar com sua conta.",
+		"verify.success.ready":
+			"Sua conta está pronta para uso. Agora você pode acessar todas as funcionalidades da plataforma.",
+		"verify.success.button": "Ir para entrar",
+		"verify.error.title": "Erro de verificação",
+		"verify.error.message":
+			"Não foi possível verificar seu e-mail. Por favor, entre ou cadastre-se novamente para receber um código de verificação.",
+		"verify.error.noAccount": "Não tem conta? Cadastre-se",
+		"verify.default.message":
+			"A verificação de e-mail é feita através de um código OTP enviado para seu e-mail durante o cadastro. Entre para continuar.",
+		"verify.default.backToLogin": "Voltar para entrar",
+
+		// Account page
+		"account.noSession.title": "Sessão não encontrada",
+		"account.noSession.description":
+			"Não foi encontrada uma sessão ativa neste ambiente",
+		"account.noSession.previewNote":
+			"Se você veio de um preview, certifique-se de ter entrado no mesmo domínio para compartilhar o cookie.",
+		"account.noSession.login": "Entrar",
+		"account.noSession.signup": "Criar conta",
+		"account.title": "Minha conta",
+		"account.description": "Informações da sua sessão ativa",
+		"account.environment": "Ambiente",
+		"account.userId": "ID do usuário",
+		"account.expires": "Expira {time}",
+		"account.lastUpdate": "Última atualização:",
+		"account.sessionId": "ID da sessão",
+		"account.logout": "Sair",
+		"account.loggingOut": "Saindo...",
+		"account.security.title": "Configurações de segurança",
+		"account.security.description": "Detalhes do cookie de autenticação",
+		"account.security.domain": "Domínio",
+		"account.security.endpoint": "Endpoint base",
+		"account.security.scope": "Escopo da sessão",
+		"account.security.scopeDev": "Todas as aplicações em *.janovix.workers.dev",
+		"account.security.scopeProd": "Apenas aplicações no domínio atual",
+		"account.security.note": "Nota importante",
+		"account.security.noteText":
+			"Os ambientes de desenvolvimento e produção usam domínios diferentes, então você precisará entrar independentemente em cada um.",
+		"account.technical.title": "Informações técnicas",
+		"account.technical.description":
+			"Detalhes de depuração para desenvolvedores",
+		"account.technical.token": "Token de sessão",
+		"account.technical.ip": "Endereço IP",
+		"account.technical.userAgent": "User Agent",
+	},
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(
@@ -336,11 +491,17 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
 		setMounted(true);
 		const stored = localStorage.getItem("language") as Language;
-		if (stored && (stored === "en" || stored === "es")) {
+		if (stored && (stored === "en" || stored === "es" || stored === "pt")) {
 			setLanguageState(stored);
 		} else {
 			const browserLang = navigator.language.toLowerCase();
-			setLanguageState(browserLang.startsWith("es") ? "es" : "en");
+			if (browserLang.startsWith("pt")) {
+				setLanguageState("pt");
+			} else if (browserLang.startsWith("es")) {
+				setLanguageState("es");
+			} else {
+				setLanguageState("en");
+			}
 		}
 	}, []);
 

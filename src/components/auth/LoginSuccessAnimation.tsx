@@ -28,25 +28,18 @@ export function LoginSuccessAnimation({
 	}, [delay, onComplete]);
 
 	return (
-		<div className="flex flex-col items-center justify-center gap-6 py-12">
-			{/* Simple checkmark icon with fade */}
-			<div
-				className={`flex items-center justify-center w-16 h-16 rounded-full bg-green-500/10 transition-all duration-500 ease-out ${
-					showContent ? "opacity-100 scale-100" : "opacity-0 scale-90"
-				}`}
-			>
-				<Check className="w-8 h-8 text-green-500" strokeWidth={2.5} />
+		<div
+			className={`flex items-center justify-center gap-3 transition-all duration-500 ease-out ${
+				showContent ? "opacity-100 scale-100" : "opacity-0 scale-90"
+			}`}
+		>
+			{/* Checkmark icon on the left */}
+			<div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-500/10">
+				<Check className="w-5 h-5 text-green-500" strokeWidth={2.5} />
 			</div>
 
-			{/* Redirecting caption */}
-			<p
-				className={`text-sm text-muted-foreground transition-opacity duration-500 ${
-					showContent ? "opacity-100" : "opacity-0"
-				}`}
-				style={{ transitionDelay: "150ms" }}
-			>
-				Redirigiendo...
-			</p>
+			{/* Redirecting caption on the right */}
+			<p className="text-sm text-muted-foreground">Redirigiendo...</p>
 		</div>
 	);
 }

@@ -296,18 +296,12 @@ export const LoginView = ({
 	// Show success animation when login is successful
 	if (showSuccessAnimation) {
 		return (
-			<div className="flex flex-col gap-4 sm:gap-6 w-full">
-				<div className="flex justify-center mb-2">
-					<Logo variant="logo" forceTheme={logoTheme} />
-				</div>
-				<Card className="animate-fade-in">
-					<CardContent className="pt-6">
-						<LoginSuccessAnimation
-							onComplete={handleSuccessComplete}
-							delay={2000}
-						/>
-					</CardContent>
-				</Card>
+			<div className="flex flex-col items-center justify-center gap-6 w-full min-h-[200px]">
+				<Logo variant="logo" forceTheme={logoTheme} />
+				<LoginSuccessAnimation
+					onComplete={handleSuccessComplete}
+					delay={2000}
+				/>
 			</div>
 		);
 	}

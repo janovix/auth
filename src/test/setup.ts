@@ -73,3 +73,9 @@ if (typeof window !== "undefined") {
 		}) as typeof window.cancelAnimationFrame;
 	}
 }
+
+// Mock document.elementFromPoint for input-otp library
+// The input-otp library uses this method which doesn't exist in jsdom
+if (typeof document !== "undefined" && !document.elementFromPoint) {
+	document.elementFromPoint = vi.fn(() => null);
+}

@@ -1,3 +1,10 @@
+# [1.2.0-rc.3](https://github.com/janovix/auth/compare/v1.2.0-rc.2...v1.2.0-rc.3) (2026-01-08)
+
+
+### Features
+
+* implement OTP-based passwordless auth, remove password recovery ([665c4b5](https://github.com/janovix/auth/commit/665c4b50fc9fa38cbd55a6e1977a53486a41300e))
+
 # [1.2.0-rc.2](https://github.com/janovix/auth/compare/v1.2.0-rc.1...v1.2.0-rc.2) (2026-01-08)
 
 

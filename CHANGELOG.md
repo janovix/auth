@@ -1,3 +1,30 @@
+# [1.3.0](https://github.com/janovix/auth/compare/v1.2.0...v1.3.0) (2026-01-08)
+
+
+### Bug Fixes
+
+* add __name polyfill for next-themes esbuild compatibility ([98336f6](https://github.com/janovix/auth/commit/98336f6c0f064a72b633fafb949d91c93d967269))
+* **middleware:** validate session with auth service ([e8e7c80](https://github.com/janovix/auth/commit/e8e7c802be91e1e8e271c724444f051ab8b4eaf2))
+* restore organizationClient plugin for aml-janovix compatibility ([a62e2c2](https://github.com/janovix/auth/commit/a62e2c2829deef44484b98c076a627091e5ff8d3))
+* **signup:** hide form fields after successful signup with verification ([fcf26fc](https://github.com/janovix/auth/commit/fcf26fce6f68011b05959bad2e8c1f3a79c9f013))
+* update password reset to use Better Auth client methods ([76c9938](https://github.com/janovix/auth/commit/76c99380108bc800cc04f31f8efa34be877601dd))
+* **verify:** add /verify to auth layout for consistent styling ([02b1c14](https://github.com/janovix/auth/commit/02b1c145eabccc71fdba79dc294c4a2d123be843))
+
+
+### Features
+
+* add email verification UI support ([0e6178e](https://github.com/janovix/auth/commit/0e6178e31eeeb9f4468b31881e6a5016174aa8d3))
+* Add internationalization and language switcher ([74f5fc0](https://github.com/janovix/auth/commit/74f5fc0838bb1dc28ddec4e94c652258355e56d1))
+* Add login success animation and redirect ([1de6eb6](https://github.com/janovix/auth/commit/1de6eb629e5d91a7269bcc1353f60cd6ec184404))
+* add Turnstile widget to password recovery form ([609b15d](https://github.com/janovix/auth/commit/609b15d1226500a35b7e6338f18353831e10d27b))
+* **auth:** add 60s cooldown timer on password reset request ([bca6da2](https://github.com/janovix/auth/commit/bca6da21820778f29b055b56a563d772b602eff5))
+* **auth:** improve verify email UI and signup verification message ([e8314ff](https://github.com/janovix/auth/commit/e8314ff26626f2125807e7150d4e2cae7e13c1a9))
+* Implement aurora background animations and context ([2b0c8c8](https://github.com/janovix/auth/commit/2b0c8c834ab91b3f2208d7441bf59d4b77f6a553))
+* implement OTP-based passwordless auth, remove password recovery ([665c4b5](https://github.com/janovix/auth/commit/665c4b50fc9fa38cbd55a6e1977a53486a41300e))
+* implement OTP-based passwordless auth, remove password recovery ([e1138f0](https://github.com/janovix/auth/commit/e1138f0a1297915b7cb810d32de09b90d827994a))
+* Implement shadcn-ui theme switcher component ([cc6d5ab](https://github.com/janovix/auth/commit/cc6d5ab134fe95429271213ea2995ef708837976))
+* **signup:** add 10s countdown before redirect to login after signup ([2fe25ce](https://github.com/janovix/auth/commit/2fe25ce7fb39588e0fdcc87d94e8e008a8f93efa))
+
 # [1.3.0-rc.1](https://github.com/janovix/auth/compare/v1.2.0...v1.3.0-rc.1) (2026-01-08)
 
 

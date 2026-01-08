@@ -15,19 +15,38 @@ describe("ThemeSwitcher", () => {
 		setThemeMock.mockReset();
 	});
 
-	it("renders theme switcher button", () => {
+	it("renders ternary theme switcher with system, light, and dark options", () => {
 		vi.mocked(nextThemes.useTheme).mockReturnValue({
-			theme: "light",
+			theme: "system",
 			setTheme: setThemeMock,
 			resolvedTheme: "light",
 		} as unknown as ReturnType<typeof nextThemes.useTheme>);
 
 		render(<ThemeSwitcher />);
-		const buttons = screen.getAllByRole("button", { name: /toggle theme/i });
-		expect(buttons.length).toBeGreaterThan(0);
+		expect(screen.getAllByLabelText("System theme").length).toBeGreaterThan(0);
+		expect(screen.getAllByLabelText("Light theme").length).toBeGreaterThan(0);
+		expect(screen.getAllByLabelText("Dark theme").length).toBeGreaterThan(0);
 	});
 
-	it("toggles from light to dark when clicked", async () => {
+	it("sets theme to light when light button is clicked", async () => {
+		vi.mocked(nextThemes.useTheme).mockReturnValue({
+			theme: "system",
+			setTheme: setThemeMock,
+			resolvedTheme: "light",
+		} as unknown as ReturnType<typeof nextThemes.useTheme>);
+
+		const user = userEvent.setup();
+		render(<ThemeSwitcher />);
+
+		// Get the last matching element (handles StrictMode double render)
+		const lightButtons = screen.getAllByLabelText("Light theme");
+		const lightButton = lightButtons[lightButtons.length - 1];
+		await user.click(lightButton);
+
+		expect(setThemeMock).toHaveBeenCalledWith("light");
+	});
+
+	it("sets theme to dark when dark button is clicked", async () => {
 		vi.mocked(nextThemes.useTheme).mockReturnValue({
 			theme: "light",
 			setTheme: setThemeMock,
@@ -37,14 +56,15 @@ describe("ThemeSwitcher", () => {
 		const user = userEvent.setup();
 		render(<ThemeSwitcher />);
 
-		const buttons = screen.getAllByRole("button", { name: /toggle theme/i });
-		const button = buttons[buttons.length - 1];
-		await user.click(button);
+		// Get the last matching element (handles StrictMode double render)
+		const darkButtons = screen.getAllByLabelText("Dark theme");
+		const darkButton = darkButtons[darkButtons.length - 1];
+		await user.click(darkButton);
 
 		expect(setThemeMock).toHaveBeenCalledWith("dark");
 	});
 
-	it("toggles from dark to light when clicked", async () => {
+	it("sets theme to system when system button is clicked", async () => {
 		vi.mocked(nextThemes.useTheme).mockReturnValue({
 			theme: "dark",
 			setTheme: setThemeMock,
@@ -54,10 +74,11 @@ describe("ThemeSwitcher", () => {
 		const user = userEvent.setup();
 		render(<ThemeSwitcher />);
 
-		const buttons = screen.getAllByRole("button", { name: /toggle theme/i });
-		const button = buttons[buttons.length - 1];
-		await user.click(button);
+		// Get the last matching element (handles StrictMode double render)
+		const systemButtons = screen.getAllByLabelText("System theme");
+		const systemButton = systemButtons[systemButtons.length - 1];
+		await user.click(systemButton);
 
-		expect(setThemeMock).toHaveBeenCalledWith("light");
+		expect(setThemeMock).toHaveBeenCalledWith("system");
 	});
 });

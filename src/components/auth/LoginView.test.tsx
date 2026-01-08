@@ -86,6 +86,7 @@ describe("LoginView", () => {
 	});
 
 	it("verifies OTP and redirects on success", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
 		const sendOtp = createSendOtp();
 		const signInWithOtp = createSignInWithOtp();
 
@@ -126,7 +127,7 @@ describe("LoginView", () => {
 				signInWithOtp={signInWithOtp}
 			/>,
 		);
-		const user = userEvent.setup();
+		const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
 		// Step 1: Enter email
 		const emailInputs = screen.getAllByPlaceholderText("tu@empresa.com");
@@ -150,10 +151,23 @@ describe("LoginView", () => {
 		const otpInput = screen.getByLabelText(/código de verificación/i);
 		await user.type(otpInput, "123456");
 
+		// Verify OTP was submitted
 		await waitFor(() => {
 			expect(signInWithOtp).toHaveBeenCalledWith("ana@example.com", "123456");
-			expect(window.location.href).toBe("https://app.example.com");
 		});
+
+		// Should show success animation with welcome message
+		await waitFor(() => {
+			expect(screen.getByText(/bienvenido/i)).toBeInTheDocument();
+		});
+
+		// Advance timers to trigger redirect after success animation
+		await vi.advanceTimersByTimeAsync(3000);
+
+		// Check redirect happened
+		expect(window.location.href).toBe("https://app.example.com");
+
+		vi.useRealTimers();
 	});
 
 	it("shows error when OTP sending fails", async () => {

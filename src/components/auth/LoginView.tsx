@@ -55,6 +55,7 @@ import {
 } from "@/components/ui/input-otp";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 import { useAurora } from "@/contexts/aurora-context";
+import { LoginSuccessAnimation } from "./LoginSuccessAnimation";
 
 const emailSchema = z.object({
 	email: z
@@ -110,6 +111,11 @@ export const LoginView = ({
 	const [otpError, setOtpError] = useState<string | null>(null);
 	const [otpNeedsResend, setOtpNeedsResend] = useState(false);
 	const [isResending, setIsResending] = useState(false);
+
+	// Success animation state
+	const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+	const [userName, setUserName] = useState<string | undefined>(undefined);
+	const redirectUrlRef = useRef<string>("");
 
 	// Always use dark theme for logo to show white letters
 	const logoTheme = "dark" as const;
@@ -229,11 +235,17 @@ export const LoginView = ({
 			return;
 		}
 
-		// Success! Redirect to the target URL
-		setSuccessMessage("Acceso validado. Redirigiendo…");
+		// Success! Show animation then redirect
 		setStateModifier("success"); // Green aurora on success
-		window.location.href = getAuthRedirectUrl(redirectTo);
+		setUserName(result.data?.user?.name ?? undefined);
+		redirectUrlRef.current = getAuthRedirectUrl(redirectTo);
+		setShowSuccessAnimation(true);
 	}, [userEmail, otpValue, signInWithOtp, redirectTo, setStateModifier]);
+
+	// Handle redirect after success animation completes
+	const handleSuccessComplete = useCallback(() => {
+		window.location.href = redirectUrlRef.current;
+	}, []);
 
 	// Auto-submit when OTP is complete
 	useEffect(() => {
@@ -283,8 +295,30 @@ export const LoginView = ({
 
 	const isSubmitting = form.formState.isSubmitting;
 
+	// Show success animation when login is successful
+	if (showSuccessAnimation) {
+		return (
+			<div className="flex flex-col gap-4 sm:gap-6 w-full">
+				<div className="flex justify-center mb-2">
+					<Logo variant="logo" forceTheme={logoTheme} />
+				</div>
+				<Card className="animate-fade-in">
+					<CardContent className="pt-6">
+						<LoginSuccessAnimation
+							userName={userName}
+							onComplete={handleSuccessComplete}
+							delay={2500}
+						/>
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
+
 	return (
-		<div className="flex flex-col gap-4 sm:gap-6 w-full">
+		<div
+			className={`flex flex-col gap-4 sm:gap-6 w-full transition-opacity duration-300`}
+		>
 			<div className="flex justify-center mb-2">
 				<Logo variant="logo" forceTheme={logoTheme} />
 			</div>

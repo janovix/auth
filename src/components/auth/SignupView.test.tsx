@@ -10,6 +10,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuroraProvider } from "@/contexts/aurora-context";
 
 import { SignupView } from "./SignupView";
 
@@ -29,8 +30,12 @@ vi.mock("next/navigation", () => ({
 // Mock window.location
 const originalLocation = window.location;
 
-const renderWithTheme = (ui: React.ReactElement) => {
-	return render(<ThemeProvider>{ui}</ThemeProvider>);
+const renderWithProviders = (ui: React.ReactElement) => {
+	return render(
+		<ThemeProvider>
+			<AuroraProvider>{ui}</AuroraProvider>
+		</ThemeProvider>,
+	);
 };
 
 type SignUpFn = (credentials: SignUpCredentials) => Promise<AuthResult>;
@@ -81,7 +86,7 @@ describe("SignupView", () => {
 				error: null,
 			});
 
-			renderWithTheme(
+			renderWithProviders(
 				<SignupView redirectTo="https://app.example.com" signUp={signUp} />,
 			);
 			const user = userEvent.setup();
@@ -158,7 +163,7 @@ describe("SignupView", () => {
 			error: null,
 		});
 
-		renderWithTheme(<SignupView signUp={signUp} />);
+		renderWithProviders(<SignupView signUp={signUp} />);
 		const user = userEvent.setup();
 
 		await waitFor(() => {
@@ -202,7 +207,7 @@ describe("SignupView", () => {
 			error: new Error("Usuario existente"),
 		});
 
-		renderWithTheme(<SignupView signUp={signUp} />);
+		renderWithProviders(<SignupView signUp={signUp} />);
 		const user = userEvent.setup();
 
 		await waitFor(() => {
@@ -242,7 +247,7 @@ describe("SignupView", () => {
 
 	it("requires terms acceptance", async () => {
 		const signUp = createSignUp();
-		renderWithTheme(<SignupView signUp={signUp} />);
+		renderWithProviders(<SignupView signUp={signUp} />);
 		const user = userEvent.setup();
 
 		await waitFor(() => {

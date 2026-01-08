@@ -18,7 +18,7 @@ import {
 	Shield,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -54,6 +54,8 @@ import {
 	InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
+import { useAurora } from "@/contexts/aurora-context";
+import { LoginSuccessAnimation } from "./LoginSuccessAnimation";
 
 const emailSchema = z.object({
 	email: z
@@ -95,6 +97,7 @@ export const LoginView = ({
 	signInWithOtp?: SignInWithOtpFn;
 	defaultSuccessMessage?: string;
 }) => {
+	const { setPageProfile, setStateModifier } = useAurora();
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(
 		defaultSuccessMessage ?? null,
@@ -109,8 +112,17 @@ export const LoginView = ({
 	const [otpNeedsResend, setOtpNeedsResend] = useState(false);
 	const [isResending, setIsResending] = useState(false);
 
+	// Success animation state
+	const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+	const redirectUrlRef = useRef<string>("");
+
 	// Always use dark theme for logo to show white letters
 	const logoTheme = "dark" as const;
+
+	// Set aurora page profile to login on mount
+	useEffect(() => {
+		setPageProfile("login");
+	}, [setPageProfile]);
 
 	const form = useForm<EmailValues>({
 		resolver: zodResolver(emailSchema),
@@ -119,17 +131,54 @@ export const LoginView = ({
 		},
 	});
 
+	// Track email value at time of error to detect actual changes
+	const emailAtErrorRef = useRef<string | null>(null);
+	const otpAtErrorRef = useRef<string | null>(null);
+
+	// Reset aurora to default when user starts typing (clears error state)
+	const emailValue = form.watch("email");
+	useEffect(() => {
+		// Only clear error if the email has actually changed since the error was set
+		if (
+			serverError &&
+			emailAtErrorRef.current !== null &&
+			emailValue !== emailAtErrorRef.current
+		) {
+			setServerError(null);
+			setStateModifier("default"); // Reset to purple when editing form
+			emailAtErrorRef.current = null;
+		}
+	}, [emailValue, serverError, setStateModifier]);
+
+	// Reset aurora to default when OTP value changes (clears error state)
+	useEffect(() => {
+		// Only clear error if the OTP has actually changed since the error was set
+		if (
+			otpError &&
+			otpAtErrorRef.current !== null &&
+			otpValue !== otpAtErrorRef.current
+		) {
+			setOtpError(null);
+			setStateModifier("default"); // Reset to purple when editing OTP
+			otpAtErrorRef.current = null;
+		}
+	}, [otpValue, otpError, setStateModifier]);
+
 	const handleSendOtp = async (values: EmailValues) => {
 		setServerError(null);
 		setSuccessMessage(null);
 		setOtpError(null);
 		setOtpNeedsResend(false);
+		emailAtErrorRef.current = null;
+		setStateModifier("loading"); // Blue aurora while loading
 
 		const email = values.email.trim();
 		const result = await sendOtp(email, "sign-in");
 
 		if (!result.success) {
 			setServerError(getAuthErrorMessage(result.error));
+			emailAtErrorRef.current = email; // Capture email at time of error
+			setStateModifier("error"); // Red aurora on error
 			return;
 		}
 
@@ -138,6 +187,7 @@ export const LoginView = ({
 		setSuccessMessage(
 			"Te enviamos un código de 6 dígitos. Revisa tu correo y spam.",
 		);
+		setStateModifier("default"); // Back to purple after OTP sent
 	};
 
 	// Handle OTP verification and sign-in
@@ -149,6 +199,8 @@ export const LoginView = ({
 		setIsVerifyingOtp(true);
 		setOtpError(null);
 		setOtpNeedsResend(false);
+		otpAtErrorRef.current = null;
+		setStateModifier("loading"); // Blue aurora while verifying
 
 		const result = await signInWithOtp(userEmail, otpValue);
 
@@ -162,26 +214,36 @@ export const LoginView = ({
 				);
 				setOtpNeedsResend(true);
 				setOtpValue("");
+				otpAtErrorRef.current = ""; // Capture OTP value at time of error (empty after clear)
 			} else if (isTooManyAttempts) {
 				setOtpError(
 					"Has excedido el número de intentos. Por seguridad, solicita un nuevo código.",
 				);
 				setOtpNeedsResend(true);
 				setOtpValue("");
+				otpAtErrorRef.current = ""; // Capture OTP value at time of error (empty after clear)
 			} else {
 				setOtpError(
 					result.error?.message || "Código incorrecto. Inténtalo de nuevo.",
 				);
+				otpAtErrorRef.current = otpValue; // Capture current OTP value at time of error
 			}
 
 			setIsVerifyingOtp(false);
+			setStateModifier("error"); // Red aurora on error
 			return;
 		}
 
-		// Success! Redirect to the target URL
-		setSuccessMessage("Acceso validado. Redirigiendo…");
-		window.location.href = getAuthRedirectUrl(redirectTo);
-	}, [userEmail, otpValue, signInWithOtp, redirectTo]);
+		// Success! Show animation then redirect
+		setStateModifier("success"); // Green aurora on success
+		redirectUrlRef.current = getAuthRedirectUrl(redirectTo);
+		setShowSuccessAnimation(true);
+	}, [userEmail, otpValue, signInWithOtp, redirectTo, setStateModifier]);
+
+	// Handle redirect after success animation completes
+	const handleSuccessComplete = useCallback(() => {
+		window.location.href = redirectUrlRef.current;
+	}, []);
 
 	// Auto-submit when OTP is complete
 	useEffect(() => {
@@ -199,6 +261,7 @@ export const LoginView = ({
 		setOtpError(null);
 		setOtpNeedsResend(false);
 		setOtpValue("");
+		setStateModifier("loading"); // Blue aurora while resending
 
 		const result = await sendOtp(userEmail, "sign-in");
 
@@ -207,10 +270,12 @@ export const LoginView = ({
 				result.error?.message ||
 					"Error al reenviar el código. Intenta de nuevo.",
 			);
+			setStateModifier("error"); // Red aurora on error
 		} else {
 			setSuccessMessage(
 				"Nuevo código enviado. Revisa tu correo (válido por 5 minutos).",
 			);
+			setStateModifier("default"); // Back to purple after success
 		}
 
 		setIsResending(false);
@@ -223,12 +288,28 @@ export const LoginView = ({
 		setOtpError(null);
 		setOtpNeedsResend(false);
 		setSuccessMessage(null);
+		setStateModifier("default"); // Reset to purple when going back
 	};
 
 	const isSubmitting = form.formState.isSubmitting;
 
+	// Show success animation when login is successful
+	if (showSuccessAnimation) {
+		return (
+			<div className="flex flex-col items-center justify-center gap-6 w-full min-h-[200px]">
+				<Logo variant="logo" forceTheme={logoTheme} />
+				<LoginSuccessAnimation
+					onComplete={handleSuccessComplete}
+					delay={2000}
+				/>
+			</div>
+		);
+	}
+
 	return (
-		<div className="flex flex-col gap-4 sm:gap-6 w-full">
+		<div
+			className={`flex flex-col gap-4 sm:gap-6 w-full transition-opacity duration-300`}
+		>
 			<div className="flex justify-center mb-2">
 				<Logo variant="logo" forceTheme={logoTheme} />
 			</div>

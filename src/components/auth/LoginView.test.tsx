@@ -10,14 +10,19 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuroraProvider } from "@/contexts/aurora-context";
 
 import { LoginView } from "./LoginView";
 
 // Mock window.location
 const originalLocation = window.location;
 
-const renderWithTheme = (ui: React.ReactElement) => {
-	return render(<ThemeProvider>{ui}</ThemeProvider>);
+const renderWithProviders = (ui: React.ReactElement) => {
+	return render(
+		<ThemeProvider>
+			<AuroraProvider>{ui}</AuroraProvider>
+		</ThemeProvider>,
+	);
 };
 
 type SendOtpFn = (
@@ -52,7 +57,7 @@ describe("LoginView", () => {
 			error: null,
 		});
 
-		renderWithTheme(
+		renderWithProviders(
 			<LoginView sendOtp={sendOtp} signInWithOtp={signInWithOtp} />,
 		);
 		const user = userEvent.setup();
@@ -81,6 +86,7 @@ describe("LoginView", () => {
 	});
 
 	it("verifies OTP and redirects on success", async () => {
+		vi.useFakeTimers({ shouldAdvanceTime: true });
 		const sendOtp = createSendOtp();
 		const signInWithOtp = createSignInWithOtp();
 
@@ -114,14 +120,14 @@ describe("LoginView", () => {
 			error: null,
 		});
 
-		renderWithTheme(
+		renderWithProviders(
 			<LoginView
 				redirectTo="https://app.example.com"
 				sendOtp={sendOtp}
 				signInWithOtp={signInWithOtp}
 			/>,
 		);
-		const user = userEvent.setup();
+		const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
 		// Step 1: Enter email
 		const emailInputs = screen.getAllByPlaceholderText("tu@empresa.com");
@@ -145,10 +151,23 @@ describe("LoginView", () => {
 		const otpInput = screen.getByLabelText(/código de verificación/i);
 		await user.type(otpInput, "123456");
 
+		// Verify OTP was submitted
 		await waitFor(() => {
 			expect(signInWithOtp).toHaveBeenCalledWith("ana@example.com", "123456");
-			expect(window.location.href).toBe("https://app.example.com");
 		});
+
+		// Should show success animation with redirecting message
+		await waitFor(() => {
+			expect(screen.getByText(/redirigiendo/i)).toBeInTheDocument();
+		});
+
+		// Advance timers to trigger redirect after success animation
+		await vi.advanceTimersByTimeAsync(3000);
+
+		// Check redirect happened
+		expect(window.location.href).toBe("https://app.example.com");
+
+		vi.useRealTimers();
 	});
 
 	it("shows error when OTP sending fails", async () => {
@@ -161,7 +180,7 @@ describe("LoginView", () => {
 			error: new Error("Usuario no encontrado"),
 		});
 
-		renderWithTheme(
+		renderWithProviders(
 			<LoginView sendOtp={sendOtp} signInWithOtp={signInWithOtp} />,
 		);
 		const user = userEvent.setup();
@@ -192,7 +211,7 @@ describe("LoginView", () => {
 		const sendOtp = createSendOtp();
 		const signInWithOtp = createSignInWithOtp();
 
-		renderWithTheme(
+		renderWithProviders(
 			<LoginView
 				defaultSuccessMessage="Login exitoso"
 				sendOtp={sendOtp}
@@ -215,7 +234,7 @@ describe("LoginView", () => {
 			error: null,
 		});
 
-		renderWithTheme(
+		renderWithProviders(
 			<LoginView sendOtp={sendOtp} signInWithOtp={signInWithOtp} />,
 		);
 		const user = userEvent.setup();

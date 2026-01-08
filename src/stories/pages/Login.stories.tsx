@@ -1,8 +1,10 @@
 import type { AuthResult } from "@/lib/auth/authActions";
 import type { Meta, StoryObj } from "@storybook/react";
 
+import { GlobalAuroraBackground } from "@/components/aurora";
 import { LoginView } from "@/components/auth/LoginView";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AuroraProvider } from "@/contexts/aurora-context";
 
 import { mockRouter } from "../mocks/router";
 
@@ -59,13 +61,16 @@ const meta = {
 	},
 	decorators: [
 		(Story) => (
-			<div className="min-h-screen flex items-center justify-center p-4 bg-background">
-				<div className="w-full max-w-md">
-					<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-						<Story />
-					</ThemeProvider>
-				</div>
-			</div>
+			<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+				<AuroraProvider>
+					<div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+						<GlobalAuroraBackground />
+						<div className="w-full max-w-md relative z-10">
+							<Story />
+						</div>
+					</div>
+				</AuroraProvider>
+			</ThemeProvider>
 		),
 	],
 } satisfies Meta<typeof LoginView>;

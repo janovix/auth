@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -58,6 +58,7 @@ import {
 	InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
+import { useAurora } from "@/contexts/aurora-context";
 
 const signupSchema = z.object({
 	firstName: z.string().min(1, "Tu nombre es obligatorio."),
@@ -83,6 +84,7 @@ export const SignupView = ({
 	redirectTo?: string;
 	signUp?: SignUpFn;
 }) => {
+	const { setPageProfile, setStateModifier } = useAurora();
 	const router = useRouter();
 	const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -102,6 +104,11 @@ export const SignupView = ({
 
 	// Always use dark theme for logo to show white letters
 	const logoTheme = "dark" as const;
+
+	// Set aurora page profile to signup (pink/purple) on mount
+	useEffect(() => {
+		setPageProfile("signup");
+	}, [setPageProfile]);
 
 	// Cleanup redirect timeout on unmount
 	useEffect(() => {
@@ -123,12 +130,53 @@ export const SignupView = ({
 		},
 	});
 
+	// Track form values at time of error to detect actual changes
+	const formValuesAtErrorRef = useRef<string | null>(null);
+	const otpAtErrorRef = useRef<string | null>(null);
+
+	// Watch form values to reset aurora mode when user starts typing (clears error state)
+	const formValues = form.watch();
+	const formValuesString = useMemo(
+		() => JSON.stringify(formValues),
+		[formValues],
+	);
+
+	useEffect(() => {
+		// Only clear error if form values have actually changed since the error was set
+		if (
+			serverError &&
+			!needsVerification &&
+			formValuesAtErrorRef.current !== null &&
+			formValuesString !== formValuesAtErrorRef.current
+		) {
+			setServerError(null);
+			setStateModifier("default"); // Reset to pink/purple when editing form
+			formValuesAtErrorRef.current = null;
+		}
+	}, [formValuesString, serverError, needsVerification, setStateModifier]);
+
+	// Reset aurora to default when OTP value changes (clears error state)
+	useEffect(() => {
+		// Only clear error if OTP has actually changed since the error was set
+		if (
+			otpError &&
+			otpAtErrorRef.current !== null &&
+			otpValue !== otpAtErrorRef.current
+		) {
+			setOtpError(null);
+			setStateModifier("default"); // Reset to pink/purple when editing OTP
+			otpAtErrorRef.current = null;
+		}
+	}, [otpValue, otpError, setStateModifier]);
+
 	const handleSubmit = async (values: SignupValues) => {
 		setServerError(null);
 		setSuccessMessage(null);
 		setNeedsVerification(false);
 		setResendMessage(null);
 		setResendError(null);
+		formValuesAtErrorRef.current = null;
+		setStateModifier("loading"); // Blue aurora while loading
 
 		const email = values.email.trim();
 		const name = `${values.firstName.trim()} ${values.lastName.trim()}`.trim();
@@ -139,6 +187,8 @@ export const SignupView = ({
 
 		if (!result.success) {
 			setServerError(getAuthErrorMessage(result.error));
+			formValuesAtErrorRef.current = JSON.stringify(values); // Capture form values at time of error
+			setStateModifier("error"); // Red aurora on error
 			return;
 		}
 
@@ -153,11 +203,13 @@ export const SignupView = ({
 			setSuccessMessage(
 				"Hemos enviado un código de 6 dígitos a tu correo. Ingrésalo a continuación para verificar tu cuenta.",
 			);
+			setStateModifier("default"); // Back to pink/purple after OTP sent
 			return;
 		}
 
 		// Email is already verified, redirect to login
 		setSuccessMessage("Cuenta creada. Redirigiendo al inicio de sesión…");
+		setStateModifier("success"); // Green aurora on success
 		const loginUrl = redirectTo
 			? `/login?redirect_to=${encodeURIComponent(redirectTo)}`
 			: "/login";
@@ -175,6 +227,8 @@ export const SignupView = ({
 		setIsVerifyingOtp(true);
 		setOtpError(null);
 		setOtpNeedsResend(false);
+		otpAtErrorRef.current = null;
+		setStateModifier("loading"); // Blue aurora while verifying
 
 		const result = await verifyEmailWithOtp(userEmail, otpValue);
 
@@ -189,20 +243,24 @@ export const SignupView = ({
 				);
 				setOtpNeedsResend(true);
 				setOtpValue(""); // Clear the expired OTP
+				otpAtErrorRef.current = ""; // Capture OTP value at time of error (empty after clear)
 			} else if (isTooManyAttempts) {
 				setOtpError(
 					"Has excedido el número de intentos. Por seguridad, solicita un nuevo código.",
 				);
 				setOtpNeedsResend(true);
 				setOtpValue(""); // Clear the OTP
+				otpAtErrorRef.current = ""; // Capture OTP value at time of error (empty after clear)
 			} else {
 				// Invalid OTP or unknown error - show message from server
 				setOtpError(
 					result.error?.message || "Código incorrecto. Inténtalo de nuevo.",
 				);
+				otpAtErrorRef.current = otpValue; // Capture current OTP value at time of error
 			}
 
 			setIsVerifyingOtp(false);
+			setStateModifier("error"); // Red aurora on error
 			return;
 		}
 
@@ -211,6 +269,7 @@ export const SignupView = ({
 		setSuccessMessage(
 			"¡Correo verificado! Por favor inicia sesión para continuar.",
 		);
+		setStateModifier("success"); // Green aurora on success
 
 		// Short delay to show the success message before redirecting to login
 		setTimeout(() => {
@@ -220,7 +279,7 @@ export const SignupView = ({
 				: "/login";
 			router.push(loginUrl);
 		}, 1500);
-	}, [userEmail, otpValue, redirectTo, router]);
+	}, [userEmail, otpValue, redirectTo, router, setStateModifier]);
 
 	// Auto-submit when OTP is complete
 	useEffect(() => {
@@ -240,6 +299,7 @@ export const SignupView = ({
 		setOtpValue(""); // Clear current OTP
 		setOtpError(null);
 		setOtpNeedsResend(false); // Reset the needs-resend state
+		setStateModifier("loading"); // Blue aurora while resending
 
 		const result = await sendVerificationOtp(userEmail, "email-verification");
 
@@ -247,10 +307,12 @@ export const SignupView = ({
 			setResendError(
 				result.error?.message || "Error al reenviar el código de verificación",
 			);
+			setStateModifier("error"); // Red aurora on error
 		} else {
 			setResendMessage(
 				"Nuevo código enviado. Revisa tu correo (válido por 5 minutos).",
 			);
+			setStateModifier("default"); // Back to pink/purple after success
 		}
 
 		setIsResending(false);
@@ -392,6 +454,7 @@ export const SignupView = ({
 												setOtpError(null);
 												setOtpNeedsResend(false);
 												setSuccessMessage(null);
+												setStateModifier("default"); // Reset to pink/purple when going back
 											}}
 											className="font-medium text-primary underline-offset-4 hover:underline"
 										>

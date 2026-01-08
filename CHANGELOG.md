@@ -1,3 +1,11 @@
+# [1.2.0-rc.5](https://github.com/janovix/auth/compare/v1.2.0-rc.4...v1.2.0-rc.5) (2026-01-08)
+
+
+### Features
+
+* Add login success animation and redirect ([1de6eb6](https://github.com/janovix/auth/commit/1de6eb629e5d91a7269bcc1353f60cd6ec184404))
+* Implement aurora background animations and context ([2b0c8c8](https://github.com/janovix/auth/commit/2b0c8c834ab91b3f2208d7441bf59d4b77f6a553))
+
 # [1.2.0-rc.4](https://github.com/janovix/auth/compare/v1.2.0-rc.3...v1.2.0-rc.4) (2026-01-08)
 
 

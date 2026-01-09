@@ -1,3 +1,10 @@
+# [1.3.0-rc.2](https://github.com/janovix/auth/compare/v1.3.0-rc.1...v1.3.0-rc.2) (2026-01-09)
+
+
+### Features
+
+* Integrate Sentry for error monitoring and tracing ([d44b1a7](https://github.com/janovix/auth/commit/d44b1a7ba44a820d5967edbad655abcef8da2769))
+
 # [1.3.0-rc.1](https://github.com/janovix/auth/compare/v1.2.0...v1.3.0-rc.1) (2026-01-08)
 
 

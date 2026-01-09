@@ -23,6 +23,8 @@ export default defineConfig({
 				"src/app/**",
 				// Next.js middleware - tested via integration tests
 				"src/middleware.ts",
+				// Sentry instrumentation files
+				"src/instrumentation*.ts",
 			],
 			/*thresholds: {
 				lines: 85,

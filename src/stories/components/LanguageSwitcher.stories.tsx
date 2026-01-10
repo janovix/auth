@@ -32,7 +32,7 @@ export const WithDescription: Story = {
 		<div className="flex flex-col gap-4">
 			<LanguageSwitcher />
 			<p className="text-sm text-muted-foreground">
-				Switch between English and Spanish
+				Switch between English, Spanish, and Portuguese
 			</p>
 		</div>
 	),

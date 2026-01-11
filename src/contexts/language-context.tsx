@@ -267,6 +267,144 @@ const translations = {
 		"audit.integrity.brokenAt": "Chain broken at",
 		"audit.integrity.description":
 			"Click verify to check the integrity of the audit log chain.",
+
+		// Settings navigation
+		"settings.nav.personal": "Personal",
+		"settings.nav.organization": "Organization",
+		"settings.nav.compliance": "AML Compliance",
+		"settings.nav.team": "Team",
+		"settings.nav.organizations": "Organizations",
+		"settings.nav.signOut": "Sign out",
+		"settings.saving": "Saving...",
+
+		// Personal settings
+		"settings.personal.title": "Personal Settings",
+		"settings.personal.description":
+			"Manage your personal preferences and profile",
+		"settings.personal.profile": "Profile",
+		"settings.personal.profileDesc": "Your personal information",
+		"settings.personal.fullName": "Full name",
+		"settings.personal.nameHelp": "Your name is managed through your account",
+		"settings.personal.email": "Email address",
+		"settings.personal.verified": "Verified",
+		"settings.personal.preferences": "Preferences",
+		"settings.personal.preferencesDesc": "Customize your experience",
+		"settings.personal.useOrgDefault": "Use organization default",
+		"settings.personal.avatarHelp": "Enter a URL for your avatar image",
+		"settings.personal.dateExample": "Example",
+		"settings.personal.spanish": "Spanish",
+		"settings.personal.english": "English",
+
+		// Organization settings
+		"settings.org.title": "Organization Settings",
+		"settings.org.description":
+			"Manage your organization's profile and default settings",
+		"settings.org.profile": "Organization Profile",
+		"settings.org.profileDesc": "Basic organization information",
+		"settings.org.name": "Organization name",
+		"settings.org.slug": "URL slug",
+		"settings.org.id": "Organization ID",
+		"settings.org.idHelp": "Use this ID for API integrations",
+		"settings.org.logoHelp": "Enter a URL for your organization logo",
+		"settings.org.defaultPreferences": "Default Preferences",
+		"settings.org.defaultPreferencesDesc":
+			"These settings will be used as defaults for new members",
+		"settings.org.defaultTimezone": "Default timezone",
+		"settings.org.defaultLanguage": "Default language",
+		"settings.org.defaultDateFormat": "Default date format",
+		"settings.org.dangerZone": "Danger Zone",
+		"settings.org.dangerZoneDesc": "Irreversible and destructive actions",
+		"settings.org.delete": "Delete organization",
+		"settings.org.deleteDesc":
+			"Permanently delete this organization and all its data",
+		"settings.org.deleteButton": "Delete organization",
+		"settings.org.deleteConfirmTitle": "Delete organization?",
+		"settings.org.deleteConfirmDesc":
+			"This action cannot be undone. This will permanently delete {name} and all associated data including members, transactions, and alerts.",
+		"settings.org.cancel": "Cancel",
+
+		// AML Compliance settings
+		"settings.compliance.title": "AML Compliance Settings",
+		"settings.compliance.description":
+			"Configure your obligated subject information for anti-money laundering compliance",
+		"settings.compliance.statusConfigured": "Compliance configured",
+		"settings.compliance.statusConfiguredDesc":
+			"Your AML compliance information has been configured",
+		"settings.compliance.statusNotConfigured": "Compliance not configured",
+		"settings.compliance.statusNotConfiguredDesc":
+			"Please configure your obligated subject information to comply with AML regulations",
+		"settings.compliance.obligatedSubject": "Obligated Subject Information",
+		"settings.compliance.obligatedSubjectDesc":
+			"Information required for LFPIORPI compliance",
+		"settings.compliance.rfc": "RFC (Tax ID)",
+		"settings.compliance.rfcRequired": "RFC is required",
+		"settings.compliance.rfcLength": "RFC must be 12 or 13 characters",
+		"settings.compliance.rfcFormat": "Invalid RFC format",
+		"settings.compliance.rfcHelp":
+			"The RFC (Registro Federal de Contribuyentes) is your Mexican tax identification number. It must be 12 characters for legal entities or 13 for individuals.",
+		"settings.compliance.characters": "characters",
+		"settings.compliance.vulnerableActivity": "Vulnerable Activity",
+		"settings.compliance.activityRequired": "Vulnerable activity is required",
+		"settings.compliance.activityHelp":
+			"Select the vulnerable activity that best describes your business operations according to LFPIORPI Article 17",
+		"settings.compliance.selectActivity": "Select a vulnerable activity",
+		"settings.compliance.saveChanges": "Save changes",
+		"settings.compliance.savedSuccess":
+			"Compliance settings saved successfully",
+		"settings.compliance.saveError": "Failed to save compliance settings",
+		"settings.compliance.ownerOnly":
+			"Only organization owners and admins can edit compliance settings",
+		"settings.compliance.reportingThresholds": "Reporting Thresholds",
+		"settings.compliance.reportingThresholdsDesc":
+			"Operations above these thresholds must be reported to the FIU",
+		"settings.compliance.thresholdUMA": "Threshold (UMAs)",
+		"settings.compliance.thresholdMXN": "Threshold (MXN)",
+		"settings.compliance.umaNote": "UMA value",
+		"settings.compliance.viewAllThresholds": "View all thresholds by activity",
+
+		// Team settings
+		"settings.team.title": "Team Settings",
+		"settings.team.description":
+			"Manage your organization's team members and access",
+		"settings.team.members": "Team Members",
+		"settings.team.pendingInvitations": "Pending Invitations",
+		"settings.team.inviteMember": "Invite member",
+		"settings.team.inviteDesc": "Send an invitation to join your organization",
+		"settings.team.email": "Email address",
+		"settings.team.role": "Role",
+		"settings.team.roleOwner": "Owner",
+		"settings.team.roleAdmin": "Admin",
+		"settings.team.roleMember": "Member",
+		"settings.team.sendInvite": "Send invitation",
+		"settings.team.sending": "Sending...",
+		"settings.team.cancel": "Cancel",
+		"settings.team.inviteSent": "Invitation sent successfully",
+		"settings.team.inviteError": "Failed to send invitation",
+		"settings.team.you": "You",
+		"settings.team.invitedBy": "Invited by",
+		"settings.team.makeAdmin": "Make admin",
+		"settings.team.makeMember": "Make member",
+		"settings.team.remove": "Remove",
+		"settings.team.roleUpdated": "Role updated successfully",
+		"settings.team.roleUpdateError": "Failed to update role",
+		"settings.team.memberRemoved": "Member removed successfully",
+		"settings.team.removeError": "Failed to remove member",
+		"settings.team.invitationCanceled": "Invitation canceled",
+		"settings.team.cancelError": "Failed to cancel invitation",
+		"settings.team.removeConfirmTitle": "Remove member?",
+		"settings.team.removeConfirmDesc":
+			"Are you sure you want to remove {name} from the organization? They will lose access immediately.",
+		"settings.team.rolePermissions": "Role Permissions",
+		"settings.team.rolePermissionsDesc":
+			"What each role can do in your organization",
+		"settings.team.perm.all": "Full access to all settings",
+		"settings.team.perm.delete": "Delete organization",
+		"settings.team.perm.transfer": "Transfer ownership",
+		"settings.team.perm.manage": "Manage team members",
+		"settings.team.perm.invite": "Invite new members",
+		"settings.team.perm.settings": "Edit organization settings",
+		"settings.team.perm.view": "View organization data",
+		"settings.team.perm.use": "Use organization features",
 	},
 	es: {
 		// Login page
@@ -535,6 +673,148 @@ const translations = {
 		"audit.integrity.brokenAt": "Cadena rota en",
 		"audit.integrity.description":
 			"Haz clic en verificar para comprobar la integridad de la cadena de auditoría.",
+
+		// Settings navigation
+		"settings.nav.personal": "Personal",
+		"settings.nav.organization": "Organización",
+		"settings.nav.compliance": "Cumplimiento PLD",
+		"settings.nav.team": "Equipo",
+		"settings.nav.organizations": "Organizaciones",
+		"settings.nav.signOut": "Cerrar sesión",
+		"settings.saving": "Guardando...",
+
+		// Personal settings
+		"settings.personal.title": "Configuración Personal",
+		"settings.personal.description":
+			"Administra tus preferencias personales y perfil",
+		"settings.personal.profile": "Perfil",
+		"settings.personal.profileDesc": "Tu información personal",
+		"settings.personal.fullName": "Nombre completo",
+		"settings.personal.nameHelp": "Tu nombre se administra desde tu cuenta",
+		"settings.personal.email": "Correo electrónico",
+		"settings.personal.verified": "Verificado",
+		"settings.personal.preferences": "Preferencias",
+		"settings.personal.preferencesDesc": "Personaliza tu experiencia",
+		"settings.personal.useOrgDefault": "Usar valor de organización",
+		"settings.personal.avatarHelp": "Ingresa una URL para tu imagen de avatar",
+		"settings.personal.dateExample": "Ejemplo",
+		"settings.personal.spanish": "Español",
+		"settings.personal.english": "Inglés",
+
+		// Organization settings
+		"settings.org.title": "Configuración de Organización",
+		"settings.org.description":
+			"Administra el perfil y configuración predeterminada de tu organización",
+		"settings.org.profile": "Perfil de la Organización",
+		"settings.org.profileDesc": "Información básica de la organización",
+		"settings.org.name": "Nombre de la organización",
+		"settings.org.slug": "URL slug",
+		"settings.org.id": "ID de Organización",
+		"settings.org.idHelp": "Usa este ID para integraciones API",
+		"settings.org.logoHelp": "Ingresa una URL para el logo de tu organización",
+		"settings.org.defaultPreferences": "Preferencias Predeterminadas",
+		"settings.org.defaultPreferencesDesc":
+			"Esta configuración se usará como predeterminada para nuevos miembros",
+		"settings.org.defaultTimezone": "Zona horaria predeterminada",
+		"settings.org.defaultLanguage": "Idioma predeterminado",
+		"settings.org.defaultDateFormat": "Formato de fecha predeterminado",
+		"settings.org.dangerZone": "Zona de Peligro",
+		"settings.org.dangerZoneDesc": "Acciones irreversibles y destructivas",
+		"settings.org.delete": "Eliminar organización",
+		"settings.org.deleteDesc":
+			"Eliminar permanentemente esta organización y todos sus datos",
+		"settings.org.deleteButton": "Eliminar organización",
+		"settings.org.deleteConfirmTitle": "¿Eliminar organización?",
+		"settings.org.deleteConfirmDesc":
+			"Esta acción no se puede deshacer. Esto eliminará permanentemente {name} y todos los datos asociados incluyendo miembros, transacciones y alertas.",
+		"settings.org.cancel": "Cancelar",
+
+		// AML Compliance settings
+		"settings.compliance.title": "Configuración de Cumplimiento PLD",
+		"settings.compliance.description":
+			"Configura la información de sujeto obligado para el cumplimiento de prevención de lavado de dinero",
+		"settings.compliance.statusConfigured": "Cumplimiento configurado",
+		"settings.compliance.statusConfiguredDesc":
+			"Tu información de cumplimiento PLD ha sido configurada",
+		"settings.compliance.statusNotConfigured": "Cumplimiento no configurado",
+		"settings.compliance.statusNotConfiguredDesc":
+			"Por favor configura tu información de sujeto obligado para cumplir con la regulación PLD",
+		"settings.compliance.obligatedSubject": "Información del Sujeto Obligado",
+		"settings.compliance.obligatedSubjectDesc":
+			"Información requerida para cumplimiento LFPIORPI",
+		"settings.compliance.rfc": "RFC",
+		"settings.compliance.rfcRequired": "El RFC es requerido",
+		"settings.compliance.rfcLength": "El RFC debe tener 12 o 13 caracteres",
+		"settings.compliance.rfcFormat": "Formato de RFC inválido",
+		"settings.compliance.rfcHelp":
+			"El RFC (Registro Federal de Contribuyentes) es tu número de identificación fiscal mexicano. Debe tener 12 caracteres para personas morales o 13 para personas físicas.",
+		"settings.compliance.characters": "caracteres",
+		"settings.compliance.vulnerableActivity": "Actividad Vulnerable",
+		"settings.compliance.activityRequired":
+			"La actividad vulnerable es requerida",
+		"settings.compliance.activityHelp":
+			"Selecciona la actividad vulnerable que mejor describe tus operaciones según el Artículo 17 de la LFPIORPI",
+		"settings.compliance.selectActivity": "Selecciona una actividad vulnerable",
+		"settings.compliance.saveChanges": "Guardar cambios",
+		"settings.compliance.savedSuccess":
+			"Configuración de cumplimiento guardada exitosamente",
+		"settings.compliance.saveError":
+			"Error al guardar configuración de cumplimiento",
+		"settings.compliance.ownerOnly":
+			"Solo propietarios y administradores pueden editar la configuración de cumplimiento",
+		"settings.compliance.reportingThresholds": "Umbrales de Reporte",
+		"settings.compliance.reportingThresholdsDesc":
+			"Las operaciones superiores a estos umbrales deben reportarse a la UIF",
+		"settings.compliance.thresholdUMA": "Umbral (UMAs)",
+		"settings.compliance.thresholdMXN": "Umbral (MXN)",
+		"settings.compliance.umaNote": "Valor UMA",
+		"settings.compliance.viewAllThresholds":
+			"Ver todos los umbrales por actividad",
+
+		// Team settings
+		"settings.team.title": "Configuración de Equipo",
+		"settings.team.description":
+			"Administra los miembros del equipo y accesos de tu organización",
+		"settings.team.members": "Miembros del Equipo",
+		"settings.team.pendingInvitations": "Invitaciones Pendientes",
+		"settings.team.inviteMember": "Invitar miembro",
+		"settings.team.inviteDesc":
+			"Envía una invitación para unirse a tu organización",
+		"settings.team.email": "Correo electrónico",
+		"settings.team.role": "Rol",
+		"settings.team.roleOwner": "Propietario",
+		"settings.team.roleAdmin": "Administrador",
+		"settings.team.roleMember": "Miembro",
+		"settings.team.sendInvite": "Enviar invitación",
+		"settings.team.sending": "Enviando...",
+		"settings.team.cancel": "Cancelar",
+		"settings.team.inviteSent": "Invitación enviada exitosamente",
+		"settings.team.inviteError": "Error al enviar la invitación",
+		"settings.team.you": "Tú",
+		"settings.team.invitedBy": "Invitado por",
+		"settings.team.makeAdmin": "Hacer administrador",
+		"settings.team.makeMember": "Hacer miembro",
+		"settings.team.remove": "Remover",
+		"settings.team.roleUpdated": "Rol actualizado exitosamente",
+		"settings.team.roleUpdateError": "Error al actualizar rol",
+		"settings.team.memberRemoved": "Miembro removido exitosamente",
+		"settings.team.removeError": "Error al remover miembro",
+		"settings.team.invitationCanceled": "Invitación cancelada",
+		"settings.team.cancelError": "Error al cancelar invitación",
+		"settings.team.removeConfirmTitle": "¿Remover miembro?",
+		"settings.team.removeConfirmDesc":
+			"¿Estás seguro de que deseas remover a {name} de la organización? Perderá acceso inmediatamente.",
+		"settings.team.rolePermissions": "Permisos por Rol",
+		"settings.team.rolePermissionsDesc":
+			"Lo que cada rol puede hacer en tu organización",
+		"settings.team.perm.all": "Acceso completo a toda la configuración",
+		"settings.team.perm.delete": "Eliminar organización",
+		"settings.team.perm.transfer": "Transferir propiedad",
+		"settings.team.perm.manage": "Administrar miembros del equipo",
+		"settings.team.perm.invite": "Invitar nuevos miembros",
+		"settings.team.perm.settings": "Editar configuración de organización",
+		"settings.team.perm.view": "Ver datos de la organización",
+		"settings.team.perm.use": "Usar funciones de la organización",
 	},
 };
 

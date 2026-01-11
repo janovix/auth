@@ -87,3 +87,25 @@ export interface SettingsApiResponse<T> {
 	data: T;
 	error?: string;
 }
+
+/**
+ * AML Compliance Settings (stored in aml-svc)
+ */
+export interface AmlComplianceSettings {
+	id: string;
+	organizationId: string;
+	obligatedSubjectKey: string; // RFC (clave_sujeto_obligado) - 12 characters
+	activityKey: string; // Vulnerable activity code (e.g., "VEH")
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface UpdateAmlComplianceSettingsInput {
+	obligatedSubjectKey?: string;
+	activityKey?: string;
+}
+
+export interface CreateAmlComplianceSettingsInput {
+	obligatedSubjectKey: string;
+	activityKey: string;
+}

@@ -372,6 +372,9 @@ describe("settingsClient", () => {
 			global.fetch = vi.fn().mockResolvedValue({
 				ok: false,
 				status: 500,
+				json: async () => ({
+					error: "Failed to fetch AML compliance settings",
+				}),
 			});
 
 			await expect(getAmlComplianceSettings("org-1")).rejects.toThrow(

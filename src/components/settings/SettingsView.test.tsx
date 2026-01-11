@@ -267,11 +267,20 @@ describe("SettingsView", () => {
 			expect(screen.getByRole("combobox")).toBeInTheDocument();
 		});
 
-		await user.selectOptions(screen.getByRole("combobox"), "UTC");
+		// Wait for timezone options to be loaded and select a different timezone
+		// Current timezone is America/Mexico_City, so select America/New_York
+		const combobox = screen.getByRole("combobox");
+		await waitFor(() => {
+			expect(
+				combobox.querySelector('option[value="America/New_York"]'),
+			).toBeInTheDocument();
+		});
+
+		await user.selectOptions(combobox, "America/New_York");
 
 		await waitFor(() => {
 			expect(settingsClient.updateUserSettings).toHaveBeenCalledWith({
-				timezone: "UTC",
+				timezone: "America/New_York",
 			});
 		});
 	});

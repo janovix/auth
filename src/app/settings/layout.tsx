@@ -38,6 +38,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { authClient } from "@/lib/auth/authClient";
+import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 
 function SidebarContent({
 	pathname,
@@ -127,24 +128,118 @@ export default function SettingsLayout({
 		session?.session as { activeOrganizationId?: string } | undefined
 	)?.activeOrganizationId;
 	const [orgName, setOrgName] = useState<string>("...");
+	const [organizations, setOrganizations] = useState<
+		Array<{ id: string; name: string; slug: string; logo?: string | null }>
+	>([]);
+	const [orgsLoading, setOrgsLoading] = useState(false);
 
-	// Fetch org name if we have an active org
+	// Fetch organizations and org name
 	useEffect(() => {
-		if (activeOrgId) {
-			authClient.organization
-				.getFullOrganization({
-					query: { organizationId: activeOrgId },
-				})
-				.then((result) => {
-					if (result.data) {
-						setOrgName(result.data.name);
+		async function loadOrganizations() {
+			try {
+				setOrgsLoading(true);
+				// List all organizations the user belongs to
+				// Using direct API call to auth service
+				const authServiceUrl = getAuthCoreBaseUrl();
+				const response = await fetch(
+					`${authServiceUrl}/api/auth/organization/list`,
+					{
+						credentials: "include",
+						headers: {
+							"Content-Type": "application/json",
+						},
+					},
+				);
+
+				if (response.ok) {
+					const data = (await response.json()) as
+						| Array<{
+								id: string;
+								name: string;
+								slug: string;
+								logo?: string | null;
+						  }>
+						| {
+								organizations?: Array<{
+									id: string;
+									name: string;
+									slug: string;
+									logo?: string | null;
+								}>;
+						  };
+					const orgs = Array.isArray(data) ? data : data.organizations || [];
+					setOrganizations(
+						orgs.map(
+							(org: {
+								id: string;
+								name: string;
+								slug: string;
+								logo?: string | null;
+							}) => ({
+								id: org.id,
+								name: org.name,
+								slug: org.slug,
+								logo: org.logo || null,
+							}),
+						),
+					);
+
+					// Set active org name
+					if (activeOrgId) {
+						const activeOrg = orgs.find(
+							(o: { id: string }) => o.id === activeOrgId,
+						);
+						if (activeOrg) {
+							setOrgName(activeOrg.name);
+						} else {
+							// Fallback: fetch full org details
+							const fullOrgResult =
+								await authClient.organization.getFullOrganization({
+									query: { organizationId: activeOrgId },
+								});
+							if (fullOrgResult.data) {
+								setOrgName(fullOrgResult.data.name);
+							}
+						}
 					}
-				})
-				.catch(() => {
-					setOrgName("Organization");
-				});
+				}
+			} catch {
+				setOrgName("Organization");
+			} finally {
+				setOrgsLoading(false);
+			}
 		}
+		loadOrganizations();
 	}, [activeOrgId]);
+
+	const handleOrganizationChange = async (orgId: string) => {
+		if (orgId === activeOrgId) return;
+
+		try {
+			const authServiceUrl = getAuthCoreBaseUrl();
+			const response = await fetch(
+				`${authServiceUrl}/api/auth/organization/set-active`,
+				{
+					method: "POST",
+					credentials: "include",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({ organizationId: orgId }),
+				},
+			);
+
+			if (!response.ok) {
+				console.error("Failed to switch organization");
+				return;
+			}
+
+			// Reload the page to reflect the new active organization
+			window.location.reload();
+		} catch (error) {
+			console.error("Failed to switch organization:", error);
+		}
+	};
 
 	const handleSignOut = async () => {
 		await authClient.signOut();
@@ -198,19 +293,54 @@ export default function SettingsLayout({
 									}
 								>
 									<DropdownMenu>
-										<DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium hover:text-foreground max-w-[180px] sm:max-w-[200px] lg:max-w-none">
-											<span className="truncate">{orgName}</span>
+										<DropdownMenuTrigger
+											disabled={orgsLoading}
+											className="flex items-center gap-1 text-sm font-medium hover:text-foreground max-w-[180px] sm:max-w-[200px] lg:max-w-none disabled:opacity-50"
+										>
+											<span className="truncate">
+												{orgsLoading ? "..." : orgName}
+											</span>
 											<ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
 										</DropdownMenuTrigger>
-										<DropdownMenuContent align="start">
+										<DropdownMenuContent align="start" className="w-56">
 											<DropdownMenuLabel>
 												{t("settings.nav.organizations")}
 											</DropdownMenuLabel>
 											<DropdownMenuSeparator />
-											<DropdownMenuItem>
-												<Building2 className="mr-2 h-4 w-4" />
-												{orgName}
-											</DropdownMenuItem>
+											{organizations.length === 0 ? (
+												<DropdownMenuItem disabled>
+													<span className="text-muted-foreground text-sm">
+														No organizations
+													</span>
+												</DropdownMenuItem>
+											) : (
+												organizations.map((org) => (
+													<DropdownMenuItem
+														key={org.id}
+														onClick={() => handleOrganizationChange(org.id)}
+														className={cn(
+															"flex items-center gap-2 cursor-pointer",
+															org.id === activeOrgId && "bg-accent font-medium",
+														)}
+													>
+														{org.logo ? (
+															<img
+																src={org.logo}
+																alt={org.name}
+																className="h-4 w-4 rounded object-contain"
+															/>
+														) : (
+															<Building2 className="h-4 w-4 text-muted-foreground" />
+														)}
+														<span className="flex-1 truncate">{org.name}</span>
+														{org.id === activeOrgId && (
+															<span className="text-xs text-muted-foreground">
+																{t("settings.nav.active") || "Active"}
+															</span>
+														)}
+													</DropdownMenuItem>
+												))
+											)}
 										</DropdownMenuContent>
 									</DropdownMenu>
 								</Suspense>

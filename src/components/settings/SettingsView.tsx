@@ -42,18 +42,10 @@ import {
 	type DateFormat,
 } from "@/lib/settings";
 import { authClient } from "@/lib/auth/authClient";
+import { getAllTimezoneOptions } from "@/lib/timezones";
 
-// Common timezones
-const TIMEZONES = [
-	{ value: "America/Mexico_City", label: "Mexico City (CST)" },
-	{ value: "America/New_York", label: "New York (EST)" },
-	{ value: "America/Los_Angeles", label: "Los Angeles (PST)" },
-	{ value: "America/Chicago", label: "Chicago (CST)" },
-	{ value: "Europe/London", label: "London (GMT)" },
-	{ value: "Europe/Paris", label: "Paris (CET)" },
-	{ value: "Asia/Tokyo", label: "Tokyo (JST)" },
-	{ value: "UTC", label: "UTC" },
-];
+// Get all timezones
+const TIMEZONES = getAllTimezoneOptions();
 
 const DATE_FORMATS: { value: DateFormat; label: string; example: string }[] = [
 	{ value: "MM/DD/YYYY", label: "MM/DD/YYYY", example: "01/15/2026" },
@@ -509,9 +501,9 @@ export function SettingsView() {
 								disabled={saving}
 								className="flex h-9 w-full max-w-xs rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
 							>
-								{TIMEZONES.map(({ value, label }) => (
-									<option key={value} value={value}>
-										{label}
+								{TIMEZONES.map((tz) => (
+									<option key={tz.value} value={tz.value}>
+										{tz.label}
 									</option>
 								))}
 							</select>
@@ -764,9 +756,9 @@ export function SettingsView() {
 											className="flex h-9 w-full max-w-xs rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
 										>
 											<option value="">— No default —</option>
-											{TIMEZONES.map(({ value, label }) => (
-												<option key={value} value={value}>
-													{label}
+											{TIMEZONES.map((tz) => (
+												<option key={tz.value} value={tz.value}>
+													{tz.label}
 												</option>
 											))}
 										</select>

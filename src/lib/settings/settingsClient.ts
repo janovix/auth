@@ -189,7 +189,17 @@ export async function getAmlComplianceSettings(
 	}
 
 	if (!response.ok) {
-		throw new Error("Failed to fetch AML compliance settings");
+		const errorResponse = (await response
+			.json()
+			.catch(() => ({ error: "Unknown error" }))) as {
+			error?: string;
+			message?: string;
+		};
+		throw new Error(
+			errorResponse.error ||
+				errorResponse.message ||
+				"Failed to fetch AML compliance settings",
+		);
 	}
 
 	const result =

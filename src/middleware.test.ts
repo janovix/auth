@@ -46,6 +46,16 @@ describe("middleware", () => {
 			);
 		});
 
+		it("should redirect to login when accessing settings routes", async () => {
+			const request = new NextRequest("https://auth.example.com/settings");
+			const response = await middleware(request);
+
+			expect(response.status).toBe(307);
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/login",
+			);
+		});
+
 		it("should allow access to login page", async () => {
 			const request = new NextRequest("https://auth.example.com/login");
 			const response = await middleware(request);
@@ -75,6 +85,14 @@ describe("middleware", () => {
 
 		it("should allow access to account routes", async () => {
 			const request = new NextRequest("https://auth.example.com/account");
+			const response = await middleware(request);
+
+			expect(response.status).toBe(200);
+			expect(response.headers.get("location")).toBeNull();
+		});
+
+		it("should allow access to settings routes", async () => {
+			const request = new NextRequest("https://auth.example.com/settings");
 			const response = await middleware(request);
 
 			expect(response.status).toBe(200);

@@ -42,20 +42,10 @@ import {
 	type DateFormat,
 } from "@/lib/settings";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
+import { getAllTimezoneOptions } from "@/lib/timezones";
 
-// Common timezones
-const TIMEZONES = [
-	{ value: "America/Mexico_City", label: "Mexico City (GMT-6)" },
-	{ value: "America/Cancun", label: "Cancún (GMT-5)" },
-	{ value: "America/Tijuana", label: "Tijuana (GMT-8)" },
-	{ value: "America/New_York", label: "New York (GMT-5)" },
-	{ value: "America/Los_Angeles", label: "Los Angeles (GMT-8)" },
-	{ value: "America/Chicago", label: "Chicago (GMT-6)" },
-	{ value: "Europe/London", label: "London (GMT)" },
-	{ value: "Europe/Paris", label: "Paris (GMT+1)" },
-	{ value: "Asia/Tokyo", label: "Tokyo (GMT+9)" },
-	{ value: "UTC", label: "UTC" },
-];
+// Get all timezones
+const TIMEZONES = getAllTimezoneOptions();
 
 const DATE_FORMATS: { value: DateFormat; label: string }[] = [
 	{ value: "DD/MM/YYYY", label: "DD/MM/YYYY" },
@@ -578,7 +568,7 @@ export function PersonalSettingsView() {
 									<SelectTrigger className="w-full">
 										<SelectValue />
 									</SelectTrigger>
-									<SelectContent>
+									<SelectContent className="max-h-[300px]">
 										{TIMEZONES.map((tz) => (
 											<SelectItem key={tz.value} value={tz.value}>
 												{tz.label}

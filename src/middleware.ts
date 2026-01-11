@@ -48,7 +48,8 @@ async function isSessionValid(cookieHeader: string): Promise<boolean> {
  *
  * This middleware runs BEFORE the page renders and validates the session
  * with the auth service. It ensures:
- * - Users with no session or invalid session cannot access /account routes
+ * - Users with no session or invalid session cannot access /account or /settings routes
+ * - Users with valid session can access /account and /settings routes
  * - Users with valid session are redirected away from public routes (login, etc.)
  *
  * For cross-subdomain cookies (like .janovix.workers.dev), the cookie will be
@@ -63,11 +64,13 @@ export async function middleware(request: NextRequest) {
 
 	// Define route protection rules
 	const isAccountRoute = pathname.startsWith("/account");
+	const isSettingsRoute = pathname.startsWith("/settings");
+	const isProtectedRoute = isAccountRoute || isSettingsRoute;
 
 	// No session cookie at all
 	if (!sessionCookie) {
-		// Redirect to login if trying to access account routes
-		if (isAccountRoute) {
+		// Redirect to login if trying to access protected routes
+		if (isProtectedRoute) {
 			const loginUrl = new URL("/login", request.url);
 			return NextResponse.redirect(loginUrl);
 		}
@@ -79,8 +82,8 @@ export async function middleware(request: NextRequest) {
 	const isValid = await isSessionValid(cookieHeader);
 
 	if (!isValid) {
-		// Invalid session - redirect to login if on account route
-		if (isAccountRoute) {
+		// Invalid session - redirect to login if on protected route
+		if (isProtectedRoute) {
 			const loginUrl = new URL("/login", request.url);
 			return NextResponse.redirect(loginUrl);
 		}
@@ -89,7 +92,8 @@ export async function middleware(request: NextRequest) {
 	}
 
 	// Valid session - redirect authenticated users away from public routes
-	if (!isAccountRoute) {
+	// But allow access to protected routes (account and settings)
+	if (!isProtectedRoute) {
 		return NextResponse.redirect(getDefaultRedirectUrl());
 	}
 

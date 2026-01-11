@@ -56,6 +56,32 @@ export interface UpdateUserSettingsInput {
 	paymentMethods?: PaymentMethod[];
 }
 
+export interface OrganizationSettings {
+	id: string;
+	organizationId: string;
+	theme: Theme | null;
+	timezone: string | null;
+	language: LanguageCode | null;
+	dateFormat: DateFormat | null;
+	avatarUrl: string | null;
+	metadata: Record<string, unknown> | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface UpdateOrganizationSettingsInput {
+	theme?: Theme | null;
+	timezone?: string | null;
+	language?: LanguageCode | null;
+	dateFormat?: DateFormat | null;
+	avatarUrl?: string | null;
+}
+
+export interface OrganizationMembership {
+	role: "owner" | "admin" | "member";
+	organizationId: string;
+}
+
 export interface SettingsApiResponse<T> {
 	success: boolean;
 	data: T;

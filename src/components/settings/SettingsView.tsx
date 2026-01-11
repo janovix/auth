@@ -12,6 +12,9 @@ import {
 	User,
 	CreditCard,
 	Loader2,
+	Building2,
+	Lock,
+	AlertCircle,
 } from "lucide-react";
 import {
 	Button,
@@ -28,11 +31,17 @@ import { useLanguage } from "@/contexts/language-context";
 import {
 	getUserSettings,
 	updateUserSettings,
+	getOrganizationSettings,
+	updateOrganizationSettings,
+	getOrganizationMembership,
 	type UserSettings,
+	type OrganizationSettings,
+	type OrganizationMembership,
 	type Theme,
 	type LanguageCode,
 	type DateFormat,
 } from "@/lib/settings";
+import { authClient } from "@/lib/auth/authClient";
 
 // Common timezones
 const TIMEZONES = [
@@ -67,11 +76,30 @@ export function SettingsView() {
 	const [error, setError] = useState<string | null>(null);
 	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+	// Organization state
+	const [activeOrgId, setActiveOrgId] = useState<string | null>(null);
+	const [orgSettings, setOrgSettings] = useState<OrganizationSettings | null>(
+		null,
+	);
+	const [orgMembership, setOrgMembership] =
+		useState<OrganizationMembership | null>(null);
+	const [orgLoading, setOrgLoading] = useState(false);
+	const [orgSaving, setOrgSaving] = useState(false);
+
+	// Organization form state
+	const [orgTheme, setOrgTheme] = useState<Theme | null>(null);
+	const [orgLanguage, setOrgLanguage] = useState<LanguageCode | null>(null);
+	const [orgTimezone, setOrgTimezone] = useState<string | null>(null);
+	const [orgDateFormat, setOrgDateFormat] = useState<DateFormat | null>(null);
+	const [orgAvatarUrl, setOrgAvatarUrl] = useState<string>("");
+
 	// Form state
 	const [selectedTimezone, setSelectedTimezone] = useState<string>("UTC");
 	const [selectedDateFormat, setSelectedDateFormat] =
 		useState<DateFormat>("MM/DD/YYYY");
 	const [avatarUrl, setAvatarUrl] = useState<string>("");
+
+	const isOrgOwner = orgMembership?.role === "owner";
 
 	useEffect(() => {
 		async function loadSettings() {
@@ -90,6 +118,15 @@ export function SettingsView() {
 				} else {
 					setSelectedTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
 				}
+
+				// Get active organization from session
+				const sessionResult = await authClient.getSession();
+				const orgId = (
+					sessionResult.data?.session as { activeOrganizationId?: string }
+				)?.activeOrganizationId;
+				if (orgId) {
+					setActiveOrgId(orgId);
+				}
 			} catch (err) {
 				setError(
 					err instanceof Error ? err.message : "Failed to load settings",
@@ -100,6 +137,45 @@ export function SettingsView() {
 		}
 		loadSettings();
 	}, []);
+
+	// Load organization settings when activeOrgId changes
+	useEffect(() => {
+		async function loadOrgSettings() {
+			if (!activeOrgId) {
+				setOrgSettings(null);
+				setOrgMembership(null);
+				return;
+			}
+
+			try {
+				setOrgLoading(true);
+				const [settings, membership] = await Promise.all([
+					getOrganizationSettings(activeOrgId),
+					getOrganizationMembership(activeOrgId),
+				]);
+				setOrgSettings(settings);
+				setOrgMembership(membership);
+
+				// Initialize org form state
+				if (settings) {
+					setOrgTheme((settings.theme as Theme) || null);
+					setOrgLanguage((settings.language as LanguageCode) || null);
+					setOrgTimezone(settings.timezone || null);
+					setOrgDateFormat((settings.dateFormat as DateFormat) || null);
+					setOrgAvatarUrl(settings.avatarUrl || "");
+				}
+			} catch (err) {
+				setError(
+					err instanceof Error
+						? err.message
+						: t("settings.organization.loadError"),
+				);
+			} finally {
+				setOrgLoading(false);
+			}
+		}
+		loadOrgSettings();
+	}, [activeOrgId, t]);
 
 	const handleThemeChange = useCallback(
 		async (newTheme: Theme) => {
@@ -187,6 +263,121 @@ export function SettingsView() {
 			setSaving(false);
 		}
 	}, [avatarUrl, t]);
+
+	// Organization settings handlers
+	const handleOrgThemeChange = useCallback(
+		async (newTheme: Theme | null) => {
+			if (!activeOrgId || !isOrgOwner) return;
+			setOrgTheme(newTheme);
+			try {
+				setOrgSaving(true);
+				await updateOrganizationSettings(activeOrgId, { theme: newTheme });
+				setSuccessMessage(t("settings.organization.savedSuccess"));
+				setTimeout(() => setSuccessMessage(null), 3000);
+			} catch (err) {
+				setError(
+					err instanceof Error
+						? err.message
+						: t("settings.organization.saveError"),
+				);
+			} finally {
+				setOrgSaving(false);
+			}
+		},
+		[activeOrgId, isOrgOwner, t],
+	);
+
+	const handleOrgLanguageChange = useCallback(
+		async (newLanguage: LanguageCode | null) => {
+			if (!activeOrgId || !isOrgOwner) return;
+			setOrgLanguage(newLanguage);
+			try {
+				setOrgSaving(true);
+				await updateOrganizationSettings(activeOrgId, {
+					language: newLanguage,
+				});
+				setSuccessMessage(t("settings.organization.savedSuccess"));
+				setTimeout(() => setSuccessMessage(null), 3000);
+			} catch (err) {
+				setError(
+					err instanceof Error
+						? err.message
+						: t("settings.organization.saveError"),
+				);
+			} finally {
+				setOrgSaving(false);
+			}
+		},
+		[activeOrgId, isOrgOwner, t],
+	);
+
+	const handleOrgTimezoneChange = useCallback(
+		async (newTimezone: string | null) => {
+			if (!activeOrgId || !isOrgOwner) return;
+			setOrgTimezone(newTimezone);
+			try {
+				setOrgSaving(true);
+				await updateOrganizationSettings(activeOrgId, {
+					timezone: newTimezone,
+				});
+				setSuccessMessage(t("settings.organization.savedSuccess"));
+				setTimeout(() => setSuccessMessage(null), 3000);
+			} catch (err) {
+				setError(
+					err instanceof Error
+						? err.message
+						: t("settings.organization.saveError"),
+				);
+			} finally {
+				setOrgSaving(false);
+			}
+		},
+		[activeOrgId, isOrgOwner, t],
+	);
+
+	const handleOrgDateFormatChange = useCallback(
+		async (newFormat: DateFormat | null) => {
+			if (!activeOrgId || !isOrgOwner) return;
+			setOrgDateFormat(newFormat);
+			try {
+				setOrgSaving(true);
+				await updateOrganizationSettings(activeOrgId, {
+					dateFormat: newFormat,
+				});
+				setSuccessMessage(t("settings.organization.savedSuccess"));
+				setTimeout(() => setSuccessMessage(null), 3000);
+			} catch (err) {
+				setError(
+					err instanceof Error
+						? err.message
+						: t("settings.organization.saveError"),
+				);
+			} finally {
+				setOrgSaving(false);
+			}
+		},
+		[activeOrgId, isOrgOwner, t],
+	);
+
+	const handleOrgAvatarSave = useCallback(async () => {
+		if (!activeOrgId || !isOrgOwner) return;
+		try {
+			setOrgSaving(true);
+			await updateOrganizationSettings(activeOrgId, {
+				avatarUrl: orgAvatarUrl || null,
+			});
+			setSuccessMessage(t("settings.organization.savedSuccess"));
+			setTimeout(() => setSuccessMessage(null), 3000);
+		} catch (err) {
+			setError(
+				err instanceof Error
+					? err.message
+					: t("settings.organization.saveError"),
+			);
+		} finally {
+			setOrgSaving(false);
+		}
+	}, [activeOrgId, isOrgOwner, orgAvatarUrl, t]);
 
 	if (loading) {
 		return (
@@ -422,6 +613,248 @@ export function SettingsView() {
 						<p className="text-sm text-muted-foreground">
 							{t("settings.payments.comingSoon")}
 						</p>
+					</CardContent>
+				</Card>
+
+				{/* Organization Settings Section */}
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<Building2 className="h-5 w-5" />
+							{t("settings.organization.title")}
+						</CardTitle>
+						<CardDescription>
+							{t("settings.organization.description")}
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-6">
+						{!activeOrgId ? (
+							<div className="flex items-center gap-3 text-muted-foreground">
+								<AlertCircle className="h-5 w-5" />
+								<div>
+									<p className="font-medium">
+										{t("settings.organization.noOrg")}
+									</p>
+									<p className="text-sm">
+										{t("settings.organization.noOrgDescription")}
+									</p>
+								</div>
+							</div>
+						) : orgLoading ? (
+							<div className="flex items-center justify-center py-8">
+								<Spinner className="h-6 w-6" />
+							</div>
+						) : (
+							<>
+								{/* Permission notice */}
+								<div
+									className={`flex items-start gap-3 p-3 rounded-md ${
+										isOrgOwner
+											? "bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200"
+											: "bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200"
+									}`}
+								>
+									{isOrgOwner ? (
+										<Building2 className="h-5 w-5 mt-0.5 flex-shrink-0" />
+									) : (
+										<Lock className="h-5 w-5 mt-0.5 flex-shrink-0" />
+									)}
+									<p className="text-sm">
+										{isOrgOwner
+											? t("settings.organization.ownerNote")
+											: t("settings.organization.viewOnly")}
+									</p>
+								</div>
+
+								{/* Organization Theme */}
+								<div>
+									<Label className="text-sm font-medium mb-3 block">
+										{t("settings.organization.theme")}
+									</Label>
+									<div className="flex gap-2">
+										{[
+											{
+												value: "light" as Theme,
+												icon: Sun,
+												label: t("settings.appearance.light"),
+											},
+											{
+												value: "dark" as Theme,
+												icon: Moon,
+												label: t("settings.appearance.dark"),
+											},
+											{
+												value: "system" as Theme,
+												icon: Monitor,
+												label: t("settings.appearance.system"),
+											},
+										].map(({ value, icon: Icon, label }) => (
+											<Button
+												key={value}
+												variant={orgTheme === value ? "default" : "outline"}
+												size="sm"
+												onClick={() => handleOrgThemeChange(value)}
+												disabled={!isOrgOwner || orgSaving}
+												className="flex items-center gap-2"
+											>
+												<Icon className="h-4 w-4" />
+												{label}
+											</Button>
+										))}
+										{orgTheme && (
+											<Button
+												variant="ghost"
+												size="sm"
+												onClick={() => handleOrgThemeChange(null)}
+												disabled={!isOrgOwner || orgSaving}
+												className="text-muted-foreground"
+											>
+												Clear
+											</Button>
+										)}
+									</div>
+								</div>
+
+								{/* Organization Language */}
+								<div>
+									<Label className="text-sm font-medium mb-3 block">
+										{t("settings.organization.language")}
+									</Label>
+									<div className="flex gap-2">
+										{LANGUAGES.map(({ value, label, flag }) => (
+											<Button
+												key={value}
+												variant={orgLanguage === value ? "default" : "outline"}
+												size="sm"
+												onClick={() => handleOrgLanguageChange(value)}
+												disabled={!isOrgOwner || orgSaving}
+												className="flex items-center gap-2"
+											>
+												<span>{flag}</span>
+												{label}
+											</Button>
+										))}
+										{orgLanguage && (
+											<Button
+												variant="ghost"
+												size="sm"
+												onClick={() => handleOrgLanguageChange(null)}
+												disabled={!isOrgOwner || orgSaving}
+												className="text-muted-foreground"
+											>
+												Clear
+											</Button>
+										)}
+									</div>
+								</div>
+
+								{/* Organization Timezone */}
+								<div>
+									<Label className="text-sm font-medium mb-3 block flex items-center gap-2">
+										<Clock className="h-4 w-4" />
+										{t("settings.organization.timezone")}
+									</Label>
+									<div className="flex gap-2 items-center">
+										<select
+											value={orgTimezone || ""}
+											onChange={(e) =>
+												handleOrgTimezoneChange(e.target.value || null)
+											}
+											disabled={!isOrgOwner || orgSaving}
+											className="flex h-9 w-full max-w-xs rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+										>
+											<option value="">— No default —</option>
+											{TIMEZONES.map(({ value, label }) => (
+												<option key={value} value={value}>
+													{label}
+												</option>
+											))}
+										</select>
+									</div>
+								</div>
+
+								{/* Organization Date Format */}
+								<div>
+									<Label className="text-sm font-medium mb-3 block flex items-center gap-2">
+										<Calendar className="h-4 w-4" />
+										{t("settings.organization.dateFormat")}
+									</Label>
+									<div className="flex flex-wrap gap-2">
+										{DATE_FORMATS.map(({ value, label, example }) => (
+											<Button
+												key={value}
+												variant={
+													orgDateFormat === value ? "default" : "outline"
+												}
+												size="sm"
+												onClick={() => handleOrgDateFormatChange(value)}
+												disabled={!isOrgOwner || orgSaving}
+												className="flex flex-col items-center py-3 px-4 h-auto"
+											>
+												<span className="font-mono text-xs">{label}</span>
+												<span className="text-xs text-muted-foreground mt-1">
+													{example}
+												</span>
+											</Button>
+										))}
+										{orgDateFormat && (
+											<Button
+												variant="ghost"
+												size="sm"
+												onClick={() => handleOrgDateFormatChange(null)}
+												disabled={!isOrgOwner || orgSaving}
+												className="text-muted-foreground self-center"
+											>
+												Clear
+											</Button>
+										)}
+									</div>
+								</div>
+
+								{/* Organization Logo */}
+								<div>
+									<Label
+										htmlFor="org-avatar-url"
+										className="text-sm font-medium mb-2 block"
+									>
+										{t("settings.organization.avatarUrl")}
+									</Label>
+									<div className="flex gap-2 max-w-md">
+										<Input
+											id="org-avatar-url"
+											type="url"
+											placeholder="https://example.com/logo.png"
+											value={orgAvatarUrl}
+											onChange={(e) => setOrgAvatarUrl(e.target.value)}
+											disabled={!isOrgOwner || orgSaving}
+										/>
+										<Button
+											onClick={handleOrgAvatarSave}
+											disabled={!isOrgOwner || orgSaving}
+											size="sm"
+										>
+											{orgSaving ? (
+												<Loader2 className="h-4 w-4 animate-spin" />
+											) : (
+												t("settings.save")
+											)}
+										</Button>
+									</div>
+									{orgAvatarUrl && (
+										<div className="mt-3">
+											<img
+												src={orgAvatarUrl}
+												alt="Organization logo preview"
+												className="h-16 w-16 rounded object-cover border"
+												onError={(e) => {
+													(e.target as HTMLImageElement).style.display = "none";
+												}}
+											/>
+										</div>
+									)}
+								</div>
+							</>
+						)}
 					</CardContent>
 				</Card>
 			</div>

@@ -187,6 +187,25 @@ const translations = {
 		"settings.payments.title": "Payment Methods",
 		"settings.payments.description": "Manage your payment methods",
 		"settings.payments.comingSoon": "Payment methods management coming soon.",
+		// Organization settings
+		"settings.organization.title": "Organization Settings",
+		"settings.organization.description":
+			"Default settings for your organization (only owners can edit)",
+		"settings.organization.noOrg": "No active organization",
+		"settings.organization.noOrgDescription":
+			"Select an organization to manage its settings",
+		"settings.organization.viewOnly":
+			"You can view organization settings, but only owners can edit them.",
+		"settings.organization.ownerNote":
+			"As the owner, you can edit these settings. Changes will apply as defaults for all organization members.",
+		"settings.organization.theme": "Default Theme",
+		"settings.organization.language": "Default Language",
+		"settings.organization.timezone": "Default Timezone",
+		"settings.organization.dateFormat": "Default Date Format",
+		"settings.organization.avatarUrl": "Organization Logo URL",
+		"settings.organization.savedSuccess": "Organization settings saved",
+		"settings.organization.loadError": "Failed to load organization settings",
+		"settings.organization.saveError": "Failed to save organization settings",
 
 		// Audit page
 		"audit.title": "Audit Logs",
@@ -432,6 +451,28 @@ const translations = {
 		"settings.payments.description": "Administra tus métodos de pago",
 		"settings.payments.comingSoon":
 			"Administración de métodos de pago próximamente.",
+		// Organization settings
+		"settings.organization.title": "Configuración de Organización",
+		"settings.organization.description":
+			"Configuración predeterminada para tu organización (solo propietarios pueden editar)",
+		"settings.organization.noOrg": "Sin organización activa",
+		"settings.organization.noOrgDescription":
+			"Selecciona una organización para administrar su configuración",
+		"settings.organization.viewOnly":
+			"Puedes ver la configuración de la organización, pero solo los propietarios pueden editarla.",
+		"settings.organization.ownerNote":
+			"Como propietario, puedes editar esta configuración. Los cambios se aplicarán como valores predeterminados para todos los miembros de la organización.",
+		"settings.organization.theme": "Tema predeterminado",
+		"settings.organization.language": "Idioma predeterminado",
+		"settings.organization.timezone": "Zona horaria predeterminada",
+		"settings.organization.dateFormat": "Formato de fecha predeterminado",
+		"settings.organization.avatarUrl": "URL del logo de la organización",
+		"settings.organization.savedSuccess":
+			"Configuración de organización guardada",
+		"settings.organization.loadError":
+			"Error al cargar la configuración de la organización",
+		"settings.organization.saveError":
+			"Error al guardar la configuración de la organización",
 
 		// Audit page
 		"audit.title": "Registros de Auditoría",

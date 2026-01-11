@@ -163,6 +163,28 @@ const mockTranslations: Record<string, string> = {
 	"settings.payments.title": "Métodos de pago",
 	"settings.payments.description": "Administra tus métodos de pago",
 	"settings.payments.comingSoon": "Próximamente",
+	// Organization settings
+	"settings.organization.title": "Configuración de Organización",
+	"settings.organization.description":
+		"Configuración predeterminada para tu organización (solo propietarios pueden editar)",
+	"settings.organization.noOrg": "Sin organización activa",
+	"settings.organization.noOrgDescription":
+		"Selecciona una organización para administrar su configuración",
+	"settings.organization.viewOnly":
+		"Puedes ver la configuración de la organización, pero solo los propietarios pueden editarla.",
+	"settings.organization.ownerNote":
+		"Como propietario, puedes editar esta configuración. Los cambios se aplicarán como valores predeterminados para todos los miembros de la organización.",
+	"settings.organization.theme": "Tema predeterminado",
+	"settings.organization.language": "Idioma predeterminado",
+	"settings.organization.timezone": "Zona horaria predeterminada",
+	"settings.organization.dateFormat": "Formato de fecha predeterminado",
+	"settings.organization.avatarUrl": "URL del logo de la organización",
+	"settings.organization.savedSuccess":
+		"Configuración de organización guardada",
+	"settings.organization.loadError":
+		"Error al cargar la configuración de la organización",
+	"settings.organization.saveError":
+		"Error al guardar la configuración de la organización",
 
 	// Audit
 	"audit.title": "Registro de auditoría",

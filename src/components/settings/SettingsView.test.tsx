@@ -4,12 +4,23 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SettingsView } from "./SettingsView";
 import * as settingsClient from "@/lib/settings/settingsClient";
+import { authClient } from "@/lib/auth/authClient";
 
 // Mock the settings client
 vi.mock("@/lib/settings/settingsClient", () => ({
 	getUserSettings: vi.fn(),
 	updateUserSettings: vi.fn(),
 	getResolvedSettings: vi.fn(),
+	getOrganizationSettings: vi.fn(),
+	updateOrganizationSettings: vi.fn(),
+	getOrganizationMembership: vi.fn(),
+}));
+
+// Mock the auth client
+vi.mock("@/lib/auth/authClient", () => ({
+	authClient: {
+		getSession: vi.fn(),
+	},
 }));
 
 // Mock next-themes
@@ -39,9 +50,40 @@ const mockSettings = {
 	updatedAt: new Date().toISOString(),
 };
 
+const mockOrgSettings = {
+	id: "org-settings-1",
+	organizationId: "org-1",
+	theme: "dark" as const,
+	timezone: "UTC",
+	language: "en" as const,
+	dateFormat: "MM/DD/YYYY" as const,
+	avatarUrl: "https://example.com/org-logo.png",
+	metadata: null,
+	createdAt: new Date().toISOString(),
+	updatedAt: new Date().toISOString(),
+};
+
+const mockOwnerMembership = {
+	role: "owner" as const,
+	organizationId: "org-1",
+};
+
+const mockMemberMembership = {
+	role: "member" as const,
+	organizationId: "org-1",
+};
+
 describe("SettingsView", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		// Default: no active organization
+		vi.mocked(authClient.getSession).mockResolvedValue({
+			data: {
+				session: { activeOrganizationId: null },
+				user: { id: "user-1" },
+			},
+			error: null,
+		});
 	});
 
 	afterEach(async () => {
@@ -286,5 +328,264 @@ describe("SettingsView", () => {
 		// Should use defaults
 		const select = screen.getByRole("combobox");
 		expect(select).toBeInTheDocument();
+	});
+
+	describe("Organization Settings", () => {
+		it("shows 'no organization' message when no active org", async () => {
+			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+
+			renderWithTheme(<SettingsView />);
+
+			await waitFor(() => {
+				expect(
+					screen.getByText("Configuración de Organización"),
+				).toBeInTheDocument();
+			});
+
+			expect(screen.getByText("Sin organización activa")).toBeInTheDocument();
+		});
+
+		it("loads organization settings when active org exists", async () => {
+			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(authClient.getSession).mockResolvedValue({
+				data: {
+					session: { activeOrganizationId: "org-1" },
+					user: { id: "user-1" },
+				},
+				error: null,
+			});
+			vi.mocked(settingsClient.getOrganizationSettings).mockResolvedValue(
+				mockOrgSettings,
+			);
+			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+				mockOwnerMembership,
+			);
+
+			renderWithTheme(<SettingsView />);
+
+			await waitFor(() => {
+				expect(settingsClient.getOrganizationSettings).toHaveBeenCalledWith(
+					"org-1",
+				);
+			});
+
+			await waitFor(() => {
+				expect(settingsClient.getOrganizationMembership).toHaveBeenCalledWith(
+					"org-1",
+				);
+			});
+		});
+
+		it("shows owner note when user is organization owner", async () => {
+			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(authClient.getSession).mockResolvedValue({
+				data: {
+					session: { activeOrganizationId: "org-1" },
+					user: { id: "user-1" },
+				},
+				error: null,
+			});
+			vi.mocked(settingsClient.getOrganizationSettings).mockResolvedValue(
+				mockOrgSettings,
+			);
+			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+				mockOwnerMembership,
+			);
+
+			renderWithTheme(<SettingsView />);
+
+			await waitFor(() => {
+				expect(
+					screen.getByText(
+						/Como propietario, puedes editar esta configuración/,
+					),
+				).toBeInTheDocument();
+			});
+		});
+
+		it("shows view-only notice when user is not owner", async () => {
+			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(authClient.getSession).mockResolvedValue({
+				data: {
+					session: { activeOrganizationId: "org-1" },
+					user: { id: "user-1" },
+				},
+				error: null,
+			});
+			vi.mocked(settingsClient.getOrganizationSettings).mockResolvedValue(
+				mockOrgSettings,
+			);
+			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+				mockMemberMembership,
+			);
+
+			renderWithTheme(<SettingsView />);
+
+			await waitFor(() => {
+				expect(
+					screen.getByText(
+						/Puedes ver la configuración de la organización, pero solo los propietarios pueden editarla/,
+					),
+				).toBeInTheDocument();
+			});
+		});
+
+		it("disables org settings controls for non-owners", async () => {
+			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(authClient.getSession).mockResolvedValue({
+				data: {
+					session: { activeOrganizationId: "org-1" },
+					user: { id: "user-1" },
+				},
+				error: null,
+			});
+			vi.mocked(settingsClient.getOrganizationSettings).mockResolvedValue(
+				mockOrgSettings,
+			);
+			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+				mockMemberMembership,
+			);
+
+			renderWithTheme(<SettingsView />);
+
+			// Wait for the view-only notice to appear (indicates org settings loaded)
+			await waitFor(() => {
+				expect(
+					screen.getByText(/solo los propietarios pueden editarla/),
+				).toBeInTheDocument();
+			});
+
+			// Get the org logo input which should be disabled
+			const orgLogoInput = screen.getByPlaceholderText(
+				"https://example.com/logo.png",
+			);
+			expect(orgLogoInput).toBeDisabled();
+		});
+
+		it("allows owner to update organization theme", async () => {
+			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(authClient.getSession).mockResolvedValue({
+				data: {
+					session: { activeOrganizationId: "org-1" },
+					user: { id: "user-1" },
+				},
+				error: null,
+			});
+			vi.mocked(settingsClient.getOrganizationSettings).mockResolvedValue(
+				mockOrgSettings,
+			);
+			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+				mockOwnerMembership,
+			);
+			vi.mocked(settingsClient.updateOrganizationSettings).mockResolvedValue(
+				mockOrgSettings,
+			);
+
+			const user = userEvent.setup();
+			renderWithTheme(<SettingsView />);
+
+			// Wait for owner note to appear
+			await waitFor(() => {
+				expect(screen.getByText(/Como propietario/)).toBeInTheDocument();
+			});
+
+			// Find the organization settings section
+			// There are multiple "Claro" buttons - one for user settings and one for org settings
+			// The org settings section comes after the user settings
+			const allLightButtons = screen.getAllByText("Claro");
+			// The second "Claro" button should be in the org section
+			const orgLightButton = allLightButtons[allLightButtons.length - 1];
+
+			await user.click(orgLightButton);
+
+			await waitFor(() => {
+				expect(settingsClient.updateOrganizationSettings).toHaveBeenCalledWith(
+					"org-1",
+					{ theme: "light" },
+				);
+			});
+		});
+
+		it("shows success message after saving org settings", async () => {
+			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(authClient.getSession).mockResolvedValue({
+				data: {
+					session: { activeOrganizationId: "org-1" },
+					user: { id: "user-1" },
+				},
+				error: null,
+			});
+			vi.mocked(settingsClient.getOrganizationSettings).mockResolvedValue(
+				mockOrgSettings,
+			);
+			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+				mockOwnerMembership,
+			);
+			vi.mocked(settingsClient.updateOrganizationSettings).mockResolvedValue(
+				mockOrgSettings,
+			);
+
+			const user = userEvent.setup();
+			renderWithTheme(<SettingsView />);
+
+			await waitFor(() => {
+				expect(
+					screen.getByText(
+						/Como propietario, puedes editar esta configuración/,
+					),
+				).toBeInTheDocument();
+			});
+
+			// Click on an org settings button
+			const allLightButtons = screen.getAllByText("Claro");
+			const orgLightButton = allLightButtons[allLightButtons.length - 1];
+			await user.click(orgLightButton);
+
+			await waitFor(() => {
+				expect(
+					screen.getByText("Configuración de organización guardada"),
+				).toBeInTheDocument();
+			});
+		});
+
+		it("shows error message when org settings fail to save", async () => {
+			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(authClient.getSession).mockResolvedValue({
+				data: {
+					session: { activeOrganizationId: "org-1" },
+					user: { id: "user-1" },
+				},
+				error: null,
+			});
+			vi.mocked(settingsClient.getOrganizationSettings).mockResolvedValue(
+				mockOrgSettings,
+			);
+			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+				mockOwnerMembership,
+			);
+			vi.mocked(settingsClient.updateOrganizationSettings).mockRejectedValue(
+				new Error("Failed to save"),
+			);
+
+			const user = userEvent.setup();
+			renderWithTheme(<SettingsView />);
+
+			await waitFor(() => {
+				expect(
+					screen.getByText(
+						/Como propietario, puedes editar esta configuración/,
+					),
+				).toBeInTheDocument();
+			});
+
+			// Click on an org settings button
+			const allLightButtons = screen.getAllByText("Claro");
+			const orgLightButton = allLightButtons[allLightButtons.length - 1];
+			await user.click(orgLightButton);
+
+			await waitFor(() => {
+				expect(screen.getByText("Failed to save")).toBeInTheDocument();
+			});
+		});
 	});
 });

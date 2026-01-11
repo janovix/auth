@@ -8,6 +8,9 @@ import type {
 	UserSettings,
 	ResolvedSettings,
 	UpdateUserSettingsInput,
+	OrganizationSettings,
+	UpdateOrganizationSettingsInput,
+	OrganizationMembership,
 	SettingsApiResponse,
 } from "./types";
 
@@ -84,5 +87,82 @@ export async function getResolvedSettings(): Promise<ResolvedSettings> {
 
 	const result =
 		(await response.json()) as SettingsApiResponse<ResolvedSettings>;
+	return result.data;
+}
+
+/**
+ * Get organization settings
+ */
+export async function getOrganizationSettings(
+	organizationId: string,
+): Promise<OrganizationSettings | null> {
+	const response = await fetch(
+		`${getBaseUrl()}/api/settings/organization/${organizationId}`,
+		{
+			credentials: "include",
+		},
+	);
+
+	if (!response.ok) {
+		throw new Error("Failed to fetch organization settings");
+	}
+
+	const result =
+		(await response.json()) as SettingsApiResponse<OrganizationSettings | null>;
+	return result.data;
+}
+
+/**
+ * Update organization settings (owner only)
+ */
+export async function updateOrganizationSettings(
+	organizationId: string,
+	input: UpdateOrganizationSettingsInput,
+): Promise<OrganizationSettings> {
+	const response = await fetch(
+		`${getBaseUrl()}/api/settings/organization/${organizationId}`,
+		{
+			method: "PATCH",
+			credentials: "include",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(input),
+		},
+	);
+
+	if (!response.ok) {
+		const errorResponse = (await response
+			.json()
+			.catch(() => ({ error: "Unknown error" }))) as { error?: string };
+		throw new Error(
+			errorResponse.error || "Failed to update organization settings",
+		);
+	}
+
+	const result =
+		(await response.json()) as SettingsApiResponse<OrganizationSettings>;
+	return result.data;
+}
+
+/**
+ * Get user's membership/role in an organization
+ */
+export async function getOrganizationMembership(
+	organizationId: string,
+): Promise<OrganizationMembership | null> {
+	const response = await fetch(
+		`${getBaseUrl()}/api/settings/organization/${organizationId}/membership`,
+		{
+			credentials: "include",
+		},
+	);
+
+	if (!response.ok) {
+		throw new Error("Failed to fetch organization membership");
+	}
+
+	const result =
+		(await response.json()) as SettingsApiResponse<OrganizationMembership | null>;
 	return result.data;
 }

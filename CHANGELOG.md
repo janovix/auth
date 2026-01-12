@@ -1,3 +1,15 @@
+# [1.5.0-rc.1](https://github.com/janovix/auth/compare/v1.4.0...v1.5.0-rc.1) (2026-01-12)
+
+
+### Features
+
+* add audit and settings components with associated tests ([3ceaae6](https://github.com/janovix/auth/commit/3ceaae62226d83dd90e4c86d096462a6475dd584))
+* add settings management components and integrate Radix UI for improved UI elements ([e800447](https://github.com/janovix/auth/commit/e800447b7e4ddf0d1730e9aee0b1e6299e4ca9b0))
+* add storybook components for UI elements ([75320a1](https://github.com/janovix/auth/commit/75320a1f6ef2be163eb539551ee5fde740071b85))
+* enhance settings management with new middleware for route protection and organization selection ([2648d23](https://github.com/janovix/auth/commit/2648d2366c91aa81ae0de9ff1f4f81b99e25094d))
+* implement billing settings management with new components for subscription, invoices, and license activation ([5d31229](https://github.com/janovix/auth/commit/5d3122950061cf8fa5e611f7a02f195ae4704914))
+* implement organization settings management in SettingsView component ([0c01349](https://github.com/janovix/auth/commit/0c01349d52f071be8f6f5b31fedf9fdd257ca8a4))
+
 # [1.4.0](https://github.com/janovix/auth/compare/v1.3.0...v1.4.0) (2026-01-09)
 
 

@@ -398,10 +398,7 @@ export default function SettingsLayout({
 										</Link>
 									</DropdownMenuItem>
 									<DropdownMenuSeparator />
-									<DropdownMenuItem
-										className="text-destructive"
-										onClick={handleSignOut}
-									>
+									<DropdownMenuItem onClick={handleSignOut}>
 										<LogOut className="mr-2 h-4 w-4" />
 										{t("settings.nav.signOut")}
 									</DropdownMenuItem>

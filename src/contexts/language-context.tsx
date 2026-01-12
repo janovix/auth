@@ -1,7 +1,19 @@
 "use client";
 
 import type React from "react";
-import { createContext, useContext, useState, useEffect } from "react";
+import {
+	createContext,
+	useContext,
+	useState,
+	useEffect,
+	useCallback,
+} from "react";
+import { getCookie, setCookie, COOKIE_NAMES } from "@/lib/cookies";
+import {
+	getResolvedSettings,
+	updateUserSettings,
+	type LanguageCode,
+} from "@/lib/settings";
 
 type Language = "en" | "es";
 
@@ -471,6 +483,28 @@ const translations = {
 		"settings.billing.reactivateSuccess": "Subscription reactivated",
 		"settings.billing.licenseSuccess": "License activated successfully",
 		"settings.billing.error": "An error occurred. Please try again.",
+		"settings.billing.freeTier": "Free",
+		"settings.billing.freeTierDesc":
+			"You're on the free plan with limited features",
+		"settings.billing.freeTierUpgradePrompt":
+			"Upgrade to unlock more features and higher limits",
+
+		// Upgrade prompts
+		"billing.upgrade.limitReached": "Limit Reached",
+		"billing.upgrade.limitApproaching": "Approaching Limit",
+		"billing.upgrade.unlockMore": "Unlock More",
+		"billing.upgrade.limitReachedDesc":
+			"You've used {current} of {limit} {type}. Upgrade to continue.",
+		"billing.upgrade.limitApproachingDesc":
+			"You've used {current} of {limit} {type}. Consider upgrading.",
+		"billing.upgrade.generalDesc":
+			"Upgrade your plan for more features and higher limits.",
+		"billing.upgrade.button": "Upgrade Plan",
+		"billing.upgrade.notices": "notices",
+		"billing.upgrade.users": "users",
+		"billing.upgrade.alerts": "alerts",
+		"billing.upgrade.transactions": "transactions",
+		"billing.upgrade.general": "resources",
 	},
 	es: {
 		// Login page
@@ -949,6 +983,28 @@ const translations = {
 		"settings.billing.reactivateSuccess": "Suscripción reactivada",
 		"settings.billing.licenseSuccess": "Licencia activada exitosamente",
 		"settings.billing.error": "Ocurrió un error. Por favor intenta de nuevo.",
+		"settings.billing.freeTier": "Gratuito",
+		"settings.billing.freeTierDesc":
+			"Estás en el plan gratuito con funciones limitadas",
+		"settings.billing.freeTierUpgradePrompt":
+			"Mejora tu plan para desbloquear más funciones y límites más altos",
+
+		// Upgrade prompts
+		"billing.upgrade.limitReached": "Límite Alcanzado",
+		"billing.upgrade.limitApproaching": "Cerca del Límite",
+		"billing.upgrade.unlockMore": "Desbloquea Más",
+		"billing.upgrade.limitReachedDesc":
+			"Has usado {current} de {limit} {type}. Mejora tu plan para continuar.",
+		"billing.upgrade.limitApproachingDesc":
+			"Has usado {current} de {limit} {type}. Considera mejorar tu plan.",
+		"billing.upgrade.generalDesc":
+			"Mejora tu plan para más funciones y límites más altos.",
+		"billing.upgrade.button": "Mejorar Plan",
+		"billing.upgrade.notices": "avisos",
+		"billing.upgrade.users": "usuarios",
+		"billing.upgrade.alerts": "alertas",
+		"billing.upgrade.transactions": "transacciones",
+		"billing.upgrade.general": "recursos",
 	},
 };
 
@@ -959,27 +1015,66 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
 	const [language, setLanguageState] = useState<Language>("es");
 	const [mounted, setMounted] = useState(false);
+	const [settingsSynced, setSettingsSynced] = useState(false);
 
+	// Initialize from cookies (instant), then sync with API
 	useEffect(() => {
 		setMounted(true);
-		const stored = localStorage.getItem("language") as Language;
+
+		// Step 1: Read from cookie first for instant render (no flash)
+		const stored = getCookie(COOKIE_NAMES.LANGUAGE) as Language | undefined;
 		if (stored && (stored === "en" || stored === "es")) {
 			setLanguageState(stored);
 		} else {
 			const browserLang = navigator.language.toLowerCase();
-			setLanguageState(browserLang.startsWith("es") ? "es" : "en");
+			const detected = browserLang.startsWith("es") ? "es" : "en";
+			setLanguageState(detected);
+			setCookie(COOKIE_NAMES.LANGUAGE, detected);
 		}
+
+		// Step 2: Fetch from API to verify/sync
+		getResolvedSettings()
+			.then((settings) => {
+				const apiLanguage = settings.language as Language;
+				if (apiLanguage && (apiLanguage === "en" || apiLanguage === "es")) {
+					setLanguageState(apiLanguage);
+					setCookie(COOKIE_NAMES.LANGUAGE, apiLanguage);
+				}
+				setSettingsSynced(true);
+			})
+			.catch((error) => {
+				// API unavailable, keep using cookie/browser value
+				console.debug("Settings API unavailable:", error);
+				setSettingsSynced(true);
+			});
 	}, []);
 
-	const handleSetLanguage = (lang: Language) => {
-		setLanguageState(lang);
-		localStorage.setItem("language", lang);
-	};
+	// Update both cookie and API when language changes
+	const handleSetLanguage = useCallback(
+		(lang: Language) => {
+			setLanguageState(lang);
+			// Update cookie immediately for cross-app sync
+			setCookie(COOKIE_NAMES.LANGUAGE, lang);
 
-	const t = (key: string): string => {
-		const langTranslations = translations[language];
-		return langTranslations[key as keyof typeof langTranslations] || key;
-	};
+			// Update API in background (only if we've already synced with API)
+			if (settingsSynced) {
+				updateUserSettings({ language: lang as LanguageCode }).catch(
+					(error) => {
+						console.debug("Failed to update language in API:", error);
+					},
+				);
+			}
+		},
+		[settingsSynced],
+	);
+
+	const t = useCallback(
+		(key: string): string => {
+			const langTranslations = translations[language];
+			return langTranslations[key as keyof typeof langTranslations] || key;
+		},
+		[language],
+	);
 
 	// Prevent hydration mismatch by not rendering until mounted
 	if (!mounted) {

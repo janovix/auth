@@ -1,7 +1,35 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Logo } from "./Logo";
+
+// Mock @/lib/settings (used by ThemeProvider)
+vi.mock("@/lib/settings", () => ({
+	getResolvedSettings: vi.fn().mockResolvedValue({
+		theme: "light",
+		language: "es",
+		timezone: "UTC",
+		dateFormat: "DD/MM/YYYY",
+		avatarUrl: null,
+		sources: {
+			theme: "default",
+			language: "default",
+			timezone: "default",
+			dateFormat: "default",
+		},
+	}),
+	updateUserSettings: vi.fn().mockResolvedValue({}),
+}));
+
+// Mock the cookies module (used by ThemeProvider)
+vi.mock("@/lib/cookies", () => ({
+	getCookie: vi.fn(),
+	setCookie: vi.fn(),
+	COOKIE_NAMES: {
+		THEME: "janovix-theme",
+		LANGUAGE: "janovix-lang",
+	},
+}));
 
 const renderWithTheme = (ui: React.ReactElement) => {
 	return render(<ThemeProvider>{ui}</ThemeProvider>);

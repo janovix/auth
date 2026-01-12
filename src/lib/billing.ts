@@ -12,7 +12,7 @@ export interface UsageCheckResult {
 	included: number;
 	remaining: number;
 	overage: number;
-	planTier: "none" | "business" | "pro" | "enterprise";
+	planTier: "none" | "free" | "business" | "pro" | "enterprise";
 }
 
 export interface SubscriptionStatus {
@@ -25,7 +25,7 @@ export interface SubscriptionStatus {
 		| "past_due"
 		| "canceled"
 		| "unpaid";
-	planTier: "none" | "business" | "pro" | "enterprise";
+	planTier: "none" | "free" | "business" | "pro" | "enterprise";
 	planName: string | null;
 	currentPeriodStart: string | null;
 	currentPeriodEnd: string | null;

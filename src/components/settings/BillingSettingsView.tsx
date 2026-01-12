@@ -247,13 +247,14 @@ export function BillingSettingsView() {
 				loading={actionLoading}
 			/>
 
-			{/* Usage */}
-			{subscription?.hasSubscription && subscription.usage && (
-				<UsageMeter
-					usage={subscription.usage}
-					periodEnd={subscription.currentPeriodEnd}
-				/>
-			)}
+			{/* Usage - show for both active subscriptions and free tier */}
+			{(subscription?.hasSubscription || subscription?.planTier === "free") &&
+				subscription?.usage && (
+					<UsageMeter
+						usage={subscription.usage}
+						periodEnd={subscription.currentPeriodEnd}
+					/>
+				)}
 
 			{/* Enterprise License */}
 			{(!subscription?.hasSubscription ||

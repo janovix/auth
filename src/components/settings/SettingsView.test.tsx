@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SettingsView } from "./SettingsView";
 import * as settingsClient from "@/lib/settings/settingsClient";
+import * as settingsModule from "@/lib/settings";
 import { authClient } from "@/lib/auth/authClient";
 
 // Mock the settings client
@@ -14,6 +15,39 @@ vi.mock("@/lib/settings/settingsClient", () => ({
 	getOrganizationSettings: vi.fn(),
 	updateOrganizationSettings: vi.fn(),
 	getOrganizationMembership: vi.fn(),
+}));
+
+// Mock @/lib/settings (the index re-exports - used by ThemeProvider)
+vi.mock("@/lib/settings", () => ({
+	getUserSettings: vi.fn(),
+	updateUserSettings: vi.fn().mockResolvedValue({}),
+	getResolvedSettings: vi.fn().mockResolvedValue({
+		theme: "light",
+		language: "es",
+		timezone: "UTC",
+		dateFormat: "DD/MM/YYYY",
+		avatarUrl: null,
+		paymentMethods: [],
+		sources: {
+			theme: "default",
+			language: "default",
+			timezone: "default",
+			dateFormat: "default",
+		},
+	}),
+	getOrganizationSettings: vi.fn(),
+	updateOrganizationSettings: vi.fn(),
+	getOrganizationMembership: vi.fn(),
+}));
+
+// Mock the cookies module (used by ThemeProvider)
+vi.mock("@/lib/cookies", () => ({
+	getCookie: vi.fn(),
+	setCookie: vi.fn(),
+	COOKIE_NAMES: {
+		THEME: "janovix-theme",
+		LANGUAGE: "janovix-lang",
+	},
 }));
 
 // Mock the auth client
@@ -132,7 +166,7 @@ describe("SettingsView", () => {
 	});
 
 	it("shows loading spinner while fetching settings", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockImplementation(
+		vi.mocked(settingsModule.getUserSettings).mockImplementation(
 			() => new Promise(() => {}), // Never resolves
 		);
 
@@ -143,7 +177,7 @@ describe("SettingsView", () => {
 	});
 
 	it("renders settings page with all sections when loaded", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 
 		renderWithTheme(<SettingsView />);
 
@@ -159,7 +193,7 @@ describe("SettingsView", () => {
 	});
 
 	it("renders theme buttons (light, dark, system)", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 
 		renderWithTheme(<SettingsView />);
 
@@ -172,7 +206,7 @@ describe("SettingsView", () => {
 	});
 
 	it("renders language buttons (English, Español)", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 
 		renderWithTheme(<SettingsView />);
 
@@ -184,7 +218,7 @@ describe("SettingsView", () => {
 	});
 
 	it("renders timezone selector with options", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 
 		renderWithTheme(<SettingsView />);
 
@@ -197,7 +231,7 @@ describe("SettingsView", () => {
 	});
 
 	it("renders date format buttons", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 
 		renderWithTheme(<SettingsView />);
 
@@ -211,8 +245,8 @@ describe("SettingsView", () => {
 	});
 
 	it("calls updateUserSettings when theme button is clicked", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
-		vi.mocked(settingsClient.updateUserSettings).mockResolvedValue(
+		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
+		vi.mocked(settingsModule.updateUserSettings).mockResolvedValue(
 			mockSettings,
 		);
 
@@ -226,15 +260,15 @@ describe("SettingsView", () => {
 		await user.click(screen.getByText("Oscuro"));
 
 		await waitFor(() => {
-			expect(settingsClient.updateUserSettings).toHaveBeenCalledWith({
+			expect(settingsModule.updateUserSettings).toHaveBeenCalledWith({
 				theme: "dark",
 			});
 		});
 	});
 
 	it("calls updateUserSettings when language button is clicked", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
-		vi.mocked(settingsClient.updateUserSettings).mockResolvedValue(
+		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
+		vi.mocked(settingsModule.updateUserSettings).mockResolvedValue(
 			mockSettings,
 		);
 
@@ -248,15 +282,15 @@ describe("SettingsView", () => {
 		await user.click(screen.getByText("English"));
 
 		await waitFor(() => {
-			expect(settingsClient.updateUserSettings).toHaveBeenCalledWith({
+			expect(settingsModule.updateUserSettings).toHaveBeenCalledWith({
 				language: "en",
 			});
 		});
 	});
 
 	it("calls updateUserSettings when timezone is changed", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
-		vi.mocked(settingsClient.updateUserSettings).mockResolvedValue(
+		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
+		vi.mocked(settingsModule.updateUserSettings).mockResolvedValue(
 			mockSettings,
 		);
 
@@ -279,15 +313,15 @@ describe("SettingsView", () => {
 		await user.selectOptions(combobox, "America/New_York");
 
 		await waitFor(() => {
-			expect(settingsClient.updateUserSettings).toHaveBeenCalledWith({
+			expect(settingsModule.updateUserSettings).toHaveBeenCalledWith({
 				timezone: "America/New_York",
 			});
 		});
 	});
 
 	it("calls updateUserSettings when date format is changed", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
-		vi.mocked(settingsClient.updateUserSettings).mockResolvedValue(
+		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
+		vi.mocked(settingsModule.updateUserSettings).mockResolvedValue(
 			mockSettings,
 		);
 
@@ -301,27 +335,30 @@ describe("SettingsView", () => {
 		await user.click(screen.getByText("YYYY-MM-DD"));
 
 		await waitFor(() => {
-			expect(settingsClient.updateUserSettings).toHaveBeenCalledWith({
+			expect(settingsModule.updateUserSettings).toHaveBeenCalledWith({
 				dateFormat: "YYYY-MM-DD",
 			});
 		});
 	});
 
 	it("shows error message when settings fail to load", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockRejectedValue(
+		vi.mocked(settingsModule.getUserSettings).mockRejectedValue(
 			new Error("Network error"),
 		);
 
 		renderWithTheme(<SettingsView />);
 
-		await waitFor(() => {
-			expect(screen.getByText("Network error")).toBeInTheDocument();
-		});
+		await waitFor(
+			() => {
+				expect(screen.getByText("Network error")).toBeInTheDocument();
+			},
+			{ timeout: 3000 },
+		);
 	});
 
 	it("shows success message after saving", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
-		vi.mocked(settingsClient.updateUserSettings).mockResolvedValue(
+		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
+		vi.mocked(settingsModule.updateUserSettings).mockResolvedValue(
 			mockSettings,
 		);
 
@@ -340,7 +377,7 @@ describe("SettingsView", () => {
 	});
 
 	it("renders avatar input and save button", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 
 		renderWithTheme(<SettingsView />);
 
@@ -349,12 +386,14 @@ describe("SettingsView", () => {
 		});
 
 		const input = screen.getByLabelText("URL del avatar");
-		expect(input).toHaveValue("https://example.com/avatar.jpg");
+		await waitFor(() => {
+			expect(input).toHaveValue("https://example.com/avatar.jpg");
+		});
 		expect(screen.getByText("Guardar")).toBeInTheDocument();
 	});
 
 	it("shows payments coming soon message", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 
 		renderWithTheme(<SettingsView />);
 
@@ -364,7 +403,7 @@ describe("SettingsView", () => {
 	});
 
 	it("handles null settings gracefully", async () => {
-		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(null);
+		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(null);
 
 		renderWithTheme(<SettingsView />);
 
@@ -379,7 +418,7 @@ describe("SettingsView", () => {
 
 	describe("Organization Settings", () => {
 		it("shows 'no organization' message when no active org", async () => {
-			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 
 			renderWithTheme(<SettingsView />);
 
@@ -393,7 +432,7 @@ describe("SettingsView", () => {
 		});
 
 		it("loads organization settings when active org exists", async () => {
-			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 			vi.mocked(authClient.getSession).mockResolvedValue({
 				data: {
 					session: { activeOrganizationId: "org-1" },
@@ -401,30 +440,30 @@ describe("SettingsView", () => {
 				},
 				error: null,
 			});
-			vi.mocked(settingsClient.getOrganizationSettings).mockResolvedValue(
+			vi.mocked(settingsModule.getOrganizationSettings).mockResolvedValue(
 				mockOrgSettings,
 			);
-			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+			vi.mocked(settingsModule.getOrganizationMembership).mockResolvedValue(
 				mockOwnerMembership,
 			);
 
 			renderWithTheme(<SettingsView />);
 
 			await waitFor(() => {
-				expect(settingsClient.getOrganizationSettings).toHaveBeenCalledWith(
+				expect(settingsModule.getOrganizationSettings).toHaveBeenCalledWith(
 					"org-1",
 				);
 			});
 
 			await waitFor(() => {
-				expect(settingsClient.getOrganizationMembership).toHaveBeenCalledWith(
+				expect(settingsModule.getOrganizationMembership).toHaveBeenCalledWith(
 					"org-1",
 				);
 			});
 		});
 
 		it("shows owner note when user is organization owner", async () => {
-			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 			vi.mocked(authClient.getSession).mockResolvedValue({
 				data: {
 					session: { activeOrganizationId: "org-1" },
@@ -432,10 +471,10 @@ describe("SettingsView", () => {
 				},
 				error: null,
 			});
-			vi.mocked(settingsClient.getOrganizationSettings).mockResolvedValue(
+			vi.mocked(settingsModule.getOrganizationSettings).mockResolvedValue(
 				mockOrgSettings,
 			);
-			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+			vi.mocked(settingsModule.getOrganizationMembership).mockResolvedValue(
 				mockOwnerMembership,
 			);
 
@@ -454,7 +493,7 @@ describe("SettingsView", () => {
 		// The component renders correctly in manual testing but the test environment
 		// has issues with the afterEach cleanup timing out
 		it.skip("shows view-only notice when user is not owner", async () => {
-			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 			vi.mocked(authClient.getSession).mockResolvedValue({
 				data: {
 					session: { activeOrganizationId: "org-1" },
@@ -462,10 +501,10 @@ describe("SettingsView", () => {
 				},
 				error: null,
 			});
-			vi.mocked(settingsClient.getOrganizationSettings).mockResolvedValue(
+			vi.mocked(settingsModule.getOrganizationSettings).mockResolvedValue(
 				mockOrgSettings,
 			);
-			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+			vi.mocked(settingsModule.getOrganizationMembership).mockResolvedValue(
 				mockMemberMembership,
 			);
 
@@ -481,7 +520,7 @@ describe("SettingsView", () => {
 		});
 
 		it.skip("disables org settings controls for non-owners", async () => {
-			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 			vi.mocked(authClient.getSession).mockResolvedValue({
 				data: {
 					session: { activeOrganizationId: "org-1" },
@@ -489,10 +528,10 @@ describe("SettingsView", () => {
 				},
 				error: null,
 			});
-			vi.mocked(settingsClient.getOrganizationSettings).mockResolvedValue(
+			vi.mocked(settingsModule.getOrganizationSettings).mockResolvedValue(
 				mockOrgSettings,
 			);
-			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+			vi.mocked(settingsModule.getOrganizationMembership).mockResolvedValue(
 				mockMemberMembership,
 			);
 
@@ -513,7 +552,7 @@ describe("SettingsView", () => {
 		});
 
 		it("allows owner to update organization theme", async () => {
-			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 			vi.mocked(authClient.getSession).mockResolvedValue({
 				data: {
 					session: { activeOrganizationId: "org-1" },
@@ -521,13 +560,13 @@ describe("SettingsView", () => {
 				},
 				error: null,
 			});
-			vi.mocked(settingsClient.getOrganizationSettings).mockResolvedValue(
+			vi.mocked(settingsModule.getOrganizationSettings).mockResolvedValue(
 				mockOrgSettings,
 			);
-			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+			vi.mocked(settingsModule.getOrganizationMembership).mockResolvedValue(
 				mockOwnerMembership,
 			);
-			vi.mocked(settingsClient.updateOrganizationSettings).mockResolvedValue(
+			vi.mocked(settingsModule.updateOrganizationSettings).mockResolvedValue(
 				mockOrgSettings,
 			);
 
@@ -549,7 +588,7 @@ describe("SettingsView", () => {
 			await user.click(orgLightButton);
 
 			await waitFor(() => {
-				expect(settingsClient.updateOrganizationSettings).toHaveBeenCalledWith(
+				expect(settingsModule.updateOrganizationSettings).toHaveBeenCalledWith(
 					"org-1",
 					{ theme: "light" },
 				);
@@ -557,7 +596,7 @@ describe("SettingsView", () => {
 		});
 
 		it("shows success message after saving org settings", async () => {
-			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 			vi.mocked(authClient.getSession).mockResolvedValue({
 				data: {
 					session: { activeOrganizationId: "org-1" },
@@ -565,13 +604,13 @@ describe("SettingsView", () => {
 				},
 				error: null,
 			});
-			vi.mocked(settingsClient.getOrganizationSettings).mockResolvedValue(
+			vi.mocked(settingsModule.getOrganizationSettings).mockResolvedValue(
 				mockOrgSettings,
 			);
-			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+			vi.mocked(settingsModule.getOrganizationMembership).mockResolvedValue(
 				mockOwnerMembership,
 			);
-			vi.mocked(settingsClient.updateOrganizationSettings).mockResolvedValue(
+			vi.mocked(settingsModule.updateOrganizationSettings).mockResolvedValue(
 				mockOrgSettings,
 			);
 
@@ -599,7 +638,7 @@ describe("SettingsView", () => {
 		});
 
 		it("shows error message when org settings fail to save", async () => {
-			vi.mocked(settingsClient.getUserSettings).mockResolvedValue(mockSettings);
+			vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 			vi.mocked(authClient.getSession).mockResolvedValue({
 				data: {
 					session: { activeOrganizationId: "org-1" },
@@ -607,13 +646,13 @@ describe("SettingsView", () => {
 				},
 				error: null,
 			});
-			vi.mocked(settingsClient.getOrganizationSettings).mockResolvedValue(
+			vi.mocked(settingsModule.getOrganizationSettings).mockResolvedValue(
 				mockOrgSettings,
 			);
-			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+			vi.mocked(settingsModule.getOrganizationMembership).mockResolvedValue(
 				mockOwnerMembership,
 			);
-			vi.mocked(settingsClient.updateOrganizationSettings).mockRejectedValue(
+			vi.mocked(settingsModule.updateOrganizationSettings).mockRejectedValue(
 				new Error("Failed to save"),
 			);
 

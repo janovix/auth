@@ -7,3 +7,4 @@ export { PlanComparisonGrid } from "./PlanComparisonGrid";
 export { InvoiceHistory } from "./InvoiceHistory";
 export { LicenseActivation } from "./LicenseActivation";
 export { CustomerPortalButton } from "./CustomerPortalButton";
+export { UpgradePrompt } from "./UpgradePrompt";

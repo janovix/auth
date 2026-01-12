@@ -33,7 +33,21 @@ export function CurrentPlanCard({
 }: CurrentPlanCardProps) {
 	const { t } = useLanguage();
 
+	// Check if on free tier (has stripe customer but no active subscription)
+	const isFreeTier =
+		subscription?.planTier === "free" ||
+		(subscription?.stripeCustomerId && !subscription?.hasSubscription);
+
 	const getStatusBadge = () => {
+		// Free tier - show "Free" badge
+		if (isFreeTier) {
+			return (
+				<Badge variant="secondary" className="bg-slate-100 text-slate-700">
+					{t("settings.billing.freeTier")}
+				</Badge>
+			);
+		}
+
 		if (!subscription?.hasSubscription) {
 			return (
 				<Badge variant="secondary" className="text-muted-foreground">
@@ -89,6 +103,17 @@ export function CurrentPlanCard({
 		return null;
 	};
 
+	// Get plan description text
+	const getPlanDescription = () => {
+		if (isFreeTier) {
+			return t("settings.billing.freeTierDesc");
+		}
+		if (subscription?.hasSubscription) {
+			return subscription.planName || subscription.planTier.toUpperCase();
+		}
+		return t("settings.billing.noPlanDesc");
+	};
+
 	return (
 		<Card>
 			<CardHeader>
@@ -99,11 +124,7 @@ export function CurrentPlanCard({
 					</div>
 					{getStatusBadge()}
 				</div>
-				<CardDescription>
-					{subscription?.hasSubscription
-						? subscription.planName || subscription.planTier.toUpperCase()
-						: t("settings.billing.noPlanDesc")}
-				</CardDescription>
+				<CardDescription>{getPlanDescription()}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				{subscription?.hasSubscription && subscription.currentPeriodEnd && (
@@ -115,15 +136,26 @@ export function CurrentPlanCard({
 					</p>
 				)}
 
+				{/* Free tier upgrade prompt */}
+				{isFreeTier && (
+					<p className="text-sm text-muted-foreground mb-4">
+						{t("settings.billing.freeTierUpgradePrompt")}
+					</p>
+				)}
+
 				{isOwner && (
 					<div className="flex flex-wrap gap-2">
-						{!subscription?.hasSubscription && (
+						{/* Free tier or no subscription - show subscribe/upgrade button */}
+						{(isFreeTier || !subscription?.hasSubscription) && (
 							<Button onClick={onUpgrade} disabled={loading}>
-								{t("settings.billing.subscribe")}
+								{isFreeTier
+									? t("settings.billing.upgrade")
+									: t("settings.billing.subscribe")}
 							</Button>
 						)}
 
 						{subscription?.hasSubscription &&
+							!isFreeTier &&
 							!subscription.cancelAtPeriodEnd && (
 								<>
 									{subscription.planTier !== "enterprise" && (
@@ -147,6 +179,7 @@ export function CurrentPlanCard({
 							)}
 
 						{subscription?.hasSubscription &&
+							!isFreeTier &&
 							subscription.cancelAtPeriodEnd && (
 								<Button onClick={onReactivate} disabled={loading}>
 									{t("settings.billing.reactivate")}

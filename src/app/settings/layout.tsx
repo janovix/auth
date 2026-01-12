@@ -31,6 +31,7 @@ import {
 	Settings,
 	LogOut,
 	Menu,
+	CreditCard,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useLanguage } from "@/contexts/language-context";
@@ -59,6 +60,11 @@ function SidebarContent({
 			name: t("settings.nav.organization"),
 			href: "/settings/organization",
 			icon: Building2,
+		},
+		{
+			name: t("settings.nav.billing"),
+			href: "/settings/billing",
+			icon: CreditCard,
 		},
 		{
 			name: t("settings.nav.compliance"),

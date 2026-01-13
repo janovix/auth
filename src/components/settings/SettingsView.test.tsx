@@ -57,6 +57,39 @@ vi.mock("@/lib/auth/authClient", () => ({
 	},
 }));
 
+// Mock the auth core config
+vi.mock("@/lib/auth/authCoreConfig", () => ({
+	getAuthCoreBaseUrl: () => "https://auth-svc.example.workers.dev",
+}));
+
+// Mock the AvatarEditor component
+vi.mock("@/components/ui/avatar-editor", () => ({
+	AvatarEditor: ({
+		onChange,
+		initials,
+	}: {
+		onChange?: (dataUrl: string | null) => void;
+		initials?: string;
+	}) => (
+		<div data-testid="mock-avatar-editor">
+			<span>{initials || "?"}</span>
+			<button
+				type="button"
+				onClick={() => onChange?.("data:image/png;base64,test")}
+			>
+				Select Image
+			</button>
+			<button type="button" onClick={() => onChange?.(null)}>
+				Clear
+			</button>
+		</div>
+	),
+}));
+
+// Mock global fetch for avatar uploads
+const mockFetch = vi.fn();
+vi.stubGlobal("fetch", mockFetch);
+
 // Mock next-themes
 vi.mock("next-themes", () => ({
 	useTheme: vi.fn(() => ({
@@ -73,29 +106,60 @@ vi.mock("@/contexts/language-context", () => ({
 			// Return Spanish translations for the tests that expect them
 			const translations: Record<string, string> = {
 				"settings.title": "Configuración",
+				"settings.description": "Administra tus preferencias de cuenta",
 				"settings.appearance.title": "Apariencia",
+				"settings.appearance.description":
+					"Personaliza la apariencia de la aplicación",
 				"settings.appearance.theme": "Tema",
 				"settings.appearance.light": "Claro",
 				"settings.appearance.dark": "Oscuro",
 				"settings.appearance.system": "Sistema",
 				"settings.localization.title": "Localización",
+				"settings.localization.description":
+					"Configura tu idioma y zona horaria",
 				"settings.localization.language": "Idioma",
 				"settings.localization.timezone": "Zona horaria",
 				"settings.localization.dateFormat": "Formato de fecha",
 				"settings.profile.title": "Perfil",
+				"settings.profile.description": "Administra tu información de perfil",
+				"settings.profile.avatar": "Foto de perfil",
 				"settings.profile.avatarUrl": "URL del avatar",
+				"settings.profile.changeAvatar": "Cambiar avatar",
+				"settings.profile.editAvatar": "Editar avatar",
+				"settings.profile.editAvatarDescription":
+					"Sube y recorta tu foto de perfil",
+				"settings.profile.uploading": "Subiendo...",
+				"settings.profile.uploadFailed": "Error al subir avatar",
+				"settings.profile.avatarSet": "Avatar subido",
+				"settings.profile.advancedOptions": "Opciones avanzadas (URL manual)",
+				"settings.profile.discardAvatar": "Descartar avatar",
 				"settings.payments.title": "Métodos de pago",
+				"settings.payments.description": "Administra tus métodos de pago",
 				"settings.payments.comingSoon": "Próximamente",
 				"settings.saved": "Configuración guardada",
 				"settings.save": "Guardar",
+				"settings.cancel": "Cancelar",
 				"settings.organization.title": "Configuración de Organización",
+				"settings.organization.description":
+					"Configuración predeterminada para tu organización",
 				"settings.organization.noOrg": "Sin organización activa",
+				"settings.organization.noOrgDescription":
+					"Selecciona una organización para administrar su configuración",
 				"settings.organization.savedSuccess":
 					"Configuración de organización guardada",
+				"settings.organization.loadError":
+					"Error al cargar la configuración de la organización",
+				"settings.organization.saveError":
+					"Error al guardar la configuración de la organización",
 				"settings.organization.ownerNote":
 					"Como propietario, puedes editar esta configuración. Los cambios se aplicarán como valores predeterminados para todos los miembros de la organización.",
 				"settings.organization.viewOnly":
 					"Puedes ver la configuración de la organización, pero solo los propietarios pueden editarla.",
+				"settings.organization.theme": "Tema predeterminado",
+				"settings.organization.language": "Idioma predeterminado",
+				"settings.organization.timezone": "Zona horaria predeterminada",
+				"settings.organization.dateFormat": "Formato de fecha predeterminado",
+				"settings.organization.avatarUrl": "URL del logo de la organización",
 			};
 			return translations[key] || key;
 		},
@@ -148,11 +212,21 @@ const mockMemberMembership = {
 describe("SettingsView", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockFetch.mockClear();
+		// Default mock for fetch - successful avatar upload
+		mockFetch.mockResolvedValue({
+			ok: true,
+			json: () =>
+				Promise.resolve({
+					success: true,
+					data: { url: "https://example.com/uploaded-avatar.jpg" },
+				}),
+		});
 		// Default: no active organization
 		vi.mocked(authClient.getSession).mockResolvedValue({
 			data: {
 				session: { activeOrganizationId: null },
-				user: { id: "user-1" },
+				user: { id: "user-1", name: "Test User" },
 			},
 			error: null,
 		});
@@ -376,19 +450,45 @@ describe("SettingsView", () => {
 		});
 	});
 
-	it("renders avatar input and save button", async () => {
+	it("renders avatar editor and change button", async () => {
 		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 
 		renderWithTheme(<SettingsView />);
 
 		await waitFor(() => {
+			expect(screen.getByText("Foto de perfil")).toBeInTheDocument();
+		});
+
+		// Check for change avatar button
+		expect(screen.getByText("Cambiar avatar")).toBeInTheDocument();
+
+		// Check for avatar uploaded indicator (since mockSettings has an avatarUrl)
+		expect(screen.getByText("Avatar subido")).toBeInTheDocument();
+	});
+
+	it("renders advanced options with URL input", async () => {
+		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
+
+		renderWithTheme(<SettingsView />);
+		const user = userEvent.setup();
+
+		await waitFor(() => {
+			expect(screen.getByText("Foto de perfil")).toBeInTheDocument();
+		});
+
+		// Expand advanced options
+		const advancedOptions = screen.getByText(
+			"Opciones avanzadas (URL manual)",
+		);
+		await user.click(advancedOptions);
+
+		// Now the URL input should be visible
+		await waitFor(() => {
 			expect(screen.getByLabelText("URL del avatar")).toBeInTheDocument();
 		});
 
 		const input = screen.getByLabelText("URL del avatar");
-		await waitFor(() => {
-			expect(input).toHaveValue("https://example.com/avatar.jpg");
-		});
+		expect(input).toHaveValue("https://example.com/avatar.jpg");
 		expect(screen.getByText("Guardar")).toBeInTheDocument();
 	});
 

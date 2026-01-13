@@ -43,19 +43,6 @@ export type SessionSnapshot = {
 };
 
 /**
- * Credentials for passwordless sign up.
- * Password is auto-generated internally - users never see or use it.
- */
-export type SignUpCredentials = {
-	email: string;
-	name: string;
-	/**
-	 * Optional profile image URL.
-	 */
-	image?: string;
-};
-
-/**
  * Result of an auth operation.
  */
 export type AuthResult<T = Session> =

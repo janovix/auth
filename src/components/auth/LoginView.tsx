@@ -232,7 +232,20 @@ export const LoginView = ({
 
 		// Success! Show animation then redirect
 		setStateModifier("success"); // Green aurora on success
-		redirectUrlRef.current = getAuthRedirectUrl(redirectTo);
+
+		// Check if user needs onboarding (no name set or empty name)
+		const userName = result.data?.user?.name?.trim();
+		const needsOnboarding = !userName;
+
+		if (needsOnboarding) {
+			// Redirect to onboarding, preserving the original redirect destination
+			const onboardingUrl = new URL("/onboarding", window.location.origin);
+			const finalRedirect = getAuthRedirectUrl(redirectTo);
+			onboardingUrl.searchParams.set("redirect_to", finalRedirect);
+			redirectUrlRef.current = onboardingUrl.toString();
+		} else {
+			redirectUrlRef.current = getAuthRedirectUrl(redirectTo);
+		}
 		setShowSuccessAnimation(true);
 	}, [userEmail, otpValue, signInWithOtp, redirectTo, setStateModifier, t]);
 
@@ -398,15 +411,6 @@ export const LoginView = ({
 												</>
 											)}
 										</Button>
-										<FieldDescription className="text-center">
-											{t("login.noAccount")}{" "}
-											<Link
-												href="/signup"
-												className="font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-											>
-												{t("login.signupLink")}
-											</Link>
-										</FieldDescription>
 									</Field>
 								</FieldGroup>
 							</form>

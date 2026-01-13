@@ -28,9 +28,9 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
 				{/* Language and Theme pickers - bottom right */}
 				<SettingsBar />
 
-				{/* Main content area - scrollable, centered */}
-				<div className="flex-1 w-full flex flex-col items-center justify-center px-4 md:px-10 py-8 relative z-10 overflow-y-auto min-h-0">
-					<div className="flex w-full max-w-sm flex-col gap-4 lg:gap-6 animate-form-fade-in">
+				{/* Main content area - scrollable, vertically centered when content fits */}
+				<div className="flex-1 w-full flex flex-col items-center px-4 md:px-10 py-6 sm:py-8 relative z-10 overflow-y-auto min-h-0">
+					<div className="flex w-full max-w-md flex-col gap-4 lg:gap-6 animate-form-fade-in my-auto">
 						{children}
 					</div>
 				</div>
@@ -49,9 +49,9 @@ export default function ClientLayout({
 	const isAuthRoute =
 		pathname === "/" ||
 		pathname.startsWith("/login") ||
-		pathname.startsWith("/signup") ||
 		pathname.startsWith("/recover") ||
-		pathname.startsWith("/verify");
+		pathname.startsWith("/verify") ||
+		pathname.startsWith("/onboarding");
 
 	return (
 		<ThemeProvider>

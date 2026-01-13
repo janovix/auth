@@ -125,16 +125,6 @@ export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
 									</Button>
 								</Field>
 
-								<Field>
-									<FieldDescription className="text-center">
-										<Link
-											href="/signup"
-											className="inline-flex items-center gap-1 font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-										>
-											{t("verify.error.noAccount")}
-										</Link>
-									</FieldDescription>
-								</Field>
 							</>
 						) : null}
 

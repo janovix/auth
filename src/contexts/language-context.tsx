@@ -36,8 +36,6 @@ const translations = {
 		"login.email.description": "Enter your email address",
 		"login.button.send": "Send access code",
 		"login.button.sending": "Sending code...",
-		"login.noAccount": "Don't have an account?",
-		"login.signupLink": "Sign up here",
 		"login.otp.sent": "Code sent",
 		"login.otp.sentDescription":
 			"We sent a 6-digit code to {email}. Check your inbox and spam.",
@@ -69,61 +67,6 @@ const translations = {
 			"We sent you a 6-digit code. Check your email and spam.",
 		"login.error": "Error",
 
-		// Signup page
-		"signup.title": "Create your account",
-		"signup.description": "Complete the form to get started",
-		"signup.firstName.label": "First name",
-		"signup.firstName.placeholder": "John",
-		"signup.firstName.required": "First name is required.",
-		"signup.firstName.description": "Your first name",
-		"signup.lastName.label": "Last name",
-		"signup.lastName.placeholder": "Doe",
-		"signup.lastName.required": "Last name is required.",
-		"signup.lastName.description": "Your last name",
-		"signup.email.label": "Email address",
-		"signup.email.placeholder": "you@company.com",
-		"signup.email.required": "Email is required.",
-		"signup.email.invalid": "Enter a valid email.",
-		"signup.email.description": "Your corporate email address",
-		"signup.terms.label": "I accept the",
-		"signup.terms.termsAndConditions": "terms and conditions",
-		"signup.terms.andThe": "and the",
-		"signup.terms.privacyNotice": "privacy notice",
-		"signup.terms.required": "You must accept the terms and conditions.",
-		"signup.terms.description":
-			"You must accept the terms and conditions to continue",
-		"signup.button.create": "Create account",
-		"signup.button.creating": "Creating account...",
-		"signup.hasAccount": "Already have an account?",
-		"signup.loginLink": "Sign in",
-		"signup.success.title": "Account created — Verification pending",
-		"signup.success.titleDone": "Account created successfully",
-		"signup.success.message":
-			"We sent a 6-digit code to your email. Enter it below to verify your account.",
-		"signup.success.redirect": "Account created. Redirecting to login…",
-		"signup.otp.title": "Enter verification code",
-		"signup.otp.description":
-			"We sent a 6-digit code to {email}. Check your inbox (and spam folder).",
-		"signup.otp.verifying": "Verifying...",
-		"signup.otp.expired":
-			"The code has expired. Codes are valid for 5 minutes. Request a new one.",
-		"signup.otp.tooManyAttempts":
-			"You have exceeded the number of attempts. For security, request a new code.",
-		"signup.otp.invalid": "Incorrect code. Try again.",
-		"signup.otp.expiredTitle": "Expired or invalid code",
-		"signup.otp.errorTitle": "Verification error",
-		"signup.otp.resendNew": "Sending new code...",
-		"signup.otp.requestNew": "Request new code",
-		"signup.otp.resend": "Resend code",
-		"signup.otp.resending": "Sending...",
-		"signup.otp.resendError": "Error resending verification code",
-		"signup.otp.resendSuccess":
-			"New code sent. Check your email (valid for 5 minutes).",
-		"signup.otp.changeEmail": "Need to change your email?",
-		"signup.otp.backToForm": "Back to form",
-		"signup.otp.verified": "Email verified! Please sign in to continue.",
-		"signup.error.title": "Error creating account",
-
 		// Verify email page
 		"verify.title": "Email verification",
 		"verify.success.description": "Your email has been verified successfully",
@@ -138,7 +81,6 @@ const translations = {
 		"verify.error.title": "Verification error",
 		"verify.error.message":
 			"Could not verify your email. Please sign in or register again to receive a verification code.",
-		"verify.error.noAccount": "Don't have an account? Sign up",
 		"verify.default.message":
 			"Email verification is done via OTP code sent to your email during registration. Sign in to continue.",
 		"verify.default.backToLogin": "Back to sign in",
@@ -150,7 +92,6 @@ const translations = {
 		"account.noSession.previewNote":
 			"If you come from a preview, make sure you signed in on the same domain to share the cookie.",
 		"account.noSession.login": "Sign in",
-		"account.noSession.signup": "Create account",
 		"account.title": "My account",
 		"account.description": "Your active session information",
 		"account.environment": "Environment",
@@ -181,6 +122,7 @@ const translations = {
 		"settings.description": "Manage your account preferences",
 		"settings.saved": "Settings saved successfully",
 		"settings.save": "Save",
+		"settings.cancel": "Cancel",
 		"settings.appearance.title": "Appearance",
 		"settings.appearance.description": "Customize how the app looks",
 		"settings.appearance.theme": "Theme",
@@ -195,7 +137,16 @@ const translations = {
 		"settings.localization.dateFormat": "Date Format",
 		"settings.profile.title": "Profile",
 		"settings.profile.description": "Manage your profile information",
+		"settings.profile.avatar": "Profile Picture",
 		"settings.profile.avatarUrl": "Avatar URL",
+		"settings.profile.changeAvatar": "Change Avatar",
+		"settings.profile.editAvatar": "Edit Avatar",
+		"settings.profile.editAvatarDescription":
+			"Upload and crop your profile picture",
+		"settings.profile.uploading": "Uploading...",
+		"settings.profile.uploadFailed": "Failed to upload avatar",
+		"settings.profile.avatarSet": "Avatar uploaded",
+		"settings.profile.advancedOptions": "Advanced options (manual URL)",
 		"settings.payments.title": "Payment Methods",
 		"settings.payments.description": "Manage your payment methods",
 		"settings.payments.comingSoon": "Payment methods management coming soon.",
@@ -505,6 +456,36 @@ const translations = {
 		"billing.upgrade.alerts": "alerts",
 		"billing.upgrade.transactions": "transactions",
 		"billing.upgrade.general": "resources",
+
+		// Onboarding page
+		"onboarding.title": "Complete your profile",
+		"onboarding.description": "Tell us a bit about yourself to get started",
+		"onboarding.firstName.label": "First name",
+		"onboarding.firstName.placeholder": "John",
+		"onboarding.firstName.required": "First name is required.",
+		"onboarding.firstName.description": "Your first name",
+		"onboarding.lastName.label": "Last name",
+		"onboarding.lastName.placeholder": "Doe",
+		"onboarding.lastName.required": "Last name is required.",
+		"onboarding.lastName.description": "Your last name",
+		"onboarding.avatar.label": "Profile picture",
+		"onboarding.avatar.optional": "Optional - you can add a photo later",
+		"onboarding.avatar.dropzone": "Click or drag an image here",
+		"onboarding.avatar.formats": "JPG, PNG, GIF or WebP (max 5MB)",
+		"onboarding.avatar.select": "Select profile picture",
+		"onboarding.avatar.remove": "Remove photo",
+		"onboarding.avatar.invalidType":
+			"Invalid file type. Please use JPG, PNG, GIF or WebP.",
+		"onboarding.avatar.tooLarge": "File is too large. Maximum size is 5MB.",
+		"onboarding.avatar.uploadFailed": "Failed to upload image. Please try again.",
+		"onboarding.avatar.saved": "Avatar ready to upload",
+		"onboarding.button.continue": "Continue",
+		"onboarding.button.saving": "Saving...",
+		"onboarding.button.uploading": "Uploading photo...",
+		"onboarding.success.title": "Profile complete!",
+		"onboarding.success.message": "Your profile has been saved. Redirecting...",
+		"onboarding.error.title": "Error",
+		"onboarding.error.updateFailed": "Failed to update profile. Please try again.",
 	},
 	es: {
 		// Login page
@@ -519,8 +500,6 @@ const translations = {
 		"login.email.description": "Ingresa tu dirección de correo",
 		"login.button.send": "Enviar código de acceso",
 		"login.button.sending": "Enviando código...",
-		"login.noAccount": "¿Aún no tienes cuenta?",
-		"login.signupLink": "Regístrate aquí",
 		"login.otp.sent": "Código enviado",
 		"login.otp.sentDescription":
 			"Enviamos un código de 6 dígitos a {email}. Revisa tu bandeja de entrada y spam.",
@@ -552,63 +531,6 @@ const translations = {
 			"Te enviamos un código de 6 dígitos. Revisa tu correo y spam.",
 		"login.error": "Error",
 
-		// Signup page
-		"signup.title": "Crea tu cuenta",
-		"signup.description": "Completa el formulario para comenzar",
-		"signup.firstName.label": "Nombre",
-		"signup.firstName.placeholder": "Mariana",
-		"signup.firstName.required": "Tu nombre es obligatorio.",
-		"signup.firstName.description": "Tu nombre de pila",
-		"signup.lastName.label": "Apellido",
-		"signup.lastName.placeholder": "López",
-		"signup.lastName.required": "Tu apellido es obligatorio.",
-		"signup.lastName.description": "Tu apellido",
-		"signup.email.label": "Correo electrónico",
-		"signup.email.placeholder": "tu@empresa.com",
-		"signup.email.required": "El correo es obligatorio.",
-		"signup.email.invalid": "Ingresa un correo válido.",
-		"signup.email.description": "Tu dirección de correo corporativo",
-		"signup.terms.label": "Acepto los",
-		"signup.terms.termsAndConditions": "términos y condiciones",
-		"signup.terms.andThe": "y el",
-		"signup.terms.privacyNotice": "aviso de privacidad",
-		"signup.terms.required": "Debes aceptar los términos y condiciones.",
-		"signup.terms.description":
-			"Debes aceptar los términos y condiciones para continuar",
-		"signup.button.create": "Crear cuenta",
-		"signup.button.creating": "Creando cuenta...",
-		"signup.hasAccount": "¿Ya tienes cuenta?",
-		"signup.loginLink": "Inicia sesión",
-		"signup.success.title": "Cuenta creada — Verificación pendiente",
-		"signup.success.titleDone": "Cuenta creada exitosamente",
-		"signup.success.message":
-			"Hemos enviado un código de 6 dígitos a tu correo. Ingrésalo a continuación para verificar tu cuenta.",
-		"signup.success.redirect":
-			"Cuenta creada. Redirigiendo al inicio de sesión…",
-		"signup.otp.title": "Ingresa el código de verificación",
-		"signup.otp.description":
-			"Enviamos un código de 6 dígitos a {email}. Revisa tu bandeja de entrada (y la carpeta de spam).",
-		"signup.otp.verifying": "Verificando...",
-		"signup.otp.expired":
-			"El código ha expirado. Los códigos son válidos por 5 minutos. Solicita uno nuevo.",
-		"signup.otp.tooManyAttempts":
-			"Has excedido el número de intentos. Por seguridad, solicita un nuevo código.",
-		"signup.otp.invalid": "Código incorrecto. Inténtalo de nuevo.",
-		"signup.otp.expiredTitle": "Código expirado o inválido",
-		"signup.otp.errorTitle": "Error de verificación",
-		"signup.otp.resendNew": "Enviando nuevo código...",
-		"signup.otp.requestNew": "Solicitar nuevo código",
-		"signup.otp.resend": "Reenviar código",
-		"signup.otp.resending": "Enviando...",
-		"signup.otp.resendError": "Error al reenviar el código de verificación",
-		"signup.otp.resendSuccess":
-			"Nuevo código enviado. Revisa tu correo (válido por 5 minutos).",
-		"signup.otp.changeEmail": "¿Necesitas cambiar tu correo?",
-		"signup.otp.backToForm": "Volver al formulario",
-		"signup.otp.verified":
-			"¡Correo verificado! Por favor inicia sesión para continuar.",
-		"signup.error.title": "Error al crear la cuenta",
-
 		// Verify email page
 		"verify.title": "Verificación de correo",
 		"verify.success.description":
@@ -625,7 +547,6 @@ const translations = {
 		"verify.error.title": "Error de verificación",
 		"verify.error.message":
 			"No se pudo verificar tu correo electrónico. Por favor, inicia sesión o regístrate nuevamente para recibir un código de verificación.",
-		"verify.error.noAccount": "¿No tienes cuenta? Regístrate",
 		"verify.default.message":
 			"La verificación de correo se realiza mediante un código OTP enviado a tu email durante el registro. Inicia sesión para continuar.",
 		"verify.default.backToLogin": "Volver al inicio de sesión",
@@ -637,7 +558,6 @@ const translations = {
 		"account.noSession.previewNote":
 			"Si vienes de un preview, asegúrate de haber iniciado sesión en el mismo dominio para compartir la cookie.",
 		"account.noSession.login": "Iniciar sesión",
-		"account.noSession.signup": "Crear cuenta",
 		"account.title": "Mi cuenta",
 		"account.description": "Información de tu sesión activa",
 		"account.environment": "Entorno",
@@ -670,6 +590,7 @@ const translations = {
 		"settings.description": "Administra las preferencias de tu cuenta",
 		"settings.saved": "Configuración guardada exitosamente",
 		"settings.save": "Guardar",
+		"settings.cancel": "Cancelar",
 		"settings.appearance.title": "Apariencia",
 		"settings.appearance.description": "Personaliza cómo se ve la aplicación",
 		"settings.appearance.theme": "Tema",
@@ -684,7 +605,16 @@ const translations = {
 		"settings.localization.dateFormat": "Formato de fecha",
 		"settings.profile.title": "Perfil",
 		"settings.profile.description": "Administra tu información de perfil",
+		"settings.profile.avatar": "Foto de perfil",
 		"settings.profile.avatarUrl": "URL del avatar",
+		"settings.profile.changeAvatar": "Cambiar avatar",
+		"settings.profile.editAvatar": "Editar avatar",
+		"settings.profile.editAvatarDescription":
+			"Sube y recorta tu foto de perfil",
+		"settings.profile.uploading": "Subiendo...",
+		"settings.profile.uploadFailed": "Error al subir avatar",
+		"settings.profile.avatarSet": "Avatar subido",
+		"settings.profile.advancedOptions": "Opciones avanzadas (URL manual)",
 		"settings.payments.title": "Métodos de pago",
 		"settings.payments.description": "Administra tus métodos de pago",
 		"settings.payments.comingSoon":
@@ -1005,6 +935,40 @@ const translations = {
 		"billing.upgrade.alerts": "alertas",
 		"billing.upgrade.transactions": "transacciones",
 		"billing.upgrade.general": "recursos",
+
+		// Onboarding page
+		"onboarding.title": "Completa tu perfil",
+		"onboarding.description": "Cuéntanos un poco sobre ti para comenzar",
+		"onboarding.firstName.label": "Nombre",
+		"onboarding.firstName.placeholder": "Mariana",
+		"onboarding.firstName.required": "Tu nombre es obligatorio.",
+		"onboarding.firstName.description": "Tu nombre de pila",
+		"onboarding.lastName.label": "Apellido",
+		"onboarding.lastName.placeholder": "López",
+		"onboarding.lastName.required": "Tu apellido es obligatorio.",
+		"onboarding.lastName.description": "Tu apellido",
+		"onboarding.avatar.label": "Foto de perfil",
+		"onboarding.avatar.optional": "Opcional - puedes agregar una foto después",
+		"onboarding.avatar.dropzone": "Haz clic o arrastra una imagen aquí",
+		"onboarding.avatar.formats": "JPG, PNG, GIF o WebP (máx 5MB)",
+		"onboarding.avatar.select": "Seleccionar foto de perfil",
+		"onboarding.avatar.remove": "Eliminar foto",
+		"onboarding.avatar.invalidType":
+			"Tipo de archivo inválido. Usa JPG, PNG, GIF o WebP.",
+		"onboarding.avatar.tooLarge":
+			"El archivo es muy grande. El tamaño máximo es 5MB.",
+		"onboarding.avatar.uploadFailed":
+			"Error al subir la imagen. Por favor intenta de nuevo.",
+		"onboarding.avatar.saved": "Avatar listo para subir",
+		"onboarding.button.continue": "Continuar",
+		"onboarding.button.saving": "Guardando...",
+		"onboarding.button.uploading": "Subiendo foto...",
+		"onboarding.success.title": "¡Perfil completo!",
+		"onboarding.success.message":
+			"Tu perfil ha sido guardado. Redirigiendo...",
+		"onboarding.error.title": "Error",
+		"onboarding.error.updateFailed":
+			"Error al actualizar el perfil. Por favor intenta de nuevo.",
 	},
 };
 

@@ -16,8 +16,6 @@ const mockTranslations: Record<string, string> = {
 	"login.email.description": "Ingresa tu dirección de correo",
 	"login.button.send": "Enviar código de acceso",
 	"login.button.sending": "Enviando código...",
-	"login.noAccount": "¿Aún no tienes cuenta?",
-	"login.signupLink": "Regístrate aquí",
 	"login.otp.sent": "Código enviado",
 	"login.otp.sentDescription":
 		"Enviamos un código de 6 dígitos a {email}. Revisa tu bandeja de entrada y spam.",
@@ -49,62 +47,6 @@ const mockTranslations: Record<string, string> = {
 		"Te enviamos un código de 6 dígitos. Revisa tu correo y spam.",
 	"login.error": "Error",
 
-	// Signup
-	"signup.title": "Crea tu cuenta",
-	"signup.description": "Completa el formulario para comenzar",
-	"signup.firstName.label": "Nombre",
-	"signup.firstName.placeholder": "Mariana",
-	"signup.firstName.required": "Tu nombre es obligatorio.",
-	"signup.firstName.description": "Tu nombre de pila",
-	"signup.lastName.label": "Apellido",
-	"signup.lastName.placeholder": "López",
-	"signup.lastName.required": "Tu apellido es obligatorio.",
-	"signup.lastName.description": "Tu apellido",
-	"signup.email.label": "Correo electrónico",
-	"signup.email.placeholder": "tu@empresa.com",
-	"signup.email.required": "El correo es obligatorio.",
-	"signup.email.invalid": "Ingresa un correo válido.",
-	"signup.email.description": "Tu dirección de correo corporativo",
-	"signup.terms.label": "Acepto los",
-	"signup.terms.termsAndConditions": "términos y condiciones",
-	"signup.terms.andThe": "y el",
-	"signup.terms.privacyNotice": "aviso de privacidad",
-	"signup.terms.required": "Debes aceptar los términos y condiciones.",
-	"signup.terms.description":
-		"Debes aceptar los términos y condiciones para continuar",
-	"signup.button.create": "Crear cuenta",
-	"signup.button.creating": "Creando cuenta...",
-	"signup.hasAccount": "¿Ya tienes cuenta?",
-	"signup.loginLink": "Inicia sesión",
-	"signup.success.title": "Cuenta creada — Verificación pendiente",
-	"signup.success.titleDone": "Cuenta creada exitosamente",
-	"signup.success.message":
-		"Hemos enviado un código de 6 dígitos a tu correo. Ingrésalo a continuación para verificar tu cuenta.",
-	"signup.success.redirect": "Cuenta creada. Redirigiendo al inicio de sesión…",
-	"signup.otp.title": "Ingresa el código de verificación",
-	"signup.otp.description":
-		"Enviamos un código de 6 dígitos a {email}. Revisa tu bandeja de entrada (y la carpeta de spam).",
-	"signup.otp.verifying": "Verificando...",
-	"signup.otp.expired":
-		"El código ha expirado. Los códigos son válidos por 5 minutos. Solicita uno nuevo.",
-	"signup.otp.tooManyAttempts":
-		"Has excedido el número de intentos. Por seguridad, solicita un nuevo código.",
-	"signup.otp.invalid": "Código incorrecto. Inténtalo de nuevo.",
-	"signup.otp.expiredTitle": "Código expirado o inválido",
-	"signup.otp.errorTitle": "Error de verificación",
-	"signup.otp.resendNew": "Enviando nuevo código...",
-	"signup.otp.requestNew": "Solicitar nuevo código",
-	"signup.otp.resend": "Reenviar código",
-	"signup.otp.resending": "Enviando...",
-	"signup.otp.resendError": "Error al reenviar el código de verificación",
-	"signup.otp.resendSuccess":
-		"Nuevo código enviado. Revisa tu correo (válido por 5 minutos).",
-	"signup.otp.changeEmail": "¿Necesitas cambiar tu correo?",
-	"signup.otp.backToForm": "Volver al formulario",
-	"signup.otp.verified":
-		"¡Correo verificado! Por favor inicia sesión para continuar.",
-	"signup.error.title": "Error al crear la cuenta",
-
 	// Account
 	"account.noSession.title": "Sesión no encontrada",
 	"account.noSession.description":
@@ -112,7 +54,6 @@ const mockTranslations: Record<string, string> = {
 	"account.noSession.previewNote":
 		"Si vienes de un preview, asegúrate de haber iniciado sesión en el mismo dominio para compartir la cookie.",
 	"account.noSession.login": "Iniciar sesión",
-	"account.noSession.signup": "Crear cuenta",
 	"account.title": "Mi cuenta",
 	"account.description": "Información de tu sesión activa",
 	"account.environment": "Entorno",
@@ -145,6 +86,7 @@ const mockTranslations: Record<string, string> = {
 	"settings.description": "Administra tus preferencias de cuenta",
 	"settings.saved": "Configuración guardada",
 	"settings.save": "Guardar",
+	"settings.cancel": "Cancelar",
 	"settings.appearance.title": "Apariencia",
 	"settings.appearance.description":
 		"Personaliza la apariencia de la aplicación",
@@ -159,7 +101,15 @@ const mockTranslations: Record<string, string> = {
 	"settings.localization.dateFormat": "Formato de fecha",
 	"settings.profile.title": "Perfil",
 	"settings.profile.description": "Administra tu información de perfil",
+	"settings.profile.avatar": "Foto de perfil",
 	"settings.profile.avatarUrl": "URL del avatar",
+	"settings.profile.changeAvatar": "Cambiar avatar",
+	"settings.profile.editAvatar": "Editar avatar",
+	"settings.profile.editAvatarDescription": "Sube y recorta tu foto de perfil",
+	"settings.profile.uploading": "Subiendo...",
+	"settings.profile.uploadFailed": "Error al subir avatar",
+	"settings.profile.avatarSet": "Avatar subido",
+	"settings.profile.advancedOptions": "Opciones avanzadas (URL manual)",
 	"settings.payments.title": "Métodos de pago",
 	"settings.payments.description": "Administra tus métodos de pago",
 	"settings.payments.comingSoon": "Próximamente",
@@ -246,6 +196,38 @@ const mockTranslations: Record<string, string> = {
 	"audit.integrity.verified": "Verificados",
 	"audit.integrity.entries": "registros",
 	"audit.integrity.brokenAt": "Roto en",
+	// Onboarding
+	"onboarding.title": "Completa tu perfil",
+	"onboarding.description": "Cuéntanos un poco sobre ti para comenzar",
+	"onboarding.firstName.label": "Nombre",
+	"onboarding.firstName.placeholder": "Mariana",
+	"onboarding.firstName.required": "Tu nombre es obligatorio.",
+	"onboarding.firstName.description": "Tu nombre de pila",
+	"onboarding.lastName.label": "Apellido",
+	"onboarding.lastName.placeholder": "López",
+	"onboarding.lastName.required": "Tu apellido es obligatorio.",
+	"onboarding.lastName.description": "Tu apellido",
+	"onboarding.avatar.label": "Foto de perfil",
+	"onboarding.avatar.optional": "Opcional - puedes agregar una foto después",
+	"onboarding.avatar.dropzone": "Haz clic o arrastra una imagen aquí",
+	"onboarding.avatar.formats": "JPG, PNG, GIF o WebP (máx 5MB)",
+	"onboarding.avatar.select": "Seleccionar foto de perfil",
+	"onboarding.avatar.remove": "Eliminar foto",
+	"onboarding.avatar.invalidType":
+		"Tipo de archivo inválido. Usa JPG, PNG, GIF o WebP.",
+	"onboarding.avatar.tooLarge":
+		"El archivo es muy grande. El tamaño máximo es 5MB.",
+	"onboarding.avatar.uploadFailed":
+		"Error al subir la imagen. Por favor intenta de nuevo.",
+	"onboarding.avatar.saved": "Avatar listo para subir",
+	"onboarding.button.continue": "Continuar",
+	"onboarding.button.saving": "Guardando...",
+	"onboarding.button.uploading": "Subiendo foto...",
+	"onboarding.success.title": "¡Perfil completo!",
+	"onboarding.success.message": "Tu perfil ha sido guardado. Redirigiendo...",
+	"onboarding.error.title": "Error",
+	"onboarding.error.updateFailed":
+		"Error al actualizar el perfil. Por favor intenta de nuevo.",
 };
 
 vi.mock("@/contexts/language-context", () => ({

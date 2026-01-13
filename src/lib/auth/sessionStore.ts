@@ -25,7 +25,7 @@ export const sessionStore: SessionStore = atom(defaultSnapshot);
 
 /**
  * Updates the session store with new session data.
- * Call this after successful login/signup.
+ * Call this after successful login.
  */
 export function setSession(session: Session): void {
 	sessionStore.set({

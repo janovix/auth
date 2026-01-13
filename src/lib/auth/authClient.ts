@@ -16,7 +16,7 @@ import { getAuthCoreBaseUrl } from "./authCoreConfig";
  *
  * Plugins:
  * - emailOTPClient: Enables OTP-based email verification instead of link-based,
- *   preserving the user's flow and redirectTo parameters during signup.
+ *   preserving the user's flow and redirectTo parameters during authentication.
  * - organizationClient: Enables organization management (required by aml-janovix).
  */
 export const authClient = createAuthClient({

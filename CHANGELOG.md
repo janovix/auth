@@ -1,3 +1,10 @@
+# [1.5.0-rc.3](https://github.com/janovix/auth/compare/v1.5.0-rc.2...v1.5.0-rc.3) (2026-01-14)
+
+
+### Features
+
+* add banned user handling in LoginView with corresponding tests and translations ([dd15d98](https://github.com/janovix/auth/commit/dd15d981bb43f12c66f101103a41ef66a7a239c6))
+
 # [1.5.0-rc.2](https://github.com/janovix/auth/compare/v1.5.0-rc.1...v1.5.0-rc.2) (2026-01-14)
 
 

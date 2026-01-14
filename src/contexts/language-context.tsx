@@ -69,6 +69,10 @@ const translations = {
 		"login.success.rateLimited":
 			"A code was already sent recently. Check your email and spam.",
 		"login.error": "Error",
+		"login.banned.title": "Account Suspended",
+		"login.banned.message":
+			"Your account has been suspended. Please contact support if you believe this is an error.",
+		"login.banned.tryDifferentEmail": "Try a different email",
 
 		// Verify email page
 		"verify.title": "Email verification",
@@ -543,6 +547,10 @@ const translations = {
 		"login.success.rateLimited":
 			"Ya te enviamos un código recientemente. Revisa tu correo y spam.",
 		"login.error": "Error",
+		"login.banned.title": "Cuenta Suspendida",
+		"login.banned.message":
+			"Tu cuenta ha sido suspendida. Por favor contacta a soporte si crees que esto es un error.",
+		"login.banned.tryDifferentEmail": "Probar con otro correo",
 
 		// Verify email page
 		"verify.title": "Verificación de correo",

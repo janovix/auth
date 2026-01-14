@@ -272,4 +272,86 @@ describe("LoginView", () => {
 			expect(inputs.length).toBeGreaterThan(0);
 		});
 	});
+
+	it("shows banned user error and allows trying different email", async () => {
+		const sendOtp = createSendOtp();
+		const signInWithOtp = createSignInWithOtp();
+
+		vi.mocked(sendOtp).mockResolvedValue({
+			success: true,
+			data: { message: "OTP sent" },
+			error: null,
+		});
+
+		// Create error with BANNED code
+		const bannedError = new Error(
+			"You have been banned from this application",
+		) as Error & { code: string };
+		bannedError.code = "BANNED";
+
+		vi.mocked(signInWithOtp).mockResolvedValue({
+			success: false,
+			data: null,
+			error: bannedError,
+		});
+
+		renderWithProviders(
+			<LoginView sendOtp={sendOtp} signInWithOtp={signInWithOtp} />,
+		);
+		const user = userEvent.setup();
+
+		// Step 1: Enter email
+		const emailInputs = screen.getAllByPlaceholderText("tu@empresa.com");
+		const emailInput = emailInputs[emailInputs.length - 1];
+		await user.type(emailInput, "banned@example.com");
+
+		const submitButtons = screen.getAllByRole("button", {
+			name: /enviar código/i,
+		});
+		const submitButton = submitButtons[submitButtons.length - 1];
+		fireEvent.click(submitButton);
+
+		// Wait for OTP input to appear
+		await waitFor(() => {
+			expect(
+				screen.getByLabelText(/código de verificación/i),
+			).toBeInTheDocument();
+		});
+
+		// Step 2: Enter OTP (6 digits)
+		const otpInput = screen.getByLabelText(/código de verificación/i);
+		await user.type(otpInput, "123456");
+
+		// Wait for banned error to be shown
+		await waitFor(() => {
+			expect(signInWithOtp).toHaveBeenCalledWith(
+				"banned@example.com",
+				"123456",
+			);
+		});
+
+		// Should show banned error alert (there are 2 alerts - success and error)
+		await waitFor(() => {
+			expect(screen.getByText(/cuenta suspendida/i)).toBeInTheDocument();
+		});
+
+		// OTP input should be disabled
+		const otpInputAfterError = screen.getByLabelText(/código de verificación/i);
+		expect(otpInputAfterError).toBeDisabled();
+
+		// Should show "Try different email" button
+		const tryDifferentButton = screen.getByRole("button", {
+			name: /probar con otro correo/i,
+		});
+		expect(tryDifferentButton).toBeInTheDocument();
+
+		// Click "Try different email" to go back to email input
+		await user.click(tryDifferentButton);
+
+		// Should go back to email input
+		await waitFor(() => {
+			const inputs = screen.getAllByPlaceholderText("tu@empresa.com");
+			expect(inputs.length).toBeGreaterThan(0);
+		});
+	});
 });

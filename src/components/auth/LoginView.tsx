@@ -5,6 +5,7 @@ import {
 	signInWithOtp as localSignInWithOtp,
 	isOtpExpiredError,
 	isOtpTooManyAttemptsError,
+	isBannedUserError,
 	type AuthResult,
 	type SendOtpOptions,
 } from "@/lib/auth/authActions";
@@ -125,6 +126,7 @@ export const LoginView = ({
 	const [otpError, setOtpError] = useState<string | null>(null);
 	const [otpNeedsResend, setOtpNeedsResend] = useState(false);
 	const [isResending, setIsResending] = useState(false);
+	const [isBanned, setIsBanned] = useState(false);
 
 	// Resend cooldown (60 seconds)
 	const { secondsRemaining, isOnCooldown, startCooldown, resetCooldown } =
@@ -252,8 +254,14 @@ export const LoginView = ({
 		if (!result.success) {
 			const isExpired = isOtpExpiredError(result.error);
 			const isTooManyAttempts = isOtpTooManyAttemptsError(result.error);
+			const isBannedUser = isBannedUserError(result.error);
 
-			if (isExpired) {
+			if (isBannedUser) {
+				setOtpError(t("login.banned.message"));
+				setIsBanned(true);
+				setOtpValue("");
+				otpAtErrorRef.current = "";
+			} else if (isExpired) {
 				setOtpError(t("login.otp.expired"));
 				setOtpNeedsResend(true);
 				setOtpValue("");
@@ -351,6 +359,7 @@ export const LoginView = ({
 		setOtpValue("");
 		setOtpError(null);
 		setOtpNeedsResend(false);
+		setIsBanned(false);
 		setSuccessMessage(null);
 		setStateModifier("default"); // Reset to purple when going back
 		resetCooldown(); // Reset cooldown when going back to email
@@ -535,7 +544,7 @@ export const LoginView = ({
 									maxLength={OTP_LENGTH}
 									value={otpValue}
 									onChange={setOtpValue}
-									disabled={isVerifyingOtp}
+									disabled={isVerifyingOtp || isBanned}
 									aria-label={t("login.otp.label")}
 									autoFocus
 								>
@@ -559,13 +568,15 @@ export const LoginView = ({
 
 							{otpError && (
 								<Alert variant="destructive" role="alert">
-									{otpNeedsResend && (
+									{(otpNeedsResend || isBanned) && (
 										<AlertTriangle className="h-4 w-4" aria-hidden="true" />
 									)}
 									<AlertTitle>
-										{otpNeedsResend
-											? t("login.otp.expiredTitle")
-											: t("login.otp.errorTitle")}
+										{isBanned
+											? t("login.banned.title")
+											: otpNeedsResend
+												? t("login.otp.expiredTitle")
+												: t("login.otp.errorTitle")}
 									</AlertTitle>
 									<AlertDescription>{otpError}</AlertDescription>
 								</Alert>
@@ -604,8 +615,17 @@ export const LoginView = ({
 								</p>
 							)}
 
-							{/* Resend button */}
-							{otpNeedsResend ? (
+							{/* Resend button - hidden when banned */}
+							{isBanned ? (
+								<Button
+									onClick={handleBackToEmail}
+									variant="outline"
+									className="w-full"
+								>
+									<Mail className="mr-2 h-4 w-4" />
+									{t("login.banned.tryDifferentEmail")}
+								</Button>
+							) : otpNeedsResend ? (
 								<Button
 									onClick={handleResendOtp}
 									disabled={

@@ -66,6 +66,10 @@ const mockTranslations: Record<string, string> = {
 	"login.success.rateLimited":
 		"Ya te enviamos un código recientemente. Revisa tu correo y spam.",
 	"login.error": "Error",
+	"login.banned.title": "Cuenta Suspendida",
+	"login.banned.message":
+		"Tu cuenta ha sido suspendida. Por favor contacta a soporte si crees que esto es un error.",
+	"login.banned.tryDifferentEmail": "Probar con otro correo",
 
 	// Account
 	"account.noSession.title": "Sesión no encontrada",

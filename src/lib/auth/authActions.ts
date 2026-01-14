@@ -269,6 +269,7 @@ export type OtpErrorCode =
 	| "EXPIRED"
 	| "INVALID"
 	| "TOO_MANY_ATTEMPTS"
+	| "BANNED"
 	| "UNKNOWN";
 
 /**
@@ -282,10 +283,15 @@ export interface OtpVerificationError extends Error {
 /**
  * Detects the OTP error type from an error message.
  * Better Auth returns errors like "OTP expired", "Invalid OTP", etc.
+ * auth-svc returns "BANNED_USER" code for banned users.
  */
 function detectOtpErrorCode(message: string): OtpErrorCode {
 	const lowerMsg = message.toLowerCase();
 
+	// Check for banned user (auth-svc returns "BANNED_USER" code or "banned" in message)
+	if (lowerMsg.includes("banned") || lowerMsg.includes("bloqueado")) {
+		return "BANNED";
+	}
 	if (lowerMsg.includes("expired") || lowerMsg.includes("expirado")) {
 		return "EXPIRED";
 	}
@@ -394,6 +400,15 @@ export function isOtpTooManyAttemptsError(
 ): boolean {
 	if (!error) return false;
 	return (error as OtpVerificationError).code === "TOO_MANY_ATTEMPTS";
+}
+
+/**
+ * Checks if an error is a banned user error.
+ * This occurs when a user has been banned from the application.
+ */
+export function isBannedUserError(error: Error | null | undefined): boolean {
+	if (!error) return false;
+	return (error as OtpVerificationError).code === "BANNED";
 }
 
 /**

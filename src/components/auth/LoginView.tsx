@@ -6,7 +6,9 @@ import {
 	isOtpExpiredError,
 	isOtpTooManyAttemptsError,
 	type AuthResult,
+	type SendOtpOptions,
 } from "@/lib/auth/authActions";
+import { useResendCooldown } from "@/hooks/useResendCooldown";
 import { getAuthRedirectUrl } from "@/lib/auth/redirectConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -21,6 +23,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState, useRef, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 import { Logo } from "@/components/Logo";
 import {
@@ -62,10 +65,14 @@ type EmailValues = { email: string };
 type SendOtpFn = (
 	email: string,
 	type: "sign-in",
-) => Promise<AuthResult<{ message: string }>>;
+	options?: SendOtpOptions,
+) => Promise<AuthResult<{ message: string; rateLimited?: boolean }>>;
 type SignInWithOtpFn = (email: string, otp: string) => Promise<AuthResult>;
 
 const OTP_LENGTH = 6;
+
+// Turnstile site key from environment variable
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
 /**
  * LoginView component for passwordless OTP-based authentication.
@@ -119,9 +126,18 @@ export const LoginView = ({
 	const [otpNeedsResend, setOtpNeedsResend] = useState(false);
 	const [isResending, setIsResending] = useState(false);
 
+	// Resend cooldown (60 seconds)
+	const { secondsRemaining, isOnCooldown, startCooldown, resetCooldown } =
+		useResendCooldown(60);
+
 	// Success animation state
 	const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
 	const redirectUrlRef = useRef<string>("");
+
+	// Turnstile captcha state
+	const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+	const [captchaError, setCaptchaError] = useState(false);
+	const turnstileRef = useRef<TurnstileInstance>(null);
 
 	// Set aurora page profile to login on mount
 	useEffect(() => {
@@ -176,8 +192,24 @@ export const LoginView = ({
 		emailAtErrorRef.current = null;
 		setStateModifier("loading"); // Blue aurora while loading
 
+		// Require captcha token if Turnstile is configured
+		if (TURNSTILE_SITE_KEY && !captchaToken) {
+			setServerError(
+				t("login.captcha.required") ||
+					"Please complete the captcha verification",
+			);
+			setStateModifier("error");
+			return;
+		}
+
 		const email = values.email.trim();
-		const result = await sendOtp(email, "sign-in");
+		const result = await sendOtp(email, "sign-in", {
+			captchaToken: captchaToken || undefined,
+		});
+
+		// Reset captcha after use (token is single-use)
+		setCaptchaToken(null);
+		turnstileRef.current?.reset();
 
 		if (!result.success) {
 			setServerError(getAuthErrorMessage(result.error));
@@ -188,8 +220,19 @@ export const LoginView = ({
 
 		setUserEmail(email);
 		setOtpSent(true);
-		setSuccessMessage(t("login.success.message"));
+
+		// Show different message if rate-limited (OTP already sent)
+		if (result.data?.rateLimited) {
+			setSuccessMessage(
+				t("login.success.rateLimited") ||
+					"A code was already sent. Check your email.",
+			);
+		} else {
+			setSuccessMessage(t("login.success.message"));
+		}
+
 		setStateModifier("default"); // Back to purple after OTP sent
+		startCooldown(); // Start 60s cooldown for resend
 	};
 
 	// Handle OTP verification and sign-in
@@ -266,13 +309,29 @@ export const LoginView = ({
 			return;
 		}
 
+		// Require captcha token if Turnstile is configured
+		if (TURNSTILE_SITE_KEY && !captchaToken) {
+			setOtpError(
+				t("login.captcha.required") ||
+					"Please complete the captcha verification",
+			);
+			setStateModifier("error");
+			return;
+		}
+
 		setIsResending(true);
 		setOtpError(null);
 		setOtpNeedsResend(false);
 		setOtpValue("");
 		setStateModifier("loading"); // Blue aurora while resending
 
-		const result = await sendOtp(userEmail, "sign-in");
+		const result = await sendOtp(userEmail, "sign-in", {
+			captchaToken: captchaToken || undefined,
+		});
+
+		// Reset captcha after use (token is single-use)
+		setCaptchaToken(null);
+		turnstileRef.current?.reset();
 
 		if (!result.success) {
 			setOtpError(result.error?.message || t("login.otp.resendError"));
@@ -280,6 +339,7 @@ export const LoginView = ({
 		} else {
 			setSuccessMessage(t("login.otp.resendSuccess"));
 			setStateModifier("default"); // Back to purple after success
+			startCooldown(); // Restart 60s cooldown after successful resend
 		}
 
 		setIsResending(false);
@@ -293,6 +353,7 @@ export const LoginView = ({
 		setOtpNeedsResend(false);
 		setSuccessMessage(null);
 		setStateModifier("default"); // Reset to purple when going back
+		resetCooldown(); // Reset cooldown when going back to email
 	};
 
 	const isSubmitting = form.formState.isSubmitting;
@@ -389,11 +450,50 @@ export const LoginView = ({
 											)}
 										/>
 									</Field>
+
+									{/* Turnstile Captcha Widget */}
+									{TURNSTILE_SITE_KEY && (
+										<Field>
+											<div className="flex justify-center">
+												<div className="rounded-lg border border-border bg-muted/30 p-1 overflow-hidden shadow-sm">
+													<Turnstile
+														ref={turnstileRef}
+														siteKey={TURNSTILE_SITE_KEY}
+														onSuccess={(token) => {
+															setCaptchaToken(token);
+															setCaptchaError(false);
+														}}
+														onError={() => {
+															setCaptchaToken(null);
+															setCaptchaError(true);
+														}}
+														onExpire={() => {
+															setCaptchaToken(null);
+														}}
+														options={{
+															theme: "auto",
+															size: "normal",
+														}}
+													/>
+												</div>
+											</div>
+											{captchaError && (
+												<p className="text-sm text-destructive text-center mt-2">
+													{t("login.captcha.error") ||
+														"Captcha verification failed. Please try again."}
+												</p>
+											)}
+										</Field>
+									)}
+
 									<Field>
 										<Button
 											type="submit"
 											className="w-full"
-											disabled={isSubmitting}
+											disabled={
+												isSubmitting ||
+												(TURNSTILE_SITE_KEY ? !captchaToken : false)
+											}
 											aria-busy={isSubmitting}
 										>
 											{isSubmitting ? (
@@ -437,6 +537,7 @@ export const LoginView = ({
 									onChange={setOtpValue}
 									disabled={isVerifyingOtp}
 									aria-label={t("login.otp.label")}
+									autoFocus
 								>
 									<InputOTPGroup>
 										<InputOTPSlot index={0} />
@@ -474,13 +575,21 @@ export const LoginView = ({
 							{otpNeedsResend ? (
 								<Button
 									onClick={handleResendOtp}
-									disabled={isResending}
+									disabled={isResending || isOnCooldown}
 									className="w-full"
 								>
 									{isResending ? (
 										<>
 											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 											{t("login.otp.resendNew")}
+										</>
+									) : isOnCooldown ? (
+										<>
+											<RefreshCw className="mr-2 h-4 w-4" />
+											{t("login.otp.resendWait").replace(
+												"{seconds}",
+												String(secondsRemaining),
+											)}
 										</>
 									) : (
 										<>
@@ -492,14 +601,19 @@ export const LoginView = ({
 							) : (
 								<Button
 									onClick={handleResendOtp}
-									disabled={isResending || isVerifyingOtp}
+									disabled={isResending || isVerifyingOtp || isOnCooldown}
 									variant="outline"
 									className="w-full"
 								>
 									<Mail className="mr-2 h-4 w-4" />
 									{isResending
 										? t("login.otp.resending")
-										: t("login.otp.resend")}
+										: isOnCooldown
+											? t("login.otp.resendWait").replace(
+													"{seconds}",
+													String(secondsRemaining),
+												)
+											: t("login.otp.resend")}
 								</Button>
 							)}
 

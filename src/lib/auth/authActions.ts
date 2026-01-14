@@ -186,6 +186,14 @@ export async function signOut(): Promise<AuthResult<null>> {
 export type OtpType = "email-verification" | "sign-in" | "forget-password";
 
 /**
+ * Options for sending verification OTP.
+ */
+export interface SendOtpOptions {
+	/** Captcha response token (from Turnstile) */
+	captchaToken?: string;
+}
+
+/**
  * Sends a verification OTP to the specified email address.
  *
  * Uses Better Auth client's emailOtp.sendVerificationOtp method.
@@ -194,16 +202,31 @@ export type OtpType = "email-verification" | "sign-in" | "forget-password";
  *
  * @param email - The email address to send the OTP to
  * @param type - The type of OTP (defaults to email-verification)
+ * @param options - Additional options including captcha token
  */
 export async function sendVerificationOtp(
 	email: string,
 	type: OtpType = "email-verification",
-): Promise<AuthResult<{ message: string }>> {
+	options?: SendOtpOptions,
+): Promise<AuthResult<{ message: string; rateLimited?: boolean }>> {
 	try {
-		const result = await authClient.emailOtp.sendVerificationOtp({
-			email,
-			type,
-		});
+		// Build fetch options with captcha header if token provided
+		const fetchOptions: { headers?: Record<string, string> } = {};
+		if (options?.captchaToken) {
+			fetchOptions.headers = {
+				"x-captcha-response": options.captchaToken,
+			};
+		}
+
+		const result = await authClient.emailOtp.sendVerificationOtp(
+			{
+				email,
+				type,
+			},
+			{
+				...fetchOptions,
+			},
+		);
 
 		if (result.error) {
 			return {
@@ -213,9 +236,20 @@ export async function sendVerificationOtp(
 			};
 		}
 
+		// Check if rate limited (OTP already sent recently)
+		const data = result.data as
+			| { rateLimited?: boolean; message?: string }
+			| undefined;
+		const rateLimited = data?.rateLimited === true;
+
 		return {
 			success: true,
-			data: { message: "OTP sent successfully" },
+			data: {
+				message: rateLimited
+					? "An OTP code was already sent. Please check your email."
+					: "OTP sent successfully",
+				rateLimited,
+			},
 			error: null,
 		};
 	} catch (err) {

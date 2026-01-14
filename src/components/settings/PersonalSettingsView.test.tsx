@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PersonalSettingsView } from "./PersonalSettingsView";
 import * as settingsClient from "@/lib/settings/settingsClient";
+import { mockToast } from "@/test/setup";
 
 // Mock the settings client
 vi.mock("@/lib/settings/settingsClient", () => ({
@@ -182,7 +183,7 @@ describe("PersonalSettingsView", () => {
 		render(<PersonalSettingsView />);
 
 		await waitFor(() => {
-			expect(screen.getByText("Network error")).toBeInTheDocument();
+			expect(mockToast.error).toHaveBeenCalledWith("Network error");
 		});
 	});
 
@@ -222,7 +223,7 @@ describe("PersonalSettingsView", () => {
 		});
 	});
 
-	it("renders avatar URL input", async () => {
+	it("renders change avatar button", async () => {
 		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(
 			mockUserSettings,
 		);
@@ -230,8 +231,9 @@ describe("PersonalSettingsView", () => {
 		render(<PersonalSettingsView />);
 
 		await waitFor(() => {
+			// Avatar is now handled through AvatarUploadDialog with a change button
 			expect(
-				screen.getByPlaceholderText("https://example.com/avatar.jpg"),
+				screen.getByText("settings.personal.changeAvatar"),
 			).toBeInTheDocument();
 		});
 	});
@@ -280,27 +282,16 @@ describe("PersonalSettingsView", () => {
 		});
 	});
 
-	it("calls updateUserSettings when avatar save button is clicked", async () => {
+	it("renders user avatar with correct initials", async () => {
 		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(
 			mockUserSettings,
 		);
-		vi.mocked(settingsClient.updateUserSettings).mockResolvedValue(
-			mockUserSettings,
-		);
 
-		const user = userEvent.setup();
 		render(<PersonalSettingsView />);
 
 		await waitFor(() => {
-			expect(screen.getByText("settings.save")).toBeInTheDocument();
-		});
-
-		await user.click(screen.getByText("settings.save"));
-
-		await waitFor(() => {
-			expect(settingsClient.updateUserSettings).toHaveBeenCalledWith({
-				avatarUrl: "https://example.com/avatar.jpg",
-			});
+			// The avatar should show user initials as fallback
+			expect(screen.getByText("TU")).toBeInTheDocument(); // "Test User" -> "TU"
 		});
 	});
 });

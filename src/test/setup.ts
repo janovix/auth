@@ -2,6 +2,23 @@ import "@testing-library/jest-dom/vitest";
 import React from "react";
 import { vi } from "vitest";
 
+// Mock sonner toast for tests
+export const mockToast = {
+	success: vi.fn(),
+	error: vi.fn(),
+	warning: vi.fn(),
+	info: vi.fn(),
+	loading: vi.fn(),
+	promise: vi.fn(),
+	dismiss: vi.fn(),
+	custom: vi.fn(),
+};
+
+vi.mock("sonner", () => ({
+	toast: mockToast,
+	Toaster: () => null,
+}));
+
 // Mock language context for tests with Spanish translations
 const mockTranslations: Record<string, string> = {
 	// Login
@@ -35,6 +52,7 @@ const mockTranslations: Record<string, string> = {
 	"login.otp.resendError": "Error al reenviar el código. Intenta de nuevo.",
 	"login.otp.resendSuccess":
 		"Nuevo código enviado. Revisa tu correo (válido por 5 minutos).",
+	"login.otp.resendWait": "Espera {seconds}s para reenviar",
 	"login.wrongEmail": "¿Correo incorrecto?",
 	"login.changeEmail": "Cambiar correo",
 	"login.terms": "Al iniciar sesión, aceptas nuestros",
@@ -45,6 +63,8 @@ const mockTranslations: Record<string, string> = {
 	"login.success.auth": "Autenticación exitosa",
 	"login.success.message":
 		"Te enviamos un código de 6 dígitos. Revisa tu correo y spam.",
+	"login.success.rateLimited":
+		"Ya te enviamos un código recientemente. Revisa tu correo y spam.",
 	"login.error": "Error",
 
 	// Account
@@ -228,6 +248,9 @@ const mockTranslations: Record<string, string> = {
 	"onboarding.error.title": "Error",
 	"onboarding.error.updateFailed":
 		"Error al actualizar el perfil. Por favor intenta de nuevo.",
+	"onboarding.exit.button": "Salir y cerrar sesión",
+	"onboarding.exit.loggingOut": "Cerrando sesión...",
+	"onboarding.exit.description": "¿No estás listo para completar tu perfil?",
 };
 
 vi.mock("@/contexts/language-context", () => ({

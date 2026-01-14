@@ -3,23 +3,17 @@
 import { useCallback, useEffect, useState } from "react";
 import {
 	Shield,
-	Building2,
 	AlertTriangle,
-	CheckCircle,
-	Info,
-	Loader2,
 	HelpCircle,
+	ChevronDown,
+	ChevronRight,
+	Check,
+	Loader2,
 } from "lucide-react";
-import {
-	Button,
-	Card,
-	CardContent,
-	Label,
-	Input,
-	Spinner,
-	Badge,
-} from "@/components/ui";
-import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+import { Button, Label, Spinner } from "@/components/ui";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
 	Select,
 	SelectContent,
@@ -34,11 +28,10 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from "@/components/ui/accordion";
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useLanguage } from "@/contexts/language-context";
 import {
 	getAmlComplianceSettings,
@@ -48,6 +41,11 @@ import {
 	type OrganizationMembership,
 } from "@/lib/settings";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
+import {
+	SettingsCard,
+	SettingsSection,
+	SettingsPageHeader,
+} from "@/components/settings";
 
 // Vulnerable activities catalog (as per Mexican AML regulations)
 const VULNERABLE_ACTIVITIES = [
@@ -153,8 +151,6 @@ export function ComplianceSettingsView() {
 
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
 	const [settings, setSettings] = useState<AmlComplianceSettings | null>(null);
 	const [membership, setMembership] = useState<OrganizationMembership | null>(
@@ -165,6 +161,7 @@ export function ComplianceSettingsView() {
 	const [rfc, setRfc] = useState("");
 	const [activityKey, setActivityKey] = useState("");
 	const [rfcError, setRfcError] = useState<string | null>(null);
+	const [thresholdsOpen, setThresholdsOpen] = useState(false);
 
 	const activeOrgId = (
 		session?.session as { activeOrganizationId?: string } | undefined
@@ -195,7 +192,7 @@ export function ComplianceSettingsView() {
 					setActivityKey(complianceSettings.activityKey);
 				}
 			} catch (err) {
-				setError(
+				toast.error(
 					err instanceof Error
 						? err.message
 						: "Failed to load compliance settings",
@@ -209,26 +206,28 @@ export function ComplianceSettingsView() {
 	}, [activeOrgId]);
 
 	const showSuccess = useCallback((message: string) => {
-		setSuccessMessage(message);
-		setTimeout(() => setSuccessMessage(null), 3000);
+		toast.success(message);
 	}, []);
 
-	const validateRfc = (value: string): boolean => {
-		if (!value) {
-			setRfcError(t("settings.compliance.rfcRequired"));
-			return false;
-		}
-		if (value.length !== 12 && value.length !== 13) {
-			setRfcError(t("settings.compliance.rfcLength"));
-			return false;
-		}
-		if (!RFC_REGEX.test(value)) {
-			setRfcError(t("settings.compliance.rfcFormat"));
-			return false;
-		}
-		setRfcError(null);
-		return true;
-	};
+	const validateRfc = useCallback(
+		(value: string): boolean => {
+			if (!value) {
+				setRfcError(t("settings.compliance.rfcRequired"));
+				return false;
+			}
+			if (value.length !== 12 && value.length !== 13) {
+				setRfcError(t("settings.compliance.rfcLength"));
+				return false;
+			}
+			if (!RFC_REGEX.test(value)) {
+				setRfcError(t("settings.compliance.rfcFormat"));
+				return false;
+			}
+			setRfcError(null);
+			return true;
+		},
+		[t],
+	);
 
 	const handleRfcChange = (value: string) => {
 		const upperValue = value.toUpperCase();
@@ -248,13 +247,12 @@ export function ComplianceSettingsView() {
 
 		// Validate activity
 		if (!activityKey) {
-			setError(t("settings.compliance.activityRequired"));
+			toast.error(t("settings.compliance.activityRequired"));
 			return;
 		}
 
 		try {
 			setSaving(true);
-			setError(null);
 
 			const result = await createOrUpdateAmlComplianceSettings(activeOrgId, {
 				obligatedSubjectKey: rfc,
@@ -264,19 +262,17 @@ export function ComplianceSettingsView() {
 			setSettings(result);
 			showSuccess(t("settings.compliance.savedSuccess"));
 		} catch (err) {
-			setError(
+			toast.error(
 				err instanceof Error ? err.message : t("settings.compliance.saveError"),
 			);
 		} finally {
 			setSaving(false);
 		}
-	}, [activeOrgId, canEdit, rfc, activityKey, showSuccess, t]);
+	}, [activeOrgId, canEdit, rfc, activityKey, validateRfc, showSuccess, t]);
 
 	const selectedActivity = VULNERABLE_ACTIVITIES.find(
 		(a) => a.value === activityKey,
 	);
-	const threshold =
-		REPORTING_THRESHOLDS[activityKey as keyof typeof REPORTING_THRESHOLDS];
 
 	if (loading) {
 		return (
@@ -288,293 +284,212 @@ export function ComplianceSettingsView() {
 
 	if (!activeOrgId) {
 		return (
-			<div className="space-y-6">
-				<div>
-					<h2 className="text-xl sm:text-2xl font-semibold tracking-tight">
-						{t("settings.compliance.title")}
-					</h2>
-					<p className="text-sm text-muted-foreground mt-1">
-						{t("settings.organization.noOrg")}
-					</p>
-				</div>
+			<div className="space-y-8">
+				<SettingsPageHeader
+					icon={Shield}
+					title={t("settings.compliance.title")}
+					description={t("settings.organization.noOrg")}
+				/>
 			</div>
 		);
 	}
 
 	return (
 		<TooltipProvider>
-			<div className="space-y-6 sm:space-y-8">
-				{/* Header */}
-				<div>
-					<h2 className="text-xl sm:text-2xl font-semibold tracking-tight flex items-center gap-2">
-						<Shield className="h-6 w-6" />
-						{t("settings.compliance.title")}
-					</h2>
-					<p className="text-sm text-muted-foreground mt-1">
-						{t("settings.compliance.description")}
-					</p>
-				</div>
+			<div className="space-y-8">
+				{/* Page Header */}
+				<SettingsPageHeader
+					icon={Shield}
+					title={t("settings.compliance.title")}
+					description={t("settings.compliance.description")}
+				/>
 
-				{/* Success/Error Messages */}
-				{successMessage && (
-					<div className="rounded-md bg-green-50 dark:bg-green-900/20 p-3 text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
-						<CheckCircle className="h-4 w-4" />
-						{successMessage}
-					</div>
+				{/* Warning Alert - show when not configured */}
+				{!settings && (
+					<Alert
+						variant="destructive"
+						className="bg-warning/10 border-warning/30 text-warning-foreground"
+					>
+						<AlertTriangle className="h-5 w-5" />
+						<AlertTitle className="font-semibold">
+							{t("settings.compliance.statusNotConfigured")}
+						</AlertTitle>
+						<AlertDescription>
+							{t("settings.compliance.statusNotConfiguredDesc")}
+						</AlertDescription>
+					</Alert>
 				)}
-				{error && (
-					<div className="rounded-md bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-800 dark:text-red-200 flex items-center gap-2">
-						<AlertTriangle className="h-4 w-4" />
-						{error}
-					</div>
-				)}
-
-				{/* Compliance Status */}
-				<Card
-					className={
-						settings
-							? "border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10"
-							: "border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10"
-					}
-				>
-					<CardContent className="p-4">
-						<div className="flex items-start gap-3">
-							{settings ? (
-								<CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
-							) : (
-								<AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5" />
-							)}
-							<div>
-								<h3 className="font-medium">
-									{settings
-										? t("settings.compliance.statusConfigured")
-										: t("settings.compliance.statusNotConfigured")}
-								</h3>
-								<p className="text-sm text-muted-foreground">
-									{settings
-										? t("settings.compliance.statusConfiguredDesc")
-										: t("settings.compliance.statusNotConfiguredDesc")}
-								</p>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
-
-				<Separator />
 
 				{/* Obligated Subject Information */}
-				<section className="space-y-4 sm:space-y-6">
-					<div>
-						<h3 className="text-base sm:text-lg font-medium flex items-center gap-2">
-							<Building2 className="h-5 w-5" />
-							{t("settings.compliance.obligatedSubject")}
-						</h3>
-						<p className="text-sm text-muted-foreground">
-							{t("settings.compliance.obligatedSubjectDesc")}
-						</p>
-					</div>
-
-					<div className="grid gap-4 sm:gap-6">
-						{/* RFC */}
-						<div className="grid gap-2">
-							<div className="flex items-center gap-2">
-								<Label htmlFor="rfc" className="font-medium">
-									{t("settings.compliance.rfc")}
-								</Label>
-								<Tooltip>
-									<TooltipTrigger>
-										<HelpCircle className="h-4 w-4 text-muted-foreground" />
-									</TooltipTrigger>
-									<TooltipContent className="max-w-xs">
-										<p>{t("settings.compliance.rfcHelp")}</p>
-									</TooltipContent>
-								</Tooltip>
-							</div>
-							<div className="flex flex-col gap-2">
+				<SettingsSection
+					title={t("settings.compliance.obligatedSubject")}
+					description={t("settings.compliance.obligatedSubjectDesc")}
+				>
+					<SettingsCard>
+						<div className="space-y-6">
+							{/* RFC */}
+							<div className="space-y-2">
+								<div className="flex items-center gap-2">
+									<Label htmlFor="rfc">{t("settings.compliance.rfc")}</Label>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+										</TooltipTrigger>
+										<TooltipContent className="max-w-xs">
+											<p>{t("settings.compliance.rfcHelp")}</p>
+										</TooltipContent>
+									</Tooltip>
+								</div>
 								<Input
 									id="rfc"
+									placeholder="XAXX010101000"
 									value={rfc}
 									onChange={(e) => handleRfcChange(e.target.value)}
-									placeholder="XAXX010101000"
 									maxLength={13}
 									disabled={!canEdit || saving}
-									className={`w-full sm:max-w-md font-mono uppercase ${
-										rfcError ? "border-red-500" : ""
-									}`}
+									className={`font-mono uppercase ${rfcError ? "border-destructive" : ""}`}
 								/>
-								{rfcError && <p className="text-sm text-red-500">{rfcError}</p>}
-								<p className="text-xs text-muted-foreground">
-									{t("settings.compliance.rfcFormat")}: 12-13{" "}
-									{t("settings.compliance.characters")}
-								</p>
-							</div>
-						</div>
-
-						{/* Vulnerable Activity */}
-						<div className="grid gap-2">
-							<div className="flex items-center gap-2">
-								<Label htmlFor="activity" className="font-medium">
-									{t("settings.compliance.vulnerableActivity")}
-								</Label>
-								<Tooltip>
-									<TooltipTrigger>
-										<HelpCircle className="h-4 w-4 text-muted-foreground" />
-									</TooltipTrigger>
-									<TooltipContent className="max-w-xs">
-										<p>{t("settings.compliance.activityHelp")}</p>
-									</TooltipContent>
-								</Tooltip>
-							</div>
-							<Select
-								value={activityKey}
-								onValueChange={setActivityKey}
-								disabled={!canEdit || saving}
-							>
-								<SelectTrigger id="activity" className="w-full sm:max-w-md">
-									<SelectValue
-										placeholder={t("settings.compliance.selectActivity")}
-									/>
-								</SelectTrigger>
-								<SelectContent>
-									{VULNERABLE_ACTIVITIES.map((activity) => (
-										<SelectItem key={activity.value} value={activity.value}>
-											<div className="flex flex-col">
-												<span>{activity.label}</span>
-												<span className="text-xs text-muted-foreground">
-													{activity.description}
-												</span>
-											</div>
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-
-							{selectedActivity && (
-								<p className="text-sm text-muted-foreground">
-									{selectedActivity.description}
-								</p>
-							)}
-						</div>
-
-						{/* Save Button */}
-						<div className="pt-2">
-							<Button
-								onClick={handleSave}
-								disabled={!canEdit || saving || !rfc || !activityKey}
-							>
-								{saving ? (
-									<>
-										<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-										{t("settings.saving")}
-									</>
-								) : (
-									t("settings.compliance.saveChanges")
+								{rfcError && (
+									<p className="text-xs text-destructive">{rfcError}</p>
 								)}
-							</Button>
-							{!canEdit && (
-								<p className="text-sm text-muted-foreground mt-2">
-									{t("settings.compliance.ownerOnly")}
-								</p>
-							)}
-						</div>
-					</div>
-				</section>
+							</div>
 
-				<Separator />
+							{/* Vulnerable Activity */}
+							<div className="space-y-2">
+								<div className="flex items-center gap-2">
+									<Label htmlFor="activity">
+										{t("settings.compliance.vulnerableActivity")}
+									</Label>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+										</TooltipTrigger>
+										<TooltipContent className="max-w-xs">
+											<p>{t("settings.compliance.activityHelp")}</p>
+										</TooltipContent>
+									</Tooltip>
+								</div>
+								<Select
+									value={activityKey}
+									onValueChange={setActivityKey}
+									disabled={!canEdit || saving}
+								>
+									<SelectTrigger>
+										<SelectValue
+											placeholder={t("settings.compliance.selectActivity")}
+										/>
+									</SelectTrigger>
+									<SelectContent>
+										{VULNERABLE_ACTIVITIES.map((activity) => (
+											<SelectItem key={activity.value} value={activity.value}>
+												{activity.label}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								{selectedActivity && (
+									<p className="text-sm text-muted-foreground">
+										{selectedActivity.description}
+									</p>
+								)}
+							</div>
+
+							<div className="pt-2">
+								<Button
+									onClick={handleSave}
+									disabled={!canEdit || saving || !rfc || !activityKey}
+								>
+									{saving ? (
+										<>
+											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+											{t("settings.saving")}
+										</>
+									) : (
+										<>
+											<Check className="mr-2 h-4 w-4" />
+											{t("settings.compliance.saveChanges")}
+										</>
+									)}
+								</Button>
+								{!canEdit && (
+									<p className="text-sm text-muted-foreground mt-2">
+										{t("settings.compliance.ownerOnly")}
+									</p>
+								)}
+							</div>
+						</div>
+					</SettingsCard>
+				</SettingsSection>
 
 				{/* Reporting Thresholds */}
-				<section className="space-y-4 sm:space-y-6">
-					<div>
-						<h3 className="text-base sm:text-lg font-medium">
-							{t("settings.compliance.reportingThresholds")}
-						</h3>
-						<p className="text-sm text-muted-foreground">
-							{t("settings.compliance.reportingThresholdsDesc")}
-						</p>
-					</div>
-
-					{threshold && activityKey && (
-						<Card>
-							<CardContent className="p-4">
-								<div className="grid gap-4">
-									<div className="flex justify-between items-center">
-										<span className="text-sm font-medium">
-											{t("settings.compliance.thresholdUMA")}
-										</span>
-										<Badge variant="secondary" className="text-base font-mono">
-											{threshold.threshold.toLocaleString()} UMAs
-										</Badge>
+				<SettingsSection
+					title={t("settings.compliance.reportingThresholds")}
+					description={t("settings.compliance.reportingThresholdsDesc")}
+				>
+					<Collapsible open={thresholdsOpen} onOpenChange={setThresholdsOpen}>
+						<SettingsCard>
+							<CollapsibleTrigger asChild>
+								<button
+									type="button"
+									className="w-full flex items-center justify-between text-left"
+								>
+									<span className="text-sm font-medium text-foreground">
+										{t("settings.compliance.viewAllThresholds")}
+									</span>
+									{thresholdsOpen ? (
+										<ChevronDown className="h-4 w-4 text-muted-foreground" />
+									) : (
+										<ChevronRight className="h-4 w-4 text-muted-foreground" />
+									)}
+								</button>
+							</CollapsibleTrigger>
+							<CollapsibleContent>
+								<div className="mt-4 pt-4 border-t border-border">
+									<div className="space-y-3">
+										{Object.entries(REPORTING_THRESHOLDS).map(
+											([key, value]) => {
+												const activity = VULNERABLE_ACTIVITIES.find(
+													(a) => a.value === key,
+												);
+												return (
+													<div
+														key={key}
+														className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/50"
+													>
+														<div>
+															<p className="text-sm font-medium text-foreground">
+																{activity?.label || key}
+															</p>
+															<p className="text-xs text-muted-foreground">
+																{activity?.description}
+															</p>
+														</div>
+														<div className="text-right">
+															<span className="text-sm font-semibold text-foreground">
+																{value.threshold.toLocaleString()} UMAs
+															</span>
+															<p className="text-xs text-muted-foreground font-mono">
+																$
+																{(value.threshold * CURRENT_UMA).toLocaleString(
+																	"es-MX",
+																	{
+																		minimumFractionDigits: 2,
+																		maximumFractionDigits: 2,
+																	},
+																)}{" "}
+																MXN
+															</p>
+														</div>
+													</div>
+												);
+											},
+										)}
 									</div>
-									<div className="flex justify-between items-center">
-										<span className="text-sm font-medium">
-											{t("settings.compliance.thresholdMXN")}
-										</span>
-										<Badge variant="outline" className="text-base font-mono">
-											$
-											{(threshold.threshold * CURRENT_UMA).toLocaleString(
-												"es-MX",
-												{
-													minimumFractionDigits: 2,
-													maximumFractionDigits: 2,
-												},
-											)}{" "}
-											MXN
-										</Badge>
-									</div>
-									<p className="text-xs text-muted-foreground flex items-center gap-1">
-										<Info className="h-3 w-3" />
-										{t("settings.compliance.umaNote")}: ${CURRENT_UMA} MXN
-										(2024)
-									</p>
 								</div>
-							</CardContent>
-						</Card>
-					)}
-
-					<Accordion type="single" collapsible className="w-full">
-						<AccordionItem value="all-thresholds">
-							<AccordionTrigger>
-								{t("settings.compliance.viewAllThresholds")}
-							</AccordionTrigger>
-							<AccordionContent>
-								<div className="grid gap-2 pt-2">
-									{Object.entries(REPORTING_THRESHOLDS).map(([key, value]) => {
-										const activity = VULNERABLE_ACTIVITIES.find(
-											(a) => a.value === key,
-										);
-										return (
-											<div
-												key={key}
-												className="flex justify-between items-center py-2 px-3 rounded-md hover:bg-muted/50"
-											>
-												<div>
-													<span className="font-medium">
-														{activity?.label || key}
-													</span>
-													<p className="text-xs text-muted-foreground">
-														{activity?.description}
-													</p>
-												</div>
-												<div className="text-right">
-													<span className="font-mono text-sm">
-														{value.threshold.toLocaleString()} UMAs
-													</span>
-													<p className="text-xs text-muted-foreground font-mono">
-														$
-														{(value.threshold * CURRENT_UMA).toLocaleString(
-															"es-MX",
-														)}{" "}
-														MXN
-													</p>
-												</div>
-											</div>
-										);
-									})}
-								</div>
-							</AccordionContent>
-						</AccordionItem>
-					</Accordion>
-				</section>
+							</CollapsibleContent>
+						</SettingsCard>
+					</Collapsible>
+				</SettingsSection>
 			</div>
 		</TooltipProvider>
 	);

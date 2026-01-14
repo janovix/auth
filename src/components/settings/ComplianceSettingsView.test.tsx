@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ComplianceSettingsView } from "./ComplianceSettingsView";
 import * as settingsClient from "@/lib/settings/settingsClient";
+import { mockToast } from "@/test/setup";
 
 // Mock the settings client
 vi.mock("@/lib/settings/settingsClient", () => ({
@@ -198,7 +199,7 @@ describe("ComplianceSettingsView", () => {
 			expect(rfcInput).not.toBeDisabled();
 		});
 
-		it("shows compliance status - configured", async () => {
+		it("does not show warning when compliance is configured", async () => {
 			vi.mocked(settingsClient.getAmlComplianceSettings).mockResolvedValue(
 				mockAmlSettings,
 			);
@@ -209,9 +210,10 @@ describe("ComplianceSettingsView", () => {
 			render(<ComplianceSettingsView />);
 
 			await waitFor(() => {
+				// When configured, the warning alert should not be shown
 				expect(
-					screen.getByText("settings.compliance.statusConfigured"),
-				).toBeInTheDocument();
+					screen.queryByText("settings.compliance.statusNotConfigured"),
+				).not.toBeInTheDocument();
 			});
 		});
 
@@ -245,7 +247,7 @@ describe("ComplianceSettingsView", () => {
 			render(<ComplianceSettingsView />);
 
 			await waitFor(() => {
-				expect(screen.getByText("Network error")).toBeInTheDocument();
+				expect(mockToast.error).toHaveBeenCalledWith("Network error");
 			});
 		});
 
@@ -298,7 +300,7 @@ describe("ComplianceSettingsView", () => {
 			});
 		});
 
-		it("shows reporting threshold information when activity is selected", async () => {
+		it("shows reporting threshold section", async () => {
 			vi.mocked(settingsClient.getAmlComplianceSettings).mockResolvedValue(
 				mockAmlSettings,
 			);
@@ -309,9 +311,9 @@ describe("ComplianceSettingsView", () => {
 			render(<ComplianceSettingsView />);
 
 			await waitFor(() => {
-				// The threshold info card shows when an activity is selected
+				// The reporting thresholds section should be visible
 				expect(
-					screen.getByText("settings.compliance.thresholdUMA"),
+					screen.getByText("settings.compliance.reportingThresholds"),
 				).toBeInTheDocument();
 			});
 		});

@@ -55,6 +55,7 @@ const translations = {
 		"login.otp.resendError": "Error resending code. Try again.",
 		"login.otp.resendSuccess":
 			"New code sent. Check your email (valid for 5 minutes).",
+		"login.otp.resendWait": "Wait {seconds}s to resend",
 		"login.wrongEmail": "Wrong email?",
 		"login.changeEmail": "Change email",
 		"login.terms": "By signing in, you accept our",
@@ -65,6 +66,8 @@ const translations = {
 		"login.success.auth": "Authentication successful",
 		"login.success.message":
 			"We sent you a 6-digit code. Check your email and spam.",
+		"login.success.rateLimited":
+			"A code was already sent recently. Check your email and spam.",
 		"login.error": "Error",
 
 		// Verify email page
@@ -146,6 +149,8 @@ const translations = {
 		"settings.profile.uploading": "Uploading...",
 		"settings.profile.uploadFailed": "Failed to upload avatar",
 		"settings.profile.avatarSet": "Avatar uploaded",
+		"settings.profile.readyToSave": "Avatar ready to save",
+		"settings.profile.saveAvatar": "Save Avatar",
 		"settings.profile.advancedOptions": "Advanced options (manual URL)",
 		"settings.payments.title": "Payment Methods",
 		"settings.payments.description": "Manage your payment methods",
@@ -477,7 +482,8 @@ const translations = {
 		"onboarding.avatar.invalidType":
 			"Invalid file type. Please use JPG, PNG, GIF or WebP.",
 		"onboarding.avatar.tooLarge": "File is too large. Maximum size is 5MB.",
-		"onboarding.avatar.uploadFailed": "Failed to upload image. Please try again.",
+		"onboarding.avatar.uploadFailed":
+			"Failed to upload image. Please try again.",
 		"onboarding.avatar.saved": "Avatar ready to upload",
 		"onboarding.button.continue": "Continue",
 		"onboarding.button.saving": "Saving...",
@@ -485,7 +491,11 @@ const translations = {
 		"onboarding.success.title": "Profile complete!",
 		"onboarding.success.message": "Your profile has been saved. Redirecting...",
 		"onboarding.error.title": "Error",
-		"onboarding.error.updateFailed": "Failed to update profile. Please try again.",
+		"onboarding.error.updateFailed":
+			"Failed to update profile. Please try again.",
+		"onboarding.exit.button": "Exit and sign out",
+		"onboarding.exit.loggingOut": "Signing out...",
+		"onboarding.exit.description": "Not ready to complete your profile yet?",
 	},
 	es: {
 		// Login page
@@ -519,6 +529,7 @@ const translations = {
 		"login.otp.resendError": "Error al reenviar el código. Intenta de nuevo.",
 		"login.otp.resendSuccess":
 			"Nuevo código enviado. Revisa tu correo (válido por 5 minutos).",
+		"login.otp.resendWait": "Espera {seconds}s para reenviar",
 		"login.wrongEmail": "¿Correo incorrecto?",
 		"login.changeEmail": "Cambiar correo",
 		"login.terms": "Al iniciar sesión, aceptas nuestros",
@@ -529,6 +540,8 @@ const translations = {
 		"login.success.auth": "Autenticación exitosa",
 		"login.success.message":
 			"Te enviamos un código de 6 dígitos. Revisa tu correo y spam.",
+		"login.success.rateLimited":
+			"Ya te enviamos un código recientemente. Revisa tu correo y spam.",
 		"login.error": "Error",
 
 		// Verify email page
@@ -614,6 +627,8 @@ const translations = {
 		"settings.profile.uploading": "Subiendo...",
 		"settings.profile.uploadFailed": "Error al subir avatar",
 		"settings.profile.avatarSet": "Avatar subido",
+		"settings.profile.readyToSave": "Avatar listo para guardar",
+		"settings.profile.saveAvatar": "Guardar Avatar",
 		"settings.profile.advancedOptions": "Opciones avanzadas (URL manual)",
 		"settings.payments.title": "Métodos de pago",
 		"settings.payments.description": "Administra tus métodos de pago",
@@ -964,11 +979,13 @@ const translations = {
 		"onboarding.button.saving": "Guardando...",
 		"onboarding.button.uploading": "Subiendo foto...",
 		"onboarding.success.title": "¡Perfil completo!",
-		"onboarding.success.message":
-			"Tu perfil ha sido guardado. Redirigiendo...",
+		"onboarding.success.message": "Tu perfil ha sido guardado. Redirigiendo...",
 		"onboarding.error.title": "Error",
 		"onboarding.error.updateFailed":
 			"Error al actualizar el perfil. Por favor intenta de nuevo.",
+		"onboarding.exit.button": "Salir y cerrar sesión",
+		"onboarding.exit.loggingOut": "Cerrando sesión...",
+		"onboarding.exit.description": "¿No estás listo para completar tu perfil?",
 	},
 };
 

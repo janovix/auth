@@ -39,6 +39,10 @@
 	--sidebar-accent-foreground: oklch(0.2626 0.0057 301.1438);
 	--sidebar-border: oklch(0.8452 0 0);
 	--sidebar-ring: oklch(0.5477 0.2518 292.8796);
+	--success: oklch(0.6 0.18 145);
+	--success-foreground: oklch(1 0 0);
+	--warning: oklch(0.75 0.15 75);
+	--warning-foreground: oklch(0.3 0.1 75);
 	--font-sans: Inter, ui-sans-serif, sans-serif, system-ui;
 	--font-serif: serif;
 	--font-mono: monospace;
@@ -99,6 +103,10 @@
 	--sidebar-accent-foreground: oklch(0.9319 0.004 286.3215);
 	--sidebar-border: oklch(0.3703 0.0119 285.8054);
 	--sidebar-ring: oklch(0.8285 0.1089 307.5875);
+	--success: oklch(0.55 0.18 145);
+	--success-foreground: oklch(0.95 0.01 270);
+	--warning: oklch(0.7 0.15 75);
+	--warning-foreground: oklch(0.15 0.05 75);
 	--font-sans: Inter, ui-sans-serif, sans-serif, system-ui;
 	--font-serif: serif;
 	--font-mono: monospace;
@@ -157,6 +165,10 @@
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
+	--color-success: var(--success);
+	--color-success-foreground: var(--success-foreground);
+	--color-warning: var(--warning);
+	--color-warning-foreground: var(--warning-foreground);
 
 	--font-sans: var(--font-sans);
 	--font-mono: var(--font-mono);

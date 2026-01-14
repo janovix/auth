@@ -1,32 +1,30 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import {
+	CreditCard,
+	Check,
+	Building2,
+	Users,
+	FileText,
+	Zap,
+} from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import {
 	getSubscriptionStatus,
 	getPlans,
-	getInvoices,
-	getLicenseStatus,
-	createCheckoutSession,
+	startSubscription,
 	cancelSubscription,
-	reactivateSubscription,
-	activateLicense,
-	type SubscriptionStatus,
-	type Plan,
-	type Invoice,
-	type LicenseStatus,
+	getPortalUrl,
+	type UserSubscriptionStatus,
+	type PlanLimits,
+	isSubscriptionActive,
+	getStatusBadgeInfo,
+	formatDate,
 } from "@/lib/billing";
 import { Spinner } from "@/components/ui";
-import {
-	CurrentPlanCard,
-	UsageMeter,
-	PlanComparisonGrid,
-	InvoiceHistory,
-	LicenseActivation,
-	CustomerPortalButton,
-} from "@/components/billing";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -37,8 +35,24 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { formatDate } from "@/lib/billing";
-import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardFooter,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { SettingsPageHeader } from "@/components/settings";
+
+interface PlanInfo {
+	name: string;
+	priceId: string;
+	limits: PlanLimits;
+}
 
 export function BillingSettingsView() {
 	const { t } = useLanguage();
@@ -47,62 +61,22 @@ export function BillingSettingsView() {
 
 	const [loading, setLoading] = useState(true);
 	const [actionLoading, setActionLoading] = useState(false);
-	const [subscription, setSubscription] = useState<SubscriptionStatus | null>(
-		null,
-	);
-	const [plans, setPlans] = useState<Plan[]>([]);
-	const [invoices, setInvoices] = useState<Invoice[]>([]);
-	const [license, setLicense] = useState<LicenseStatus | null>(null);
+	const [subscription, setSubscription] =
+		useState<UserSubscriptionStatus | null>(null);
+	const [plans, setPlans] = useState<PlanInfo[]>([]);
 	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
-
-	const activeOrgId = (
-		session?.session as { activeOrganizationId?: string } | undefined
-	)?.activeOrganizationId;
-
-	// Check if user is org owner
-	const [isOwner, setIsOwner] = useState(false);
-
-	useEffect(() => {
-		async function checkOwnership() {
-			if (!activeOrgId || !session?.user?.id) return;
-
-			try {
-				const authServiceUrl = getAuthCoreBaseUrl();
-				const response = await fetch(
-					`${authServiceUrl}/api/settings/organization/${activeOrgId}/membership`,
-					{ credentials: "include" },
-				);
-
-				if (response.ok) {
-					const result = (await response.json()) as {
-						data?: { role?: string };
-					};
-					setIsOwner(result.data?.role === "owner");
-				}
-			} catch {
-				setIsOwner(false);
-			}
-		}
-
-		checkOwnership();
-	}, [activeOrgId, session?.user?.id]);
 
 	// Load billing data
 	const loadBillingData = useCallback(async () => {
 		setLoading(true);
 		try {
-			const [subStatus, planList, invoiceList, licenseStatus] =
-				await Promise.all([
-					getSubscriptionStatus().catch(() => null),
-					getPlans().catch(() => []),
-					getInvoices().catch(() => []),
-					getLicenseStatus().catch(() => null),
-				]);
+			const [subStatus, planList] = await Promise.all([
+				getSubscriptionStatus().catch(() => null),
+				getPlans().catch(() => []),
+			]);
 
 			setSubscription(subStatus);
 			setPlans(planList);
-			setInvoices(invoiceList);
-			setLicense(licenseStatus);
 		} catch (error) {
 			console.error("Failed to load billing data:", error);
 			toast({
@@ -115,24 +89,29 @@ export function BillingSettingsView() {
 	}, [t, toast]);
 
 	useEffect(() => {
-		if (activeOrgId) {
-			loadBillingData();
-		}
-	}, [activeOrgId, loadBillingData]);
+		loadBillingData();
+	}, [loadBillingData]);
 
 	// Handle plan selection / upgrade
-	const handleSelectPlan = async (planId: string) => {
+	const handleSelectPlan = async (planName: "business" | "pro") => {
 		setActionLoading(true);
 		try {
-			const successUrl = `${window.location.origin}/settings/billing?success=true`;
-			const cancelUrl = `${window.location.origin}/settings/billing?canceled=true`;
-
-			const { url } = await createCheckoutSession(
-				planId,
-				successUrl,
-				cancelUrl,
-			);
-			window.location.href = url;
+			// If user already has a subscription, use Customer Portal for plan changes
+			if (subscription?.hasSubscription) {
+				const returnUrl = `${window.location.origin}/settings/billing?success=true`;
+				const { url } = await getPortalUrl(returnUrl);
+				window.location.href = url;
+			} else {
+				// New subscription - use checkout
+				const successUrl = `${window.location.origin}/settings/billing?success=true`;
+				const cancelUrl = `${window.location.origin}/settings/billing?canceled=true`;
+				const { url } = await startSubscription(
+					planName,
+					successUrl,
+					cancelUrl,
+				);
+				window.location.href = url;
+			}
 		} catch (error) {
 			console.error("Checkout error:", error);
 			toast({
@@ -167,52 +146,6 @@ export function BillingSettingsView() {
 		}
 	};
 
-	// Handle reactivate subscription
-	const handleReactivate = async () => {
-		setActionLoading(true);
-		try {
-			await reactivateSubscription();
-			toast({
-				title: t("settings.billing.reactivateSuccess"),
-			});
-			await loadBillingData();
-		} catch (error) {
-			console.error("Reactivate error:", error);
-			toast({
-				title: t("settings.billing.error"),
-				description: error instanceof Error ? error.message : undefined,
-				variant: "destructive",
-			});
-		} finally {
-			setActionLoading(false);
-		}
-	};
-
-	// Handle license activation
-	const handleActivateLicense = async (licenseKey: string) => {
-		setActionLoading(true);
-		try {
-			await activateLicense(licenseKey);
-			toast({
-				title: t("settings.billing.licenseSuccess"),
-			});
-			await loadBillingData();
-		} catch (error) {
-			console.error("License activation error:", error);
-			throw error; // Re-throw so the component can display the error
-		} finally {
-			setActionLoading(false);
-		}
-	};
-
-	if (!activeOrgId) {
-		return (
-			<div className="text-center py-8 text-muted-foreground">
-				{t("settings.organization.noOrg")}
-			</div>
-		);
-	}
-
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center py-12">
@@ -221,100 +154,228 @@ export function BillingSettingsView() {
 		);
 	}
 
-	return (
-		<div className="space-y-6">
-			{/* Header */}
-			<div>
-				<h2 className="text-2xl font-bold tracking-tight">
-					{t("settings.billing.title")}
-				</h2>
-				<p className="text-muted-foreground">
-					{t("settings.billing.description")}
-				</p>
-			</div>
+	const isActive = isSubscriptionActive(subscription);
+	const statusInfo = getStatusBadgeInfo(subscription?.status ?? null);
 
-			{/* Current Plan */}
-			<CurrentPlanCard
-				subscription={subscription}
-				onUpgrade={() => {
-					document
-						.getElementById("plan-selection")
-						?.scrollIntoView({ behavior: "smooth" });
-				}}
-				onCancel={() => setCancelDialogOpen(true)}
-				onReactivate={handleReactivate}
-				isOwner={isOwner}
-				loading={actionLoading}
+	return (
+		<div className="space-y-8">
+			{/* Header */}
+			<SettingsPageHeader
+				icon={CreditCard}
+				title={t("settings.billing.title")}
+				description={t("settings.billing.description")}
 			/>
 
-			{/* Usage - show for both active subscriptions and free tier */}
-			{(subscription?.hasSubscription || subscription?.planTier === "free") &&
-				subscription?.usage && (
-					<UsageMeter
-						usage={subscription.usage}
-						periodEnd={subscription.currentPeriodEnd}
-					/>
+			{/* Current Subscription Status */}
+			<Card>
+				<CardHeader>
+					<div className="flex items-center justify-between">
+						<div>
+							<CardTitle>
+								{subscription?.plan
+									? `${subscription.plan.charAt(0).toUpperCase()}${subscription.plan.slice(1)} Plan`
+									: "No Active Subscription"}
+							</CardTitle>
+							<CardDescription>
+								{subscription?.hasSubscription
+									? subscription.isTrialing
+										? `Trial - ${subscription.trialDaysRemaining} days remaining`
+										: `Active since ${subscription.currentPeriodStart ? formatDate(subscription.currentPeriodStart) : "N/A"}`
+									: "Subscribe to create organizations and access features"}
+							</CardDescription>
+						</div>
+						{subscription?.status && (
+							<Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+						)}
+					</div>
+				</CardHeader>
+				<CardContent>
+					<div className="grid grid-cols-2 gap-4">
+						<div className="flex items-center gap-2">
+							<Building2 className="h-4 w-4 text-muted-foreground" />
+							<span className="text-sm">
+								Organizations: {subscription?.organizationsOwned ?? 0} /{" "}
+								{subscription?.organizationsLimit ?? 0}
+							</span>
+						</div>
+						{subscription?.currentPeriodEnd && (
+							<div className="flex items-center gap-2">
+								<FileText className="h-4 w-4 text-muted-foreground" />
+								<span className="text-sm">
+									{subscription.cancelAtPeriodEnd ? "Ends" : "Renews"}:{" "}
+									{formatDate(subscription.currentPeriodEnd)}
+								</span>
+							</div>
+						)}
+					</div>
+
+					{/* Organization Usage Progress */}
+					{subscription?.hasSubscription &&
+						subscription.organizationsLimit > 0 && (
+							<div className="mt-4">
+								<div className="flex justify-between text-sm mb-1">
+									<span>Organization Usage</span>
+									<span>
+										{subscription.organizationsOwned} /{" "}
+										{subscription.organizationsLimit}
+									</span>
+								</div>
+								<Progress
+									value={
+										(subscription.organizationsOwned /
+											subscription.organizationsLimit) *
+										100
+									}
+									className="h-2"
+								/>
+							</div>
+						)}
+				</CardContent>
+				{isActive && (
+					<CardFooter className="flex gap-2">
+						<Button
+							variant="default"
+							onClick={async () => {
+								setActionLoading(true);
+								try {
+									const { url } = await getPortalUrl(
+										`${window.location.origin}/settings/billing`,
+									);
+									window.location.href = url;
+								} catch (error) {
+									toast({
+										title: t("settings.billing.error"),
+										description:
+											error instanceof Error ? error.message : undefined,
+										variant: "destructive",
+									});
+								} finally {
+									setActionLoading(false);
+								}
+							}}
+							disabled={actionLoading}
+						>
+							{t("settings.billing.managePortal")}
+						</Button>
+						<Button
+							variant="outline"
+							onClick={() => setCancelDialogOpen(true)}
+							disabled={actionLoading}
+						>
+							Cancel Subscription
+						</Button>
+					</CardFooter>
 				)}
-
-			{/* Enterprise License */}
-			{(!subscription?.hasSubscription ||
-				subscription.isEnterprise ||
-				license) && (
-				<LicenseActivation
-					license={license}
-					onActivate={handleActivateLicense}
-					isOwner={isOwner}
-					loading={actionLoading}
-				/>
-			)}
-
-			{/* Stripe Portal Button */}
-			{subscription?.hasSubscription && isOwner && (
-				<div className="flex justify-end">
-					<CustomerPortalButton disabled={actionLoading} />
-				</div>
-			)}
+			</Card>
 
 			{/* Plan Selection */}
-			{!subscription?.isEnterprise && (
-				<div id="plan-selection">
-					<PlanComparisonGrid
-						plans={plans}
-						currentPlanId={
-							subscription?.hasSubscription
-								? plans.find((p) => p.tier === subscription.planTier)?.id
-								: null
-						}
-						onSelectPlan={handleSelectPlan}
-						loading={actionLoading}
-					/>
-				</div>
-			)}
+			<div id="plan-selection" className="space-y-4">
+				<h3 className="text-lg font-semibold">Choose Your Plan</h3>
+				<div className="grid md:grid-cols-2 gap-6">
+					{plans.map((plan) => {
+						const isCurrent = subscription?.plan === plan.name;
+						const isPro = plan.name === "pro";
 
-			{/* Invoice History */}
-			{invoices.length > 0 && <InvoiceHistory invoices={invoices} />}
+						return (
+							<Card
+								key={plan.name}
+								className={`relative ${isPro ? "border-primary" : ""}`}
+							>
+								{isPro && (
+									<div className="absolute -top-3 left-1/2 -translate-x-1/2">
+										<Badge className="bg-primary">Recommended</Badge>
+									</div>
+								)}
+								<CardHeader>
+									<CardTitle className="flex items-center gap-2">
+										{plan.name.charAt(0).toUpperCase() + plan.name.slice(1)}
+										{isCurrent && <Badge variant="secondary">Current</Badge>}
+									</CardTitle>
+									<CardDescription>
+										{isPro
+											? "For growing teams with multiple projects"
+											: "For individuals and small teams"}
+									</CardDescription>
+								</CardHeader>
+								<CardContent className="space-y-4">
+									<ul className="space-y-2">
+										<li className="flex items-center gap-2">
+											<Check className="h-4 w-4 text-green-500" />
+											<span>
+												{plan.limits.maxOrganizations} Organization
+												{plan.limits.maxOrganizations > 1 ? "s" : ""}
+											</span>
+										</li>
+										<li className="flex items-center gap-2">
+											<Check className="h-4 w-4 text-green-500" />
+											<span>{plan.limits.noticesPerMonth} Notices/month</span>
+										</li>
+										<li className="flex items-center gap-2">
+											<Check className="h-4 w-4 text-green-500" />
+											<span>{plan.limits.usersPerOrg} Users per org</span>
+										</li>
+										<li className="flex items-center gap-2">
+											<Check className="h-4 w-4 text-green-500" />
+											<span>14-day free trial</span>
+										</li>
+										{isPro && (
+											<>
+												<li className="flex items-center gap-2">
+													<Zap className="h-4 w-4 text-yellow-500" />
+													<span>Priority support</span>
+												</li>
+												<li className="flex items-center gap-2">
+													<Zap className="h-4 w-4 text-yellow-500" />
+													<span>Advanced features</span>
+												</li>
+											</>
+										)}
+									</ul>
+								</CardContent>
+								<CardFooter>
+									<Button
+										className="w-full"
+										variant={isPro ? "default" : "outline"}
+										onClick={() =>
+											handleSelectPlan(plan.name as "business" | "pro")
+										}
+										disabled={actionLoading || isCurrent}
+									>
+										{isCurrent
+											? "Current Plan"
+											: subscription?.hasSubscription
+												? "Switch to " +
+													plan.name.charAt(0).toUpperCase() +
+													plan.name.slice(1)
+												: "Start Free Trial"}
+									</Button>
+								</CardFooter>
+							</Card>
+						);
+					})}
+				</div>
+			</div>
 
 			{/* Cancel Confirmation Dialog */}
 			<AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>{t("settings.billing.cancel")}?</AlertDialogTitle>
+						<AlertDialogTitle>Cancel Subscription?</AlertDialogTitle>
 						<AlertDialogDescription>
-							{t("settings.billing.cancelConfirm").replace(
-								"{date}",
-								subscription?.currentPeriodEnd
-									? formatDate(subscription.currentPeriodEnd)
-									: "",
-							)}
+							Your subscription will remain active until{" "}
+							{subscription?.currentPeriodEnd
+								? formatDate(subscription.currentPeriodEnd)
+								: "the end of your billing period"}
+							. You can reactivate anytime before then.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogCancel>Keep Subscription</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={handleCancel}
 							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 						>
-							{t("settings.billing.cancel")}
+							Cancel Subscription
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

@@ -32,6 +32,8 @@ import {
 	LogOut,
 	Menu,
 	CreditCard,
+	CheckCircle2,
+	Circle,
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useLanguage } from "@/contexts/language-context";
@@ -41,50 +43,86 @@ import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { authClient } from "@/lib/auth/authClient";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 
+interface NavItem {
+	name: string;
+	href: string;
+	icon: typeof User;
+	complete: boolean;
+}
+
 function SidebarContent({
 	pathname,
 	onNavClick,
+	completionStatus,
 }: {
 	pathname: string;
 	onNavClick?: () => void;
+	completionStatus: Record<string, boolean>;
 }) {
 	const { t } = useLanguage();
 
-	const navigation = [
+	const navigation: NavItem[] = [
 		{
 			name: t("settings.nav.personal"),
 			href: "/settings",
 			icon: User,
+			complete: completionStatus.personal ?? true,
 		},
 		{
 			name: t("settings.nav.organization"),
 			href: "/settings/organization",
 			icon: Building2,
+			complete: completionStatus.organization ?? true,
 		},
 		{
 			name: t("settings.nav.billing"),
 			href: "/settings/billing",
 			icon: CreditCard,
+			complete: completionStatus.billing ?? false,
 		},
 		{
 			name: t("settings.nav.compliance"),
 			href: "/settings/compliance",
 			icon: Shield,
+			complete: completionStatus.compliance ?? false,
 		},
 		{
 			name: t("settings.nav.team"),
 			href: "/settings/team",
 			icon: Users,
+			complete: completionStatus.team ?? true,
 		},
 	];
 
+	const completedCount = navigation.filter((s) => s.complete).length;
+
 	return (
-		<>
+		<div className="p-4 lg:p-6">
 			<div className="mb-6">
-				<h1 className="text-lg font-semibold">{t("settings.title")}</h1>
-				<p className="text-sm text-muted-foreground">
+				<h2 className="text-lg font-semibold text-foreground">
+					{t("settings.title")}
+				</h2>
+				<p className="text-sm text-muted-foreground mt-0.5">
 					{t("settings.description")}
 				</p>
+			</div>
+
+			{/* Setup Progress */}
+			<div className="mb-6 p-3 rounded-lg bg-secondary">
+				<div className="flex items-center justify-between mb-2">
+					<span className="text-xs font-medium text-muted-foreground">
+						{t("settings.setupProgress") || "Setup Progress"}
+					</span>
+					<span className="text-xs font-semibold text-foreground">
+						{completedCount}/{navigation.length}
+					</span>
+				</div>
+				<div className="h-1.5 bg-muted rounded-full overflow-hidden">
+					<div
+						className="h-full bg-primary rounded-full transition-all duration-300"
+						style={{ width: `${(completedCount / navigation.length) * 100}%` }}
+					/>
+				</div>
 			</div>
 
 			<nav className="space-y-1">
@@ -98,19 +136,37 @@ function SidebarContent({
 							href={item.href}
 							onClick={onNavClick}
 							className={cn(
-								"flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-colors",
+								"w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+								"hover:bg-accent",
 								isActive
-									? "bg-primary text-primary-foreground font-medium"
-									: "text-muted-foreground hover:bg-accent hover:text-foreground",
+									? "bg-primary text-primary-foreground shadow-sm"
+									: "text-muted-foreground hover:text-foreground",
 							)}
 						>
 							<item.icon className="h-4 w-4 shrink-0" />
-							<span className="truncate">{item.name}</span>
+							<span className="flex-1 text-left truncate">{item.name}</span>
+							{item.complete ? (
+								<CheckCircle2
+									className={cn(
+										"h-4 w-4 shrink-0",
+										isActive ? "text-primary-foreground/70" : "text-success",
+									)}
+								/>
+							) : (
+								<Circle
+									className={cn(
+										"h-4 w-4 shrink-0",
+										isActive
+											? "text-primary-foreground/40"
+											: "text-muted-foreground/50",
+									)}
+								/>
+							)}
 						</Link>
 					);
 				})}
 			</nav>
-		</>
+		</div>
 	);
 }
 
@@ -138,6 +194,17 @@ export default function SettingsLayout({
 		Array<{ id: string; name: string; slug: string; logo?: string | null }>
 	>([]);
 	const [orgsLoading, setOrgsLoading] = useState(false);
+
+	// Completion status for each section
+	const [completionStatus, setCompletionStatus] = useState<
+		Record<string, boolean>
+	>({
+		personal: true, // Profile always considered complete if user exists
+		organization: true, // Org exists
+		billing: false, // Has active subscription
+		compliance: false, // Has AML settings
+		team: true, // Has at least one member (owner)
+	});
 
 	// Fetch organizations and org name
 	useEffect(() => {
@@ -218,6 +285,50 @@ export default function SettingsLayout({
 		loadOrganizations();
 	}, [activeOrgId]);
 
+	// Load completion status for sections
+	useEffect(() => {
+		async function loadCompletionStatus() {
+			if (!activeOrgId) return;
+
+			try {
+				const authServiceUrl = getAuthCoreBaseUrl();
+
+				// Check compliance settings
+				const complianceResponse = await fetch(
+					`${authServiceUrl}/api/settings/organization/${activeOrgId}/aml-compliance`,
+					{ credentials: "include" },
+				);
+				if (complianceResponse.ok) {
+					const complianceData = (await complianceResponse.json()) as {
+						data?: { obligatedSubjectKey?: string };
+					};
+					setCompletionStatus((prev) => ({
+						...prev,
+						compliance: Boolean(complianceData.data?.obligatedSubjectKey),
+					}));
+				}
+
+				// Check subscription status (billing)
+				const billingResponse = await fetch(
+					`${authServiceUrl}/api/billing/subscription/status`,
+					{ credentials: "include" },
+				);
+				if (billingResponse.ok) {
+					const billingData = (await billingResponse.json()) as {
+						data?: { hasSubscription?: boolean };
+					};
+					setCompletionStatus((prev) => ({
+						...prev,
+						billing: Boolean(billingData.data?.hasSubscription),
+					}));
+				}
+			} catch {
+				// Silently fail - completion status is optional
+			}
+		}
+		loadCompletionStatus();
+	}, [activeOrgId]);
+
 	const handleOrganizationChange = async (orgId: string) => {
 		if (orgId === activeOrgId) return;
 
@@ -253,11 +364,12 @@ export default function SettingsLayout({
 	};
 
 	return (
-		<div className="min-h-screen bg-background pt-14">
+		<div className="min-h-screen bg-background">
 			{/* Top Navigation */}
-			<header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-				<div className="flex h-14 items-center justify-between px-3 sm:px-4 lg:px-6">
-					<div className="flex items-center gap-2 sm:gap-4">
+			<header className="h-14 border-b border-border bg-card sticky top-0 z-40">
+				<div className="h-full px-3 sm:px-4 lg:px-6 flex items-center justify-between">
+					{/* Logo & Org Selector */}
+					<div className="flex items-center gap-2">
 						<Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
 							<SheetTrigger asChild>
 								<Button
@@ -275,12 +387,11 @@ export default function SettingsLayout({
 										<Logo variant="logo" width={100} height={18} />
 									</SheetTitle>
 								</SheetHeader>
-								<div className="p-4">
-									<SidebarContent
-										pathname={pathname}
-										onNavClick={() => setMobileOpen(false)}
-									/>
-								</div>
+								<SidebarContent
+									pathname={pathname}
+									onNavClick={() => setMobileOpen(false)}
+									completionStatus={completionStatus}
+								/>
 							</SheetContent>
 						</Sheet>
 
@@ -410,13 +521,17 @@ export default function SettingsLayout({
 			</header>
 
 			<div className="flex">
-				<aside className="fixed top-14 left-0 hidden lg:block h-[calc(100vh-3.5rem)] w-64 shrink-0 border-r border-border bg-background p-4 overflow-y-auto">
-					<SidebarContent pathname={pathname} />
+				{/* Desktop Sidebar */}
+				<aside className="hidden lg:block w-64 border-r border-border bg-card min-h-[calc(100vh-56px)] sticky top-14">
+					<SidebarContent
+						pathname={pathname}
+						completionStatus={completionStatus}
+					/>
 				</aside>
 
-				{/* Main Content - full width on mobile */}
-				<main className="flex-1 overflow-auto min-w-0 lg:ml-64">
-					<div className="mx-auto max-w-3xl p-4 sm:p-6 lg:p-8">{children}</div>
+				{/* Main Content */}
+				<main className="flex-1 min-h-[calc(100vh-56px)]">
+					<div className="max-w-4xl mx-auto p-6 lg:p-8">{children}</div>
 				</main>
 			</div>
 		</div>

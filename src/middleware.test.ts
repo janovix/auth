@@ -84,17 +84,35 @@ describe("middleware", () => {
 		});
 	});
 
-	describe("users with valid session and name set", () => {
+	describe("users with valid session, name set, and organization", () => {
 		beforeEach(() => {
 			mockGetSessionCookie.mockReturnValue("valid-session-token");
-			mockFetch.mockResolvedValue({
-				ok: true,
-				json: () =>
-					Promise.resolve({
-						session: { id: "123" },
-						user: { id: "u1", name: "John Doe", email: "john@example.com" },
-					}),
-			});
+			// Mock both fetch calls: first for get-session, then for onboarding-status
+			mockFetch
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							session: { id: "123" },
+							user: { id: "u1", name: "John Doe", email: "john@example.com" },
+						}),
+				})
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							success: true,
+							data: {
+								profileComplete: true,
+								hasOrganization: true,
+								hasSubscription: true,
+								subscriptionStatus: "active",
+								plan: "business",
+								pendingInvitation: null,
+								canCreateOrganization: true,
+							},
+						}),
+				});
 		});
 
 		it("should allow access to account routes", async () => {
@@ -159,14 +177,32 @@ describe("middleware", () => {
 	describe("users with valid session but no name (needs onboarding)", () => {
 		beforeEach(() => {
 			mockGetSessionCookie.mockReturnValue("valid-session-token");
-			mockFetch.mockResolvedValue({
-				ok: true,
-				json: () =>
-					Promise.resolve({
-						session: { id: "123" },
-						user: { id: "u1", name: null, email: "john@example.com" },
-					}),
-			});
+			// Mock both fetch calls: first for get-session, then for onboarding-status
+			mockFetch
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							session: { id: "123" },
+							user: { id: "u1", name: null, email: "john@example.com" },
+						}),
+				})
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							success: true,
+							data: {
+								profileComplete: false,
+								hasOrganization: false,
+								hasSubscription: false,
+								subscriptionStatus: null,
+								plan: null,
+								pendingInvitation: null,
+								canCreateOrganization: false,
+							},
+						}),
+				});
 		});
 
 		it("should redirect to onboarding from account routes", async () => {
@@ -176,7 +212,9 @@ describe("middleware", () => {
 			expect(response.status).toBe(307);
 			const location = response.headers.get("location");
 			expect(location).toContain("/onboarding");
-			expect(location).toContain("redirect_to=https%3A%2F%2Fauth.example.com%2Faccount");
+			expect(location).toContain(
+				"redirect_to=https%3A%2F%2Fauth.example.com%2Faccount",
+			);
 		});
 
 		it("should redirect to onboarding from settings routes", async () => {
@@ -186,7 +224,9 @@ describe("middleware", () => {
 			expect(response.status).toBe(307);
 			const location = response.headers.get("location");
 			expect(location).toContain("/onboarding");
-			expect(location).toContain("redirect_to=https%3A%2F%2Fauth.example.com%2Fsettings");
+			expect(location).toContain(
+				"redirect_to=https%3A%2F%2Fauth.example.com%2Fsettings",
+			);
 		});
 
 		it("should redirect to onboarding from login page with default redirect", async () => {
@@ -237,14 +277,32 @@ describe("middleware", () => {
 	describe("users with empty name string (needs onboarding)", () => {
 		beforeEach(() => {
 			mockGetSessionCookie.mockReturnValue("valid-session-token");
-			mockFetch.mockResolvedValue({
-				ok: true,
-				json: () =>
-					Promise.resolve({
-						session: { id: "123" },
-						user: { id: "u1", name: "   ", email: "john@example.com" },
-					}),
-			});
+			// Mock both fetch calls: first for get-session, then for onboarding-status
+			mockFetch
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							session: { id: "123" },
+							user: { id: "u1", name: "   ", email: "john@example.com" },
+						}),
+				})
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							success: true,
+							data: {
+								profileComplete: false,
+								hasOrganization: false,
+								hasSubscription: false,
+								subscriptionStatus: null,
+								plan: null,
+								pendingInvitation: null,
+								canCreateOrganization: false,
+							},
+						}),
+				});
 		});
 
 		it("should redirect to onboarding when name is empty/whitespace", async () => {
@@ -338,14 +396,32 @@ describe("middleware", () => {
 			delete process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;
 			delete process.env.NEXT_PUBLIC_AUTH_APP_URL;
 			mockGetSessionCookie.mockReturnValue("session-token");
-			mockFetch.mockResolvedValue({
-				ok: true,
-				json: () =>
-					Promise.resolve({
-						session: { id: "123" },
-						user: { id: "u1", name: "John", email: "john@example.com" },
-					}),
-			});
+			// Mock both fetch calls: first for get-session, then for onboarding-status
+			mockFetch
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							session: { id: "123" },
+							user: { id: "u1", name: "John", email: "john@example.com" },
+						}),
+				})
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							success: true,
+							data: {
+								profileComplete: true,
+								hasOrganization: true,
+								hasSubscription: true,
+								subscriptionStatus: "active",
+								plan: "business",
+								pendingInvitation: null,
+								canCreateOrganization: true,
+							},
+						}),
+				});
 
 			const request = new NextRequest("https://auth.example.com/account");
 			await middleware(request);

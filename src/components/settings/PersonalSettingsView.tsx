@@ -8,20 +8,14 @@ import {
 	Monitor,
 	Clock,
 	Calendar,
-	Info,
-	Loader2,
+	Globe,
+	User,
+	Check,
 } from "lucide-react";
-import {
-	Button,
-	Card,
-	CardContent,
-	Label,
-	Input,
-	Spinner,
-	Badge,
-} from "@/components/ui";
+import { toast } from "sonner";
+import { Button, Label, Spinner, Badge } from "@/components/ui";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import {
 	Select,
@@ -43,6 +37,13 @@ import {
 } from "@/lib/settings";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { getAllTimezoneOptions } from "@/lib/timezones";
+import { cn } from "@/lib/utils";
+import {
+	SettingsCard,
+	SettingsSection,
+	SettingsPageHeader,
+	AvatarUploadDialog,
+} from "@/components/settings";
 
 // Get all timezones
 const TIMEZONES = getAllTimezoneOptions();
@@ -77,8 +78,6 @@ export function PersonalSettingsView() {
 	);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
-	const [error, setError] = useState<string | null>(null);
-	const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
 	// Track which settings use org defaults
 	const [useOrgDefaults, setUseOrgDefaults] = useState({
@@ -107,6 +106,14 @@ export function PersonalSettingsView() {
 		language: orgSettings?.language || "en",
 		dateFormat: orgSettings?.dateFormat || "MM/DD/YYYY",
 	};
+
+	// Get user initials for avatar placeholder
+	const userInitials =
+		user?.name
+			?.split(" ")
+			.map((n: string) => n[0])
+			.join("")
+			.toUpperCase() || "U";
 
 	useEffect(() => {
 		async function loadSettings() {
@@ -139,7 +146,7 @@ export function PersonalSettingsView() {
 					setOrgSettings(orgData);
 				}
 			} catch (err) {
-				setError(
+				toast.error(
 					err instanceof Error ? err.message : "Failed to load settings",
 				);
 			} finally {
@@ -150,8 +157,7 @@ export function PersonalSettingsView() {
 	}, [activeOrgId]);
 
 	const showSuccess = useCallback((message: string) => {
-		setSuccessMessage(message);
-		setTimeout(() => setSuccessMessage(null), 3000);
+		toast.success(message);
 	}, []);
 
 	const handleThemeChange = useCallback(
@@ -163,7 +169,9 @@ export function PersonalSettingsView() {
 				await updateUserSettings({ theme: newTheme });
 				showSuccess(t("settings.saved"));
 			} catch (err) {
-				setError(err instanceof Error ? err.message : "Failed to save theme");
+				toast.error(
+					err instanceof Error ? err.message : "Failed to save theme",
+				);
 			} finally {
 				setSaving(false);
 			}
@@ -183,7 +191,9 @@ export function PersonalSettingsView() {
 					await updateUserSettings({ theme: null });
 					showSuccess(t("settings.saved"));
 				} catch (err) {
-					setError(err instanceof Error ? err.message : "Failed to save theme");
+					toast.error(
+						err instanceof Error ? err.message : "Failed to save theme",
+					);
 				} finally {
 					setSaving(false);
 				}
@@ -200,7 +210,7 @@ export function PersonalSettingsView() {
 				await updateUserSettings({ timezone: newTimezone });
 				showSuccess(t("settings.saved"));
 			} catch (err) {
-				setError(
+				toast.error(
 					err instanceof Error ? err.message : "Failed to save timezone",
 				);
 			} finally {
@@ -220,7 +230,7 @@ export function PersonalSettingsView() {
 					await updateUserSettings({ timezone: null });
 					showSuccess(t("settings.saved"));
 				} catch (err) {
-					setError(
+					toast.error(
 						err instanceof Error ? err.message : "Failed to save timezone",
 					);
 				} finally {
@@ -240,7 +250,7 @@ export function PersonalSettingsView() {
 				await updateUserSettings({ language: newLanguage });
 				showSuccess(t("settings.saved"));
 			} catch (err) {
-				setError(
+				toast.error(
 					err instanceof Error ? err.message : "Failed to save language",
 				);
 			} finally {
@@ -262,7 +272,7 @@ export function PersonalSettingsView() {
 					await updateUserSettings({ language: null });
 					showSuccess(t("settings.saved"));
 				} catch (err) {
-					setError(
+					toast.error(
 						err instanceof Error ? err.message : "Failed to save language",
 					);
 				} finally {
@@ -281,7 +291,7 @@ export function PersonalSettingsView() {
 				await updateUserSettings({ dateFormat: newFormat });
 				showSuccess(t("settings.saved"));
 			} catch (err) {
-				setError(
+				toast.error(
 					err instanceof Error ? err.message : "Failed to save date format",
 				);
 			} finally {
@@ -301,7 +311,7 @@ export function PersonalSettingsView() {
 					await updateUserSettings({ dateFormat: null });
 					showSuccess(t("settings.saved"));
 				} catch (err) {
-					setError(
+					toast.error(
 						err instanceof Error ? err.message : "Failed to save date format",
 					);
 				} finally {
@@ -312,17 +322,23 @@ export function PersonalSettingsView() {
 		[orgDefaults.dateFormat, showSuccess, t],
 	);
 
-	const handleAvatarSave = useCallback(async () => {
-		try {
-			setSaving(true);
-			await updateUserSettings({ avatarUrl: avatarUrl || null });
-			showSuccess(t("settings.saved"));
-		} catch (err) {
-			setError(err instanceof Error ? err.message : "Failed to save avatar");
-		} finally {
-			setSaving(false);
-		}
-	}, [avatarUrl, showSuccess, t]);
+	const handleAvatarUploadSuccess = useCallback(
+		async (url: string) => {
+			setAvatarUrl(url);
+			try {
+				setSaving(true);
+				await updateUserSettings({ avatarUrl: url });
+				showSuccess(t("settings.saved"));
+			} catch (err) {
+				toast.error(
+					err instanceof Error ? err.message : "Failed to save avatar",
+				);
+			} finally {
+				setSaving(false);
+			}
+		},
+		[showSuccess, t],
+	);
 
 	const getEffectiveValue = <T,>(
 		key: keyof typeof useOrgDefaults,
@@ -341,368 +357,321 @@ export function PersonalSettingsView() {
 	}
 
 	return (
-		<div className="space-y-6 sm:space-y-8">
-			{/* Header */}
-			<div>
-				<h2 className="text-xl sm:text-2xl font-semibold tracking-tight">
-					{t("settings.personal.title")}
-				</h2>
-				<p className="text-sm text-muted-foreground mt-1">
-					{t("settings.personal.description")}
-				</p>
-			</div>
-
-			{/* Success/Error Messages */}
-			{successMessage && (
-				<div className="rounded-md bg-green-50 dark:bg-green-900/20 p-3 text-sm text-green-800 dark:text-green-200">
-					{successMessage}
-				</div>
-			)}
-			{error && (
-				<div className="rounded-md bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-800 dark:text-red-200">
-					{error}
-				</div>
-			)}
-
-			<Separator />
+		<div className="space-y-8">
+			{/* Page Header */}
+			<SettingsPageHeader
+				icon={User}
+				title={t("settings.personal.title")}
+				description={t("settings.personal.description")}
+			/>
 
 			{/* Profile Section */}
-			<section className="space-y-4 sm:space-y-6">
-				<div>
-					<h3 className="text-base sm:text-lg font-medium">
-						{t("settings.personal.profile")}
-					</h3>
-					<p className="text-sm text-muted-foreground">
-						{t("settings.personal.profileDesc")}
-					</p>
-				</div>
-
-				<div className="grid gap-4 sm:gap-6">
-					<div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-						<Avatar className="h-16 w-16 sm:h-20 sm:w-20">
-							<AvatarImage src={avatarUrl || undefined} />
-							<AvatarFallback className="text-lg sm:text-xl bg-primary text-primary-foreground">
-								{user?.name
-									?.split(" ")
-									.map((n: string) => n[0])
-									.join("")
-									.toUpperCase() || "U"}
-							</AvatarFallback>
-						</Avatar>
-						<div className="space-y-2">
-							<div className="flex gap-2 items-center">
-								<Input
-									type="url"
-									placeholder="https://example.com/avatar.jpg"
-									value={avatarUrl}
-									onChange={(e) => setAvatarUrl(e.target.value)}
-									disabled={saving}
-									className="w-full max-w-xs"
-								/>
-								<Button
-									variant="outline"
-									size="sm"
-									onClick={handleAvatarSave}
-									disabled={saving}
-								>
-									{saving ? (
-										<Loader2 className="h-4 w-4 animate-spin" />
-									) : (
-										t("settings.save")
-									)}
-								</Button>
-							</div>
-							<p className="text-xs text-muted-foreground">
-								{t("settings.personal.avatarHelp")}
-							</p>
-						</div>
-					</div>
-
-					{/* Name */}
-					<div className="grid gap-2">
-						<Label htmlFor="name">{t("settings.personal.fullName")}</Label>
-						<Input
-							id="name"
-							value={user?.name || ""}
-							disabled
-							className="w-full sm:max-w-md bg-muted"
-						/>
-						<p className="text-xs text-muted-foreground">
-							{t("settings.personal.nameHelp")}
-						</p>
-					</div>
-
-					{/* Email */}
-					<div className="grid gap-2">
-						<Label htmlFor="email">{t("settings.personal.email")}</Label>
-						<div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-							<Input
-								id="email"
-								value={user?.email || ""}
-								disabled
-								className="w-full sm:max-w-md bg-muted"
+			<SettingsSection
+				title={t("settings.personal.profile")}
+				description={t("settings.personal.profileDesc")}
+			>
+				<SettingsCard>
+					<div className="flex flex-col sm:flex-row gap-6">
+						{/* Avatar */}
+						<div className="flex flex-col items-center gap-3">
+							<Avatar className="h-20 w-20">
+								<AvatarImage src={avatarUrl || undefined} />
+								<AvatarFallback className="bg-primary text-primary-foreground text-xl">
+									{userInitials}
+								</AvatarFallback>
+							</Avatar>
+							<AvatarUploadDialog
+								trigger={
+									<Button variant="outline" size="sm">
+										{t("settings.personal.changeAvatar") || "Change Avatar"}
+									</Button>
+								}
+								initials={userInitials}
+								currentAvatarUrl={avatarUrl}
+								onUploadSuccess={handleAvatarUploadSuccess}
+								title={t("settings.avatar.title")}
+								description={t("settings.avatar.description")}
 							/>
-							{user?.emailVerified && (
-								<Badge variant="secondary" className="shrink-0">
-									{t("settings.personal.verified")}
-								</Badge>
-							)}
+						</div>
+
+						{/* Form Fields */}
+						<div className="flex-1 space-y-4">
+							<div className="space-y-2">
+								<Label htmlFor="fullName">
+									{t("settings.personal.fullName")}
+								</Label>
+								<Input
+									id="fullName"
+									defaultValue={user?.name || ""}
+									disabled
+									className="bg-muted"
+								/>
+								<p className="text-xs text-muted-foreground">
+									{t("settings.personal.nameHelp")}
+								</p>
+							</div>
+
+							<div className="space-y-2">
+								<Label htmlFor="email">{t("settings.personal.email")}</Label>
+								<div className="flex gap-2">
+									<Input
+										id="email"
+										defaultValue={user?.email || ""}
+										disabled
+										className="bg-muted flex-1"
+									/>
+									{user?.emailVerified && (
+										<Badge
+											variant="secondary"
+											className="shrink-0 bg-success/10 text-success border-success/20"
+										>
+											<Check className="h-3 w-3 mr-1" />
+											{t("settings.personal.verified")}
+										</Badge>
+									)}
+								</div>
+							</div>
 						</div>
 					</div>
-				</div>
-			</section>
-
-			<Separator />
+				</SettingsCard>
+			</SettingsSection>
 
 			{/* Preferences Section */}
-			<section className="space-y-4 sm:space-y-6">
-				<div>
-					<h3 className="text-base sm:text-lg font-medium">
-						{t("settings.personal.preferences")}
-					</h3>
-					<p className="text-sm text-muted-foreground">
-						{t("settings.personal.preferencesDesc")}
-					</p>
-				</div>
-
-				<div className="grid gap-3 sm:gap-4">
-					{/* Theme */}
-					<Card>
-						<CardContent className="p-4">
-							<div className="flex flex-col gap-4">
-								<div className="flex items-start justify-between gap-4">
-									<div className="flex items-center gap-2 min-w-0">
-										<Label htmlFor="theme" className="font-medium">
-											{t("settings.appearance.theme")}
-										</Label>
-										{useOrgDefaults.theme && (
-											<Badge variant="outline" className="text-xs shrink-0">
-												{t("settings.personal.useOrgDefault")}
-											</Badge>
-										)}
-									</div>
-									{activeOrgId && (
-										<div className="flex items-center gap-2 shrink-0">
-											<Label
-												htmlFor="theme-default"
-												className="text-xs text-muted-foreground hidden sm:inline"
-											>
-												{t("settings.personal.useOrgDefault")}
-											</Label>
-											<Switch
-												id="theme-default"
-												checked={useOrgDefaults.theme}
-												onCheckedChange={handleThemeDefaultToggle}
-											/>
-										</div>
-									)}
+			<SettingsSection
+				title={t("settings.personal.preferences")}
+				description={t("settings.personal.preferencesDesc")}
+			>
+				{/* Theme */}
+				<SettingsCard className="mb-4">
+					<div className="space-y-3">
+						<div className="flex items-start justify-between gap-4">
+							<div>
+								<h4 className="text-sm font-medium text-foreground">
+									{t("settings.appearance.theme")}
+								</h4>
+								<p className="text-sm text-muted-foreground">
+									{t("settings.personal.themeDesc") ||
+										"Select your preferred color scheme"}
+								</p>
+							</div>
+							{activeOrgId && (
+								<div className="flex items-center gap-2 shrink-0">
+									<Label
+										htmlFor="theme-default"
+										className="text-xs text-muted-foreground"
+									>
+										{t("settings.personal.useOrgDefault")}
+									</Label>
+									<Switch
+										id="theme-default"
+										checked={useOrgDefaults.theme}
+										onCheckedChange={handleThemeDefaultToggle}
+									/>
 								</div>
-								<div className="flex gap-2">
-									{THEMES.map(({ value, labelKey, icon: Icon }) => (
-										<Button
-											key={value}
-											variant={
-												getEffectiveValue(
-													"theme",
-													selectedTheme,
-													orgDefaults.theme as Theme,
-												) === value
-													? "default"
-													: "outline"
-											}
-											size="sm"
-											onClick={() => handleThemeChange(value)}
-											disabled={useOrgDefaults.theme || saving}
-											className="flex items-center gap-2"
-										>
-											<Icon className="h-4 w-4" />
-											{t(labelKey)}
-										</Button>
+							)}
+						</div>
+						<div className="grid grid-cols-3 gap-2 p-1 bg-secondary rounded-lg border border-border">
+							{THEMES.map(({ value, labelKey, icon: Icon }) => (
+								<button
+									key={value}
+									type="button"
+									onClick={() => handleThemeChange(value)}
+									disabled={useOrgDefaults.theme || saving}
+									className={cn(
+										"flex flex-col items-center justify-center gap-1.5 py-3 px-2 rounded-md text-sm font-medium transition-all",
+										"disabled:opacity-50 disabled:cursor-not-allowed",
+										getEffectiveValue(
+											"theme",
+											selectedTheme,
+											orgDefaults.theme as Theme,
+										) === value
+											? "bg-card text-foreground shadow-sm"
+											: "text-muted-foreground hover:text-foreground hover:bg-card/50",
+									)}
+								>
+									<Icon className="h-5 w-5" />
+									<span>{t(labelKey)}</span>
+								</button>
+							))}
+						</div>
+					</div>
+				</SettingsCard>
+
+				{/* Timezone */}
+				<SettingsCard className="mb-4">
+					<div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+						<div className="flex items-start gap-3">
+							<Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
+							<div>
+								<h4 className="text-sm font-medium text-foreground">
+									{t("settings.localization.timezone")}
+								</h4>
+								<p className="text-sm text-muted-foreground">
+									{t("settings.personal.timezoneDesc") ||
+										"Used for displaying dates and times"}
+								</p>
+							</div>
+						</div>
+						<div className="flex flex-col items-end gap-2">
+							{activeOrgId && (
+								<div className="flex items-center gap-2">
+									<Label
+										htmlFor="orgTimezone"
+										className="text-xs text-muted-foreground"
+									>
+										{t("settings.personal.useOrgDefault")}
+									</Label>
+									<Switch
+										id="orgTimezone"
+										checked={useOrgDefaults.timezone}
+										onCheckedChange={handleTimezoneDefaultToggle}
+									/>
+								</div>
+							)}
+							<Select
+								value={getEffectiveValue(
+									"timezone",
+									selectedTimezone,
+									orgDefaults.timezone,
+								)}
+								onValueChange={handleTimezoneChange}
+								disabled={useOrgDefaults.timezone || saving}
+							>
+								<SelectTrigger className="w-[220px]">
+									<SelectValue placeholder="Select timezone" />
+								</SelectTrigger>
+								<SelectContent className="max-h-[300px]">
+									{TIMEZONES.map((tz) => (
+										<SelectItem key={tz.value} value={tz.value}>
+											{tz.label}
+										</SelectItem>
 									))}
-								</div>
-							</div>
-						</CardContent>
-					</Card>
+								</SelectContent>
+							</Select>
+						</div>
+					</div>
+				</SettingsCard>
 
-					{/* Timezone */}
-					<Card>
-						<CardContent className="p-4">
-							<div className="flex flex-col gap-4">
-								<div className="flex items-start justify-between gap-4">
-									<div className="flex items-center gap-2 min-w-0">
-										<Clock className="h-4 w-4" />
-										<Label htmlFor="timezone" className="font-medium">
-											{t("settings.localization.timezone")}
-										</Label>
-										{useOrgDefaults.timezone && (
-											<Badge variant="outline" className="text-xs shrink-0">
-												{t("settings.personal.useOrgDefault")}
-											</Badge>
-										)}
-									</div>
-									{activeOrgId && (
-										<div className="flex items-center gap-2 shrink-0">
-											<Label
-												htmlFor="tz-default"
-												className="text-xs text-muted-foreground hidden sm:inline"
-											>
-												{t("settings.personal.useOrgDefault")}
-											</Label>
-											<Switch
-												id="tz-default"
-												checked={useOrgDefaults.timezone}
-												onCheckedChange={handleTimezoneDefaultToggle}
-											/>
-										</div>
-									)}
-								</div>
-								<Select
-									value={getEffectiveValue(
-										"timezone",
-										selectedTimezone,
-										orgDefaults.timezone,
-									)}
-									onValueChange={handleTimezoneChange}
-									disabled={useOrgDefaults.timezone || saving}
-								>
-									<SelectTrigger className="w-full">
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent className="max-h-[300px]">
-										{TIMEZONES.map((tz) => (
-											<SelectItem key={tz.value} value={tz.value}>
-												{tz.label}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
+				{/* Language */}
+				<SettingsCard className="mb-4">
+					<div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+						<div className="flex items-start gap-3">
+							<Globe className="h-5 w-5 text-muted-foreground mt-0.5" />
+							<div>
+								<h4 className="text-sm font-medium text-foreground">
+									{t("settings.localization.language")}
+								</h4>
+								<p className="text-sm text-muted-foreground">
+									{t("settings.personal.languageDesc") ||
+										"Interface display language"}
+								</p>
 							</div>
-						</CardContent>
-					</Card>
-
-					{/* Language */}
-					<Card>
-						<CardContent className="p-4">
-							<div className="flex flex-col gap-4">
-								<div className="flex items-start justify-between gap-4">
-									<div className="flex items-center gap-2 min-w-0">
-										<Label htmlFor="language" className="font-medium">
-											{t("settings.localization.language")}
-										</Label>
-										{useOrgDefaults.language && (
-											<Badge variant="outline" className="text-xs shrink-0">
-												{t("settings.personal.useOrgDefault")}
-											</Badge>
-										)}
-									</div>
-									{activeOrgId && (
-										<div className="flex items-center gap-2 shrink-0">
-											<Label
-												htmlFor="lang-default"
-												className="text-xs text-muted-foreground hidden sm:inline"
-											>
-												{t("settings.personal.useOrgDefault")}
-											</Label>
-											<Switch
-												id="lang-default"
-												checked={useOrgDefaults.language}
-												onCheckedChange={handleLanguageDefaultToggle}
-											/>
-										</div>
-									)}
+						</div>
+						<div className="flex flex-col items-end gap-2">
+							{activeOrgId && (
+								<div className="flex items-center gap-2">
+									<Label
+										htmlFor="orgLanguage"
+										className="text-xs text-muted-foreground"
+									>
+										{t("settings.personal.useOrgDefault")}
+									</Label>
+									<Switch
+										id="orgLanguage"
+										checked={useOrgDefaults.language}
+										onCheckedChange={handleLanguageDefaultToggle}
+									/>
 								</div>
-								<Select
-									value={getEffectiveValue(
-										"language",
-										selectedLanguage,
-										orgDefaults.language as LanguageCode,
-									)}
-									onValueChange={(v: string) =>
-										handleLanguageChange(v as LanguageCode)
-									}
-									disabled={useOrgDefaults.language || saving}
-								>
-									<SelectTrigger className="w-full">
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										{LANGUAGES.map((lang) => (
-											<SelectItem key={lang.value} value={lang.value}>
-												{t(lang.labelKey)}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-						</CardContent>
-					</Card>
+							)}
+							<Select
+								value={getEffectiveValue(
+									"language",
+									selectedLanguage,
+									orgDefaults.language as LanguageCode,
+								)}
+								onValueChange={(v: string) =>
+									handleLanguageChange(v as LanguageCode)
+								}
+								disabled={useOrgDefaults.language || saving}
+							>
+								<SelectTrigger className="w-[220px]">
+									<SelectValue placeholder="Select language" />
+								</SelectTrigger>
+								<SelectContent>
+									{LANGUAGES.map((lang) => (
+										<SelectItem key={lang.value} value={lang.value}>
+											{t(lang.labelKey)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+					</div>
+				</SettingsCard>
 
-					{/* Date Format */}
-					<Card>
-						<CardContent className="p-4">
-							<div className="flex flex-col gap-4">
-								<div className="flex items-start justify-between gap-4">
-									<div className="flex items-center gap-2 min-w-0">
-										<Calendar className="h-4 w-4" />
-										<Label htmlFor="dateFormat" className="font-medium">
-											{t("settings.localization.dateFormat")}
-										</Label>
-										{useOrgDefaults.dateFormat && (
-											<Badge variant="outline" className="text-xs shrink-0">
-												{t("settings.personal.useOrgDefault")}
-											</Badge>
-										)}
-									</div>
-									{activeOrgId && (
-										<div className="flex items-center gap-2 shrink-0">
-											<Label
-												htmlFor="date-default"
-												className="text-xs text-muted-foreground hidden sm:inline"
-											>
-												{t("settings.personal.useOrgDefault")}
-											</Label>
-											<Switch
-												id="date-default"
-												checked={useOrgDefaults.dateFormat}
-												onCheckedChange={handleDateFormatDefaultToggle}
-											/>
-										</div>
-									)}
-								</div>
-								<Select
-									value={getEffectiveValue(
-										"dateFormat",
-										selectedDateFormat,
-										orgDefaults.dateFormat as DateFormat,
-									)}
-									onValueChange={(v: string) =>
-										handleDateFormatChange(v as DateFormat)
-									}
-									disabled={useOrgDefaults.dateFormat || saving}
-								>
-									<SelectTrigger className="w-full">
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										{DATE_FORMATS.map((fmt) => (
-											<SelectItem key={fmt.value} value={fmt.value}>
-												{fmt.label}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-								<p className="text-xs text-muted-foreground flex items-center gap-1">
-									<Info className="h-3 w-3" />
+				{/* Date Format */}
+				<SettingsCard>
+					<div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+						<div className="flex items-start gap-3">
+							<Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
+							<div>
+								<h4 className="text-sm font-medium text-foreground">
+									{t("settings.localization.dateFormat")}
+								</h4>
+								<p className="text-sm text-muted-foreground">
+									{t("settings.personal.dateFormatDesc") ||
+										"How dates are displayed"}
+								</p>
+								<p className="text-xs text-muted-foreground mt-1">
 									{t("settings.personal.dateExample")}:{" "}
 									{new Date().toLocaleDateString(
 										language === "es" ? "es-MX" : "en-US",
 									)}
 								</p>
 							</div>
-						</CardContent>
-					</Card>
-				</div>
-			</section>
+						</div>
+						<div className="flex flex-col items-end gap-2">
+							{activeOrgId && (
+								<div className="flex items-center gap-2">
+									<Label
+										htmlFor="orgDateFormat"
+										className="text-xs text-muted-foreground"
+									>
+										{t("settings.personal.useOrgDefault")}
+									</Label>
+									<Switch
+										id="orgDateFormat"
+										checked={useOrgDefaults.dateFormat}
+										onCheckedChange={handleDateFormatDefaultToggle}
+									/>
+								</div>
+							)}
+							<Select
+								value={getEffectiveValue(
+									"dateFormat",
+									selectedDateFormat,
+									orgDefaults.dateFormat as DateFormat,
+								)}
+								onValueChange={(v: string) =>
+									handleDateFormatChange(v as DateFormat)
+								}
+								disabled={useOrgDefaults.dateFormat || saving}
+							>
+								<SelectTrigger className="w-[220px]">
+									<SelectValue placeholder="Select format" />
+								</SelectTrigger>
+								<SelectContent>
+									{DATE_FORMATS.map((fmt) => (
+										<SelectItem key={fmt.value} value={fmt.value}>
+											{fmt.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+					</div>
+				</SettingsCard>
+			</SettingsSection>
 		</div>
 	);
 }

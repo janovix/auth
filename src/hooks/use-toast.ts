@@ -1,28 +1,31 @@
 /**
- * Simple toast hook placeholder
- *
- * This is a simple implementation that logs toasts to console.
- * In a production environment, this should be replaced with a proper toast system.
+ * Toast hook using sonner
  */
 
 import { useCallback } from "react";
+import { toast as sonnerToast } from "sonner";
 
 export interface ToastProps {
 	title?: string;
 	description?: string;
-	variant?: "default" | "destructive";
+	variant?: "default" | "destructive" | "success";
 }
 
 export function useToast() {
 	const toast = useCallback((props: ToastProps) => {
-		// For now, just log to console
-		// In production, this would show a toast notification
-		if (props.variant === "destructive") {
-			console.error("[Toast]", props.title, props.description);
+		const { title, description, variant = "default" } = props;
+
+		if (variant === "destructive") {
+			sonnerToast.error(title, { description });
+		} else if (variant === "success") {
+			sonnerToast.success(title, { description });
 		} else {
-			console.log("[Toast]", props.title, props.description);
+			sonnerToast(title, { description });
 		}
 	}, []);
 
 	return { toast };
 }
+
+// Re-export sonner's toast for direct usage
+export { toast as sonnerToast } from "sonner";

@@ -450,7 +450,7 @@ describe("SettingsView", () => {
 		});
 	});
 
-	it("renders avatar editor and change button", async () => {
+	it("renders avatar editor section", async () => {
 		vi.mocked(settingsModule.getUserSettings).mockResolvedValue(mockSettings);
 
 		renderWithTheme(<SettingsView />);
@@ -459,10 +459,8 @@ describe("SettingsView", () => {
 			expect(screen.getByText("Foto de perfil")).toBeInTheDocument();
 		});
 
-		// Check for change avatar button
-		expect(screen.getByText("Cambiar avatar")).toBeInTheDocument();
-
 		// Check for avatar uploaded indicator (since mockSettings has an avatarUrl)
+		// The component now uses inline AvatarEditor instead of a "Cambiar avatar" button
 		expect(screen.getByText("Avatar subido")).toBeInTheDocument();
 	});
 
@@ -477,9 +475,7 @@ describe("SettingsView", () => {
 		});
 
 		// Expand advanced options
-		const advancedOptions = screen.getByText(
-			"Opciones avanzadas (URL manual)",
-		);
+		const advancedOptions = screen.getByText("Opciones avanzadas (URL manual)");
 		await user.click(advancedOptions);
 
 		// Now the URL input should be visible

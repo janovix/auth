@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TeamSettingsView } from "./TeamSettingsView";
 import * as settingsClient from "@/lib/settings/settingsClient";
 import { authClient } from "@/lib/auth/authClient";
+import { mockToast } from "@/test/setup";
 
 // Mock the settings client
 vi.mock("@/lib/settings/settingsClient", () => ({
@@ -260,7 +261,7 @@ describe("TeamSettingsView", () => {
 			render(<TeamSettingsView />);
 
 			await waitFor(() => {
-				expect(screen.getByText("Network error")).toBeInTheDocument();
+				expect(mockToast.error).toHaveBeenCalledWith("Network error");
 			});
 		});
 

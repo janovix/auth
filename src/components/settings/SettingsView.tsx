@@ -331,9 +331,7 @@ export function SettingsView() {
 				const errorData = (await response.json().catch(() => ({}))) as {
 					error?: string;
 				};
-				throw new Error(
-					errorData.error || t("settings.profile.uploadFailed"),
-				);
+				throw new Error(errorData.error || t("settings.profile.uploadFailed"));
 			}
 
 			const result = (await response.json()) as {
@@ -343,9 +341,7 @@ export function SettingsView() {
 			};
 
 			if (!result.success || !result.data?.url) {
-				throw new Error(
-					result.error || t("settings.profile.uploadFailed"),
-				);
+				throw new Error(result.error || t("settings.profile.uploadFailed"));
 			}
 
 			// Update settings with the new avatar URL
@@ -357,9 +353,7 @@ export function SettingsView() {
 			setTimeout(() => setSuccessMessage(null), 3000);
 		} catch (err) {
 			const message =
-				err instanceof Error
-					? err.message
-					: t("settings.profile.uploadFailed");
+				err instanceof Error ? err.message : t("settings.profile.uploadFailed");
 			setAvatarUploadError(message);
 		} finally {
 			setUploadingAvatar(false);
@@ -667,103 +661,74 @@ export function SettingsView() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
-						{/* Avatar Editor */}
+						{/* Avatar Editor - Direct Upload */}
 						<div>
 							<Label className="text-sm font-medium mb-3 block flex items-center gap-2">
 								<Camera className="h-4 w-4" />
 								{t("settings.profile.avatar")}
 							</Label>
-							<div className="flex items-center gap-4">
-								<Avatar className="h-20 w-20">
-									<AvatarImage src={avatarUrl || undefined} />
-									<AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-										{currentUserName
-											.split(" ")
-											.map((n) => n[0])
-											.join("")
-											.toUpperCase() || "?"}
-									</AvatarFallback>
-								</Avatar>
-								<div className="flex flex-col gap-2">
-									<Dialog
-										open={showAvatarEditor}
-										onOpenChange={(open) => {
-											if (!open) {
-												handleAvatarEditorCancel();
-											} else {
-												setShowAvatarEditor(true);
-											}
-										}}
-									>
-										<DialogTrigger asChild>
-											<Button variant="outline" size="sm">
-												<Camera className="h-4 w-4 mr-2" />
-												{t("settings.profile.changeAvatar")}
-											</Button>
-										</DialogTrigger>
-										<DialogContent className="sm:max-w-md">
-											<DialogHeader>
-												<DialogTitle>
-													{t("settings.profile.editAvatar")}
-												</DialogTitle>
-												<DialogDescription>
-													{t("settings.profile.editAvatarDescription")}
-												</DialogDescription>
-											</DialogHeader>
-											<div className="flex flex-col items-center gap-4 py-4 w-full">
-												<div className="w-full max-w-[280px]">
-													<AvatarEditor
-														outputSize={256}
-														outputFormat="webp"
-														outputQuality={0.9}
-														defaultImage={avatarUrl || undefined}
-														onChange={handleAvatarEditorChange}
-														initials={
-															currentUserName
-																.split(" ")
-																.map((n) => n[0])
-																.join("")
-																.toUpperCase() || "?"
-														}
-													/>
-												</div>
-												{avatarUploadError && (
-													<p className="text-sm text-destructive">
-														{avatarUploadError}
-													</p>
-												)}
-											</div>
-											<DialogFooter className="gap-2 sm:gap-0">
-												<Button
-													variant="outline"
-													onClick={handleAvatarEditorCancel}
-													disabled={uploadingAvatar}
-												>
-													{t("settings.cancel") || "Cancel"}
-												</Button>
-												<Button
-													onClick={handleAvatarEditorSave}
-													disabled={!pendingAvatarDataUrl || uploadingAvatar}
-												>
-													{uploadingAvatar ? (
-														<>
-															<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-															{t("settings.profile.uploading")}
-														</>
-													) : (
-														t("settings.save")
-													)}
-												</Button>
-											</DialogFooter>
-										</DialogContent>
-									</Dialog>
-									{avatarUrl && (
-										<p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
-											<CheckCircle2 className="h-3 w-3" />
-											{t("settings.profile.avatarSet")}
-										</p>
+							<div className="flex flex-col items-center gap-4">
+								<div className="w-full max-w-[280px] relative">
+									<AvatarEditor
+										outputSize={256}
+										outputFormat="webp"
+										outputQuality={0.9}
+										defaultImage={avatarUrl || undefined}
+										onChange={handleAvatarEditorChange}
+										initials={
+											currentUserName
+												.split(" ")
+												.map((n) => n[0])
+												.join("")
+												.toUpperCase() || "?"
+										}
+									/>
+									{/* Upload overlay */}
+									{uploadingAvatar && (
+										<div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center gap-3 z-10">
+											<Loader2 className="h-8 w-8 animate-spin text-primary" />
+											<span className="text-sm font-medium text-foreground">
+												{t("settings.profile.uploading")}
+											</span>
+										</div>
 									)}
 								</div>
+								{avatarUploadError && (
+									<p className="text-sm text-destructive">
+										{avatarUploadError}
+									</p>
+								)}
+								{pendingAvatarDataUrl && !uploadingAvatar && (
+									<div className="flex flex-col items-center gap-2">
+										<p className="text-sm text-muted-foreground flex items-center gap-1">
+											<CheckCircle2 className="h-3 w-3 text-green-500" />
+											{t("settings.profile.readyToSave")}
+										</p>
+										<Button
+											onClick={handleAvatarEditorSave}
+											disabled={uploadingAvatar}
+											size="sm"
+										>
+											{uploadingAvatar ? (
+												<>
+													<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+													{t("settings.profile.uploading")}
+												</>
+											) : (
+												<>
+													<CheckCircle2 className="h-4 w-4 mr-2" />
+													{t("settings.profile.saveAvatar")}
+												</>
+											)}
+										</Button>
+									</div>
+								)}
+								{avatarUrl && !pendingAvatarDataUrl && (
+									<p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+										<CheckCircle2 className="h-3 w-3" />
+										{t("settings.profile.avatarSet")}
+									</p>
+								)}
 							</div>
 						</div>
 

@@ -15,6 +15,8 @@ import {
 	Building2,
 	Lock,
 	AlertCircle,
+	CheckCircle2,
+	Camera,
 } from "lucide-react";
 import {
 	Button,
@@ -26,7 +28,18 @@ import {
 	Label,
 	Input,
 	Spinner,
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
 } from "@/components/ui";
+import { AvatarEditor } from "@/components/ui/avatar-editor";
 import { useLanguage } from "@/contexts/language-context";
 import {
 	getUserSettings,
@@ -43,6 +56,22 @@ import {
 } from "@/lib/settings";
 import { authClient } from "@/lib/auth/authClient";
 import { getAllTimezoneOptions } from "@/lib/timezones";
+import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
+
+/**
+ * Convert a data URL to a Blob for uploading.
+ */
+function dataURLtoBlob(dataUrl: string): Blob {
+	const arr = dataUrl.split(",");
+	const mime = arr[0].match(/:(.*?);/)?.[1] || "image/png";
+	const bstr = atob(arr[1]);
+	let n = bstr.length;
+	const u8arr = new Uint8Array(n);
+	while (n--) {
+		u8arr[n] = bstr.charCodeAt(n);
+	}
+	return new Blob([u8arr], { type: mime });
+}
 
 // Get all timezones
 const TIMEZONES = getAllTimezoneOptions();
@@ -91,6 +120,17 @@ export function SettingsView() {
 		useState<DateFormat>("MM/DD/YYYY");
 	const [avatarUrl, setAvatarUrl] = useState<string>("");
 
+	// Avatar editor state
+	const [showAvatarEditor, setShowAvatarEditor] = useState(false);
+	const [uploadingAvatar, setUploadingAvatar] = useState(false);
+	const [avatarUploadError, setAvatarUploadError] = useState<string | null>(
+		null,
+	);
+	const [currentUserName, setCurrentUserName] = useState<string>("");
+	const [pendingAvatarDataUrl, setPendingAvatarDataUrl] = useState<
+		string | null
+	>(null);
+
 	const isOrgOwner = orgMembership?.role === "owner";
 
 	useEffect(() => {
@@ -118,6 +158,12 @@ export function SettingsView() {
 				)?.activeOrganizationId;
 				if (orgId) {
 					setActiveOrgId(orgId);
+				}
+
+				// Get user name for avatar fallback
+				const userName = sessionResult.data?.user?.name;
+				if (userName) {
+					setCurrentUserName(userName);
 				}
 			} catch (err) {
 				setError(
@@ -255,6 +301,71 @@ export function SettingsView() {
 			setSaving(false);
 		}
 	}, [avatarUrl, t]);
+
+	// Handle avatar change from editor (fires on any edit)
+	const handleAvatarEditorChange = useCallback((dataUrl: string | null) => {
+		setPendingAvatarDataUrl(dataUrl);
+		setAvatarUploadError(null);
+	}, []);
+
+	// Handle avatar upload when user clicks save in dialog
+	const handleAvatarEditorSave = useCallback(async () => {
+		if (!pendingAvatarDataUrl) return;
+
+		setUploadingAvatar(true);
+		setAvatarUploadError(null);
+
+		try {
+			const baseUrl = getAuthCoreBaseUrl();
+			const blob = dataURLtoBlob(pendingAvatarDataUrl);
+			const formData = new FormData();
+			formData.append("file", blob, "avatar.webp");
+
+			const response = await fetch(`${baseUrl}/api/upload/avatar`, {
+				method: "POST",
+				credentials: "include",
+				body: formData,
+			});
+
+			if (!response.ok) {
+				const errorData = (await response.json().catch(() => ({}))) as {
+					error?: string;
+				};
+				throw new Error(errorData.error || t("settings.profile.uploadFailed"));
+			}
+
+			const result = (await response.json()) as {
+				success: boolean;
+				data?: { url: string };
+				error?: string;
+			};
+
+			if (!result.success || !result.data?.url) {
+				throw new Error(result.error || t("settings.profile.uploadFailed"));
+			}
+
+			// Update settings with the new avatar URL
+			await updateUserSettings({ avatarUrl: result.data.url });
+			setAvatarUrl(result.data.url);
+			setShowAvatarEditor(false);
+			setPendingAvatarDataUrl(null);
+			setSuccessMessage(t("settings.saved"));
+			setTimeout(() => setSuccessMessage(null), 3000);
+		} catch (err) {
+			const message =
+				err instanceof Error ? err.message : t("settings.profile.uploadFailed");
+			setAvatarUploadError(message);
+		} finally {
+			setUploadingAvatar(false);
+		}
+	}, [pendingAvatarDataUrl, t]);
+
+	// Handle cancel in avatar editor dialog
+	const handleAvatarEditorCancel = useCallback(() => {
+		setShowAvatarEditor(false);
+		setPendingAvatarDataUrl(null);
+		setAvatarUploadError(null);
+	}, []);
 
 	// Organization settings handlers
 	const handleOrgThemeChange = useCallback(
@@ -549,43 +660,117 @@ export function SettingsView() {
 							{t("settings.profile.description")}
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="space-y-4">
+					<CardContent className="space-y-6">
+						{/* Avatar Editor - Direct Upload */}
 						<div>
-							<Label
-								htmlFor="avatar-url"
-								className="text-sm font-medium mb-2 block"
-							>
-								{t("settings.profile.avatarUrl")}
+							<Label className="text-sm font-medium mb-3 block flex items-center gap-2">
+								<Camera className="h-4 w-4" />
+								{t("settings.profile.avatar")}
 							</Label>
-							<div className="flex gap-2 max-w-md">
-								<Input
-									id="avatar-url"
-									type="url"
-									placeholder="https://example.com/avatar.jpg"
-									value={avatarUrl}
-									onChange={(e) => setAvatarUrl(e.target.value)}
-									disabled={saving}
-								/>
-								<Button onClick={handleAvatarSave} disabled={saving} size="sm">
-									{saving ? (
-										<Loader2 className="h-4 w-4 animate-spin" />
-									) : (
-										t("settings.save")
-									)}
-								</Button>
-							</div>
-							{avatarUrl && (
-								<div className="mt-3">
-									<img
-										src={avatarUrl}
-										alt="Avatar preview"
-										className="h-16 w-16 rounded-full object-cover border"
-										onError={(e) => {
-											(e.target as HTMLImageElement).style.display = "none";
-										}}
+							<div className="flex flex-col items-center gap-4">
+								<div className="w-full max-w-[280px] relative">
+									<AvatarEditor
+										outputSize={256}
+										outputFormat="webp"
+										outputQuality={0.9}
+										defaultImage={avatarUrl || undefined}
+										onChange={handleAvatarEditorChange}
+										initials={
+											currentUserName
+												.split(" ")
+												.map((n) => n[0])
+												.join("")
+												.toUpperCase() || "?"
+										}
 									/>
+									{/* Upload overlay */}
+									{uploadingAvatar && (
+										<div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center gap-3 z-10">
+											<Loader2 className="h-8 w-8 animate-spin text-primary" />
+											<span className="text-sm font-medium text-foreground">
+												{t("settings.profile.uploading")}
+											</span>
+										</div>
+									)}
 								</div>
-							)}
+								{avatarUploadError && (
+									<p className="text-sm text-destructive">
+										{avatarUploadError}
+									</p>
+								)}
+								{pendingAvatarDataUrl && !uploadingAvatar && (
+									<div className="flex flex-col items-center gap-2">
+										<p className="text-sm text-muted-foreground flex items-center gap-1">
+											<CheckCircle2 className="h-3 w-3 text-green-500" />
+											{t("settings.profile.readyToSave")}
+										</p>
+										<Button
+											onClick={handleAvatarEditorSave}
+											disabled={uploadingAvatar}
+											size="sm"
+										>
+											{uploadingAvatar ? (
+												<>
+													<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+													{t("settings.profile.uploading")}
+												</>
+											) : (
+												<>
+													<CheckCircle2 className="h-4 w-4 mr-2" />
+													{t("settings.profile.saveAvatar")}
+												</>
+											)}
+										</Button>
+									</div>
+								)}
+								{avatarUrl && !pendingAvatarDataUrl && (
+									<p className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+										<CheckCircle2 className="h-3 w-3" />
+										{t("settings.profile.avatarSet")}
+									</p>
+								)}
+							</div>
+						</div>
+
+						{/* Manual URL Input (Collapsible/Advanced) */}
+						<div className="border-t pt-4">
+							<details className="group">
+								<summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors list-none flex items-center gap-2">
+									<span className="group-open:rotate-90 transition-transform">
+										▶
+									</span>
+									{t("settings.profile.advancedOptions")}
+								</summary>
+								<div className="mt-4">
+									<Label
+										htmlFor="avatar-url"
+										className="text-sm font-medium mb-2 block"
+									>
+										{t("settings.profile.avatarUrl")}
+									</Label>
+									<div className="flex gap-2 max-w-md">
+										<Input
+											id="avatar-url"
+											type="url"
+											placeholder="https://example.com/avatar.jpg"
+											value={avatarUrl}
+											onChange={(e) => setAvatarUrl(e.target.value)}
+											disabled={saving}
+										/>
+										<Button
+											onClick={handleAvatarSave}
+											disabled={saving}
+											size="sm"
+										>
+											{saving ? (
+												<Loader2 className="h-4 w-4 animate-spin" />
+											) : (
+												t("settings.save")
+											)}
+										</Button>
+									</div>
+								</div>
+							</details>
 						</div>
 					</CardContent>
 				</Card>

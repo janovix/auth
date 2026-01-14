@@ -25,9 +25,11 @@ const renderWithProviders = (ui: React.ReactElement) => {
 	);
 };
 
+type SendOtpOptions = { captchaToken?: string };
 type SendOtpFn = (
 	email: string,
 	type: "sign-in",
+	options?: SendOtpOptions,
 ) => Promise<AuthResult<{ message: string }>>;
 type SignInWithOtpFn = (email: string, otp: string) => Promise<AuthResult>;
 
@@ -74,7 +76,9 @@ describe("LoginView", () => {
 		fireEvent.click(submitButton);
 
 		await waitFor(() => {
-			expect(sendOtp).toHaveBeenCalledWith("ana@example.com", "sign-in");
+			expect(sendOtp).toHaveBeenCalledWith("ana@example.com", "sign-in", {
+				captchaToken: undefined,
+			});
 		});
 
 		// Should show OTP input after sending

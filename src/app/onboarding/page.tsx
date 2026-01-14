@@ -1,4 +1,4 @@
-import { SignupView } from "@/components/auth/SignupView";
+import { OnboardingView } from "@/components/auth/OnboardingView";
 import type { Metadata } from "next";
 
 type PageProps = {
@@ -17,11 +17,11 @@ const getRedirect = (
 };
 
 export const metadata: Metadata = {
-	title: "Crear cuenta | Janovix",
-	description: "Crea tu cuenta en Janovix para empezar.",
+	title: "Completa tu perfil | Janovix",
+	description: "Configura tu nombre y foto de perfil para continuar.",
 };
 
-export default async function SignupPage({ searchParams }: PageProps) {
+export default async function OnboardingPage({ searchParams }: PageProps) {
 	const resolvedParams = await searchParams;
-	return <SignupView redirectTo={getRedirect(resolvedParams)} />;
+	return <OnboardingView redirectTo={getRedirect(resolvedParams)} />;
 }

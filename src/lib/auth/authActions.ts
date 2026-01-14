@@ -8,15 +8,16 @@
  *
  * This app uses passwordless OTP-based authentication:
  * - Sign-in: User enters email → receives OTP → enters OTP → session created
- * - Sign-up: User enters email + name → receives OTP → enters OTP → email verified → redirect to login
+ * - New users are automatically created during OTP sign-in if they don't exist
+ * - New users without a name are redirected to onboarding after login
  */
 
 import { authClient } from "./authClient";
 import { setSession, clearSession } from "./sessionStore";
-import type { Session, SignUpCredentials, AuthResult } from "./types";
+import type { Session, AuthResult } from "./types";
 
 // Re-export types for convenience
-export type { Session, SignUpCredentials, AuthResult };
+export type { Session, AuthResult };
 
 /**
  * Helper to convert Better Auth session response to our Session type.
@@ -141,77 +142,6 @@ export async function signInWithOtp(
 }
 
 /**
- * Generates a cryptographically secure random password.
- * Used internally for passwordless signup - users never see or use this password.
- */
-function generateSecurePassword(): string {
-	const chars =
-		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-	const array = new Uint8Array(32);
-	crypto.getRandomValues(array);
-	return Array.from(array, (byte) => chars[byte % chars.length]).join("");
-}
-
-/**
- * Signs up a new user with email and name (passwordless).
- *
- * The system auto-generates a secure password that the user never sees.
- * After signup, an OTP is sent to verify the email.
- * Users sign in using OTP, not password.
- */
-export async function signUp(
-	credentials: SignUpCredentials,
-): Promise<AuthResult> {
-	try {
-		// Generate a secure random password - user will never use it
-		// Sign-in is always via OTP
-		const autoPassword = generateSecurePassword();
-
-		const result = await authClient.signUp.email({
-			email: credentials.email,
-			password: autoPassword,
-			name: credentials.name,
-			image: credentials.image,
-		});
-
-		if (result.error) {
-			return {
-				success: false,
-				data: null,
-				error: new Error(result.error.message || "Sign up failed"),
-			};
-		}
-
-		// Fetch full session after sign-up
-		const sessionResult = await authClient.getSession();
-
-		if (sessionResult.error || !sessionResult.data) {
-			// Sign-up succeeded but couldn't get session
-			return {
-				success: true,
-				data: null,
-				error: null,
-			};
-		}
-
-		const session = toSession(sessionResult.data);
-		setSession(session);
-
-		return {
-			success: true,
-			data: session,
-			error: null,
-		};
-	} catch (err) {
-		return {
-			success: false,
-			data: null,
-			error: err instanceof Error ? err : new Error("Sign up failed"),
-		};
-	}
-}
-
-/**
  * Signs out the current user.
  *
  * Automatically clears the session store.
@@ -256,6 +186,14 @@ export async function signOut(): Promise<AuthResult<null>> {
 export type OtpType = "email-verification" | "sign-in" | "forget-password";
 
 /**
+ * Options for sending verification OTP.
+ */
+export interface SendOtpOptions {
+	/** Captcha response token (from Turnstile) */
+	captchaToken?: string;
+}
+
+/**
  * Sends a verification OTP to the specified email address.
  *
  * Uses Better Auth client's emailOtp.sendVerificationOtp method.
@@ -264,16 +202,31 @@ export type OtpType = "email-verification" | "sign-in" | "forget-password";
  *
  * @param email - The email address to send the OTP to
  * @param type - The type of OTP (defaults to email-verification)
+ * @param options - Additional options including captcha token
  */
 export async function sendVerificationOtp(
 	email: string,
 	type: OtpType = "email-verification",
-): Promise<AuthResult<{ message: string }>> {
+	options?: SendOtpOptions,
+): Promise<AuthResult<{ message: string; rateLimited?: boolean }>> {
 	try {
-		const result = await authClient.emailOtp.sendVerificationOtp({
-			email,
-			type,
-		});
+		// Build fetch options with captcha header if token provided
+		const fetchOptions: { headers?: Record<string, string> } = {};
+		if (options?.captchaToken) {
+			fetchOptions.headers = {
+				"x-captcha-response": options.captchaToken,
+			};
+		}
+
+		const result = await authClient.emailOtp.sendVerificationOtp(
+			{
+				email,
+				type,
+			},
+			{
+				...fetchOptions,
+			},
+		);
 
 		if (result.error) {
 			return {
@@ -283,9 +236,20 @@ export async function sendVerificationOtp(
 			};
 		}
 
+		// Check if rate limited (OTP already sent recently)
+		const data = result.data as
+			| { rateLimited?: boolean; message?: string }
+			| undefined;
+		const rateLimited = data?.rateLimited === true;
+
 		return {
 			success: true,
-			data: { message: "OTP sent successfully" },
+			data: {
+				message: rateLimited
+					? "An OTP code was already sent. Please check your email."
+					: "OTP sent successfully",
+				rateLimited,
+			},
 			error: null,
 		};
 	} catch (err) {

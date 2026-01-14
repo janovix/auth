@@ -104,9 +104,6 @@ export const AccountView = () => {
 							<Button asChild>
 								<Link href="/login">{t("account.noSession.login")}</Link>
 							</Button>
-							<Button variant="outline" asChild>
-								<Link href="/signup">{t("account.noSession.signup")}</Link>
-							</Button>
 						</CardFooter>
 					</Card>
 				</div>

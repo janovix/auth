@@ -330,14 +330,18 @@ describe("LoginView", () => {
 			);
 		});
 
-		// Should show banned error alert (there are 2 alerts - success and error)
+		// Should show banned error alert (OTP fields are hidden when banned)
 		await waitFor(() => {
 			expect(screen.getByText(/cuenta suspendida/i)).toBeInTheDocument();
 		});
 
-		// OTP input should be disabled
-		const otpInputAfterError = screen.getByLabelText(/código de verificación/i);
-		expect(otpInputAfterError).toBeDisabled();
+		// OTP input should be hidden when banned
+		expect(
+			screen.queryByLabelText(/código de verificación/i),
+		).not.toBeInTheDocument();
+
+		// "Código enviado" success alert should also be hidden
+		expect(screen.queryByText(/código enviado/i)).not.toBeInTheDocument();
 
 		// Should show "Try different email" button
 		const tryDifferentButton = screen.getByRole("button", {

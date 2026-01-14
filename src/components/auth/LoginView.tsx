@@ -525,170 +525,181 @@ export const LoginView = ({
 							</form>
 						</Form>
 					) : (
-						// Step 2: OTP input
+						// Step 2: OTP input (or banned state)
 						<div className="space-y-4">
-							<Alert>
-								<Mail className="h-4 w-4" aria-hidden="true" />
-								<AlertTitle>{t("login.otp.sent")}</AlertTitle>
-								<AlertDescription>
-									{t("login.otp.sentDescription").replace(
-										"{email}",
-										userEmail || "",
-									)}
-								</AlertDescription>
-							</Alert>
-
-							{/* OTP Input */}
-							<div className="flex flex-col items-center gap-4">
-								<InputOTP
-									maxLength={OTP_LENGTH}
-									value={otpValue}
-									onChange={setOtpValue}
-									disabled={isVerifyingOtp || isBanned}
-									aria-label={t("login.otp.label")}
-									autoFocus
-								>
-									<InputOTPGroup>
-										<InputOTPSlot index={0} />
-										<InputOTPSlot index={1} />
-										<InputOTPSlot index={2} />
-										<InputOTPSlot index={3} />
-										<InputOTPSlot index={4} />
-										<InputOTPSlot index={5} />
-									</InputOTPGroup>
-								</InputOTP>
-
-								{isVerifyingOtp && (
-									<div className="flex items-center gap-2 text-sm text-muted-foreground">
-										<Loader2 className="h-4 w-4 animate-spin" />
-										{t("login.otp.verifying")}
-									</div>
-								)}
-							</div>
-
-							{otpError && (
-								<Alert variant="destructive" role="alert">
-									{(otpNeedsResend || isBanned) && (
-										<AlertTriangle className="h-4 w-4" aria-hidden="true" />
-									)}
-									<AlertTitle>
-										{isBanned
-											? t("login.banned.title")
-											: otpNeedsResend
-												? t("login.otp.expiredTitle")
-												: t("login.otp.errorTitle")}
-									</AlertTitle>
-									<AlertDescription>{otpError}</AlertDescription>
-								</Alert>
-							)}
-
-							{/* Turnstile Captcha Widget for Resend */}
-							{TURNSTILE_SITE_KEY && !captchaToken && (
-								<div className="flex justify-center">
-									<div className="rounded-lg border border-border bg-muted/30 p-1 overflow-hidden shadow-sm">
-										<Turnstile
-											ref={turnstileRef}
-											siteKey={TURNSTILE_SITE_KEY}
-											onSuccess={(token) => {
-												setCaptchaToken(token);
-												setCaptchaError(false);
-											}}
-											onError={() => {
-												setCaptchaToken(null);
-												setCaptchaError(true);
-											}}
-											onExpire={() => {
-												setCaptchaToken(null);
-											}}
-											options={{
-												theme: "auto",
-												size: "normal",
-											}}
-										/>
-									</div>
-								</div>
-							)}
-							{captchaError && (
-								<p className="text-sm text-destructive text-center">
-									{t("login.captcha.error") ||
-										"Captcha verification failed. Please try again."}
-								</p>
-							)}
-
-							{/* Resend button - hidden when banned */}
+							{/* Show banned error alert when user is banned */}
 							{isBanned ? (
-								<Button
-									onClick={handleBackToEmail}
-									variant="outline"
-									className="w-full"
-								>
-									<Mail className="mr-2 h-4 w-4" />
-									{t("login.banned.tryDifferentEmail")}
-								</Button>
-							) : otpNeedsResend ? (
-								<Button
-									onClick={handleResendOtp}
-									disabled={
-										isResending ||
-										isOnCooldown ||
-										(TURNSTILE_SITE_KEY ? !captchaToken : false)
-									}
-									className="w-full"
-								>
-									{isResending ? (
-										<>
-											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-											{t("login.otp.resendNew")}
-										</>
-									) : isOnCooldown ? (
-										<>
-											<RefreshCw className="mr-2 h-4 w-4" />
-											{t("login.otp.resendWait").replace(
-												"{seconds}",
-												String(secondsRemaining),
-											)}
-										</>
-									) : (
-										<>
-											<RefreshCw className="mr-2 h-4 w-4" />
-											{t("login.otp.requestNew")}
-										</>
-									)}
-								</Button>
-							) : (
-								<Button
-									onClick={handleResendOtp}
-									disabled={
-										isResending ||
-										isVerifyingOtp ||
-										isOnCooldown ||
-										(TURNSTILE_SITE_KEY ? !captchaToken : false)
-									}
-									variant="outline"
-									className="w-full"
-								>
-									<Mail className="mr-2 h-4 w-4" />
-									{isResending
-										? t("login.otp.resending")
-										: isOnCooldown
-											? t("login.otp.resendWait").replace(
-													"{seconds}",
-													String(secondsRemaining),
-												)
-											: t("login.otp.resend")}
-								</Button>
-							)}
+								<>
+									<Alert variant="destructive" role="alert">
+										<AlertTriangle className="h-4 w-4" aria-hidden="true" />
+										<AlertTitle>{t("login.banned.title")}</AlertTitle>
+										<AlertDescription>{otpError}</AlertDescription>
+									</Alert>
 
-							<div className="text-center text-sm text-muted-foreground">
-								{t("login.wrongEmail")}{" "}
-								<button
-									type="button"
-									onClick={handleBackToEmail}
-									className="font-medium text-primary underline-offset-4 hover:underline"
-								>
-									{t("login.changeEmail")}
-								</button>
-							</div>
+									<Button
+										onClick={handleBackToEmail}
+										variant="outline"
+										className="w-full"
+									>
+										<Mail className="mr-2 h-4 w-4" />
+										{t("login.banned.tryDifferentEmail")}
+									</Button>
+								</>
+							) : (
+								<>
+									<Alert>
+										<Mail className="h-4 w-4" aria-hidden="true" />
+										<AlertTitle>{t("login.otp.sent")}</AlertTitle>
+										<AlertDescription>
+											{t("login.otp.sentDescription").replace(
+												"{email}",
+												userEmail || "",
+											)}
+										</AlertDescription>
+									</Alert>
+
+									{/* OTP Input */}
+									<div className="flex flex-col items-center gap-4">
+										<InputOTP
+											maxLength={OTP_LENGTH}
+											value={otpValue}
+											onChange={setOtpValue}
+											disabled={isVerifyingOtp}
+											aria-label={t("login.otp.label")}
+											autoFocus
+										>
+											<InputOTPGroup>
+												<InputOTPSlot index={0} />
+												<InputOTPSlot index={1} />
+												<InputOTPSlot index={2} />
+												<InputOTPSlot index={3} />
+												<InputOTPSlot index={4} />
+												<InputOTPSlot index={5} />
+											</InputOTPGroup>
+										</InputOTP>
+
+										{isVerifyingOtp && (
+											<div className="flex items-center gap-2 text-sm text-muted-foreground">
+												<Loader2 className="h-4 w-4 animate-spin" />
+												{t("login.otp.verifying")}
+											</div>
+										)}
+									</div>
+
+									{otpError && (
+										<Alert variant="destructive" role="alert">
+											{otpNeedsResend && (
+												<AlertTriangle className="h-4 w-4" aria-hidden="true" />
+											)}
+											<AlertTitle>
+												{otpNeedsResend
+													? t("login.otp.expiredTitle")
+													: t("login.otp.errorTitle")}
+											</AlertTitle>
+											<AlertDescription>{otpError}</AlertDescription>
+										</Alert>
+									)}
+
+									{/* Turnstile Captcha Widget for Resend */}
+									{TURNSTILE_SITE_KEY && !captchaToken && (
+										<div className="flex justify-center">
+											<div className="rounded-lg border border-border bg-muted/30 p-1 overflow-hidden shadow-sm">
+												<Turnstile
+													ref={turnstileRef}
+													siteKey={TURNSTILE_SITE_KEY}
+													onSuccess={(token) => {
+														setCaptchaToken(token);
+														setCaptchaError(false);
+													}}
+													onError={() => {
+														setCaptchaToken(null);
+														setCaptchaError(true);
+													}}
+													onExpire={() => {
+														setCaptchaToken(null);
+													}}
+													options={{
+														theme: "auto",
+														size: "normal",
+													}}
+												/>
+											</div>
+										</div>
+									)}
+									{captchaError && (
+										<p className="text-sm text-destructive text-center">
+											{t("login.captcha.error") ||
+												"Captcha verification failed. Please try again."}
+										</p>
+									)}
+
+									{/* Resend button */}
+									{otpNeedsResend ? (
+										<Button
+											onClick={handleResendOtp}
+											disabled={
+												isResending ||
+												isOnCooldown ||
+												(TURNSTILE_SITE_KEY ? !captchaToken : false)
+											}
+											className="w-full"
+										>
+											{isResending ? (
+												<>
+													<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+													{t("login.otp.resendNew")}
+												</>
+											) : isOnCooldown ? (
+												<>
+													<RefreshCw className="mr-2 h-4 w-4" />
+													{t("login.otp.resendWait").replace(
+														"{seconds}",
+														String(secondsRemaining),
+													)}
+												</>
+											) : (
+												<>
+													<RefreshCw className="mr-2 h-4 w-4" />
+													{t("login.otp.requestNew")}
+												</>
+											)}
+										</Button>
+									) : (
+										<Button
+											onClick={handleResendOtp}
+											disabled={
+												isResending ||
+												isVerifyingOtp ||
+												isOnCooldown ||
+												(TURNSTILE_SITE_KEY ? !captchaToken : false)
+											}
+											variant="outline"
+											className="w-full"
+										>
+											<Mail className="mr-2 h-4 w-4" />
+											{isResending
+												? t("login.otp.resending")
+												: isOnCooldown
+													? t("login.otp.resendWait").replace(
+															"{seconds}",
+															String(secondsRemaining),
+														)
+													: t("login.otp.resend")}
+										</Button>
+									)}
+
+									<div className="text-center text-sm text-muted-foreground">
+										{t("login.wrongEmail")}{" "}
+										<button
+											type="button"
+											onClick={handleBackToEmail}
+											className="font-medium text-primary underline-offset-4 hover:underline"
+										>
+											{t("login.changeEmail")}
+										</button>
+									</div>
+								</>
+							)}
 						</div>
 					)}
 

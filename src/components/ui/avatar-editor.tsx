@@ -246,7 +246,16 @@ export function AvatarEditor({
 		// Notify parent of the change after rendering is complete
 		const dataUrl = generateOutputDataUrl();
 		onChange?.(dataUrl);
-	}, [image, imageLoaded, zoom, rotation, position, containerSize, generateOutputDataUrl, onChange]);
+	}, [
+		image,
+		imageLoaded,
+		zoom,
+		rotation,
+		position,
+		containerSize,
+		generateOutputDataUrl,
+		onChange,
+	]);
 
 	const resetTransforms = useCallback(() => {
 		setZoom(1);
@@ -398,14 +407,56 @@ export function AvatarEditor({
 						preserveAspectRatio="none"
 					>
 						{/* Vertical lines */}
-						<line x1="33.33" y1="0" x2="33.33" y2="100" stroke="white" strokeWidth="0.5" />
-						<line x1="66.66" y1="0" x2="66.66" y2="100" stroke="white" strokeWidth="0.5" />
+						<line
+							x1="33.33"
+							y1="0"
+							x2="33.33"
+							y2="100"
+							stroke="white"
+							strokeWidth="0.5"
+						/>
+						<line
+							x1="66.66"
+							y1="0"
+							x2="66.66"
+							y2="100"
+							stroke="white"
+							strokeWidth="0.5"
+						/>
 						{/* Horizontal lines */}
-						<line x1="0" y1="33.33" x2="100" y2="33.33" stroke="white" strokeWidth="0.5" />
-						<line x1="0" y1="66.66" x2="100" y2="66.66" stroke="white" strokeWidth="0.5" />
+						<line
+							x1="0"
+							y1="33.33"
+							x2="100"
+							y2="33.33"
+							stroke="white"
+							strokeWidth="0.5"
+						/>
+						<line
+							x1="0"
+							y1="66.66"
+							x2="100"
+							y2="66.66"
+							stroke="white"
+							strokeWidth="0.5"
+						/>
 						{/* Center crosshair */}
-						<line x1="45" y1="50" x2="55" y2="50" stroke="white" strokeWidth="0.5" />
-						<line x1="50" y1="45" x2="50" y2="55" stroke="white" strokeWidth="0.5" />
+						<line
+							x1="45"
+							y1="50"
+							x2="55"
+							y2="50"
+							stroke="white"
+							strokeWidth="0.5"
+						/>
+						<line
+							x1="50"
+							y1="45"
+							x2="50"
+							y2="55"
+							stroke="white"
+							strokeWidth="0.5"
+						/>
 					</svg>
 				)}
 

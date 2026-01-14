@@ -124,7 +124,6 @@ export const VerifyEmailView = ({ success, error }: VerifyEmailViewProps) => {
 										</Link>
 									</Button>
 								</Field>
-
 							</>
 						) : null}
 

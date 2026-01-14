@@ -139,7 +139,9 @@ describe("aurora-context", () => {
 				screen.getByTestId("set-onboarding-page").click();
 			});
 
-			expect(screen.getByTestId("page-profile")).toHaveTextContent("onboarding");
+			expect(screen.getByTestId("page-profile")).toHaveTextContent(
+				"onboarding",
+			);
 		});
 
 		it("changes animation speed for loading state", () => {
@@ -265,8 +267,12 @@ describe("aurora-context", () => {
 			const onboardingPositions = pageBlobPositions.onboarding;
 
 			// Login and onboarding should have different blob1 positions
-			expect(loginPositions.blob1.width).not.toBe(onboardingPositions.blob1.width);
-			expect(loginPositions.blob1.left).not.toBe(onboardingPositions.blob1.left);
+			expect(loginPositions.blob1.width).not.toBe(
+				onboardingPositions.blob1.width,
+			);
+			expect(loginPositions.blob1.left).not.toBe(
+				onboardingPositions.blob1.left,
+			);
 		});
 	});
 

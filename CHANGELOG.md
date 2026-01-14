@@ -1,3 +1,12 @@
+# [1.5.0-rc.2](https://github.com/janovix/auth/compare/v1.5.0-rc.1...v1.5.0-rc.2) (2026-01-14)
+
+
+### Features
+
+* add onboarding steps and UI components for organization management, including avatar upload and subscription selection ([1d83d7d](https://github.com/janovix/auth/commit/1d83d7d5ff04847717ca5bc70b6b80e3855ed109))
+* implement theme synchronization and upgrade prompts in billing components ([83c001c](https://github.com/janovix/auth/commit/83c001c97c995e70faad837dc25cb5a1eb43fcc4))
+* integrate Turnstile Captcha for enhanced OTP resend functionality in LoginView ([9e64176](https://github.com/janovix/auth/commit/9e6417694f11b17e30ca653b92b9d1ab0637d9df))
+
 # [1.5.0-rc.1](https://github.com/janovix/auth/compare/v1.4.0...v1.5.0-rc.1) (2026-01-12)
 
 

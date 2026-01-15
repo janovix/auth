@@ -1,3 +1,10 @@
+# [1.5.0-rc.4](https://github.com/janovix/auth/compare/v1.5.0-rc.3...v1.5.0-rc.4) (2026-01-15)
+
+
+### Bug Fixes
+
+* update success message display logic in LoginView to ensure correct rendering based on OTP state ([9bbc027](https://github.com/janovix/auth/commit/9bbc027f8c3313024a7610aee8d70059fafe9976))
+
 # [1.5.0-rc.3](https://github.com/janovix/auth/compare/v1.5.0-rc.2...v1.5.0-rc.3) (2026-01-14)
 
 

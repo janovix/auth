@@ -397,14 +397,10 @@ export const LoginView = ({
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					{successMessage && !otpError ? (
+					{successMessage && !otpError && !otpSent ? (
 						<Alert role="status" className="mb-6">
 							<CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-							<AlertTitle>
-								{otpSent
-									? t("login.success.codeSent")
-									: t("login.success.auth")}
-							</AlertTitle>
+							<AlertTitle>{t("login.success.auth")}</AlertTitle>
 							<AlertDescription>{successMessage}</AlertDescription>
 						</Alert>
 					) : null}

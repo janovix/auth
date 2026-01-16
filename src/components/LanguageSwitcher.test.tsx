@@ -17,90 +17,132 @@ describe("LanguageSwitcher", () => {
 		setLanguageMock.mockReset();
 	});
 
-	it("renders with current language ES", () => {
-		vi.mocked(languageContext.useLanguage).mockReturnValue({
-			language: "es",
-			setLanguage: setLanguageMock,
-			t: (key: string) => key,
+	describe("default variant (segmented control)", () => {
+		it("renders both language buttons", () => {
+			vi.mocked(languageContext.useLanguage).mockReturnValue({
+				language: "es",
+				setLanguage: setLanguageMock,
+				t: (key: string) => key,
+			});
+
+			render(<LanguageSwitcher />);
+			expect(screen.getByRole("button", { name: "EN" })).toBeInTheDocument();
+			expect(screen.getByRole("button", { name: "ES" })).toBeInTheDocument();
 		});
 
-		render(<LanguageSwitcher />);
-		const buttons = screen.getAllByRole("button");
-		const button = buttons[buttons.length - 1];
-		expect(button).toHaveTextContent("ES");
+		it("calls setLanguage when EN button is clicked", async () => {
+			vi.mocked(languageContext.useLanguage).mockReturnValue({
+				language: "es",
+				setLanguage: setLanguageMock,
+				t: (key: string) => key,
+			});
+
+			const user = userEvent.setup();
+			render(<LanguageSwitcher />);
+
+			// Get all EN buttons and click the last one (handles StrictMode double render)
+			const enButtons = screen.getAllByRole("button", { name: "EN" });
+			await user.click(enButtons[enButtons.length - 1]);
+			expect(setLanguageMock).toHaveBeenCalledWith("en");
+		});
+
+		it("calls setLanguage when ES button is clicked", async () => {
+			vi.mocked(languageContext.useLanguage).mockReturnValue({
+				language: "en",
+				setLanguage: setLanguageMock,
+				t: (key: string) => key,
+			});
+
+			const user = userEvent.setup();
+			render(<LanguageSwitcher />);
+
+			// Get all ES buttons and click the last one (handles StrictMode double render)
+			const esButtons = screen.getAllByRole("button", { name: "ES" });
+			await user.click(esButtons[esButtons.length - 1]);
+			expect(setLanguageMock).toHaveBeenCalledWith("es");
+		});
 	});
 
-	it("renders with current language EN", () => {
-		vi.mocked(languageContext.useLanguage).mockReturnValue({
-			language: "en",
-			setLanguage: setLanguageMock,
-			t: (key: string) => key,
+	describe("mini variant (dropdown)", () => {
+		it("opens dropdown and shows language options with native names", async () => {
+			vi.mocked(languageContext.useLanguage).mockReturnValue({
+				language: "es",
+				setLanguage: setLanguageMock,
+				t: (key: string) => {
+					const translations: Record<string, string> = {
+						"language.label": "Language",
+					};
+					return translations[key] || key;
+				},
+			});
+
+			const user = userEvent.setup();
+			render(<LanguageSwitcher variant="mini" />);
+
+			// Click the trigger button to open dropdown (get the last one for StrictMode)
+			const triggerButtons = screen.getAllByRole("button");
+			const triggerButton = triggerButtons[triggerButtons.length - 1];
+			await user.click(triggerButton);
+
+			// Both language options should be visible with native names
+			const menuItems = await screen.findAllByRole("menuitem");
+			expect(menuItems).toHaveLength(2);
+			expect(menuItems[0]).toHaveTextContent("English");
+			expect(menuItems[1]).toHaveTextContent("Español");
 		});
 
-		render(<LanguageSwitcher />);
-		const buttons = screen.getAllByRole("button");
-		const button = buttons[buttons.length - 1];
-		expect(button).toHaveTextContent("EN");
-	});
+		it("calls setLanguage with 'en' when English is selected", async () => {
+			vi.mocked(languageContext.useLanguage).mockReturnValue({
+				language: "es",
+				setLanguage: setLanguageMock,
+				t: (key: string) => {
+					const translations: Record<string, string> = {
+						"language.label": "Language",
+					};
+					return translations[key] || key;
+				},
+			});
 
-	it("opens dropdown and shows language options", async () => {
-		vi.mocked(languageContext.useLanguage).mockReturnValue({
-			language: "es",
-			setLanguage: setLanguageMock,
-			t: (key: string) => key,
+			const user = userEvent.setup();
+			render(<LanguageSwitcher variant="mini" />);
+
+			// Open dropdown (get the last button for StrictMode)
+			const triggerButtons = screen.getAllByRole("button");
+			const triggerButton = triggerButtons[triggerButtons.length - 1];
+			await user.click(triggerButton);
+
+			// Click English option
+			const enItem = await screen.findByRole("menuitem", { name: "English" });
+			await user.click(enItem);
+
+			expect(setLanguageMock).toHaveBeenCalledWith("en");
 		});
 
-		const user = userEvent.setup();
-		render(<LanguageSwitcher />);
+		it("calls setLanguage with 'es' when Español is selected", async () => {
+			vi.mocked(languageContext.useLanguage).mockReturnValue({
+				language: "en",
+				setLanguage: setLanguageMock,
+				t: (key: string) => {
+					const translations: Record<string, string> = {
+						"language.label": "Language",
+					};
+					return translations[key] || key;
+				},
+			});
 
-		const buttons = screen.getAllByRole("button");
-		const button = buttons[buttons.length - 1];
-		await user.click(button);
+			const user = userEvent.setup();
+			render(<LanguageSwitcher variant="mini" />);
 
-		// Both language options should be visible in the dropdown
-		const menuItems = screen.getAllByRole("menuitem");
-		expect(menuItems.length).toBeGreaterThanOrEqual(2);
-	});
+			// Open dropdown (get the last button for StrictMode)
+			const triggerButtons = screen.getAllByRole("button");
+			const triggerButton = triggerButtons[triggerButtons.length - 1];
+			await user.click(triggerButton);
 
-	it("calls setLanguage with 'en' when EN is selected", async () => {
-		vi.mocked(languageContext.useLanguage).mockReturnValue({
-			language: "es",
-			setLanguage: setLanguageMock,
-			t: (key: string) => key,
+			// Click Español option
+			const esItem = await screen.findByRole("menuitem", { name: "Español" });
+			await user.click(esItem);
+
+			expect(setLanguageMock).toHaveBeenCalledWith("es");
 		});
-
-		const user = userEvent.setup();
-		render(<LanguageSwitcher />);
-
-		const buttons = screen.getAllByRole("button");
-		const button = buttons[buttons.length - 1];
-		await user.click(button);
-
-		const menuItems = screen.getAllByRole("menuitem");
-		const enItem = menuItems.find((item) => item.textContent === "EN");
-		await user.click(enItem!);
-
-		expect(setLanguageMock).toHaveBeenCalledWith("en");
-	});
-
-	it("calls setLanguage with 'es' when ES is selected", async () => {
-		vi.mocked(languageContext.useLanguage).mockReturnValue({
-			language: "en",
-			setLanguage: setLanguageMock,
-			t: (key: string) => key,
-		});
-
-		const user = userEvent.setup();
-		render(<LanguageSwitcher />);
-
-		const buttons = screen.getAllByRole("button");
-		const button = buttons[buttons.length - 1];
-		await user.click(button);
-
-		const menuItems = screen.getAllByRole("menuitem");
-		const esItem = menuItems.find((item) => item.textContent === "ES");
-		await user.click(esItem!);
-
-		expect(setLanguageMock).toHaveBeenCalledWith("es");
 	});
 });

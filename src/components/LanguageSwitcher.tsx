@@ -1,6 +1,7 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
+import { Languages } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -8,56 +9,174 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/language-context";
 
+const languages = [
+	{ key: "en", label: "EN", nativeName: "English" },
+	{ key: "es", label: "ES", nativeName: "Español" },
+] as const;
+
+type LanguageKey = "en" | "es";
+
 export type LanguageSwitcherProps = {
 	className?: string;
+	/** Size of the switcher */
+	size?: "sm" | "md" | "lg";
+	/** Shape of the button */
+	shape?: "rounded" | "squared" | "pill";
+	/** Mini variant shows only an icon */
+	variant?: "default" | "mini";
+	/** Show language icon in default variant */
+	showIcon?: boolean;
+	/** Dropdown alignment */
+	align?: "start" | "center" | "end";
+	/** Dropdown side */
+	side?: "top" | "bottom" | "left" | "right";
 };
 
-export function LanguageSwitcher({ className }: LanguageSwitcherProps) {
-	const { language, setLanguage } = useLanguage();
+const sizeClasses = {
+	sm: {
+		container: "h-7 p-0.5 text-xs",
+		button: "h-6 px-2",
+		buttonMini: "h-7 w-7",
+		icon: "size-3",
+		iconMini: "size-3.5",
+	},
+	md: {
+		container: "h-8 p-0.5 text-xs",
+		button: "h-7 px-2.5",
+		buttonMini: "h-8 w-8",
+		icon: "size-3.5",
+		iconMini: "size-4",
+	},
+	lg: {
+		container: "h-9 p-0.5 text-sm",
+		button: "h-8 px-3",
+		buttonMini: "h-9 w-9",
+		icon: "size-4",
+		iconMini: "size-4.5",
+	},
+};
 
+const shapeClasses = {
+	rounded: "rounded-md",
+	squared: "rounded-sm",
+	pill: "rounded-full",
+};
+
+export function LanguageSwitcher({
+	className,
+	size = "sm",
+	shape = "rounded",
+	variant = "default",
+	showIcon = true,
+	align = "center",
+	side = "top",
+}: LanguageSwitcherProps) {
+	const { language, setLanguage, t } = useLanguage();
+	const sizes = sizeClasses[size];
+	const shapeClass = shapeClasses[shape];
+
+	const currentLanguage = language as LanguageKey;
+
+	// Mini variant - dropdown with language icon
+	if (variant === "mini") {
+		return (
+			<DropdownMenu modal={false}>
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<DropdownMenuTrigger asChild>
+							<Button
+								variant="ghost"
+								size="icon"
+								className={cn(sizes.buttonMini, shapeClass, className)}
+							>
+								<Languages className={sizes.iconMini} />
+							</Button>
+						</DropdownMenuTrigger>
+					</TooltipTrigger>
+					<TooltipContent side="right" sideOffset={8}>
+						{t("language.label")}
+					</TooltipContent>
+				</Tooltip>
+				<DropdownMenuContent
+					side={side}
+					align={align}
+					sideOffset={8}
+					className="min-w-0 w-auto"
+				>
+					{languages.map(({ key, nativeName }) => (
+						<DropdownMenuItem
+							key={key}
+							onClick={() => setLanguage(key)}
+							className={cn(
+								"justify-center text-xs font-semibold cursor-pointer px-3",
+								currentLanguage === key && "bg-accent",
+							)}
+						>
+							{nativeName}
+						</DropdownMenuItem>
+					))}
+				</DropdownMenuContent>
+			</DropdownMenu>
+		);
+	}
+
+	// Default variant - segmented control
 	return (
-		<DropdownMenu modal={false}>
-			<DropdownMenuTrigger asChild>
-				<Button
-					variant="ghost"
-					size="sm"
-					className={cn(
-						"h-8 px-2 gap-1 text-xs font-semibold uppercase",
-						className,
-					)}
-				>
-					{language === "en" ? "EN" : "ES"}
-					<ChevronDown className="size-3 opacity-60" />
-				</Button>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent
-				side="top"
-				align="center"
-				sideOffset={8}
-				className="min-w-[3.5rem]"
-			>
-				<DropdownMenuItem
-					onClick={() => setLanguage("es")}
-					className={cn(
-						"justify-center text-xs font-semibold cursor-pointer",
-						language === "es" && "bg-accent",
-					)}
-				>
-					ES
-				</DropdownMenuItem>
-				<DropdownMenuItem
-					onClick={() => setLanguage("en")}
-					className={cn(
-						"justify-center text-xs font-semibold cursor-pointer",
-						language === "en" && "bg-accent",
-					)}
-				>
-					EN
-				</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
+		<div
+			className={cn(
+				"relative isolate flex items-center bg-background ring-1 ring-border",
+				sizes.container,
+				shapeClass,
+				className,
+			)}
+		>
+			{showIcon && (
+				<Languages
+					className={cn(sizes.icon, "ml-1.5 mr-1.5 text-muted-foreground")}
+				/>
+			)}
+			{languages.map(({ key, label }) => {
+				const isActive = currentLanguage === key;
+
+				return (
+					<button
+						aria-label={label}
+						className={cn("relative font-semibold", sizes.button, shapeClass)}
+						key={key}
+						onClick={() => setLanguage(key)}
+						type="button"
+					>
+						<AnimatePresence>
+							{isActive && (
+								<motion.div
+									className={cn("absolute inset-0 bg-secondary", shapeClass)}
+									layoutId="activeLanguage"
+									initial={{ opacity: 0 }}
+									animate={{ opacity: 1 }}
+									exit={{ opacity: 0 }}
+									transition={{ type: "spring", duration: 0.5 }}
+								/>
+							)}
+						</AnimatePresence>
+						<span
+							className={cn(
+								"relative z-10",
+								isActive ? "text-foreground" : "text-muted-foreground",
+							)}
+						>
+							{label}
+						</span>
+					</button>
+				);
+			})}
+		</div>
 	);
 }

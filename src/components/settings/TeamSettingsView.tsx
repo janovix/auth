@@ -15,7 +15,7 @@ import {
 	Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Button, Label, Spinner, Badge } from "@/components/ui";
+import { Button, Label, Badge } from "@/components/ui";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -63,6 +63,7 @@ import {
 	SettingsCard,
 	SettingsSection,
 	SettingsPageHeader,
+	TeamSettingsViewSkeleton,
 } from "@/components/settings";
 
 type Role = "owner" | "admin" | "member";
@@ -302,11 +303,7 @@ export function TeamSettingsView() {
 	};
 
 	if (loading) {
-		return (
-			<div className="flex items-center justify-center py-20">
-				<Spinner className="h-8 w-8" />
-			</div>
-		);
+		return <TeamSettingsViewSkeleton />;
 	}
 
 	if (!activeOrgId) {

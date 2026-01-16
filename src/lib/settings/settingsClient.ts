@@ -15,6 +15,7 @@ import type {
 	AmlComplianceSettings,
 	CreateAmlComplianceSettingsInput,
 	UpdateAmlComplianceSettingsInput,
+	UIPreferences,
 } from "./types";
 
 const getBaseUrl = () => getAuthCoreBaseUrl();
@@ -277,4 +278,52 @@ export async function updateAmlComplianceSettings(
 	const result =
 		(await response.json()) as SettingsApiResponse<AmlComplianceSettings>;
 	return result.data;
+}
+
+/**
+ * Get UI preferences from user settings metadata
+ */
+export async function getUIPreferences(): Promise<UIPreferences> {
+	try {
+		const settings = await getUserSettings();
+		return settings?.metadata ?? {};
+	} catch {
+		return {};
+	}
+}
+
+/**
+ * Update UI preferences (merges with existing metadata)
+ */
+export async function updateUIPreferences(
+	preferences: UIPreferences,
+): Promise<UserSettings> {
+	// First get current settings to merge metadata
+	const currentSettings = await getUserSettings();
+	const currentMetadata = currentSettings?.metadata ?? {};
+
+	// Merge new preferences with existing metadata
+	const mergedMetadata = {
+		...currentMetadata,
+		...preferences,
+	};
+
+	return updateUserSettings({ metadata: mergedMetadata });
+}
+
+/**
+ * Get sidebar collapsed state from user settings
+ */
+export async function getSidebarCollapsed(): Promise<boolean | undefined> {
+	const prefs = await getUIPreferences();
+	return prefs.sidebarCollapsed;
+}
+
+/**
+ * Update sidebar collapsed state in user settings
+ */
+export async function setSidebarCollapsed(
+	collapsed: boolean,
+): Promise<UserSettings> {
+	return updateUIPreferences({ sidebarCollapsed: collapsed });
 }

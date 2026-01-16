@@ -128,6 +128,7 @@ describe("ThemeProvider", () => {
 			language: "es",
 			timezone: "UTC",
 			dateFormat: "DD/MM/YYYY",
+			clockFormat: "12h",
 			avatarUrl: null,
 			paymentMethods: [],
 			sources: {
@@ -135,6 +136,7 @@ describe("ThemeProvider", () => {
 				language: "default",
 				timezone: "default",
 				dateFormat: "default",
+				clockFormat: "default",
 			},
 		});
 
@@ -177,6 +179,7 @@ describe("ThemeProvider", () => {
 			language: "es",
 			timezone: "UTC",
 			dateFormat: "DD/MM/YYYY",
+			clockFormat: "12h",
 			avatarUrl: null,
 			paymentMethods: [],
 			sources: {
@@ -184,6 +187,7 @@ describe("ThemeProvider", () => {
 				language: "default",
 				timezone: "default",
 				dateFormat: "default",
+				clockFormat: "default",
 			},
 		});
 

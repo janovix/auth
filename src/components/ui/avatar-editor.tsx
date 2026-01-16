@@ -72,14 +72,20 @@ export interface AvatarEditorProps {
 	initials?: string;
 	/** Whether to show grid overlay by default */
 	showGrid?: boolean;
-	/** Default image URL to load */
+	/** Default image URL to load (alias: value) */
 	defaultImage?: string;
+	/** Current value - image URL or data URL (alias for defaultImage) */
+	value?: string | null;
+	/** Fixed size for the editor in pixels (overrides responsive sizing) */
+	size?: number;
 	/** Output image size in pixels */
 	outputSize?: number;
 	/** Output format */
 	outputFormat?: "png" | "jpeg" | "webp";
 	/** Output quality for jpeg/webp (0-1) */
 	outputQuality?: number;
+	/** Size variant for controls - 'default' or 'large' for mobile */
+	controlSize?: "default" | "large";
 	/** Additional class names */
 	className?: string;
 }
@@ -89,9 +95,12 @@ export function AvatarEditor({
 	initials = "?",
 	showGrid: initialShowGrid = false,
 	defaultImage,
+	value,
+	size,
 	outputSize = 256,
 	outputFormat = "png",
 	outputQuality = 0.92,
+	controlSize = "default",
 	className,
 }: AvatarEditorProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -106,10 +115,25 @@ export function AvatarEditor({
 	const [isDragging, setIsDragging] = useState(false);
 	const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 	const [showGrid, setShowGrid] = useState(initialShowGrid);
-	const [containerSize, setContainerSize] = useState(280);
+	const [containerSize, setContainerSize] = useState(size || 280);
 
-	// Observe container size for responsive canvas
+	// Use value prop if provided, otherwise fall back to defaultImage
+	const imageSource = value ?? defaultImage;
+
+	// Control sizes based on controlSize prop
+	const isLargeControls = controlSize === "large";
+	const buttonSize = isLargeControls ? "h-10 w-10" : "h-8 w-8";
+	const iconSize = isLargeControls ? "w-5 h-5" : "w-4 h-4";
+	const sliderHeight = isLargeControls ? "h-2" : "";
+
+	// Observe container size for responsive canvas (only if size prop not provided)
 	useEffect(() => {
+		// If fixed size is provided, use it
+		if (size) {
+			setContainerSize(size);
+			return;
+		}
+
 		const container = containerRef.current;
 		if (!container) return;
 
@@ -128,11 +152,11 @@ export function AvatarEditor({
 		resizeObserver.observe(container);
 
 		return () => resizeObserver.disconnect();
-	}, []);
+	}, [size]);
 
-	// Load default image
+	// Load image from value or defaultImage
 	useEffect(() => {
-		if (defaultImage) {
+		if (imageSource) {
 			const img = new Image();
 			img.crossOrigin = "anonymous";
 			img.onload = () => {
@@ -142,9 +166,13 @@ export function AvatarEditor({
 				setRotation(0);
 				setPosition({ x: 0, y: 0 });
 			};
-			img.src = defaultImage;
+			img.src = imageSource;
+		} else {
+			// Reset if no image source
+			setImage(null);
+			setImageLoaded(false);
 		}
-	}, [defaultImage]);
+	}, [imageSource]);
 
 	// Generate output data URL
 	const generateOutputDataUrl = useCallback(() => {
@@ -471,18 +499,18 @@ export function AvatarEditor({
 
 			{/* Controls - only show when image is loaded */}
 			{imageLoaded && (
-				<div className="space-y-3">
+				<div className={cn("space-y-3", isLargeControls && "space-y-4")}>
 					{/* Zoom Slider */}
 					<div className="flex items-center gap-2">
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 shrink-0"
+							className={cn(buttonSize, "shrink-0")}
 							onClick={handleZoomOut}
 							aria-label="Zoom out"
 							type="button"
 						>
-							<ZoomOut className="w-4 h-4" />
+							<ZoomOut className={iconSize} />
 						</Button>
 						<Slider
 							value={[zoom]}
@@ -490,18 +518,18 @@ export function AvatarEditor({
 							min={0.5}
 							max={3}
 							step={0.01}
-							className="flex-1"
+							className={cn("flex-1", sliderHeight)}
 							aria-label="Zoom level"
 						/>
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 shrink-0"
+							className={cn(buttonSize, "shrink-0")}
 							onClick={handleZoomIn}
 							aria-label="Zoom in"
 							type="button"
 						>
-							<ZoomIn className="w-4 h-4" />
+							<ZoomIn className={iconSize} />
 						</Button>
 					</div>
 
@@ -511,25 +539,30 @@ export function AvatarEditor({
 							<Button
 								variant="ghost"
 								size="icon"
-								className="h-8 w-8"
+								className={buttonSize}
 								onClick={handleRotateLeft}
 								aria-label="Rotate left 15 degrees"
 								type="button"
 							>
-								<RotateCcw className="w-4 h-4" />
+								<RotateCcw className={iconSize} />
 							</Button>
-							<span className="text-xs text-muted-foreground w-12 text-center tabular-nums">
+							<span
+								className={cn(
+									"text-muted-foreground text-center tabular-nums",
+									isLargeControls ? "text-sm w-14" : "text-xs w-12",
+								)}
+							>
 								{rotation}°
 							</span>
 							<Button
 								variant="ghost"
 								size="icon"
-								className="h-8 w-8"
+								className={buttonSize}
 								onClick={handleRotateRight}
 								aria-label="Rotate right 15 degrees"
 								type="button"
 							>
-								<RotateCw className="w-4 h-4" />
+								<RotateCw className={iconSize} />
 							</Button>
 						</div>
 
@@ -538,30 +571,33 @@ export function AvatarEditor({
 								pressed={showGrid}
 								onPressedChange={setShowGrid}
 								size="sm"
-								className="h-8 w-8 p-0"
+								className={cn(buttonSize, "p-0")}
 								aria-label="Toggle grid overlay"
 							>
-								<Grid3X3 className="w-4 h-4" />
+								<Grid3X3 className={iconSize} />
 							</Toggle>
 							<Button
 								variant="ghost"
 								size="icon"
-								className="h-8 w-8"
+								className={buttonSize}
 								onClick={resetTransforms}
 								aria-label="Reset all transforms"
 								type="button"
 							>
-								<RefreshCw className="w-4 h-4" />
+								<RefreshCw className={iconSize} />
 							</Button>
 							<Button
 								variant="ghost"
 								size="icon"
-								className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+								className={cn(
+									buttonSize,
+									"text-destructive hover:text-destructive hover:bg-destructive/10",
+								)}
 								onClick={handleDiscard}
 								aria-label="Discard image"
 								type="button"
 							>
-								<Trash2 className="w-4 h-4" />
+								<Trash2 className={iconSize} />
 							</Button>
 						</div>
 					</div>

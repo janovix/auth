@@ -32,6 +32,18 @@ vi.mock("@/contexts/language-context", () => ({
 	})),
 }));
 
+// Mock next/navigation
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		push: vi.fn(),
+		replace: vi.fn(),
+		prefetch: vi.fn(),
+		back: vi.fn(),
+		forward: vi.fn(),
+		refresh: vi.fn(),
+	}),
+}));
+
 // Mock the auth session hook - no org by default
 const mockUseAuthSession = vi.fn(() => ({
 	data: {
@@ -65,6 +77,7 @@ const mockOrgSettings = {
 	timezone: "UTC",
 	language: "en" as const,
 	dateFormat: "MM/DD/YYYY" as const,
+	clockFormat: "12h" as const,
 	avatarUrl: null,
 	metadata: null,
 	createdAt: new Date().toISOString(),
@@ -121,7 +134,7 @@ describe("OrganizationSettingsView", () => {
 			});
 		});
 
-		it("shows loading spinner while fetching settings", async () => {
+		it("shows skeleton loader while fetching settings", async () => {
 			vi.mocked(authClient.organization.getFullOrganization).mockImplementation(
 				() => new Promise(() => {}),
 			);
@@ -134,7 +147,8 @@ describe("OrganizationSettingsView", () => {
 
 			render(<OrganizationSettingsView />);
 
-			expect(document.querySelector(".animate-spin")).toBeInTheDocument();
+			// Skeleton uses animate-pulse and data-testid="skeleton"
+			expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0);
 		});
 
 		it("renders organization settings page header", async () => {

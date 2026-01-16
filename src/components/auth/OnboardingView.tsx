@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
 import { useAurora } from "@/contexts/aurora-context";
+import { useLanguage } from "@/contexts/language-context";
 import { useOnboarding } from "@/contexts/onboarding-context";
 import { getAuthRedirectUrl } from "@/lib/auth/redirectConfig";
 import {
@@ -21,6 +22,7 @@ interface OnboardingViewProps {
 export const OnboardingView = ({ redirectTo }: OnboardingViewProps) => {
 	const { setPageProfile } = useAurora();
 	const { state, refreshOnboardingStatus } = useOnboarding();
+	const { t } = useLanguage();
 	const searchParams = useSearchParams();
 
 	// License modal state
@@ -56,10 +58,10 @@ export const OnboardingView = ({ redirectTo }: OnboardingViewProps) => {
 	// Show loading state while fetching initial data
 	if (state.isLoading) {
 		return (
-			<div className="min-h-screen flex items-center justify-center">
+			<div className="w-full flex items-center justify-center py-12">
 				<div className="flex flex-col items-center gap-4">
 					<Loader2 className="h-8 w-8 animate-spin text-primary" />
-					<p className="text-muted-foreground">Loading...</p>
+					<p className="text-muted-foreground">{t("onboarding.loading")}</p>
 				</div>
 			</div>
 		);
@@ -70,17 +72,19 @@ export const OnboardingView = ({ redirectTo }: OnboardingViewProps) => {
 		const targetUrl = getAuthRedirectUrl(redirectTo);
 		window.location.href = targetUrl;
 		return (
-			<div className="min-h-screen flex items-center justify-center">
+			<div className="w-full flex items-center justify-center py-12">
 				<div className="flex flex-col items-center gap-4">
 					<Loader2 className="h-8 w-8 animate-spin text-primary" />
-					<p className="text-muted-foreground">Redirecting...</p>
+					<p className="text-muted-foreground">{t("onboarding.redirecting")}</p>
 				</div>
 			</div>
 		);
 	}
 
 	// Step 1: Profile completion (name/avatar)
-	if (!state.userProfile.isComplete) {
+	const editProfile = searchParams.get("edit_profile") === "true";
+
+	if (editProfile || !state.userProfile.isComplete) {
 		return (
 			<>
 				<ProfileCompletionStep />

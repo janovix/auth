@@ -11,7 +11,7 @@ import {
 	Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Button, Label, Spinner } from "@/components/ui";
+import { Button, Label } from "@/components/ui";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -45,6 +45,7 @@ import {
 	SettingsCard,
 	SettingsSection,
 	SettingsPageHeader,
+	ComplianceSettingsViewSkeleton,
 } from "@/components/settings";
 
 // Vulnerable activities catalog (as per Mexican AML regulations)
@@ -275,11 +276,7 @@ export function ComplianceSettingsView() {
 	);
 
 	if (loading) {
-		return (
-			<div className="flex items-center justify-center py-20">
-				<Spinner className="h-8 w-8" />
-			</div>
-		);
+		return <ComplianceSettingsViewSkeleton />;
 	}
 
 	if (!activeOrgId) {

@@ -63,8 +63,9 @@ export type OnboardingState = {
 	// Organization state
 	hasOrganization: boolean;
 	organizationName: string | null;
-	// Invitation state
-	pendingInvitation: PendingInvitation | null;
+	// Invitation state - support multiple invitations
+	pendingInvitation: PendingInvitation | null; // Kept for backward compatibility
+	pendingInvitations: PendingInvitation[]; // All pending invitations
 	// Derived state
 	canCreateOrganization: boolean;
 	isLoading: boolean;
@@ -88,6 +89,7 @@ export type OnboardingContextType = {
 	// Invitation actions (using Better Auth organization plugin)
 	acceptInvitation: (
 		invitationId: string,
+		organizationId?: string,
 	) => Promise<{ success: boolean; error?: string }>;
 	declineInvitation: (
 		invitationId: string,
@@ -128,6 +130,7 @@ const initialState: OnboardingState = {
 	hasOrganization: false,
 	organizationName: null,
 	pendingInvitation: null,
+	pendingInvitations: [],
 	canCreateOrganization: false,
 	isLoading: true,
 };
@@ -183,6 +186,16 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 						inviterEmail: string | null;
 						expiresAt: string | null;
 					} | null;
+					pendingInvitations?: Array<{
+						id: string;
+						organizationId: string;
+						organizationName: string;
+						organizationLogo: string | null;
+						role: string;
+						inviterName: string | null;
+						inviterEmail: string | null;
+						expiresAt: string | null;
+					}>;
 					canCreateOrganization: boolean;
 				};
 			};
@@ -214,6 +227,23 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 				avatarUrl = sessionData.user?.image ?? null;
 			}
 
+			// Map all pending invitations
+			const allInvitations: PendingInvitation[] = (
+				data.pendingInvitations || []
+			).map((inv) => ({
+				id: inv.id,
+				organizationId: inv.organizationId,
+				organizationName: inv.organizationName,
+				organizationLogo: inv.organizationLogo,
+				role: inv.role as "member" | "admin" | "owner",
+				inviterName: inv.inviterName,
+				inviterEmail: inv.inviterEmail,
+				expiresAt: inv.expiresAt ? new Date(inv.expiresAt) : null,
+			}));
+
+			// Fallback to single invitation for backward compatibility
+			const firstInvitation = allInvitations[0] || null;
+
 			setState({
 				userProfile: {
 					firstName,
@@ -233,20 +263,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 				license: null, // License info would come from subscription status endpoint if needed
 				hasOrganization: data.hasOrganization,
 				organizationName: null, // Will be set when org is created/joined
-				pendingInvitation: data.pendingInvitation
-					? {
-							id: data.pendingInvitation.id,
-							organizationId: data.pendingInvitation.organizationId,
-							organizationName: data.pendingInvitation.organizationName,
-							organizationLogo: data.pendingInvitation.organizationLogo,
-							role: data.pendingInvitation.role as "member" | "admin" | "owner",
-							inviterName: data.pendingInvitation.inviterName,
-							inviterEmail: data.pendingInvitation.inviterEmail,
-							expiresAt: data.pendingInvitation.expiresAt
-								? new Date(data.pendingInvitation.expiresAt)
-								: null,
-						}
-					: null,
+				pendingInvitation: firstInvitation,
+				pendingInvitations: allInvitations,
 				canCreateOrganization: data.canCreateOrganization,
 				isLoading: false,
 			});
@@ -285,7 +303,11 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 			successUrl: string,
 			cancelUrl: string,
 		): Promise<{ url: string }> => {
-			const planId = plan.id.toLowerCase() as "business" | "pro";
+			const planId = plan.id.toLowerCase() as
+				| "watchlist"
+				| "business"
+				| "pro"
+				| "ultra";
 			return startSubscription(planId, successUrl, cancelUrl);
 		},
 		[],
@@ -338,6 +360,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 	const acceptInvitation = useCallback(
 		async (
 			invitationId: string,
+			organizationId?: string,
 		): Promise<{ success: boolean; error?: string }> => {
 			try {
 				const result = await authClient.organization.acceptInvitation({
@@ -349,6 +372,20 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 						success: false,
 						error: result.error.message || "Failed to accept invitation",
 					};
+				}
+
+				// Update seat count in Stripe after accepting invitation
+				// This is done asynchronously and doesn't block the user flow
+				if (organizationId) {
+					fetch(`${getAuthCoreBaseUrl()}/api/organization/update-seats`, {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						credentials: "include",
+						body: JSON.stringify({ organizationId }),
+					}).catch((err) => {
+						// Log but don't fail - seat update can be synced later
+						console.warn("[Onboarding] Failed to update seats:", err);
+					});
 				}
 
 				// Refresh state to update organization membership

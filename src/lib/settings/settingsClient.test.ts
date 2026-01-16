@@ -30,6 +30,7 @@ const mockUserSettings: UserSettings = {
 	timezone: "America/Mexico_City",
 	language: "es",
 	dateFormat: "DD/MM/YYYY",
+	clockFormat: "12h",
 	avatarUrl: "https://example.com/avatar.jpg",
 	paymentMethods: [],
 	metadata: null,
@@ -42,6 +43,7 @@ const mockResolvedSettings: ResolvedSettings = {
 	timezone: "America/Mexico_City",
 	language: "es",
 	dateFormat: "DD/MM/YYYY",
+	clockFormat: "12h",
 	avatarUrl: "https://example.com/avatar.jpg",
 	paymentMethods: [],
 	sources: {
@@ -49,6 +51,7 @@ const mockResolvedSettings: ResolvedSettings = {
 		timezone: "user",
 		language: "user",
 		dateFormat: "user",
+		clockFormat: "user",
 	},
 };
 
@@ -59,6 +62,7 @@ const mockOrgSettings: OrganizationSettings = {
 	timezone: "UTC",
 	language: "en",
 	dateFormat: "MM/DD/YYYY",
+	clockFormat: "12h",
 	avatarUrl: null,
 	metadata: null,
 	createdAt: "2024-01-01T00:00:00Z",

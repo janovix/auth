@@ -18,10 +18,13 @@ const API_BASE = () => `${getAuthCoreBaseUrl()}/api`;
 
 export interface PlanLimits {
 	maxOrganizations: number;
-	noticesPerMonth: number;
 	usersPerOrg: number;
-	alertsPerMonth: number | null;
-	transactionsPerMonth: number | null;
+	reportsPerMonth: number; // Metered: overage billed via Stripe
+	noticesPerMonth: number; // Metered: overage billed via Stripe
+	alertsPerMonth: number; // Metered: overage billed via Stripe
+	transactionsPerMonth: number; // Metered: overage billed via Stripe
+	clientsPerMonth: number; // Metered: overage billed via Stripe
+	watchlistQueriesPerDay: number; // Per user per day limit
 }
 
 export interface UserSubscriptionStatus {
@@ -36,7 +39,7 @@ export interface UserSubscriptionStatus {
 		| "incomplete_expired"
 		| "paused"
 		| null;
-	plan: "business" | "pro" | null;
+	plan: "watchlist" | "business" | "pro" | "ultra" | null;
 	limits: PlanLimits | null;
 	isTrialing: boolean;
 	trialDaysRemaining: number | null;
@@ -48,19 +51,23 @@ export interface UserSubscriptionStatus {
 }
 
 export interface OrganizationUsage {
+	reports: number;
 	notices: number;
 	alerts: number;
 	transactions: number;
+	clients: number;
 	users: number;
 }
 
 export interface UsageResponse {
 	usage: OrganizationUsage;
 	limits: {
-		notices: number | null;
-		alerts: number | null;
-		transactions: number | null;
-		users: number | null;
+		reports: number;
+		notices: number;
+		alerts: number;
+		transactions: number;
+		clients: number;
+		users: number;
 	} | null;
 	period: {
 		start: string;
@@ -74,6 +81,8 @@ export interface OrgCreationCheck {
 }
 
 export type Feature =
+	| "product_aml"
+	| "product_watchlist"
 	| "data_capture"
 	| "compliance_validation"
 	| "report_generation"
@@ -81,7 +90,31 @@ export type Feature =
 	| "advanced_roles"
 	| "approval_flows"
 	| "report_templates"
-	| "priority_support";
+	| "priority_support"
+	| "dedicated_support"
+	| "custom_integrations"
+	| "sla_guarantee";
+
+/**
+ * Public plan pricing info (no sensitive Stripe IDs)
+ */
+export interface PublicPlanPrice {
+	priceType: string; // "subscription", "seat", "extra_org", "overage_*"
+	amount: number; // Amount in centavos (MXN)
+	currency: string;
+	interval: string | null; // "month", "year", or null for one-time
+	description: string | null;
+}
+
+export interface PublicPlanInfo {
+	id: string;
+	name: string;
+	displayName: string;
+	description: string | null;
+	trialDays: number;
+	limits: PlanLimits | null;
+	prices: PublicPlanPrice[];
+}
 
 interface ApiResponse<T> {
 	success: boolean;
@@ -141,6 +174,67 @@ export async function getFeatures(): Promise<Feature[]> {
 		features: Feature[];
 	}>;
 	return result.data?.features ?? [];
+}
+
+// ============================================================================
+// Public Pricing (no auth required)
+// ============================================================================
+
+/**
+ * Get all public plans with pricing info
+ * This is for pricing pages and subscription selection
+ */
+export async function getPublicPlans(): Promise<PublicPlanInfo[]> {
+	const response = await fetch(`${API_BASE()}/pricing/plans/public`, {
+		credentials: "include",
+	});
+
+	if (!response.ok) {
+		throw new Error("Failed to fetch plans");
+	}
+
+	const result = (await response.json()) as ApiResponse<PublicPlanInfo[]>;
+	return result.data ?? [];
+}
+
+/**
+ * Get a single plan's public pricing info
+ */
+export async function getPublicPlanByName(
+	name: string,
+): Promise<PublicPlanInfo | null> {
+	const response = await fetch(`${API_BASE()}/pricing/plans/public/${name}`, {
+		credentials: "include",
+	});
+
+	if (!response.ok) {
+		if (response.status === 404) return null;
+		throw new Error("Failed to fetch plan");
+	}
+
+	const result = (await response.json()) as ApiResponse<PublicPlanInfo>;
+	return result.data ?? null;
+}
+
+/**
+ * Helper to get subscription price for a plan
+ */
+export function getSubscriptionPrice(
+	plan: PublicPlanInfo,
+): PublicPlanPrice | null {
+	return plan.prices.find((p) => p.priceType === "subscription") ?? null;
+}
+
+/**
+ * Helper to format price in MXN
+ */
+export function formatPriceMXN(amountInCentavos: number): string {
+	return new Intl.NumberFormat("es-MX", {
+		style: "currency",
+		currency: "MXN",
+		minimumFractionDigits: 0,
+		maximumFractionDigits: 0,
+	}).format(amountInCentavos / 100);
 }
 
 // ============================================================================
@@ -211,7 +305,7 @@ export async function ensureStripeCustomer(): Promise<{
  * Automatically ensures a Stripe customer exists before starting checkout.
  */
 export async function startSubscription(
-	plan: "business" | "pro",
+	plan: "watchlist" | "business" | "pro" | "ultra",
 	successUrl: string,
 	cancelUrl: string,
 ): Promise<{ url: string }> {
@@ -264,27 +358,64 @@ export async function getPlans(): Promise<
 	}>
 > {
 	// Static plan definitions - pricing managed in Stripe
+	// - All per-month metrics: Metered billing via Stripe Usage Records
+	// - usersPerOrg: Seat-based billing via Stripe subscription quantity
+	// - watchlistQueriesPerDay: Per user per day limit
 	return [
 		{
-			name: "business",
-			priceId: "price_business",
+			name: "watchlist",
+			priceId: "price_watchlist",
 			limits: {
 				maxOrganizations: 1,
-				noticesPerMonth: 50,
-				usersPerOrg: 5,
-				alertsPerMonth: null,
-				transactionsPerMonth: null,
+				usersPerOrg: 3,
+				reportsPerMonth: 0,
+				noticesPerMonth: 0,
+				alertsPerMonth: 0,
+				transactionsPerMonth: 0,
+				clientsPerMonth: 0,
+				watchlistQueriesPerDay: 50,
+			},
+		},
+		{
+			name: "business",
+			priceId: "price_aml_business",
+			limits: {
+				maxOrganizations: 1,
+				usersPerOrg: 2,
+				reportsPerMonth: 1,
+				noticesPerMonth: 2,
+				alertsPerMonth: 20,
+				transactionsPerMonth: 50,
+				clientsPerMonth: 25,
+				watchlistQueriesPerDay: 50,
 			},
 		},
 		{
 			name: "pro",
-			priceId: "price_pro",
+			priceId: "price_aml_pro",
 			limits: {
 				maxOrganizations: 3,
-				noticesPerMonth: 150,
 				usersPerOrg: 10,
-				alertsPerMonth: null,
-				transactionsPerMonth: null,
+				reportsPerMonth: 15,
+				noticesPerMonth: 20,
+				alertsPerMonth: 100,
+				transactionsPerMonth: 500,
+				clientsPerMonth: 250,
+				watchlistQueriesPerDay: 200,
+			},
+		},
+		{
+			name: "ultra",
+			priceId: "price_aml_ultra",
+			limits: {
+				maxOrganizations: 10,
+				usersPerOrg: 20,
+				reportsPerMonth: 100,
+				noticesPerMonth: 100,
+				alertsPerMonth: 500,
+				transactionsPerMonth: 2000,
+				clientsPerMonth: 1000,
+				watchlistQueriesPerDay: 500,
 			},
 		},
 	];
@@ -377,7 +508,14 @@ export async function createCheckoutSession(
 	successUrl: string,
 	cancelUrl: string,
 ): Promise<{ sessionId: string; url: string }> {
-	const plan = planId.includes("pro") ? "pro" : "business";
+	let plan: "watchlist" | "business" | "pro" | "ultra" = "business";
+	if (planId.includes("ultra")) {
+		plan = "ultra";
+	} else if (planId.includes("pro")) {
+		plan = "pro";
+	} else if (planId.includes("watchlist")) {
+		plan = "watchlist";
+	}
 	const result = await startSubscription(plan, successUrl, cancelUrl);
 	return { sessionId: "migrated", url: result.url };
 }

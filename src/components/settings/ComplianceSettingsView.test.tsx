@@ -99,7 +99,7 @@ describe("ComplianceSettingsView", () => {
 			});
 		});
 
-		it("shows loading spinner while fetching settings", async () => {
+		it("shows skeleton loader while fetching settings", async () => {
 			vi.mocked(settingsClient.getAmlComplianceSettings).mockImplementation(
 				() => new Promise(() => {}),
 			);
@@ -109,7 +109,8 @@ describe("ComplianceSettingsView", () => {
 
 			render(<ComplianceSettingsView />);
 
-			expect(document.querySelector(".animate-spin")).toBeInTheDocument();
+			// Skeleton uses animate-pulse and data-testid="skeleton"
+			expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0);
 		});
 
 		it("renders compliance settings page header", async () => {

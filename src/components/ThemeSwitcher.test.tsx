@@ -10,6 +10,21 @@ vi.mock("next-themes", () => ({
 	useTheme: vi.fn(),
 }));
 
+// Mock language context with proper translations
+vi.mock("@/contexts/language-context", () => ({
+	useLanguage: () => ({
+		t: (key: string) => {
+			const translations: Record<string, string> = {
+				"theme.system": "System",
+				"theme.light": "Light",
+				"theme.dark": "Dark",
+				"theme.label": "Theme",
+			};
+			return translations[key] || key;
+		},
+	}),
+}));
+
 describe("ThemeSwitcher", () => {
 	beforeEach(() => {
 		setThemeMock.mockReset();
@@ -23,9 +38,9 @@ describe("ThemeSwitcher", () => {
 		} as unknown as ReturnType<typeof nextThemes.useTheme>);
 
 		render(<ThemeSwitcher />);
-		expect(screen.getAllByLabelText("System theme").length).toBeGreaterThan(0);
-		expect(screen.getAllByLabelText("Light theme").length).toBeGreaterThan(0);
-		expect(screen.getAllByLabelText("Dark theme").length).toBeGreaterThan(0);
+		expect(screen.getAllByLabelText("System").length).toBeGreaterThan(0);
+		expect(screen.getAllByLabelText("Light").length).toBeGreaterThan(0);
+		expect(screen.getAllByLabelText("Dark").length).toBeGreaterThan(0);
 	});
 
 	it("sets theme to light when light button is clicked", async () => {
@@ -39,7 +54,7 @@ describe("ThemeSwitcher", () => {
 		render(<ThemeSwitcher />);
 
 		// Get the last matching element (handles StrictMode double render)
-		const lightButtons = screen.getAllByLabelText("Light theme");
+		const lightButtons = screen.getAllByLabelText("Light");
 		const lightButton = lightButtons[lightButtons.length - 1];
 		await user.click(lightButton);
 
@@ -57,7 +72,7 @@ describe("ThemeSwitcher", () => {
 		render(<ThemeSwitcher />);
 
 		// Get the last matching element (handles StrictMode double render)
-		const darkButtons = screen.getAllByLabelText("Dark theme");
+		const darkButtons = screen.getAllByLabelText("Dark");
 		const darkButton = darkButtons[darkButtons.length - 1];
 		await user.click(darkButton);
 
@@ -75,7 +90,7 @@ describe("ThemeSwitcher", () => {
 		render(<ThemeSwitcher />);
 
 		// Get the last matching element (handles StrictMode double render)
-		const systemButtons = screen.getAllByLabelText("System theme");
+		const systemButtons = screen.getAllByLabelText("System");
 		const systemButton = systemButtons[systemButtons.length - 1];
 		await user.click(systemButton);
 

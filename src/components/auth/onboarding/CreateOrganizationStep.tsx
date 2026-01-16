@@ -16,11 +16,28 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AvatarEditorDialog } from "@/components/ui/avatar-editor-dialog";
 import { useLanguage } from "@/contexts/language-context";
 import { useOnboarding } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
 import { getAuthRedirectUrl } from "@/lib/auth/redirectConfig";
+import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 import { cn } from "@/lib/utils";
+
+/**
+ * Convert a data URL to a Blob for uploading.
+ */
+function dataURLtoBlob(dataUrl: string): Blob {
+	const arr = dataUrl.split(",");
+	const mime = arr[0].match(/:(.*?);/)?.[1] || "image/png";
+	const bstr = atob(arr[1]);
+	let n = bstr.length;
+	const u8arr = new Uint8Array(n);
+	while (n--) {
+		u8arr[n] = bstr.charCodeAt(n);
+	}
+	return new Blob([u8arr], { type: mime });
+}
 
 interface CreateOrganizationStepProps {
 	redirectTo?: string;
@@ -49,30 +66,30 @@ function generateSlug(name: string): string {
 /**
  * Validate slug format
  */
-function validateSlug(slug: string): { valid: boolean; error?: string } {
+function validateSlug(
+	slug: string,
+	t: (key: string) => string,
+): { valid: boolean; error?: string } {
 	if (!slug) {
-		return { valid: false, error: "Slug is required" };
+		return { valid: false, error: t("onboarding.org.slug.error.required") };
 	}
 	if (slug.length < 3) {
-		return { valid: false, error: "Slug must be at least 3 characters" };
+		return { valid: false, error: t("onboarding.org.slug.error.min") };
 	}
 	if (slug.length > 50) {
-		return { valid: false, error: "Slug must be 50 characters or less" };
+		return { valid: false, error: t("onboarding.org.slug.error.max") };
 	}
 	if (!/^[a-z0-9]/.test(slug)) {
-		return { valid: false, error: "Slug must start with a letter or number" };
+		return { valid: false, error: t("onboarding.org.slug.error.start") };
 	}
 	if (!/[a-z0-9]$/.test(slug)) {
-		return { valid: false, error: "Slug must end with a letter or number" };
+		return { valid: false, error: t("onboarding.org.slug.error.end") };
 	}
 	if (!/^[a-z0-9-]+$/.test(slug)) {
-		return {
-			valid: false,
-			error: "Slug can only contain lowercase letters, numbers, and hyphens",
-		};
+		return { valid: false, error: t("onboarding.org.slug.error.chars") };
 	}
 	if (/--/.test(slug)) {
-		return { valid: false, error: "Slug cannot contain consecutive hyphens" };
+		return { valid: false, error: t("onboarding.org.slug.error.consecutive") };
 	}
 	return { valid: true };
 }
@@ -88,6 +105,7 @@ export function CreateOrganizationStep({
 	const [slug, setSlug] = useState("");
 	const [slugTouched, setSlugTouched] = useState(false);
 	const [slugError, setSlugError] = useState<string | null>(null);
+	const [orgLogo, setOrgLogo] = useState<string | null>(null);
 	const [isCreating, setIsCreating] = useState(false);
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -102,7 +120,7 @@ export function CreateOrganizationStep({
 	// Validate slug on change
 	useEffect(() => {
 		if (slug) {
-			const validation = validateSlug(slug);
+			const validation = validateSlug(slug, t);
 			setSlugError(validation.valid ? null : validation.error || null);
 		} else {
 			setSlugError(null);
@@ -116,6 +134,55 @@ export function CreateOrganizationStep({
 		setSlugTouched(true);
 	}, []);
 
+	// Handle logo save via the AvatarEditorDialog
+	const handleLogoSave = useCallback(
+		async (dataUrl: string): Promise<boolean> => {
+			try {
+				const baseUrl = getAuthCoreBaseUrl();
+				const blob = dataURLtoBlob(dataUrl);
+				const formData = new FormData();
+				formData.append("file", blob, "logo.png");
+
+				const response = await fetch(`${baseUrl}/api/upload/avatar`, {
+					method: "POST",
+					credentials: "include",
+					body: formData,
+				});
+
+				if (!response.ok) {
+					return false;
+				}
+
+				const result = (await response.json()) as {
+					success: boolean;
+					data?: { url: string };
+					error?: string;
+				};
+
+				if (!result.success || !result.data?.url) {
+					return false;
+				}
+
+				// Update state with the uploaded URL
+				setOrgLogo(result.data.url);
+				return true;
+			} catch {
+				return false;
+			}
+		},
+		[],
+	);
+
+	// Get org initials for placeholder
+	const orgInitials = orgName
+		? orgName
+				.split(" ")
+				.map((word) => word[0])
+				.join("")
+				.slice(0, 2)
+				.toUpperCase()
+		: "?";
+
 	const handleLogout = async () => {
 		setIsLoggingOut(true);
 		await authClient.signOut();
@@ -126,9 +193,9 @@ export function CreateOrganizationStep({
 		if (!orgName.trim() || !slug.trim()) return;
 
 		// Validate slug before submitting
-		const validation = validateSlug(slug);
+		const validation = validateSlug(slug, t);
 		if (!validation.valid) {
-			setSlugError(validation.error || "Invalid slug");
+			setSlugError(validation.error || t("onboarding.org.slug.error.invalid"));
 			return;
 		}
 
@@ -143,12 +210,25 @@ export function CreateOrganizationStep({
 				result.error?.toLowerCase().includes("slug") ||
 				result.error?.toLowerCase().includes("unique")
 			) {
-				setSlugError("This slug is already taken. Please choose another.");
+				setSlugError(t("onboarding.org.slug.error.taken"));
 			} else {
-				setError(result.error || "Failed to create organization");
+				setError(result.error || t("onboarding.org.error.createFailed"));
 			}
 			setIsCreating(false);
 			return;
+		}
+
+		// If there's a logo, update the organization with it
+		// The organization is already created and set as active by createOrganization
+		if (orgLogo) {
+			try {
+				await authClient.organization.update({
+					data: { logo: orgLogo },
+				});
+			} catch {
+				// Don't fail if logo update fails, org is already created
+				console.warn("Failed to set organization logo");
+			}
 		}
 
 		// Success! Redirect to the target URL
@@ -159,11 +239,28 @@ export function CreateOrganizationStep({
 	const isFormValid = orgName.trim() && slug.trim() && !slugError;
 
 	// Get the plan name for display
-	const planName = state.currentPlan?.name || "Active";
+	const planName = state.currentPlan?.name || t("onboarding.org.plan.active");
 
 	return (
-		<div className="min-h-screen bg-background flex items-center justify-center p-4">
+		<div className="w-full flex justify-center my-auto">
 			<div className="w-full max-w-lg">
+				<div className="flex justify-end mb-4">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleLogout}
+						disabled={isLoggingOut || isCreating}
+						className="gap-2"
+					>
+						{isLoggingOut ? (
+							<Loader2 className="h-3.5 w-3.5 animate-spin" />
+						) : (
+							<LogOut className="h-3.5 w-3.5" />
+						)}
+						{t("settings.nav.signOut")}
+					</Button>
+				</div>
+
 				{/* Header */}
 				<div className="text-center mb-8">
 					<div className="flex justify-center mb-4">
@@ -173,13 +270,13 @@ export function CreateOrganizationStep({
 						<Check className="h-8 w-8 text-success" />
 					</div>
 					<Badge className="mb-4 bg-success/10 text-success border-success/20">
-						{planName} Subscription Active
+						{t("onboarding.org.badge").replace("{plan}", planName)}
 					</Badge>
 					<h1 className="text-2xl font-bold text-foreground mb-2">
-						Create Your Organization
+						{t("onboarding.org.title")}
 					</h1>
 					<p className="text-muted-foreground">
-						Set up your organization to start using Janovix
+						{t("onboarding.org.description")}
 					</p>
 				</div>
 
@@ -193,19 +290,48 @@ export function CreateOrganizationStep({
 					)}
 
 					<div className="space-y-5">
+						{/* Organization Logo */}
+						<div className="flex flex-col items-center gap-3">
+							<AvatarEditorDialog
+								value={orgLogo}
+								onChange={setOrgLogo}
+								onSave={handleLogoSave}
+								displaySize={96}
+								editorSize={280}
+								outputSize={256}
+								placeholder={orgInitials}
+								editLabel={t("onboarding.org.logo.edit") || "Add Logo"}
+								dialogTitle={
+									t("onboarding.org.logo.title") || "Organization Logo"
+								}
+								acceptText={t("common.accept") || "Accept"}
+								cancelText={t("common.cancel") || "Cancel"}
+								successMessage={
+									t("onboarding.org.logo.success") || "Logo saved!"
+								}
+								errorMessage={
+									t("onboarding.org.logo.error") || "Failed to save logo."
+								}
+							/>
+							<p className="text-xs text-muted-foreground">
+								{t("onboarding.org.logo.help") ||
+									"Optional: Add a logo for your organization"}
+							</p>
+						</div>
+
 						{/* Organization Name */}
 						<div className="space-y-2">
-							<Label htmlFor="orgName">Organization name</Label>
+							<Label htmlFor="orgName">{t("onboarding.org.name.label")}</Label>
 							<Input
 								id="orgName"
-								placeholder="Acme Corporation"
+								placeholder={t("onboarding.org.name.placeholder")}
 								value={orgName}
 								onChange={(e) => setOrgName(e.target.value)}
 								className="h-12"
 								disabled={isCreating}
 							/>
 							<p className="text-xs text-muted-foreground">
-								This is how your organization will appear across Janovix
+								{t("onboarding.org.name.help")}
 							</p>
 						</div>
 
@@ -213,12 +339,12 @@ export function CreateOrganizationStep({
 						<div className="space-y-2">
 							<Label htmlFor="orgSlug" className="flex items-center gap-1.5">
 								<Link2 className="h-3.5 w-3.5" />
-								Organization subdomain
+								{t("onboarding.org.slug.label")}
 							</Label>
 							<div className="flex items-center">
 								<Input
 									id="orgSlug"
-									placeholder="acme-corp"
+									placeholder={t("onboarding.org.slug.placeholder")}
 									value={slug}
 									onChange={(e) => handleSlugChange(e.target.value)}
 									className={cn(
@@ -240,11 +366,11 @@ export function CreateOrganizationStep({
 							) : slug ? (
 								<p className="text-xs text-success flex items-center gap-1">
 									<Check className="h-3 w-3" />
-									{slug}.janovix.com is available!
+									{t("onboarding.org.slug.available").replace("{slug}", slug)}
 								</p>
 							) : (
 								<p className="text-xs text-muted-foreground">
-									This will be your organization&apos;s unique subdomain
+									{t("onboarding.org.slug.help")}
 								</p>
 							)}
 						</div>
@@ -258,11 +384,11 @@ export function CreateOrganizationStep({
 							{isCreating ? (
 								<>
 									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-									Creating...
+									{t("onboarding.org.creating")}
 								</>
 							) : (
 								<>
-									Create Organization
+									{t("onboarding.org.submit")}
 									<ArrowRight className="h-4 w-4 ml-2" />
 								</>
 							)}
@@ -273,22 +399,8 @@ export function CreateOrganizationStep({
 				{/* Footer Info */}
 				<div className="mt-6 text-center space-y-3">
 					<p className="text-xs text-muted-foreground">
-						You can invite team members and configure settings after creating
-						your organization.
+						{t("onboarding.org.footer")}
 					</p>
-					<button
-						type="button"
-						onClick={handleLogout}
-						disabled={isLoggingOut || isCreating}
-						className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5 disabled:opacity-50"
-					>
-						{isLoggingOut ? (
-							<Loader2 className="h-3.5 w-3.5 animate-spin" />
-						) : (
-							<LogOut className="h-3.5 w-3.5" />
-						)}
-						Sign out
-					</button>
 				</div>
 			</div>
 		</div>

@@ -10,6 +10,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuroraProvider } from "@/contexts/aurora-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { OnboardingProvider } from "@/contexts/onboarding-context";
+import { PageStatusProvider } from "@/contexts/page-status-context";
 import { TurnstileProvider } from "@/contexts/turnstile-context";
 
 // Turnstile site key from environment variable
@@ -19,7 +20,7 @@ const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 function SettingsBar() {
 	return (
 		<div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
-			<LanguageSwitcher />
+			<LanguageSwitcher showIcon />
 			<ThemeSwitcher />
 		</div>
 	);
@@ -60,26 +61,25 @@ export default function ClientLayout({
 		pathname.startsWith("/recover") ||
 		pathname.startsWith("/verify");
 
+	// Error pages should also use the auth layout (centered with aurora background)
+	const isErrorPageRoute =
+		pathname.startsWith("/forbidden") || pathname.startsWith("/unauthorized");
+
 	// Onboarding and invite routes have their own full-screen layout but need OnboardingProvider
 	const isOnboardingRoute =
 		pathname.startsWith("/onboarding") || pathname.startsWith("/invite");
 
 	const content = (
 		<>
-			{isAuthRoute ? (
+			{isAuthRoute || isErrorPageRoute ? (
 				<AuthLayout>{children}</AuthLayout>
 			) : isOnboardingRoute ? (
 				<OnboardingProvider>
-					<AuroraProvider>
-						<SettingsBar />
-						{children}
-					</AuroraProvider>
+					<AuroraProvider>{children}</AuroraProvider>
 				</OnboardingProvider>
 			) : (
-				<>
-					<SettingsBar />
-					{children}
-				</>
+				// Settings and other routes - no SettingsBar (they have their own controls in the header)
+				children
 			)}
 			<Toaster position="top-right" richColors closeButton />
 		</>
@@ -88,13 +88,15 @@ export default function ClientLayout({
 	return (
 		<ThemeProvider>
 			<LanguageProvider>
-				{TURNSTILE_SITE_KEY ? (
-					<TurnstileProvider siteKey={TURNSTILE_SITE_KEY}>
-						{content}
-					</TurnstileProvider>
-				) : (
-					content
-				)}
+				<PageStatusProvider>
+					{TURNSTILE_SITE_KEY ? (
+						<TurnstileProvider siteKey={TURNSTILE_SITE_KEY}>
+							{content}
+						</TurnstileProvider>
+					) : (
+						content
+					)}
+				</PageStatusProvider>
 			</LanguageProvider>
 		</ThemeProvider>
 	);

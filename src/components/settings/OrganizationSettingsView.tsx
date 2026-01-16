@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Building2, Copy, Check, Trash2, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Building2, Copy, Check, Trash2, Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { Button, Label, Spinner } from "@/components/ui";
+import { Button, Label } from "@/components/ui";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	Select,
 	SelectContent,
@@ -13,6 +13,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { TimezonePicker } from "@/components/ui/timezone-picker";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -37,16 +38,14 @@ import {
 } from "@/lib/settings";
 import { authClient } from "@/lib/auth/authClient";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
-import { getAllTimezoneOptions } from "@/lib/timezones";
 import {
 	SettingsCard,
 	SettingsSection,
 	SettingsPageHeader,
-	AvatarUploadDialog,
+	OrganizationSettingsViewSkeleton,
 } from "@/components/settings";
-
-// Get all timezones
-const TIMEZONES = getAllTimezoneOptions();
+import { AvatarEditorDialog } from "@/components/ui/avatar-editor-dialog";
+import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 
 const DATE_FORMATS: { value: DateFormat; label: string }[] = [
 	{ value: "DD/MM/YYYY", label: "DD/MM/YYYY" },
@@ -76,6 +75,7 @@ interface OrgData {
 export function OrganizationSettingsView() {
 	const { t } = useLanguage();
 	const { data: session } = useAuthSession();
+	const router = useRouter();
 
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
@@ -93,7 +93,7 @@ export function OrganizationSettingsView() {
 	// Form state
 	const [orgName, setOrgName] = useState("");
 	const [orgSlug, setOrgSlug] = useState("");
-	const [orgLogo, setOrgLogo] = useState("");
+	const [orgLogo, setOrgLogo] = useState<string | null>("");
 	const [selectedTheme, setSelectedTheme] = useState<Theme>("system");
 	const [selectedTimezone, setSelectedTimezone] = useState<string>("UTC");
 	const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>("en");
@@ -179,27 +179,72 @@ export function OrganizationSettingsView() {
 		}
 	};
 
-	const handleLogoUploadSuccess = useCallback(
-		async (url: string) => {
-			if (!activeOrgId || !isOwner) return;
-			setOrgLogo(url);
+	/**
+	 * Convert a data URL to a Blob for uploading.
+	 */
+	const dataURLtoBlob = useCallback((dataUrl: string): Blob => {
+		const arr = dataUrl.split(",");
+		const mime = arr[0].match(/:(.*?);/)?.[1] || "image/png";
+		const bstr = atob(arr[1]);
+		let n = bstr.length;
+		const u8arr = new Uint8Array(n);
+		while (n--) {
+			u8arr[n] = bstr.charCodeAt(n);
+		}
+		return new Blob([u8arr], { type: mime });
+	}, []);
+
+	// Handle logo save via the new AvatarEditorDialog
+	const handleLogoSave = useCallback(
+		async (dataUrl: string): Promise<boolean> => {
+			if (!activeOrgId || !isOwner) return false;
+
 			try {
 				setSaving(true);
+				const baseUrl = getAuthCoreBaseUrl();
+				const blob = dataURLtoBlob(dataUrl);
+				const formData = new FormData();
+				formData.append("file", blob, "logo.png");
+
+				const response = await fetch(`${baseUrl}/api/upload/avatar`, {
+					method: "POST",
+					credentials: "include",
+					body: formData,
+				});
+
+				if (!response.ok) {
+					return false;
+				}
+
+				const result = (await response.json()) as {
+					success: boolean;
+					data?: { url: string };
+					error?: string;
+				};
+
+				if (!result.success || !result.data?.url) {
+					return false;
+				}
+
+				// Update state with the uploaded URL
+				setOrgLogo(result.data.url);
 				await updateOrganizationSettings(activeOrgId, {
-					avatarUrl: url,
+					avatarUrl: result.data.url,
 				});
 				showSuccess(t("settings.organization.savedSuccess"));
+				return true;
 			} catch (err) {
 				toast.error(
 					err instanceof Error
 						? err.message
 						: t("settings.organization.saveError"),
 				);
+				return false;
 			} finally {
 				setSaving(false);
 			}
 		},
-		[activeOrgId, isOwner, showSuccess, t],
+		[activeOrgId, isOwner, dataURLtoBlob, showSuccess, t],
 	);
 
 	const handleOrgUpdate = useCallback(async () => {
@@ -316,12 +361,15 @@ export function OrganizationSettingsView() {
 	);
 
 	if (loading) {
-		return (
-			<div className="flex items-center justify-center py-20">
-				<Spinner className="h-8 w-8" />
-			</div>
-		);
+		return <OrganizationSettingsViewSkeleton />;
 	}
+
+	const createOrgAction = (
+		<Button onClick={() => router.push("/settings/organization/new")}>
+			<Plus className="h-4 w-4 mr-2" />
+			{t("settings.nav.createOrganization")}
+		</Button>
+	);
 
 	if (!activeOrgId) {
 		return (
@@ -330,6 +378,7 @@ export function OrganizationSettingsView() {
 					icon={Building2}
 					title={t("settings.org.title")}
 					description={t("settings.organization.noOrg")}
+					action={createOrgAction}
 				/>
 			</div>
 		);
@@ -342,6 +391,7 @@ export function OrganizationSettingsView() {
 				icon={Building2}
 				title={t("settings.org.title")}
 				description={t("settings.org.description")}
+				action={createOrgAction}
 			/>
 
 			{/* Organization Profile */}
@@ -351,30 +401,30 @@ export function OrganizationSettingsView() {
 			>
 				<SettingsCard>
 					<div className="space-y-6">
-						{/* Logo */}
+						{/* Logo with Editor Dialog */}
 						<div className="flex flex-col sm:flex-row gap-6">
 							<div className="flex flex-col items-center gap-3">
-								<Avatar className="h-20 w-20">
-									<AvatarImage src={orgLogo || undefined} />
-									<AvatarFallback className="bg-primary text-primary-foreground text-xl">
-										{orgInitials}
-									</AvatarFallback>
-								</Avatar>
-								<AvatarUploadDialog
-									trigger={
-										<Button variant="outline" size="sm" disabled={!isOwner}>
-											{t("settings.org.changeLogo") || "Change Logo"}
-										</Button>
+								<AvatarEditorDialog
+									value={orgLogo}
+									onChange={setOrgLogo}
+									onSave={handleLogoSave}
+									displaySize={80}
+									editorSize={280}
+									outputSize={256}
+									placeholder={orgInitials}
+									editLabel={t("settings.org.changeLogo") || "Change Logo"}
+									dialogTitle={
+										t("settings.org.logoTitle") || "Edit Organization Logo"
 									}
-									initials={orgInitials}
-									currentAvatarUrl={orgLogo}
-									onUploadSuccess={handleLogoUploadSuccess}
-									title={
-										t("settings.org.logoTitle") || "Change Organization Logo"
+									acceptText={t("common.accept") || "Accept"}
+									cancelText={t("common.cancel") || "Cancel"}
+									successMessage={
+										t("settings.organization.savedSuccess") ||
+										"Logo saved successfully!"
 									}
-									description={
-										t("settings.org.logoDescription") ||
-										"Upload a logo for your organization"
+									errorMessage={
+										t("settings.organization.saveError") ||
+										"Failed to save logo. Please try again."
 									}
 								/>
 							</div>
@@ -451,89 +501,80 @@ export function OrganizationSettingsView() {
 				description={t("settings.org.defaultPreferencesDesc")}
 			>
 				<SettingsCard>
-					<div className="grid sm:grid-cols-2 gap-6">
-						<div className="space-y-2">
-							<Label>{t("settings.appearance.theme")}</Label>
-							<Select
-								value={selectedTheme}
-								onValueChange={(v: string) => handleThemeChange(v as Theme)}
-								disabled={!isOwner || saving}
-							>
-								<SelectTrigger>
-									<SelectValue placeholder="Select theme" />
-								</SelectTrigger>
-								<SelectContent>
-									{THEMES.map(({ value, labelKey }) => (
-										<SelectItem key={value} value={value}>
-											{t(labelKey)}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+					<div className="space-y-6">
+						<div className="grid sm:grid-cols-2 gap-6">
+							<div className="space-y-2">
+								<Label>{t("settings.appearance.theme")}</Label>
+								<Select
+									value={selectedTheme}
+									onValueChange={(v: string) => handleThemeChange(v as Theme)}
+									disabled={!isOwner || saving}
+								>
+									<SelectTrigger>
+										<SelectValue placeholder="Select theme" />
+									</SelectTrigger>
+									<SelectContent>
+										{THEMES.map(({ value, labelKey }) => (
+											<SelectItem key={value} value={value}>
+												{t(labelKey)}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+
+							<div className="space-y-2">
+								<Label>{t("settings.org.defaultLanguage")}</Label>
+								<Select
+									value={selectedLanguage}
+									onValueChange={(v: string) =>
+										handleLanguageChange(v as LanguageCode)
+									}
+									disabled={!isOwner || saving}
+								>
+									<SelectTrigger>
+										<SelectValue placeholder="Select language" />
+									</SelectTrigger>
+									<SelectContent>
+										{LANGUAGES.map((lang) => (
+											<SelectItem key={lang.value} value={lang.value}>
+												{t(lang.labelKey)}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+
+							<div className="space-y-2">
+								<Label>{t("settings.org.defaultDateFormat")}</Label>
+								<Select
+									value={selectedDateFormat}
+									onValueChange={(v: string) =>
+										handleDateFormatChange(v as DateFormat)
+									}
+									disabled={!isOwner || saving}
+								>
+									<SelectTrigger>
+										<SelectValue placeholder="Select format" />
+									</SelectTrigger>
+									<SelectContent>
+										{DATE_FORMATS.map((fmt) => (
+											<SelectItem key={fmt.value} value={fmt.value}>
+												{fmt.label}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
 						</div>
 
 						<div className="space-y-2">
 							<Label>{t("settings.org.defaultTimezone")}</Label>
-							<Select
+							<TimezonePicker
 								value={selectedTimezone}
-								onValueChange={handleTimezoneChange}
+								onChange={handleTimezoneChange}
 								disabled={!isOwner || saving}
-							>
-								<SelectTrigger>
-									<SelectValue placeholder="Select timezone" />
-								</SelectTrigger>
-								<SelectContent className="max-h-[300px]">
-									{TIMEZONES.map((tz) => (
-										<SelectItem key={tz.value} value={tz.value}>
-											{tz.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div className="space-y-2">
-							<Label>{t("settings.org.defaultLanguage")}</Label>
-							<Select
-								value={selectedLanguage}
-								onValueChange={(v: string) =>
-									handleLanguageChange(v as LanguageCode)
-								}
-								disabled={!isOwner || saving}
-							>
-								<SelectTrigger>
-									<SelectValue placeholder="Select language" />
-								</SelectTrigger>
-								<SelectContent>
-									{LANGUAGES.map((lang) => (
-										<SelectItem key={lang.value} value={lang.value}>
-											{t(lang.labelKey)}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div className="space-y-2">
-							<Label>{t("settings.org.defaultDateFormat")}</Label>
-							<Select
-								value={selectedDateFormat}
-								onValueChange={(v: string) =>
-									handleDateFormatChange(v as DateFormat)
-								}
-								disabled={!isOwner || saving}
-							>
-								<SelectTrigger>
-									<SelectValue placeholder="Select format" />
-								</SelectTrigger>
-								<SelectContent>
-									{DATE_FORMATS.map((fmt) => (
-										<SelectItem key={fmt.value} value={fmt.value}>
-											{fmt.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+							/>
 						</div>
 					</div>
 				</SettingsCard>

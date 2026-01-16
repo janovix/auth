@@ -9,6 +9,7 @@ export type DateFormat =
 	| "YYYY-MM-DD"
 	| "DD.MM.YYYY";
 export type LanguageCode = "en" | "es";
+export type ClockFormat = "12h" | "24h";
 
 export interface PaymentMethod {
 	id: string;
@@ -18,6 +19,20 @@ export interface PaymentMethod {
 	isDefault?: boolean;
 }
 
+/**
+ * UI preferences stored in metadata
+ */
+export interface UIPreferences {
+	sidebarCollapsed?: boolean;
+}
+
+/**
+ * Type-safe metadata for user settings
+ */
+export interface UserSettingsMetadata extends UIPreferences {
+	[key: string]: unknown;
+}
+
 export interface UserSettings {
 	id: string;
 	userId: string;
@@ -25,9 +40,10 @@ export interface UserSettings {
 	timezone: string | null;
 	language: LanguageCode | null;
 	dateFormat: DateFormat | null;
+	clockFormat: ClockFormat | null;
 	avatarUrl: string | null;
 	paymentMethods: PaymentMethod[];
-	metadata: Record<string, unknown> | null;
+	metadata: UserSettingsMetadata | null;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -37,6 +53,7 @@ export interface ResolvedSettings {
 	timezone: string;
 	language: LanguageCode;
 	dateFormat: DateFormat;
+	clockFormat: ClockFormat;
 	avatarUrl: string | null;
 	paymentMethods: PaymentMethod[];
 	sources: {
@@ -44,6 +61,7 @@ export interface ResolvedSettings {
 		timezone: "user" | "organization" | "browser" | "default";
 		language: "user" | "organization" | "browser" | "default";
 		dateFormat: "user" | "organization" | "default";
+		clockFormat: "user" | "organization" | "default";
 	};
 }
 
@@ -52,8 +70,10 @@ export interface UpdateUserSettingsInput {
 	timezone?: string | null;
 	language?: LanguageCode | null;
 	dateFormat?: DateFormat | null;
+	clockFormat?: ClockFormat | null;
 	avatarUrl?: string | null;
 	paymentMethods?: PaymentMethod[];
+	metadata?: UserSettingsMetadata;
 }
 
 export interface OrganizationSettings {
@@ -63,6 +83,7 @@ export interface OrganizationSettings {
 	timezone: string | null;
 	language: LanguageCode | null;
 	dateFormat: DateFormat | null;
+	clockFormat: ClockFormat | null;
 	avatarUrl: string | null;
 	metadata: Record<string, unknown> | null;
 	createdAt: string;
@@ -74,6 +95,7 @@ export interface UpdateOrganizationSettingsInput {
 	timezone?: string | null;
 	language?: LanguageCode | null;
 	dateFormat?: DateFormat | null;
+	clockFormat?: ClockFormat | null;
 	avatarUrl?: string | null;
 }
 

@@ -6,16 +6,17 @@ import {
 	Moon,
 	Sun,
 	Monitor,
-	Clock,
 	Calendar,
-	Globe,
+	Languages,
 	User,
 	Check,
+	PanelLeftClose,
+	Globe,
+	Clock,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Button, Label, Spinner, Badge } from "@/components/ui";
+import { Button, Label, Badge } from "@/components/ui";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import {
 	Select,
@@ -24,29 +25,30 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { TimezonePicker } from "@/components/ui/timezone-picker";
 import { useLanguage } from "@/contexts/language-context";
 import {
 	getUserSettings,
 	updateUserSettings,
 	getOrganizationSettings,
+	updateUIPreferences,
 	type UserSettings,
 	type OrganizationSettings,
 	type Theme,
 	type LanguageCode,
 	type DateFormat,
+	type ClockFormat,
 } from "@/lib/settings";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
-import { getAllTimezoneOptions } from "@/lib/timezones";
 import { cn } from "@/lib/utils";
 import {
 	SettingsCard,
 	SettingsSection,
 	SettingsPageHeader,
-	AvatarUploadDialog,
+	PersonalSettingsViewSkeleton,
 } from "@/components/settings";
-
-// Get all timezones
-const TIMEZONES = getAllTimezoneOptions();
+import { AvatarEditorDialog } from "@/components/ui/avatar-editor-dialog";
+import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 
 const DATE_FORMATS: { value: DateFormat; label: string }[] = [
 	{ value: "DD/MM/YYYY", label: "DD/MM/YYYY" },
@@ -56,14 +58,19 @@ const DATE_FORMATS: { value: DateFormat; label: string }[] = [
 ];
 
 const THEMES: { value: Theme; labelKey: string; icon: typeof Sun }[] = [
+	{ value: "system", labelKey: "settings.appearance.system", icon: Monitor },
 	{ value: "light", labelKey: "settings.appearance.light", icon: Sun },
 	{ value: "dark", labelKey: "settings.appearance.dark", icon: Moon },
-	{ value: "system", labelKey: "settings.appearance.system", icon: Monitor },
 ];
 
 const LANGUAGES: { value: LanguageCode; labelKey: string }[] = [
 	{ value: "es", labelKey: "settings.personal.spanish" },
 	{ value: "en", labelKey: "settings.personal.english" },
+];
+
+const CLOCK_FORMATS: { value: ClockFormat; label: string }[] = [
+	{ value: "12h", label: "12-hour (AM/PM)" },
+	{ value: "24h", label: "24-hour" },
 ];
 
 export function PersonalSettingsView() {
@@ -85,6 +92,7 @@ export function PersonalSettingsView() {
 		timezone: true,
 		language: true,
 		dateFormat: true,
+		clockFormat: true,
 	});
 
 	// Form state
@@ -93,7 +101,10 @@ export function PersonalSettingsView() {
 	const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>("en");
 	const [selectedDateFormat, setSelectedDateFormat] =
 		useState<DateFormat>("MM/DD/YYYY");
-	const [avatarUrl, setAvatarUrl] = useState<string>("");
+	const [selectedClockFormat, setSelectedClockFormat] =
+		useState<ClockFormat>("12h");
+	const [avatarUrl, setAvatarUrl] = useState<string | null>("");
+	const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
 
 	const activeOrgId = (
 		session?.session as { activeOrganizationId?: string } | undefined
@@ -105,6 +116,7 @@ export function PersonalSettingsView() {
 		timezone: orgSettings?.timezone || "UTC",
 		language: orgSettings?.language || "en",
 		dateFormat: orgSettings?.dateFormat || "MM/DD/YYYY",
+		clockFormat: orgSettings?.clockFormat || "12h",
 	};
 
 	// Get user initials for avatar placeholder
@@ -129,6 +141,7 @@ export function PersonalSettingsView() {
 						timezone: data.timezone === null,
 						language: data.language === null,
 						dateFormat: data.dateFormat === null,
+						clockFormat: data.clockFormat === null,
 					});
 
 					setSelectedTheme(data.theme || "system");
@@ -137,7 +150,9 @@ export function PersonalSettingsView() {
 					);
 					setSelectedLanguage(data.language || "en");
 					setSelectedDateFormat(data.dateFormat || "MM/DD/YYYY");
+					setSelectedClockFormat(data.clockFormat || "12h");
 					setAvatarUrl(data.avatarUrl || "");
+					setSidebarCollapsed(data.metadata?.sidebarCollapsed ?? false);
 				}
 
 				// Load org settings if we have an active org
@@ -208,6 +223,12 @@ export function PersonalSettingsView() {
 			try {
 				setSaving(true);
 				await updateUserSettings({ timezone: newTimezone });
+				// Dispatch event to update navbar clock immediately
+				window.dispatchEvent(
+					new CustomEvent("timezone-change", {
+						detail: { timezone: newTimezone },
+					}),
+				);
 				showSuccess(t("settings.saved"));
 			} catch (err) {
 				toast.error(
@@ -228,6 +249,12 @@ export function PersonalSettingsView() {
 				try {
 					setSaving(true);
 					await updateUserSettings({ timezone: null });
+					// Dispatch event to update navbar clock to org timezone
+					window.dispatchEvent(
+						new CustomEvent("timezone-change", {
+							detail: { timezone: orgDefaults.timezone },
+						}),
+					);
 					showSuccess(t("settings.saved"));
 				} catch (err) {
 					toast.error(
@@ -322,16 +349,138 @@ export function PersonalSettingsView() {
 		[orgDefaults.dateFormat, showSuccess, t],
 	);
 
-	const handleAvatarUploadSuccess = useCallback(
-		async (url: string) => {
-			setAvatarUrl(url);
+	const handleClockFormatChange = useCallback(
+		async (newFormat: ClockFormat) => {
+			setSelectedClockFormat(newFormat);
 			try {
 				setSaving(true);
-				await updateUserSettings({ avatarUrl: url });
+				await updateUserSettings({ clockFormat: newFormat });
+				// Dispatch event to update navbar clock immediately
+				window.dispatchEvent(
+					new CustomEvent("clock-format-change", {
+						detail: { clockFormat: newFormat },
+					}),
+				);
 				showSuccess(t("settings.saved"));
 			} catch (err) {
 				toast.error(
+					err instanceof Error ? err.message : "Failed to save clock format",
+				);
+			} finally {
+				setSaving(false);
+			}
+		},
+		[showSuccess, t],
+	);
+
+	const handleClockFormatDefaultToggle = useCallback(
+		async (useDefault: boolean) => {
+			setUseOrgDefaults((prev) => ({ ...prev, clockFormat: useDefault }));
+			if (useDefault) {
+				const defaultFormat = orgDefaults.clockFormat as ClockFormat;
+				setSelectedClockFormat(defaultFormat);
+				try {
+					setSaving(true);
+					await updateUserSettings({ clockFormat: null });
+					// Dispatch event to update navbar clock to org clock format
+					window.dispatchEvent(
+						new CustomEvent("clock-format-change", {
+							detail: { clockFormat: defaultFormat },
+						}),
+					);
+					showSuccess(t("settings.saved"));
+				} catch (err) {
+					toast.error(
+						err instanceof Error ? err.message : "Failed to save clock format",
+					);
+				} finally {
+					setSaving(false);
+				}
+			}
+		},
+		[orgDefaults.clockFormat, showSuccess, t],
+	);
+
+	/**
+	 * Convert a data URL to a Blob for uploading.
+	 */
+	const dataURLtoBlob = useCallback((dataUrl: string): Blob => {
+		const arr = dataUrl.split(",");
+		const mime = arr[0].match(/:(.*?);/)?.[1] || "image/png";
+		const bstr = atob(arr[1]);
+		let n = bstr.length;
+		const u8arr = new Uint8Array(n);
+		while (n--) {
+			u8arr[n] = bstr.charCodeAt(n);
+		}
+		return new Blob([u8arr], { type: mime });
+	}, []);
+
+	// Handle avatar save via the new AvatarEditorDialog
+	const handleAvatarSave = useCallback(
+		async (dataUrl: string): Promise<boolean> => {
+			try {
+				setSaving(true);
+				const baseUrl = getAuthCoreBaseUrl();
+				const blob = dataURLtoBlob(dataUrl);
+				const formData = new FormData();
+				formData.append("file", blob, "avatar.png");
+
+				const response = await fetch(`${baseUrl}/api/upload/avatar`, {
+					method: "POST",
+					credentials: "include",
+					body: formData,
+				});
+
+				if (!response.ok) {
+					return false;
+				}
+
+				const result = (await response.json()) as {
+					success: boolean;
+					data?: { url: string };
+					error?: string;
+				};
+
+				if (!result.success || !result.data?.url) {
+					return false;
+				}
+
+				// Update state with the uploaded URL
+				setAvatarUrl(result.data.url);
+				await updateUserSettings({ avatarUrl: result.data.url });
+				showSuccess(t("settings.saved"));
+				return true;
+			} catch (err) {
+				toast.error(
 					err instanceof Error ? err.message : "Failed to save avatar",
+				);
+				return false;
+			} finally {
+				setSaving(false);
+			}
+		},
+		[dataURLtoBlob, showSuccess, t],
+	);
+
+	const handleSidebarCollapsedChange = useCallback(
+		async (collapsed: boolean) => {
+			setSidebarCollapsed(collapsed);
+			try {
+				setSaving(true);
+				await updateUIPreferences({ sidebarCollapsed: collapsed });
+				// Dispatch event to update the current sidebar state immediately
+				window.dispatchEvent(
+					new CustomEvent("sidebar-collapsed-change", {
+						detail: { collapsed },
+					}),
+				);
+				showSuccess(t("settings.saved"));
+			} catch (err) {
+				toast.error(
+					err instanceof Error
+						? err.message
+						: "Failed to save sidebar preference",
 				);
 			} finally {
 				setSaving(false);
@@ -349,11 +498,7 @@ export function PersonalSettingsView() {
 	};
 
 	if (loading) {
-		return (
-			<div className="flex items-center justify-center py-20">
-				<Spinner className="h-8 w-8" />
-			</div>
-		);
+		return <PersonalSettingsViewSkeleton />;
 	}
 
 	return (
@@ -372,25 +517,29 @@ export function PersonalSettingsView() {
 			>
 				<SettingsCard>
 					<div className="flex flex-col sm:flex-row gap-6">
-						{/* Avatar */}
+						{/* Avatar with Editor Dialog */}
 						<div className="flex flex-col items-center gap-3">
-							<Avatar className="h-20 w-20">
-								<AvatarImage src={avatarUrl || undefined} />
-								<AvatarFallback className="bg-primary text-primary-foreground text-xl">
-									{userInitials}
-								</AvatarFallback>
-							</Avatar>
-							<AvatarUploadDialog
-								trigger={
-									<Button variant="outline" size="sm">
-										{t("settings.personal.changeAvatar") || "Change Avatar"}
-									</Button>
+							<AvatarEditorDialog
+								value={avatarUrl}
+								onChange={setAvatarUrl}
+								onSave={handleAvatarSave}
+								displaySize={80}
+								editorSize={280}
+								outputSize={256}
+								placeholder={userInitials}
+								editLabel={
+									t("settings.personal.changeAvatar") || "Change Avatar"
 								}
-								initials={userInitials}
-								currentAvatarUrl={avatarUrl}
-								onUploadSuccess={handleAvatarUploadSuccess}
-								title={t("settings.avatar.title")}
-								description={t("settings.avatar.description")}
+								dialogTitle={t("settings.avatar.title") || "Edit Avatar"}
+								acceptText={t("common.accept") || "Accept"}
+								cancelText={t("common.cancel") || "Cancel"}
+								successMessage={
+									t("settings.avatar.success") || "Avatar saved successfully!"
+								}
+								errorMessage={
+									t("settings.avatar.error") ||
+									"Failed to save avatar. Please try again."
+								}
 							/>
 						</div>
 
@@ -501,54 +650,43 @@ export function PersonalSettingsView() {
 				<SettingsCard className="mb-4">
 					<div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
 						<div className="flex items-start gap-3">
-							<Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
-							<div>
-								<h4 className="text-sm font-medium text-foreground">
-									{t("settings.localization.timezone")}
-								</h4>
-								<p className="text-sm text-muted-foreground">
-									{t("settings.personal.timezoneDesc") ||
-										"Used for displaying dates and times"}
-								</p>
+							<Globe className="h-5 w-5 text-muted-foreground mt-0.5" />
+							<div className="space-y-3 flex-1">
+								<div>
+									<h4 className="text-sm font-medium text-foreground">
+										{t("settings.localization.timezone")}
+									</h4>
+									<p className="text-sm text-muted-foreground">
+										{t("settings.personal.timezoneDesc") ||
+											"Used for displaying dates and times"}
+									</p>
+								</div>
+								<TimezonePicker
+									value={getEffectiveValue(
+										"timezone",
+										selectedTimezone,
+										orgDefaults.timezone,
+									)}
+									onChange={handleTimezoneChange}
+									disabled={useOrgDefaults.timezone || saving}
+								/>
 							</div>
 						</div>
-						<div className="flex flex-col items-end gap-2">
-							{activeOrgId && (
-								<div className="flex items-center gap-2">
-									<Label
-										htmlFor="orgTimezone"
-										className="text-xs text-muted-foreground"
-									>
-										{t("settings.personal.useOrgDefault")}
-									</Label>
-									<Switch
-										id="orgTimezone"
-										checked={useOrgDefaults.timezone}
-										onCheckedChange={handleTimezoneDefaultToggle}
-									/>
-								</div>
-							)}
-							<Select
-								value={getEffectiveValue(
-									"timezone",
-									selectedTimezone,
-									orgDefaults.timezone,
-								)}
-								onValueChange={handleTimezoneChange}
-								disabled={useOrgDefaults.timezone || saving}
-							>
-								<SelectTrigger className="w-[220px]">
-									<SelectValue placeholder="Select timezone" />
-								</SelectTrigger>
-								<SelectContent className="max-h-[300px]">
-									{TIMEZONES.map((tz) => (
-										<SelectItem key={tz.value} value={tz.value}>
-											{tz.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
+						{activeOrgId && (
+							<div className="flex items-center gap-2 shrink-0">
+								<Label
+									htmlFor="orgTimezone"
+									className="text-xs text-muted-foreground"
+								>
+									{t("settings.personal.useOrgDefault")}
+								</Label>
+								<Switch
+									id="orgTimezone"
+									checked={useOrgDefaults.timezone}
+									onCheckedChange={handleTimezoneDefaultToggle}
+								/>
+							</div>
+						)}
 					</div>
 				</SettingsCard>
 
@@ -556,7 +694,7 @@ export function PersonalSettingsView() {
 				<SettingsCard className="mb-4">
 					<div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
 						<div className="flex items-start gap-3">
-							<Globe className="h-5 w-5 text-muted-foreground mt-0.5" />
+							<Languages className="h-5 w-5 text-muted-foreground mt-0.5" />
 							<div>
 								<h4 className="text-sm font-medium text-foreground">
 									{t("settings.localization.language")}
@@ -610,7 +748,7 @@ export function PersonalSettingsView() {
 				</SettingsCard>
 
 				{/* Date Format */}
-				<SettingsCard>
+				<SettingsCard className="mb-4">
 					<div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
 						<div className="flex items-start gap-3">
 							<Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
@@ -668,6 +806,94 @@ export function PersonalSettingsView() {
 									))}
 								</SelectContent>
 							</Select>
+						</div>
+					</div>
+				</SettingsCard>
+
+				{/* Clock Format */}
+				<SettingsCard>
+					<div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+						<div className="flex items-start gap-3">
+							<Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
+							<div>
+								<h4 className="text-sm font-medium text-foreground">
+									{t("settings.personal.clockFormat")}
+								</h4>
+								<p className="text-sm text-muted-foreground">
+									{t("settings.personal.clockFormatDesc") ||
+										"How time is displayed"}
+								</p>
+							</div>
+						</div>
+						<div className="flex flex-col items-end gap-2">
+							{activeOrgId && (
+								<div className="flex items-center gap-2">
+									<Label
+										htmlFor="orgClockFormat"
+										className="text-xs text-muted-foreground"
+									>
+										{t("settings.personal.useOrgDefault")}
+									</Label>
+									<Switch
+										id="orgClockFormat"
+										checked={useOrgDefaults.clockFormat}
+										onCheckedChange={handleClockFormatDefaultToggle}
+									/>
+								</div>
+							)}
+							<Select
+								value={getEffectiveValue(
+									"clockFormat",
+									selectedClockFormat,
+									orgDefaults.clockFormat as ClockFormat,
+								)}
+								onValueChange={(v: string) =>
+									handleClockFormatChange(v as ClockFormat)
+								}
+								disabled={useOrgDefaults.clockFormat || saving}
+							>
+								<SelectTrigger className="w-[220px]">
+									<SelectValue placeholder="Select format" />
+								</SelectTrigger>
+								<SelectContent>
+									{CLOCK_FORMATS.map((fmt) => (
+										<SelectItem key={fmt.value} value={fmt.value}>
+											{fmt.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+					</div>
+				</SettingsCard>
+			</SettingsSection>
+
+			{/* Interface Section */}
+			<SettingsSection
+				title={t("settings.personal.interface")}
+				description={t("settings.personal.interfaceDesc")}
+			>
+				{/* Sidebar Collapsed */}
+				<SettingsCard>
+					<div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+						<div className="flex items-start gap-3">
+							<PanelLeftClose className="h-5 w-5 text-muted-foreground mt-0.5" />
+							<div>
+								<h4 className="text-sm font-medium text-foreground">
+									{t("settings.personal.sidebarCollapsed")}
+								</h4>
+								<p className="text-sm text-muted-foreground">
+									{t("settings.personal.sidebarCollapsedDesc")}
+								</p>
+							</div>
+						</div>
+						<div className="flex items-center gap-2">
+							<Switch
+								id="sidebarCollapsed"
+								checked={sidebarCollapsed}
+								onCheckedChange={handleSidebarCollapsedChange}
+								disabled={saving}
+							/>
 						</div>
 					</div>
 				</SettingsCard>

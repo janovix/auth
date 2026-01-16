@@ -106,7 +106,7 @@
 	--success: oklch(0.55 0.18 145);
 	--success-foreground: oklch(0.95 0.01 270);
 	--warning: oklch(0.7 0.15 75);
-	--warning-foreground: oklch(0.15 0.05 75);
+	--warning-foreground: oklch(0.9 0.12 75);
 	--font-sans: Inter, ui-sans-serif, sans-serif, system-ui;
 	--font-serif: serif;
 	--font-mono: monospace;
@@ -199,6 +199,9 @@
 @layer base {
 	* {
 		@apply border-border outline-ring/50;
+	}
+	html {
+		scrollbar-gutter: stable;
 	}
 	html,
 	body {
@@ -405,4 +408,25 @@
 .animate-bounce-dot-3 {
 	animation: bounce-dot 1.4s ease-in-out infinite;
 	animation-delay: 0.32s;
+}
+
+/* Mobile sidebar dropdown styles - larger touch targets */
+.mobile-sidebar-open [data-slot="dropdown-menu-content"] {
+	@apply rounded-xl border-white/10 bg-background/95 backdrop-blur-xl;
+}
+
+.mobile-sidebar-open [data-slot="dropdown-menu-item"] {
+	@apply min-h-14 rounded-xl px-4 py-3 text-base gap-3;
+}
+
+.mobile-sidebar-open [data-slot="dropdown-menu-item"] svg {
+	@apply size-5;
+}
+
+.mobile-sidebar-open [data-slot="dropdown-menu-label"] {
+	@apply px-4 py-3 text-sm;
+}
+
+.mobile-sidebar-open [data-slot="dropdown-menu-separator"] {
+	@apply my-2 bg-white/10;
 }

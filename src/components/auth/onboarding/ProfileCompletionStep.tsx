@@ -1,19 +1,17 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { User, Upload, X, ArrowRight, Loader2, LogOut } from "lucide-react";
+import { User, ArrowRight, Loader2, LogOut } from "lucide-react";
 
 import { Logo } from "@/components/Logo";
 import {
 	Button,
 	Card,
 	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
 	Form,
 	FormControl,
 	FormField,
@@ -22,7 +20,9 @@ import {
 	Input,
 	Label,
 } from "@/components/ui";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AvatarEditorDialog } from "@/components/ui/avatar-editor-dialog";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useLanguage } from "@/contexts/language-context";
 import { useOnboarding } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
@@ -52,15 +52,15 @@ function dataURLtoBlob(dataUrl: string): Blob {
 export function ProfileCompletionStep() {
 	const { t } = useLanguage();
 	const { state, updateUserProfile, refreshOnboardingStatus } = useOnboarding();
+	const router = useRouter();
+	const searchParams = useSearchParams();
 
 	const [serverError, setServerError] = useState<string | null>(null);
 	const [avatarPreview, setAvatarPreview] = useState<string | null>(
 		state.userProfile.avatarUrl,
 	);
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-	const [avatarError, setAvatarError] = useState<string | null>(null);
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
-	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const handleLogout = async () => {
 		setIsLoggingOut(true);
@@ -83,50 +83,9 @@ export function ProfileCompletionStep() {
 		},
 	});
 
-	// Handle avatar file selection
-	const handleAvatarChange = useCallback(
-		(e: React.ChangeEvent<HTMLInputElement>) => {
-			const file = e.target.files?.[0];
-			if (file) {
-				// Validate file size (5MB max)
-				if (file.size > 5 * 1024 * 1024) {
-					setAvatarError(t("onboarding.avatar.tooLarge"));
-					return;
-				}
-
-				// Validate file type
-				if (
-					!["image/jpeg", "image/png", "image/gif", "image/webp"].includes(
-						file.type,
-					)
-				) {
-					setAvatarError(t("onboarding.avatar.invalidType"));
-					return;
-				}
-
-				const reader = new FileReader();
-				reader.onload = (event) => {
-					setAvatarPreview(event.target?.result as string);
-					setAvatarError(null);
-				};
-				reader.readAsDataURL(file);
-			}
-		},
-		[t],
-	);
-
-	// Handle avatar removal
-	const handleRemoveAvatar = useCallback(() => {
-		setAvatarPreview(null);
-		if (fileInputRef.current) {
-			fileInputRef.current.value = "";
-		}
-	}, []);
-
-	// Upload avatar to R2
-	const uploadAvatar = async (dataUrl: string): Promise<string | null> => {
+	// Upload avatar to R2 and return success/failure
+	const handleAvatarSave = async (dataUrl: string): Promise<boolean> => {
 		setIsUploadingAvatar(true);
-		setAvatarError(null);
 
 		try {
 			const baseUrl = getAuthCoreBaseUrl();
@@ -141,10 +100,7 @@ export function ProfileCompletionStep() {
 			});
 
 			if (!response.ok) {
-				const errorData = (await response.json().catch(() => ({}))) as {
-					error?: string;
-				};
-				throw new Error(errorData.error || t("onboarding.avatar.uploadFailed"));
+				return false;
 			}
 
 			const result = (await response.json()) as {
@@ -154,17 +110,14 @@ export function ProfileCompletionStep() {
 			};
 
 			if (!result.success || !result.data?.url) {
-				throw new Error(result.error || t("onboarding.avatar.uploadFailed"));
+				return false;
 			}
 
-			return result.data.url;
-		} catch (error) {
-			const message =
-				error instanceof Error
-					? error.message
-					: t("onboarding.avatar.uploadFailed");
-			setAvatarError(message);
-			return null;
+			// Update the avatar preview with the uploaded URL
+			setAvatarPreview(result.data.url);
+			return true;
+		} catch {
+			return false;
 		} finally {
 			setIsUploadingAvatar(false);
 		}
@@ -176,20 +129,12 @@ export function ProfileCompletionStep() {
 
 		const name = `${values.firstName.trim()} ${values.lastName.trim()}`.trim();
 
-		// Upload avatar if selected
-		let avatarUrl: string | undefined;
-		if (avatarPreview && avatarPreview.startsWith("data:")) {
-			const uploadedUrl = await uploadAvatar(avatarPreview);
-			if (uploadedUrl) {
-				avatarUrl = uploadedUrl;
-			}
-			// Continue even if avatar upload fails
-		}
-
 		// Update profile with Better Auth
+		// Avatar is already uploaded via the AvatarEditorDialog onSave callback
 		const result = await updateProfile({
 			name,
-			...(avatarUrl && { image: avatarUrl }),
+			...(avatarPreview &&
+				!avatarPreview.startsWith("data:") && { image: avatarPreview }),
 		});
 
 		if (!result.success) {
@@ -203,12 +148,19 @@ export function ProfileCompletionStep() {
 		updateUserProfile({
 			firstName: values.firstName.trim(),
 			lastName: values.lastName.trim(),
-			avatarUrl: avatarUrl || avatarPreview,
+			avatarUrl: avatarPreview,
 			isComplete: true,
 		});
 
 		// Refresh onboarding status to get updated state
 		await refreshOnboardingStatus();
+
+		// If coming from edit mode, remove the edit_profile flag
+		if (searchParams.get("edit_profile") === "true") {
+			const url = new URL(window.location.href);
+			url.searchParams.delete("edit_profile");
+			router.replace(url.toString());
+		}
 	};
 
 	const isSubmitting = form.formState.isSubmitting || isUploadingAvatar;
@@ -220,7 +172,7 @@ export function ProfileCompletionStep() {
 		(firstName.charAt(0) + lastName.charAt(0)).toUpperCase() || "?";
 
 	return (
-		<div className="min-h-screen bg-background flex items-center justify-center p-4">
+		<div className="w-full flex justify-center my-auto pt-6">
 			<div className="w-full max-w-lg">
 				<div className="text-center mb-8">
 					<div className="flex justify-center mb-4">
@@ -248,49 +200,29 @@ export function ProfileCompletionStep() {
 								onSubmit={form.handleSubmit(handleSubmit)}
 								className="space-y-6"
 							>
-								{/* Avatar Upload */}
+								{/* Avatar Upload with Editor Dialog */}
 								<div className="flex flex-col items-center gap-4">
-									<div className="relative">
-										<Avatar className="h-24 w-24 border-4 border-background shadow-lg">
-											<AvatarImage src={avatarPreview || undefined} />
-											<AvatarFallback className="bg-primary/10 text-primary text-2xl font-semibold">
-												{avatarInitials}
-											</AvatarFallback>
-										</Avatar>
-										{avatarPreview && (
-											<button
-												type="button"
-												onClick={handleRemoveAvatar}
-												className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow-md hover:bg-destructive/90 transition-colors"
-											>
-												<X className="h-3.5 w-3.5" />
-											</button>
-										)}
-									</div>
-									<div className="flex gap-2">
-										<input
-											ref={fileInputRef}
-											type="file"
-											accept="image/*"
-											onChange={handleAvatarChange}
-											className="hidden"
-											id="avatar-upload"
-										/>
-										<Button
-											type="button"
-											variant="outline"
-											size="sm"
-											onClick={() => fileInputRef.current?.click()}
-											disabled={isSubmitting}
-											className="gap-2"
-										>
-											<Upload className="h-4 w-4" />
-											{t("onboarding.avatar.select")}
-										</Button>
-									</div>
-									{avatarError && (
-										<p className="text-sm text-destructive">{avatarError}</p>
-									)}
+									<AvatarEditorDialog
+										value={avatarPreview}
+										onChange={setAvatarPreview}
+										onSave={handleAvatarSave}
+										displaySize={96}
+										editorSize={280}
+										outputSize={256}
+										placeholder={t("onboarding.avatar.select")}
+										editLabel={t("onboarding.avatar.edit") || "Edit avatar"}
+										dialogTitle={t("onboarding.avatar.title") || "Edit Avatar"}
+										acceptText={t("common.accept") || "Accept"}
+										cancelText={t("common.cancel") || "Cancel"}
+										successMessage={
+											t("onboarding.avatar.uploadSuccess") ||
+											"Avatar saved successfully!"
+										}
+										errorMessage={
+											t("onboarding.avatar.uploadFailed") ||
+											"Failed to save avatar. Please try again."
+										}
+									/>
 									<p className="text-xs text-muted-foreground">
 										{t("onboarding.avatar.optional")}
 									</p>
@@ -374,26 +306,34 @@ export function ProfileCompletionStep() {
 
 								<div className="text-center space-y-2">
 									<p className="text-xs text-muted-foreground">
-										You can update your profile anytime from settings
+										{t("onboarding.profile.footerNote")}
 									</p>
-									<button
-										type="button"
-										onClick={handleLogout}
-										disabled={isLoggingOut || isSubmitting}
-										className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1.5 disabled:opacity-50"
-									>
-										{isLoggingOut ? (
-											<Loader2 className="h-3.5 w-3.5 animate-spin" />
-										) : (
-											<LogOut className="h-3.5 w-3.5" />
-										)}
-										Sign out
-									</button>
 								</div>
 							</form>
 						</Form>
 					</CardContent>
 				</Card>
+
+				<div className="border-t border-border pt-6 mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+					<div className="flex items-center gap-2">
+						<LanguageSwitcher showIcon />
+						<ThemeSwitcher />
+					</div>
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleLogout}
+						disabled={isLoggingOut || isSubmitting}
+						className="gap-2"
+					>
+						{isLoggingOut ? (
+							<Loader2 className="h-3.5 w-3.5 animate-spin" />
+						) : (
+							<LogOut className="h-3.5 w-3.5" />
+						)}
+						{t("settings.nav.signOut")}
+					</Button>
+				</div>
 			</div>
 		</div>
 	);

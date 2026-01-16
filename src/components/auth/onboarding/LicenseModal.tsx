@@ -47,7 +47,7 @@ export function LicenseModal({ open, onOpenChange }: LicenseModalProps) {
 		setIsValidating(false);
 
 		if (!result.valid || !result.license) {
-			setError(result.error || "Invalid license key");
+			setError(result.error || t("onboarding.license.invalid"));
 			return;
 		}
 
@@ -65,7 +65,7 @@ export function LicenseModal({ open, onOpenChange }: LicenseModalProps) {
 		setIsActivating(false);
 
 		if (!result.success) {
-			setError(result.error || "Failed to activate license");
+			setError(result.error || t("onboarding.license.activateFailed"));
 			return;
 		}
 
@@ -89,7 +89,7 @@ export function LicenseModal({ open, onOpenChange }: LicenseModalProps) {
 	};
 
 	const formatDate = (dateStr: string) => {
-		return new Date(dateStr).toLocaleDateString("en-US", {
+		return new Date(dateStr).toLocaleDateString(undefined, {
 			year: "numeric",
 			month: "long",
 			day: "numeric",
@@ -103,9 +103,9 @@ export function LicenseModal({ open, onOpenChange }: LicenseModalProps) {
 					<div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
 						<Key className="h-6 w-6 text-primary" />
 					</div>
-					<DialogTitle>Activate License Key</DialogTitle>
+					<DialogTitle>{t("onboarding.license.title")}</DialogTitle>
 					<DialogDescription>
-						Enter your enterprise license key to activate your subscription.
+						{t("onboarding.license.description")}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -119,7 +119,9 @@ export function LicenseModal({ open, onOpenChange }: LicenseModalProps) {
 
 					{!validatedLicense ? (
 						<div className="space-y-2">
-							<Label htmlFor="license-key">License Key</Label>
+							<Label htmlFor="license-key">
+								{t("onboarding.license.label")}
+							</Label>
 							<div className="flex gap-2">
 								<Input
 									id="license-key"
@@ -136,12 +138,12 @@ export function LicenseModal({ open, onOpenChange }: LicenseModalProps) {
 									{isValidating ? (
 										<Loader2 className="h-4 w-4 animate-spin" />
 									) : (
-										"Validate"
+										t("onboarding.license.validate")
 									)}
 								</Button>
 							</div>
 							<p className="text-xs text-muted-foreground">
-								Contact your administrator if you need a license key.
+								{t("onboarding.license.contactAdmin")}
 							</p>
 						</div>
 					) : (
@@ -150,37 +152,45 @@ export function LicenseModal({ open, onOpenChange }: LicenseModalProps) {
 							<div className="rounded-lg border border-success/30 bg-success/5 p-4">
 								<div className="flex items-center gap-2 text-success font-medium mb-3">
 									<Check className="h-4 w-4" />
-									License Valid
+									{t("onboarding.license.valid")}
 								</div>
 								<div className="space-y-2 text-sm">
 									<div className="flex items-center gap-2">
 										<Building2 className="h-4 w-4 text-muted-foreground" />
-										<span className="text-muted-foreground">Organization:</span>
+										<span className="text-muted-foreground">
+											{t("onboarding.license.organization")}:
+										</span>
 										<span className="font-medium text-foreground">
 											{validatedLicense.organizationName}
 										</span>
 									</div>
 									<div className="flex justify-between">
-										<span className="text-muted-foreground">Plan:</span>
+										<span className="text-muted-foreground">
+											{t("onboarding.license.plan")}:
+										</span>
 										<span className="font-medium text-foreground">
 											{validatedLicense.plan}
 										</span>
 									</div>
 									<div className="flex justify-between">
-										<span className="text-muted-foreground">Valid until:</span>
+										<span className="text-muted-foreground">
+											{t("onboarding.license.validUntil")}:
+										</span>
 										<span className="font-medium text-foreground">
 											{formatDate(validatedLicense.expiresAt)}
 										</span>
 									</div>
 									<div className="flex justify-between">
-										<span className="text-muted-foreground">Users:</span>
+										<span className="text-muted-foreground">
+											{t("onboarding.license.users")}:
+										</span>
 										<span className="font-medium text-foreground">
 											{validatedLicense.maxUsers}
 										</span>
 									</div>
 									<div className="flex justify-between">
 										<span className="text-muted-foreground">
-											Notices included:
+											{t("onboarding.license.notices")}:
 										</span>
 										<span className="font-medium text-foreground">
 											{validatedLicense.noticesIncluded.toLocaleString()}
@@ -198,7 +208,7 @@ export function LicenseModal({ open, onOpenChange }: LicenseModalProps) {
 									setLicenseKey("");
 								}}
 							>
-								Use different key
+								{t("onboarding.license.useDifferent")}
 							</Button>
 						</div>
 					)}
@@ -206,17 +216,17 @@ export function LicenseModal({ open, onOpenChange }: LicenseModalProps) {
 
 				<DialogFooter>
 					<Button variant="ghost" onClick={handleClose}>
-						Cancel
+						{t("onboarding.license.cancel")}
 					</Button>
 					{validatedLicense && (
 						<Button onClick={handleActivate} disabled={isActivating}>
 							{isActivating ? (
 								<>
 									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-									Activating...
+									{t("onboarding.license.activating")}
 								</>
 							) : (
-								"Activate License"
+								t("onboarding.license.activate")
 							)}
 						</Button>
 					)}

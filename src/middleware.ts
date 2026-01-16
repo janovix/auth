@@ -252,15 +252,6 @@ export async function middleware(request: NextRequest) {
 
 	// User needs onboarding (profile incomplete OR no organization)
 	if (userNeedsOnboarding) {
-		// Check if user has a pending invitation - redirect to invite page first
-		if (
-			onboardingStatus.pendingInvitation &&
-			onboardingStatus.profileComplete
-		) {
-			const inviteUrl = new URL("/invite", request.url);
-			return NextResponse.redirect(inviteUrl);
-		}
-
 		// Already on onboarding page - allow access
 		if (isOnboardingRoute) {
 			return NextResponse.next();

@@ -53,6 +53,7 @@ const mockUserSettings = {
 	timezone: "America/Mexico_City",
 	language: "es" as const,
 	dateFormat: "DD/MM/YYYY" as const,
+	clockFormat: "12h" as const,
 	avatarUrl: "https://example.com/avatar.jpg",
 	paymentMethods: [],
 	metadata: null,
@@ -72,14 +73,15 @@ describe("PersonalSettingsView", () => {
 		cleanup();
 	});
 
-	it("shows loading spinner while fetching settings", async () => {
+	it("shows skeleton loader while fetching settings", async () => {
 		vi.mocked(settingsClient.getUserSettings).mockImplementation(
 			() => new Promise(() => {}),
 		);
 
 		render(<PersonalSettingsView />);
 
-		expect(document.querySelector(".animate-spin")).toBeInTheDocument();
+		// Skeleton uses animate-pulse and data-testid="skeleton"
+		expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0);
 	});
 
 	it("renders personal settings page header", async () => {
@@ -231,9 +233,12 @@ describe("PersonalSettingsView", () => {
 		render(<PersonalSettingsView />);
 
 		await waitFor(() => {
-			// Avatar is now handled through AvatarUploadDialog with a change button
+			// Avatar is now handled through AvatarEditorDialog with an edit button
+			// The edit button has aria-label for accessibility
 			expect(
-				screen.getByText("settings.personal.changeAvatar"),
+				screen.getByRole("button", {
+					name: "settings.personal.changeAvatar",
+				}),
 			).toBeInTheDocument();
 		});
 	});
@@ -282,7 +287,7 @@ describe("PersonalSettingsView", () => {
 		});
 	});
 
-	it("renders user avatar with correct initials", async () => {
+	it("renders user avatar image when URL is available", async () => {
 		vi.mocked(settingsClient.getUserSettings).mockResolvedValue(
 			mockUserSettings,
 		);
@@ -290,8 +295,10 @@ describe("PersonalSettingsView", () => {
 		render(<PersonalSettingsView />);
 
 		await waitFor(() => {
-			// The avatar should show user initials as fallback
-			expect(screen.getByText("TU")).toBeInTheDocument(); // "Test User" -> "TU"
+			// When avatar URL is available, the image should be displayed
+			const avatar = screen.getByRole("img", { name: "Avatar" });
+			expect(avatar).toBeInTheDocument();
+			expect(avatar).toHaveAttribute("src", "https://example.com/avatar.jpg");
 		});
 	});
 });

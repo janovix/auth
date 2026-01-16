@@ -129,7 +129,7 @@ describe("TeamSettingsView", () => {
 			});
 		});
 
-		it("shows loading spinner while fetching data", async () => {
+		it("shows skeleton loader while fetching data", async () => {
 			vi.mocked(settingsClient.getOrganizationMembership).mockImplementation(
 				() => new Promise(() => {}),
 			);
@@ -139,7 +139,8 @@ describe("TeamSettingsView", () => {
 
 			render(<TeamSettingsView />);
 
-			expect(document.querySelector(".animate-spin")).toBeInTheDocument();
+			// Skeleton uses animate-pulse and data-testid="skeleton"
+			expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0);
 		});
 
 		it("renders team settings page header", async () => {

@@ -1,3 +1,10 @@
+# [1.5.0-rc.5](https://github.com/janovix/auth/compare/v1.5.0-rc.4...v1.5.0-rc.5) (2026-01-16)
+
+
+### Features
+
+* add new UI components for organization management, including CreateOrganizationView and associated settings, and implement timezone picker functionality ([b04b6b7](https://github.com/janovix/auth/commit/b04b6b7a6730ac5f4ca1cfb62ade2be572bc64a7))
+
 # [1.5.0-rc.4](https://github.com/janovix/auth/compare/v1.5.0-rc.3...v1.5.0-rc.4) (2026-01-15)
 
 

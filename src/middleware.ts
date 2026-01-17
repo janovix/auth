@@ -305,8 +305,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-	// Apply middleware to all routes except static files and api
+	// Apply middleware to all routes except static files, api, and monitoring (Sentry tunnel)
 	matcher: [
-		"/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+		"/((?!api|monitoring|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
 	],
 };

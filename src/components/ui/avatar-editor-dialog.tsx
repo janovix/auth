@@ -146,7 +146,9 @@ export function AvatarEditorDialog({
 			if (onSave) {
 				const result = await onSave(editedValue);
 				if (result) {
-					onChange?.(editedValue);
+					// Note: Don't call onChange here when onSave is provided.
+					// The onSave handler is responsible for updating the state
+					// with the uploaded URL (not the data URL).
 					setFeedback({ type: "success", message: successMessage });
 					setTimeout(() => {
 						setIsOpen(false);
@@ -156,6 +158,7 @@ export function AvatarEditorDialog({
 					setFeedback({ type: "error", message: errorMessage });
 				}
 			} else {
+				// Only call onChange when there's no onSave handler
 				onChange?.(editedValue);
 				setFeedback({ type: "success", message: successMessage });
 				setTimeout(() => {

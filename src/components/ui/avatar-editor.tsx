@@ -137,19 +137,76 @@ export function AvatarEditor({
 	}, [imageSource]);
 
 	const generateOutput = useCallback(() => {
-		if (!canvasRef.current || !image) return null;
+		if (!image) return null;
 
+		// Create output canvas at desired size
 		const outputCanvas = document.createElement("canvas");
 		outputCanvas.width = outputSize;
 		outputCanvas.height = outputSize;
 		const ctx = outputCanvas.getContext("2d");
 		if (!ctx) return null;
 
-		ctx.drawImage(canvasRef.current, 0, 0, outputSize, outputSize);
+		// Enable high-quality rendering
+		ctx.imageSmoothingEnabled = true;
+		ctx.imageSmoothingQuality = "high";
+
+		// Fill with white background (or transparent for PNG)
+		if (outputFormat === "jpeg") {
+			ctx.fillStyle = "#ffffff";
+			ctx.fillRect(0, 0, outputSize, outputSize);
+		}
+
+		// Save context state
+		ctx.save();
+
+		// Move to center
+		ctx.translate(outputSize / 2, outputSize / 2);
+
+		// Apply rotation
+		ctx.rotate((rotation * Math.PI) / 180);
+
+		// Calculate scaled dimensions for output
+		const scale = zoom;
+		const imgAspect = image.width / image.height;
+		let drawWidth, drawHeight;
+
+		if (imgAspect > 1) {
+			drawHeight = outputSize * scale;
+			drawWidth = drawHeight * imgAspect;
+		} else {
+			drawWidth = outputSize * scale;
+			drawHeight = drawWidth / imgAspect;
+		}
+
+		// Scale position proportionally from display size to output size
+		const positionScale = outputSize / size;
+		const scaledPosX = position.x * positionScale;
+		const scaledPosY = position.y * positionScale;
+
+		// Draw image centered with position offset (NO circular mask - square output)
+		ctx.drawImage(
+			image,
+			-drawWidth / 2 + scaledPosX,
+			-drawHeight / 2 + scaledPosY,
+			drawWidth,
+			drawHeight,
+		);
+
+		// Restore context
+		ctx.restore();
 
 		const mimeType = `image/${outputFormat}`;
 		return outputCanvas.toDataURL(mimeType, outputQuality);
-	}, [image, outputSize, outputFormat, outputQuality]);
+	}, [
+		image,
+		outputSize,
+		outputFormat,
+		outputQuality,
+		zoom,
+		rotation,
+		position,
+		size,
+	]);
 
 	useEffect(() => {
 		if (!canvasRef.current || !image || !imageLoaded) return;

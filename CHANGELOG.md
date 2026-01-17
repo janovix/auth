@@ -1,3 +1,10 @@
+# [1.5.0-rc.16](https://github.com/janovix/auth/compare/v1.5.0-rc.15...v1.5.0-rc.16) (2026-01-17)
+
+
+### Features
+
+* refactor compliance settings retrieval in SettingsLayoutClient to use getAmlComplianceSettings function ([894d04a](https://github.com/janovix/auth/commit/894d04acd72e975baff7bf1e518ef5eaac3a8639))
+
 # [1.5.0-rc.15](https://github.com/janovix/auth/compare/v1.5.0-rc.14...v1.5.0-rc.15) (2026-01-17)
 
 

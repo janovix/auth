@@ -1,3 +1,10 @@
+# [1.5.0-rc.13](https://github.com/janovix/auth/compare/v1.5.0-rc.12...v1.5.0-rc.13) (2026-01-17)
+
+
+### Bug Fixes
+
+* update middleware configuration to exclude monitoring routes from middleware application ([39981de](https://github.com/janovix/auth/commit/39981de7c42aa49ac522777077d29eb46c36b2ec))
+
 # [1.5.0-rc.12](https://github.com/janovix/auth/compare/v1.5.0-rc.11...v1.5.0-rc.12) (2026-01-17)
 
 

@@ -1,3 +1,10 @@
+# [1.5.0-rc.7](https://github.com/janovix/auth/compare/v1.5.0-rc.6...v1.5.0-rc.7) (2026-01-17)
+
+
+### Bug Fixes
+
+* adjust layout of AvatarEditor in AvatarEditorDialog for better responsiveness ([567f94c](https://github.com/janovix/auth/commit/567f94c8e9f5d7ae105983d2a01b16293ff6c85e))
+
 # [1.5.0-rc.6](https://github.com/janovix/auth/compare/v1.5.0-rc.5...v1.5.0-rc.6) (2026-01-17)
 
 

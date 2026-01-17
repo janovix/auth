@@ -184,7 +184,22 @@ export function AvatarEditor({
 		const ctx = outputCanvas.getContext("2d");
 		if (!ctx) return null;
 
-		ctx.drawImage(canvasRef.current, 0, 0, outputSize, outputSize);
+		// Enable high-quality image smoothing for output
+		ctx.imageSmoothingEnabled = true;
+		ctx.imageSmoothingQuality = "high";
+
+		// Draw from source canvas (which may be scaled by dpr) to output at desired size
+		ctx.drawImage(
+			canvasRef.current,
+			0,
+			0,
+			canvasRef.current.width,
+			canvasRef.current.height,
+			0,
+			0,
+			outputSize,
+			outputSize,
+		);
 
 		const mimeType = `image/${outputFormat}`;
 		return outputCanvas.toDataURL(mimeType, outputQuality);
@@ -198,9 +213,24 @@ export function AvatarEditor({
 		const ctx = canvas.getContext("2d");
 		if (!ctx) return;
 
+		// Use device pixel ratio for sharp rendering on retina displays
+		const dpr = window.devicePixelRatio || 1;
 		const displaySize = containerSize;
-		canvas.width = displaySize;
-		canvas.height = displaySize;
+
+		// Set canvas actual size in memory (scaled for retina)
+		canvas.width = displaySize * dpr;
+		canvas.height = displaySize * dpr;
+
+		// Set canvas display size via style
+		canvas.style.width = `${displaySize}px`;
+		canvas.style.height = `${displaySize}px`;
+
+		// Scale context to match device pixel ratio
+		ctx.scale(dpr, dpr);
+
+		// Enable high-quality image smoothing
+		ctx.imageSmoothingEnabled = true;
+		ctx.imageSmoothingQuality = "high";
 
 		// Clear canvas
 		ctx.clearRect(0, 0, displaySize, displaySize);
@@ -415,7 +445,7 @@ export function AvatarEditor({
 				<canvas
 					ref={canvasRef}
 					className={cn(
-						"absolute inset-0 w-full h-full",
+						"absolute top-0 left-0",
 						imageLoaded ? "cursor-move" : "pointer-events-none opacity-0",
 					)}
 					onMouseDown={handleMouseDown}

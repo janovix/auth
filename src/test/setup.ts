@@ -21,6 +21,10 @@ vi.mock("sonner", () => ({
 
 // Mock language context for tests with Spanish translations
 const mockTranslations: Record<string, string> = {
+	// Common
+	"common.accept": "Aceptar",
+	"common.cancel": "Cancelar",
+
 	// Login
 	"login.title": "Bienvenido",
 	"login.description.email":
@@ -134,6 +138,11 @@ const mockTranslations: Record<string, string> = {
 	"settings.profile.uploadFailed": "Error al subir avatar",
 	"settings.profile.avatarSet": "Avatar subido",
 	"settings.profile.advancedOptions": "Opciones avanzadas (URL manual)",
+	"settings.personal.changeAvatar": "Cambiar avatar",
+	"settings.avatar.title": "Editar Avatar",
+	"settings.avatar.success": "¡Avatar guardado exitosamente!",
+	"settings.avatar.error":
+		"Error al guardar avatar. Por favor intenta de nuevo.",
 	"settings.payments.title": "Métodos de pago",
 	"settings.payments.description": "Administra tus métodos de pago",
 	"settings.payments.comingSoon": "Próximamente",
@@ -232,6 +241,8 @@ const mockTranslations: Record<string, string> = {
 	"onboarding.lastName.required": "Tu apellido es obligatorio.",
 	"onboarding.lastName.description": "Tu apellido",
 	"onboarding.avatar.label": "Foto de perfil",
+	"onboarding.avatar.title": "Editar Avatar",
+	"onboarding.avatar.edit": "Editar avatar",
 	"onboarding.avatar.optional": "Opcional - puedes agregar una foto después",
 	"onboarding.avatar.dropzone": "Haz clic o arrastra una imagen aquí",
 	"onboarding.avatar.formats": "JPG, PNG, GIF o WebP (máx 5MB)",
@@ -243,6 +254,7 @@ const mockTranslations: Record<string, string> = {
 		"El archivo es muy grande. El tamaño máximo es 5MB.",
 	"onboarding.avatar.uploadFailed":
 		"Error al subir la imagen. Por favor intenta de nuevo.",
+	"onboarding.avatar.uploadSuccess": "¡Avatar guardado exitosamente!",
 	"onboarding.avatar.saved": "Avatar listo para subir",
 	"onboarding.button.continue": "Continuar",
 	"onboarding.button.saving": "Guardando...",

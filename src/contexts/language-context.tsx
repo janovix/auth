@@ -25,6 +25,10 @@ interface LanguageContextType {
 
 const translations = {
 	en: {
+		// Common
+		"common.accept": "Accept",
+		"common.cancel": "Cancel",
+
 		// Login page
 		"login.title": "Welcome",
 		"login.description.email": "Enter your email to receive an access code",
@@ -307,6 +311,12 @@ const translations = {
 		"settings.personal.sidebarCollapsed": "Collapse sidebar by default",
 		"settings.personal.sidebarCollapsedDesc":
 			"Start with the sidebar collapsed on all applications",
+		"settings.personal.changeAvatar": "Change avatar",
+
+		// Avatar editor
+		"settings.avatar.title": "Edit Avatar",
+		"settings.avatar.success": "Avatar saved successfully!",
+		"settings.avatar.error": "Failed to save avatar. Please try again.",
 
 		// Organization settings
 		"settings.org.title": "Organization Settings",
@@ -594,6 +604,8 @@ const translations = {
 		"onboarding.lastName.required": "Last name is required.",
 		"onboarding.lastName.description": "Your last name",
 		"onboarding.avatar.label": "Profile picture",
+		"onboarding.avatar.title": "Edit Avatar",
+		"onboarding.avatar.edit": "Edit avatar",
 		"onboarding.avatar.optional": "Optional - you can add a photo later",
 		"onboarding.avatar.dropzone": "Click or drag an image here",
 		"onboarding.avatar.formats": "JPG, PNG, GIF or WebP (max 5MB)",
@@ -604,6 +616,7 @@ const translations = {
 		"onboarding.avatar.tooLarge": "File is too large. Maximum size is 5MB.",
 		"onboarding.avatar.uploadFailed":
 			"Failed to upload image. Please try again.",
+		"onboarding.avatar.uploadSuccess": "Avatar saved successfully!",
 		"onboarding.avatar.saved": "Avatar ready to upload",
 		"onboarding.button.continue": "Continue",
 		"onboarding.button.saving": "Saving...",
@@ -809,6 +822,10 @@ const translations = {
 		"timezone.timezoneOptions": "Timezone options",
 	},
 	es: {
+		// Common
+		"common.accept": "Aceptar",
+		"common.cancel": "Cancelar",
+
 		// Login page
 		"login.title": "Bienvenido",
 		"login.description.email":
@@ -1101,6 +1118,13 @@ const translations = {
 		"settings.personal.sidebarCollapsed": "Colapsar barra lateral por defecto",
 		"settings.personal.sidebarCollapsedDesc":
 			"Iniciar con la barra lateral colapsada en todas las aplicaciones",
+		"settings.personal.changeAvatar": "Cambiar avatar",
+
+		// Avatar editor
+		"settings.avatar.title": "Editar Avatar",
+		"settings.avatar.success": "¡Avatar guardado exitosamente!",
+		"settings.avatar.error":
+			"Error al guardar avatar. Por favor intenta de nuevo.",
 
 		// Organization settings
 		"settings.org.title": "Configuración de Organización",
@@ -1395,6 +1419,8 @@ const translations = {
 		"onboarding.lastName.required": "Tu apellido es obligatorio.",
 		"onboarding.lastName.description": "Tu apellido",
 		"onboarding.avatar.label": "Foto de perfil",
+		"onboarding.avatar.title": "Editar Avatar",
+		"onboarding.avatar.edit": "Editar avatar",
 		"onboarding.avatar.optional": "Opcional - puedes agregar una foto después",
 		"onboarding.avatar.dropzone": "Haz clic o arrastra una imagen aquí",
 		"onboarding.avatar.formats": "JPG, PNG, GIF o WebP (máx 5MB)",
@@ -1406,6 +1432,7 @@ const translations = {
 			"El archivo es muy grande. El tamaño máximo es 5MB.",
 		"onboarding.avatar.uploadFailed":
 			"Error al subir la imagen. Por favor intenta de nuevo.",
+		"onboarding.avatar.uploadSuccess": "¡Avatar guardado exitosamente!",
 		"onboarding.avatar.saved": "Avatar listo para subir",
 		"onboarding.button.continue": "Continuar",
 		"onboarding.button.saving": "Guardando...",

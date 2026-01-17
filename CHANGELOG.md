@@ -1,3 +1,10 @@
+# [1.5.0-rc.8](https://github.com/janovix/auth/compare/v1.5.0-rc.7...v1.5.0-rc.8) (2026-01-17)
+
+
+### Features
+
+* enhance AvatarEditor with high-quality image smoothing and retina display support ([7caf547](https://github.com/janovix/auth/commit/7caf547359d8a63095006f54c9c6be348307892a)), closes [hi#quality](https://github.com/hi/issues/quality)
+
 # [1.5.0-rc.7](https://github.com/janovix/auth/compare/v1.5.0-rc.6...v1.5.0-rc.7) (2026-01-17)
 
 

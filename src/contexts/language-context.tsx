@@ -293,6 +293,8 @@ const translations = {
 		"settings.personal.fullName": "Full name",
 		"settings.personal.nameHelp": "Your name is managed through your account",
 		"settings.personal.email": "Email address",
+		"settings.personal.emailHelp":
+			"Email changes are not currently supported. Please contact support if you need to update your email.",
 		"settings.personal.verified": "Verified",
 		"settings.personal.preferences": "Preferences",
 		"settings.personal.preferencesDesc": "Customize your experience",
@@ -1109,6 +1111,8 @@ const translations = {
 		"settings.personal.fullName": "Nombre completo",
 		"settings.personal.nameHelp": "Tu nombre se administra desde tu cuenta",
 		"settings.personal.email": "Correo electrónico",
+		"settings.personal.emailHelp":
+			"Actualmente no es posible cambiar tu correo electrónico. Contacta a soporte si necesitas actualizarlo.",
 		"settings.personal.verified": "Verificado",
 		"settings.personal.preferences": "Preferencias",
 		"settings.personal.preferencesDesc": "Personaliza tu experiencia",

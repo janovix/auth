@@ -590,6 +590,9 @@ export function PersonalSettingsView() {
 										</Badge>
 									)}
 								</div>
+								<p className="text-xs text-muted-foreground">
+									{t("settings.personal.emailHelp")}
+								</p>
 							</div>
 						</div>
 					</div>

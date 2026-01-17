@@ -1,3 +1,10 @@
+# [1.5.0-rc.11](https://github.com/janovix/auth/compare/v1.5.0-rc.10...v1.5.0-rc.11) (2026-01-17)
+
+
+### Features
+
+* update organization logo handling in OrganizationSettingsView ([f6034ae](https://github.com/janovix/auth/commit/f6034aec1c08a754b7deafb9fc5a4408ec597e03))
+
 # [1.5.0-rc.10](https://github.com/janovix/auth/compare/v1.5.0-rc.9...v1.5.0-rc.10) (2026-01-17)
 
 

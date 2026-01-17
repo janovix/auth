@@ -49,6 +49,7 @@ import {
 } from "@/components/settings";
 import { AvatarEditorDialog } from "@/components/ui/avatar-editor-dialog";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
+import { updateProfile } from "@/lib/auth/authActions";
 
 const DATE_FORMATS: { value: DateFormat; label: string }[] = [
 	{ value: "DD/MM/YYYY", label: "DD/MM/YYYY" },
@@ -446,9 +447,15 @@ export function PersonalSettingsView() {
 					return false;
 				}
 
-				// Update state with the uploaded URL
-				setAvatarUrl(result.data.url);
-				await updateUserSettings({ avatarUrl: result.data.url });
+				const uploadedUrl = result.data.url;
+
+				// Update Better Auth user's image
+				await updateProfile({ image: uploadedUrl });
+
+				// Update user settings with the avatar URL
+				setAvatarUrl(uploadedUrl);
+				await updateUserSettings({ avatarUrl: uploadedUrl });
+
 				showSuccess(t("settings.saved"));
 				return true;
 			} catch (err) {

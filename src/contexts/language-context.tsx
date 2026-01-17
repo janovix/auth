@@ -367,6 +367,15 @@ const translations = {
 		"settings.org.deleteConfirmTitle": "Delete organization?",
 		"settings.org.deleteConfirmDesc":
 			"This action cannot be undone. This will permanently delete {name} and all associated data including members, transactions, and alerts.",
+		"settings.org.deleteWarning":
+			"This is a destructive action. All organization data, members, and settings will be permanently removed.",
+		"settings.org.deleteSlugPrompt":
+			"To confirm, type the organization slug: {slug}",
+		"settings.org.deleting": "Deleting...",
+		"settings.org.deleteButtonConfirm":
+			"I understand, delete this organization",
+		"settings.org.deleteSuccess": "Organization deleted successfully",
+		"settings.org.deleteError": "Failed to delete organization",
 		"settings.org.cancel": "Cancel",
 
 		// AML Compliance settings
@@ -1175,6 +1184,14 @@ const translations = {
 		"settings.org.deleteConfirmTitle": "¿Eliminar organización?",
 		"settings.org.deleteConfirmDesc":
 			"Esta acción no se puede deshacer. Esto eliminará permanentemente {name} y todos los datos asociados incluyendo miembros, transacciones y alertas.",
+		"settings.org.deleteWarning":
+			"Esta es una acción destructiva. Todos los datos, miembros y configuraciones de la organización serán eliminados permanentemente.",
+		"settings.org.deleteSlugPrompt":
+			"Para confirmar, escribe el slug de la organización: {slug}",
+		"settings.org.deleting": "Eliminando...",
+		"settings.org.deleteButtonConfirm": "Entiendo, eliminar esta organización",
+		"settings.org.deleteSuccess": "Organización eliminada exitosamente",
+		"settings.org.deleteError": "Error al eliminar la organización",
 		"settings.org.cancel": "Cancelar",
 
 		// AML Compliance settings

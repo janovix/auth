@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Copy, Check, Trash2, Loader2, Plus } from "lucide-react";
+import { Building2, Copy, Check, Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { Button, Label } from "@/components/ui";
 import { Input } from "@/components/ui/input";
@@ -14,17 +14,6 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { TimezonePicker } from "@/components/ui/timezone-picker";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { useLanguage } from "@/contexts/language-context";
 import {
 	getOrganizationSettings,
@@ -43,6 +32,7 @@ import {
 	SettingsSection,
 	SettingsPageHeader,
 	OrganizationSettingsViewSkeleton,
+	DeleteOrganizationDialog,
 } from "@/components/settings";
 import { AvatarEditorDialog } from "@/components/ui/avatar-editor-dialog";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
@@ -607,39 +597,13 @@ export function OrganizationSettingsView() {
 								{t("settings.org.deleteDesc")}
 							</p>
 						</div>
-						<AlertDialog>
-							<AlertDialogTrigger asChild>
-								<Button
-									variant="destructive"
-									className="shrink-0"
-									disabled={!isOwner}
-								>
-									<Trash2 className="h-4 w-4 mr-2" />
-									{t("settings.org.deleteButton")}
-								</Button>
-							</AlertDialogTrigger>
-							<AlertDialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
-								<AlertDialogHeader>
-									<AlertDialogTitle>
-										{t("settings.org.deleteConfirmTitle")}
-									</AlertDialogTitle>
-									<AlertDialogDescription>
-										{t("settings.org.deleteConfirmDesc").replace(
-											"{name}",
-											orgData?.name || "",
-										)}
-									</AlertDialogDescription>
-								</AlertDialogHeader>
-								<AlertDialogFooter className="flex-col sm:flex-row gap-2">
-									<AlertDialogCancel className="w-full sm:w-auto">
-										{t("settings.org.cancel")}
-									</AlertDialogCancel>
-									<AlertDialogAction className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90">
-										{t("settings.org.deleteButton")}
-									</AlertDialogAction>
-								</AlertDialogFooter>
-							</AlertDialogContent>
-						</AlertDialog>
+						<DeleteOrganizationDialog
+							organizationId={activeOrgId}
+							organizationName={orgData?.name || ""}
+							organizationSlug={orgData?.slug || ""}
+							disabled={!isOwner}
+							onDeleted={() => router.push("/")}
+						/>
 					</div>
 				</SettingsCard>
 			</SettingsSection>

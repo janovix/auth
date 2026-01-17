@@ -13,6 +13,7 @@ export { SettingsCard } from "./SettingsCard";
 export { SettingsSection } from "./SettingsSection";
 export { SettingsPageHeader } from "./SettingsPageHeader";
 export { AvatarUploadDialog } from "./AvatarUploadDialog";
+export { DeleteOrganizationDialog } from "./DeleteOrganizationDialog";
 export { PricingTable } from "./PricingTable";
 
 // Skeleton loaders for settings views

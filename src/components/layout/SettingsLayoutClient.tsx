@@ -20,6 +20,7 @@ import {
 	setSidebarCollapsed as saveSidebarCollapsed,
 	getResolvedSettings,
 } from "@/lib/settings/settingsClient";
+import { getSubscriptionStatus } from "@/lib/billing";
 
 interface SettingsLayoutClientProps {
 	children: React.ReactNode;
@@ -333,29 +334,14 @@ export function SettingsLayoutClient({
 				}
 
 				// Check subscription status (billing)
-				const billingResponse = await fetch(
-					`${authServiceUrl}/api/billing/subscription/status`,
-					{ credentials: "include" },
-				);
-				if (billingResponse.ok) {
-					const billingData = (await billingResponse.json()) as {
-						data?: {
-							hasSubscription?: boolean;
-							organizationsOwned?: number;
-							organizationsLimit?: number;
-						};
-					};
+				const subscriptionStatus = await getSubscriptionStatus();
+				if (subscriptionStatus) {
 					setCompletionStatus((prev) => ({
 						...prev,
-						billing: Boolean(billingData.data?.hasSubscription),
+						billing: subscriptionStatus.hasSubscription,
 					}));
-					// Set organization usage info
-					if (billingData.data?.organizationsOwned !== undefined) {
-						setOrganizationsOwned(billingData.data.organizationsOwned);
-					}
-					if (billingData.data?.organizationsLimit !== undefined) {
-						setOrganizationsLimit(billingData.data.organizationsLimit);
-					}
+					setOrganizationsOwned(subscriptionStatus.organizationsOwned);
+					setOrganizationsLimit(subscriptionStatus.organizationsLimit);
 				}
 			} catch {
 				// Silently fail - completion status is optional

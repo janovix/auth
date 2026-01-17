@@ -1,3 +1,10 @@
+# [1.5.0-rc.15](https://github.com/janovix/auth/compare/v1.5.0-rc.14...v1.5.0-rc.15) (2026-01-17)
+
+
+### Features
+
+* refactor subscription status handling in SettingsLayoutClient to use getSubscriptionStatus function ([e49f77d](https://github.com/janovix/auth/commit/e49f77d26c5f104992ef316118ba477b7cbd9288))
+
 # [1.5.0-rc.14](https://github.com/janovix/auth/compare/v1.5.0-rc.13...v1.5.0-rc.14) (2026-01-17)
 
 

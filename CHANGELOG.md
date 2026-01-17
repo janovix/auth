@@ -1,3 +1,10 @@
+# [1.5.0-rc.6](https://github.com/janovix/auth/compare/v1.5.0-rc.5...v1.5.0-rc.6) (2026-01-17)
+
+
+### Features
+
+* add common and avatar-related translations for onboarding and settings in English and Spanish ([edc6c3a](https://github.com/janovix/auth/commit/edc6c3a0fd4e778bb31498152a55c90da178bceb))
+
 # [1.5.0-rc.5](https://github.com/janovix/auth/compare/v1.5.0-rc.4...v1.5.0-rc.5) (2026-01-16)
 
 

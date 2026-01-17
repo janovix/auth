@@ -1,3 +1,10 @@
+# [1.5.0-rc.17](https://github.com/janovix/auth/compare/v1.5.0-rc.16...v1.5.0-rc.17) (2026-01-17)
+
+
+### Features
+
+* add email help text to PersonalSettingsView for user guidance ([bb23e12](https://github.com/janovix/auth/commit/bb23e12d7741512d47b88141604441d8c687a831))
+
 # [1.5.0-rc.16](https://github.com/janovix/auth/compare/v1.5.0-rc.15...v1.5.0-rc.16) (2026-01-17)
 
 

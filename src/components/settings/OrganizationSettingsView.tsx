@@ -226,11 +226,22 @@ export function OrganizationSettingsView() {
 					return false;
 				}
 
-				// Update state with the uploaded URL
-				setOrgLogo(result.data.url);
-				await updateOrganizationSettings(activeOrgId, {
-					avatarUrl: result.data.url,
+				const uploadedUrl = result.data.url;
+
+				// Update Better Auth organization's logo
+				await authClient.organization.update({
+					organizationId: activeOrgId,
+					data: {
+						logo: uploadedUrl,
+					},
 				});
+
+				// Update organization settings with the avatar URL
+				setOrgLogo(uploadedUrl);
+				await updateOrganizationSettings(activeOrgId, {
+					avatarUrl: uploadedUrl,
+				});
+
 				showSuccess(t("settings.organization.savedSuccess"));
 				return true;
 			} catch (err) {

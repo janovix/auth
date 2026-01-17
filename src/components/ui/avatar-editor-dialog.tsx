@@ -217,14 +217,16 @@ export function AvatarEditorDialog({
 
 	// Editor content (shared between dialog and drawer)
 	const EditorContent = (
-		<div className="flex flex-col items-center gap-4">
-			<AvatarEditor
-				value={editedValue}
-				onChange={setEditedValue}
-				size={mobileEditorSize}
-				outputSize={outputSize}
-				controlSize={isMobile ? "large" : "default"}
-			/>
+		<div className="flex flex-col items-center gap-4 w-full">
+			<div style={{ width: mobileEditorSize, maxWidth: "100%" }}>
+				<AvatarEditor
+					value={editedValue}
+					onChange={setEditedValue}
+					size={mobileEditorSize}
+					outputSize={outputSize}
+					controlSize={isMobile ? "large" : "default"}
+				/>
+			</div>
 
 			{/* Feedback message */}
 			<AnimatePresence>

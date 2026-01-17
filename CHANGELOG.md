@@ -1,3 +1,10 @@
+# [1.5.0-rc.12](https://github.com/janovix/auth/compare/v1.5.0-rc.11...v1.5.0-rc.12) (2026-01-17)
+
+
+### Features
+
+* add DeleteOrganizationDialog component with tests and integration into OrganizationSettingsView ([fb5026e](https://github.com/janovix/auth/commit/fb5026e7b1df7bd26f2f5fd34ff1c73c5bd605a4))
+
 # [1.5.0-rc.11](https://github.com/janovix/auth/compare/v1.5.0-rc.10...v1.5.0-rc.11) (2026-01-17)
 
 

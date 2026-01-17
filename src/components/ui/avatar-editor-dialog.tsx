@@ -170,14 +170,6 @@ export function AvatarEditorDialog({
 		}
 	}, [editedValue, onChange, onSave, successMessage, errorMessage]);
 
-	// Calculate mobile editor size
-	const mobileEditorSize = isMobile
-		? Math.min(
-				editorSize + 40,
-				typeof window !== "undefined" ? window.innerWidth - 48 : editorSize,
-			)
-		: editorSize;
-
 	// Avatar display component
 	const AvatarDisplay = (
 		<div
@@ -215,18 +207,20 @@ export function AvatarEditorDialog({
 		</div>
 	);
 
+	const mobileEditorSize = isMobile
+		? Math.min(editorSize + 40, window.innerWidth - 48)
+		: editorSize;
+
 	// Editor content (shared between dialog and drawer)
 	const EditorContent = (
-		<div className="flex flex-col items-center gap-4 w-full">
-			<div style={{ width: mobileEditorSize, maxWidth: "100%" }}>
-				<AvatarEditor
-					value={editedValue}
-					onChange={setEditedValue}
-					size={mobileEditorSize}
-					outputSize={outputSize}
-					controlSize={isMobile ? "large" : "default"}
-				/>
-			</div>
+		<div className="flex flex-col items-center gap-4">
+			<AvatarEditor
+				value={editedValue}
+				onChange={setEditedValue}
+				size={mobileEditorSize}
+				outputSize={outputSize}
+				controlSize={isMobile ? "large" : "default"}
+			/>
 
 			{/* Feedback message */}
 			<AnimatePresence>

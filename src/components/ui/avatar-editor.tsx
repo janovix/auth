@@ -1,38 +1,39 @@
 /**
  * @name AvatarEditor
- * @description A responsive avatar editor component that takes full width of its container.
+ * @description A compact, reusable avatar editor component that fits within a square container.
  * Supports image cropping, zooming, rotating, and repositioning with an optional grid overlay.
- * The parent form handles the actual save/upload - this component just manages image editing.
+ * This is a controlled component - the parent manages the image state.
  *
  * @example
  * ```tsx
  * import { AvatarEditor } from "@/components/ui/avatar-editor"
  *
- * export default function ProfilePage() {
- *   const [avatarDataUrl, setAvatarDataUrl] = useState<string | null>(null)
+ * export default function ProfileForm() {
+ *   const [avatarData, setAvatarData] = useState<string | null>(null)
  *
  *   return (
- *     <form onSubmit={handleSubmit}>
- *       <div className="max-w-xs mx-auto">
- *         <AvatarEditor
- *           onChange={(dataUrl) => setAvatarDataUrl(dataUrl)}
- *           initials="JD"
- *         />
- *       </div>
- *       <button type="submit">Save Profile</button>
+ *     <form>
+ *       <AvatarEditor
+ *         value={avatarData}
+ *         onChange={setAvatarData}
+ *         size={280}
+ *       />
+ *       <button type="submit">Submit Form</button>
  *     </form>
  *   )
  * }
  * ```
  *
  * @props
- * - `onChange` - Callback fired when the image changes, receives the cropped image as a data URL
- * - `initials` - Initials to show in the placeholder (default: "?")
+ * - `value` - The current cropped image as a data URL (controlled)
+ * - `onChange` - Callback when the cropped image changes
+ * - `size` - Size of the editor container in pixels (default: 280)
  * - `showGrid` - Whether to show the alignment grid overlay (default: false)
- * - `defaultImage` - Optional default image URL to load
  * - `outputSize` - Size of the output image in pixels (default: 256)
  * - `outputFormat` - Output format: 'png' | 'jpeg' | 'webp' (default: 'png')
  * - `outputQuality` - Quality for jpeg/webp output 0-1 (default: 0.92)
+ * - `className` - Additional class names
+ * - `controlSize` - Control size variant - 'default' for desktop, 'large' for mobile/touch devices (default: 'default')
  *
  * @accessibility
  * - Full keyboard navigation support
@@ -56,9 +57,9 @@ import {
 	RotateCcw,
 	RotateCw,
 	Grid3X3,
+	X,
 	Move,
 	RefreshCw,
-	Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -66,46 +67,49 @@ import { Toggle } from "@/components/ui/toggle";
 import { cn } from "@/lib/utils";
 
 export interface AvatarEditorProps {
-	/** Callback fired when the edited image changes (receives data URL or null if cleared) */
+	/** Current cropped image as data URL (controlled) */
+	value?: string | null;
+	/** Callback when the cropped image changes */
 	onChange?: (dataUrl: string | null) => void;
-	/** Initials to show in the placeholder avatar */
-	initials?: string;
+	/** Size of the editor container in pixels */
+	size?: number;
 	/** Whether to show grid overlay by default */
 	showGrid?: boolean;
-	/** Default image URL to load (alias: value) */
-	defaultImage?: string;
-	/** Current value - image URL or data URL (alias for defaultImage) */
-	value?: string | null;
-	/** Fixed size for the editor in pixels (overrides responsive sizing) */
-	size?: number;
 	/** Output image size in pixels */
 	outputSize?: number;
 	/** Output format */
 	outputFormat?: "png" | "jpeg" | "webp";
 	/** Output quality for jpeg/webp (0-1) */
 	outputQuality?: number;
-	/** Size variant for controls - 'default' or 'large' for mobile */
-	controlSize?: "default" | "large";
 	/** Additional class names */
 	className?: string;
+	/** Control size variant - 'default' for desktop, 'large' for mobile/touch devices */
+	controlSize?: "default" | "large";
+	/** @deprecated Use value instead. Default image URL to load */
+	defaultImage?: string;
+	/** Initials to show in the placeholder (for backward compatibility, not displayed in current UI) */
+	initials?: string;
 }
 
 export function AvatarEditor({
-	onChange,
-	initials = "?",
-	showGrid: initialShowGrid = false,
-	defaultImage,
 	value,
-	size,
+	onChange,
+	size = 280,
+	showGrid: initialShowGrid = false,
 	outputSize = 256,
 	outputFormat = "png",
 	outputQuality = 0.92,
-	controlSize = "default",
 	className,
+	controlSize = "default",
+	defaultImage,
+	initials: _initials,
 }: AvatarEditorProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
+
+	// Support both value and defaultImage props
+	const imageSource = value ?? defaultImage;
 
 	const [image, setImage] = useState<HTMLImageElement | null>(null);
 	const [imageLoaded, setImageLoaded] = useState(false);
@@ -115,48 +119,10 @@ export function AvatarEditor({
 	const [isDragging, setIsDragging] = useState(false);
 	const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 	const [showGrid, setShowGrid] = useState(initialShowGrid);
-	const [containerSize, setContainerSize] = useState(size || 280);
 
-	// Use value prop if provided, otherwise fall back to defaultImage
-	const imageSource = value ?? defaultImage;
-
-	// Control sizes based on controlSize prop
-	const isLargeControls = controlSize === "large";
-	const buttonSize = isLargeControls ? "h-10 w-10" : "h-8 w-8";
-	const iconSize = isLargeControls ? "w-5 h-5" : "w-4 h-4";
-	const sliderHeight = isLargeControls ? "h-2" : "";
-
-	// Observe container size for responsive canvas (only if size prop not provided)
+	// Load image from imageSource (value or defaultImage)
 	useEffect(() => {
-		// If fixed size is provided, use it
-		if (size) {
-			setContainerSize(size);
-			return;
-		}
-
-		const container = containerRef.current;
-		if (!container) return;
-
-		const updateSize = () => {
-			const width = container.clientWidth;
-			if (width > 0) {
-				setContainerSize(width);
-			}
-		};
-
-		// Initial size
-		updateSize();
-
-		// ResizeObserver for responsive updates
-		const resizeObserver = new ResizeObserver(updateSize);
-		resizeObserver.observe(container);
-
-		return () => resizeObserver.disconnect();
-	}, [size]);
-
-	// Load image from value or defaultImage
-	useEffect(() => {
-		if (imageSource) {
+		if (imageSource && !imageSource.startsWith("data:")) {
 			const img = new Image();
 			img.crossOrigin = "anonymous";
 			img.onload = () => {
@@ -167,15 +133,10 @@ export function AvatarEditor({
 				setPosition({ x: 0, y: 0 });
 			};
 			img.src = imageSource;
-		} else {
-			// Reset if no image source
-			setImage(null);
-			setImageLoaded(false);
 		}
 	}, [imageSource]);
 
-	// Generate output data URL
-	const generateOutputDataUrl = useCallback(() => {
+	const generateOutput = useCallback(() => {
 		if (!canvasRef.current || !image) return null;
 
 		const outputCanvas = document.createElement("canvas");
@@ -184,28 +145,12 @@ export function AvatarEditor({
 		const ctx = outputCanvas.getContext("2d");
 		if (!ctx) return null;
 
-		// Enable high-quality image smoothing for output
-		ctx.imageSmoothingEnabled = true;
-		ctx.imageSmoothingQuality = "high";
-
-		// Draw from source canvas (which may be scaled by dpr) to output at desired size
-		ctx.drawImage(
-			canvasRef.current,
-			0,
-			0,
-			canvasRef.current.width,
-			canvasRef.current.height,
-			0,
-			0,
-			outputSize,
-			outputSize,
-		);
+		ctx.drawImage(canvasRef.current, 0, 0, outputSize, outputSize);
 
 		const mimeType = `image/${outputFormat}`;
 		return outputCanvas.toDataURL(mimeType, outputQuality);
 	}, [image, outputSize, outputFormat, outputQuality]);
 
-	// Draw canvas and notify parent of changes
 	useEffect(() => {
 		if (!canvasRef.current || !image || !imageLoaded) return;
 
@@ -213,42 +158,18 @@ export function AvatarEditor({
 		const ctx = canvas.getContext("2d");
 		if (!ctx) return;
 
-		// Use device pixel ratio for sharp rendering on retina displays
-		const dpr = window.devicePixelRatio || 1;
-		const displaySize = containerSize;
+		const displaySize = size;
+		canvas.width = displaySize;
+		canvas.height = displaySize;
 
-		// Set canvas actual size in memory (scaled for retina)
-		canvas.width = displaySize * dpr;
-		canvas.height = displaySize * dpr;
-
-		// Set canvas display size via style
-		canvas.style.width = `${displaySize}px`;
-		canvas.style.height = `${displaySize}px`;
-
-		// Scale context to match device pixel ratio
-		ctx.scale(dpr, dpr);
-
-		// Enable high-quality image smoothing
-		ctx.imageSmoothingEnabled = true;
-		ctx.imageSmoothingQuality = "high";
-
-		// Clear canvas
 		ctx.clearRect(0, 0, displaySize, displaySize);
-
-		// Fill with background
 		ctx.fillStyle = "#1a1a2e";
 		ctx.fillRect(0, 0, displaySize, displaySize);
 
-		// Save context state
 		ctx.save();
-
-		// Move to center
 		ctx.translate(displaySize / 2, displaySize / 2);
-
-		// Apply rotation
 		ctx.rotate((rotation * Math.PI) / 180);
 
-		// Apply zoom and position
 		const scale = zoom;
 		const imgAspect = image.width / image.height;
 		let drawWidth, drawHeight;
@@ -261,7 +182,6 @@ export function AvatarEditor({
 			drawHeight = drawWidth / imgAspect;
 		}
 
-		// Draw image centered with position offset
 		ctx.drawImage(
 			image,
 			-drawWidth / 2 + position.x,
@@ -269,11 +189,8 @@ export function AvatarEditor({
 			drawWidth,
 			drawHeight,
 		);
-
-		// Restore context
 		ctx.restore();
 
-		// Draw circular mask
 		ctx.globalCompositeOperation = "destination-in";
 		ctx.beginPath();
 		ctx.arc(
@@ -285,10 +202,7 @@ export function AvatarEditor({
 		);
 		ctx.fill();
 
-		// Reset composite operation
 		ctx.globalCompositeOperation = "source-over";
-
-		// Draw border ring
 		ctx.strokeStyle = "hsl(var(--primary))";
 		ctx.lineWidth = 3;
 		ctx.beginPath();
@@ -301,17 +215,18 @@ export function AvatarEditor({
 		);
 		ctx.stroke();
 
-		// Notify parent of the change after rendering is complete
-		const dataUrl = generateOutputDataUrl();
-		onChange?.(dataUrl);
+		const dataUrl = generateOutput();
+		if (dataUrl) {
+			onChange?.(dataUrl);
+		}
 	}, [
 		image,
 		imageLoaded,
 		zoom,
 		rotation,
 		position,
-		containerSize,
-		generateOutputDataUrl,
+		size,
+		generateOutput,
 		onChange,
 	]);
 
@@ -320,20 +235,6 @@ export function AvatarEditor({
 		setRotation(0);
 		setPosition({ x: 0, y: 0 });
 	}, []);
-
-	// Discard the image entirely
-	const handleDiscard = useCallback(() => {
-		setImage(null);
-		setImageLoaded(false);
-		setZoom(1);
-		setRotation(0);
-		setPosition({ x: 0, y: 0 });
-		// Reset the file input so the same file can be selected again
-		if (fileInputRef.current) {
-			fileInputRef.current.value = "";
-		}
-		onChange?.(null);
-	}, [onChange]);
 
 	const handleFileSelect = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -347,15 +248,13 @@ export function AvatarEditor({
 				img.onload = () => {
 					setImage(img);
 					setImageLoaded(true);
-					setZoom(1);
-					setRotation(0);
-					setPosition({ x: 0, y: 0 });
+					resetTransforms();
 				};
 				img.src = event.target?.result as string;
 			};
 			reader.readAsDataURL(file);
 		},
-		[],
+		[resetTransforms],
 	);
 
 	const handleMouseDown = useCallback(
@@ -407,37 +306,72 @@ export function AvatarEditor({
 		[isDragging, dragStart],
 	);
 
+	const handleDiscard = useCallback(() => {
+		setImage(null);
+		setImageLoaded(false);
+		resetTransforms();
+		if (fileInputRef.current) {
+			fileInputRef.current.value = "";
+		}
+		onChange?.(null);
+	}, [resetTransforms, onChange]);
+
 	const handleZoomIn = () => setZoom((z) => Math.min(z + 0.1, 3));
 	const handleZoomOut = () => setZoom((z) => Math.max(z - 0.1, 0.5));
 	const handleRotateLeft = () => setRotation((r) => r - 15);
 	const handleRotateRight = () => setRotation((r) => r + 15);
 
+	const isLarge = controlSize === "large";
+	const buttonSize = isLarge ? "h-12 w-12" : "h-8 w-8";
+	const iconSize = isLarge ? "w-6 h-6" : "w-4 h-4";
+	const smallIconSize = isLarge ? "w-5 h-5" : "w-3 h-3";
+	const textSize = isLarge ? "text-sm" : "text-xs";
+	const uploadIconSize = isLarge ? "w-12 h-12" : "w-8 h-8";
+	const uploadContainerSize = isLarge ? "w-24 h-24" : "w-16 h-16";
+	const gapSize = isLarge ? "gap-6" : "gap-4";
+	const controlGap = isLarge ? "gap-3" : "gap-2";
+	const sliderHeight = isLarge
+		? "[&_[role=slider]]:h-6 [&_[role=slider]]:w-6"
+		: "";
+
 	return (
-		<div className={cn("flex flex-col gap-4 w-full", className)}>
-			{/* Canvas Container - Square aspect ratio, full width */}
+		<div
+			className={cn("flex flex-col", gapSize, className)}
+			style={{ width: size }}
+		>
+			{/* Canvas Container */}
 			<div
 				ref={containerRef}
-				className="relative w-full aspect-square bg-muted rounded-2xl overflow-hidden"
+				className="relative bg-muted rounded-2xl overflow-hidden"
+				style={{ width: size, height: size }}
 			>
-				{/* Upload placeholder with avatar initials */}
+				{/* Upload placeholder */}
 				{!imageLoaded && (
 					<button
 						onClick={() => fileInputRef.current?.click()}
-						className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 hover:bg-muted/80 transition-colors cursor-pointer group"
+						className={cn(
+							"absolute inset-0 z-10 flex flex-col items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors cursor-pointer",
+							isLarge ? "gap-4" : "gap-3",
+						)}
 						aria-label="Upload image"
 						type="button"
 					>
-						{/* Avatar circle with initials */}
-						<div className="w-3/4 aspect-square max-w-[200px] rounded-full bg-primary flex items-center justify-center ring-4 ring-primary/20 group-hover:ring-primary/40 transition-all">
-							<span className="text-primary-foreground font-bold text-4xl sm:text-5xl md:text-6xl select-none">
-								{initials}
-							</span>
+						<div
+							className={cn(
+								"rounded-full bg-primary/10 flex items-center justify-center",
+								uploadContainerSize,
+							)}
+						>
+							<Upload className={cn("text-primary", uploadIconSize)} />
 						</div>
-						{/* Upload hint */}
-						<div className="flex items-center gap-2 text-muted-foreground group-hover:text-foreground transition-colors">
-							<Upload className="w-4 h-4" />
-							<span className="text-sm font-medium">Click to upload</span>
-						</div>
+						<span
+							className={cn("font-medium", isLarge ? "text-base" : "text-sm")}
+						>
+							Click to upload
+						</span>
+						<span className={cn("text-muted-foreground", textSize)}>
+							PNG, JPG up to 10MB
+						</span>
 					</button>
 				)}
 
@@ -445,9 +379,10 @@ export function AvatarEditor({
 				<canvas
 					ref={canvasRef}
 					className={cn(
-						"absolute top-0 left-0",
+						"absolute inset-0",
 						imageLoaded ? "cursor-move" : "pointer-events-none opacity-0",
 					)}
+					style={{ width: size, height: size }}
 					onMouseDown={handleMouseDown}
 					onMouseMove={handleMouseMove}
 					onMouseUp={handleMouseUp}
@@ -459,69 +394,72 @@ export function AvatarEditor({
 
 				{/* Grid Overlay */}
 				{showGrid && imageLoaded && (
-					<svg
-						className="absolute inset-0 w-full h-full pointer-events-none opacity-30"
-						viewBox="0 0 100 100"
-						preserveAspectRatio="none"
+					<div
+						className="absolute inset-0 pointer-events-none"
+						style={{ width: size, height: size }}
 					>
-						{/* Vertical lines */}
-						<line
-							x1="33.33"
-							y1="0"
-							x2="33.33"
-							y2="100"
-							stroke="white"
-							strokeWidth="0.5"
-						/>
-						<line
-							x1="66.66"
-							y1="0"
-							x2="66.66"
-							y2="100"
-							stroke="white"
-							strokeWidth="0.5"
-						/>
-						{/* Horizontal lines */}
-						<line
-							x1="0"
-							y1="33.33"
-							x2="100"
-							y2="33.33"
-							stroke="white"
-							strokeWidth="0.5"
-						/>
-						<line
-							x1="0"
-							y1="66.66"
-							x2="100"
-							y2="66.66"
-							stroke="white"
-							strokeWidth="0.5"
-						/>
-						{/* Center crosshair */}
-						<line
-							x1="45"
-							y1="50"
-							x2="55"
-							y2="50"
-							stroke="white"
-							strokeWidth="0.5"
-						/>
-						<line
-							x1="50"
-							y1="45"
-							x2="50"
-							y2="55"
-							stroke="white"
-							strokeWidth="0.5"
-						/>
-					</svg>
+						<svg width={size} height={size} className="opacity-30">
+							<line
+								x1={size / 3}
+								y1={0}
+								x2={size / 3}
+								y2={size}
+								stroke="white"
+								strokeWidth="1"
+							/>
+							<line
+								x1={(size * 2) / 3}
+								y1={0}
+								x2={(size * 2) / 3}
+								y2={size}
+								stroke="white"
+								strokeWidth="1"
+							/>
+							<line
+								x1={0}
+								y1={size / 3}
+								x2={size}
+								y2={size / 3}
+								stroke="white"
+								strokeWidth="1"
+							/>
+							<line
+								x1={0}
+								y1={(size * 2) / 3}
+								x2={size}
+								y2={(size * 2) / 3}
+								stroke="white"
+								strokeWidth="1"
+							/>
+							<line
+								x1={size / 2 - 10}
+								y1={size / 2}
+								x2={size / 2 + 10}
+								y2={size / 2}
+								stroke="white"
+								strokeWidth="1"
+							/>
+							<line
+								x1={size / 2}
+								y1={size / 2 - 10}
+								x2={size / 2}
+								y2={size / 2 + 10}
+								stroke="white"
+								strokeWidth="1"
+							/>
+						</svg>
+					</div>
 				)}
 
 				{/* Drag indicator */}
 				{imageLoaded && isDragging && (
-					<div className="absolute top-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-black/60 rounded text-xs text-white flex items-center gap-1">
-						<Move className="w-3 h-3" />
+					<div
+						className={cn(
+							"absolute top-2 left-1/2 -translate-x-1/2 bg-black/60 rounded text-white flex items-center",
+							isLarge ? "px-3 py-2 text-sm gap-2" : "px-2 py-1 text-xs gap-1",
+						)}
+					>
+						<Move className={smallIconSize} />
 						Dragging
 					</div>
 				)}
@@ -529,9 +467,9 @@ export function AvatarEditor({
 
 			{/* Controls - only show when image is loaded */}
 			{imageLoaded && (
-				<div className={cn("space-y-3", isLargeControls && "space-y-4")}>
+				<div className={cn("space-y-4", isLarge && "space-y-5")}>
 					{/* Zoom Slider */}
-					<div className="flex items-center gap-2">
+					<div className={cn("flex items-center", controlGap)}>
 						<Button
 							variant="ghost"
 							size="icon"
@@ -564,8 +502,10 @@ export function AvatarEditor({
 					</div>
 
 					{/* Rotation & Grid Controls */}
-					<div className="flex items-center justify-between gap-2">
-						<div className="flex items-center gap-1">
+					<div className={cn("flex items-center justify-between", controlGap)}>
+						<div
+							className={cn("flex items-center", isLarge ? "gap-2" : "gap-1")}
+						>
 							<Button
 								variant="ghost"
 								size="icon"
@@ -579,7 +519,8 @@ export function AvatarEditor({
 							<span
 								className={cn(
 									"text-muted-foreground text-center tabular-nums",
-									isLargeControls ? "text-sm w-14" : "text-xs w-12",
+									textSize,
+									isLarge ? "w-16" : "w-12",
 								)}
 							>
 								{rotation}°
@@ -596,7 +537,9 @@ export function AvatarEditor({
 							</Button>
 						</div>
 
-						<div className="flex items-center gap-1">
+						<div
+							className={cn("flex items-center", isLarge ? "gap-2" : "gap-1")}
+						>
 							<Toggle
 								pressed={showGrid}
 								onPressedChange={setShowGrid}
@@ -619,6 +562,17 @@ export function AvatarEditor({
 							<Button
 								variant="ghost"
 								size="icon"
+								className={buttonSize}
+								onClick={() => fileInputRef.current?.click()}
+								aria-label="Upload new image"
+								type="button"
+							>
+								<Upload className={iconSize} />
+							</Button>
+							{/* Discard button */}
+							<Button
+								variant="ghost"
+								size="icon"
 								className={cn(
 									buttonSize,
 									"text-destructive hover:text-destructive hover:bg-destructive/10",
@@ -627,7 +581,7 @@ export function AvatarEditor({
 								aria-label="Discard image"
 								type="button"
 							>
-								<Trash2 className={iconSize} />
+								<X className={iconSize} />
 							</Button>
 						</div>
 					</div>

@@ -1,3 +1,10 @@
+# [1.5.0-rc.9](https://github.com/janovix/auth/compare/v1.5.0-rc.8...v1.5.0-rc.9) (2026-01-17)
+
+
+### Features
+
+* update user profile image handling in PersonalSettingsView ([faf6859](https://github.com/janovix/auth/commit/faf68597bea0b1df77b96d8978da8dd769a01f15))
+
 # [1.5.0-rc.8](https://github.com/janovix/auth/compare/v1.5.0-rc.7...v1.5.0-rc.8) (2026-01-17)
 
 

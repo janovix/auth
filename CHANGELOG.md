@@ -1,3 +1,10 @@
+# [1.5.0-rc.14](https://github.com/janovix/auth/compare/v1.5.0-rc.13...v1.5.0-rc.14) (2026-01-17)
+
+
+### Features
+
+* enhance avatar URL handling in PersonalSettingsView to prioritize user.image over settings.avatarUrl ([6a3bf02](https://github.com/janovix/auth/commit/6a3bf02234703827925f661c0d5eebe65c12f56f))
+
 # [1.5.0-rc.13](https://github.com/janovix/auth/compare/v1.5.0-rc.12...v1.5.0-rc.13) (2026-01-17)
 
 

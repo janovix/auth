@@ -19,6 +19,7 @@ import { NavbarClock } from "@/components/ui/navbar-clock";
 import {
 	setSidebarCollapsed as saveSidebarCollapsed,
 	getResolvedSettings,
+	getAmlComplianceSettings,
 } from "@/lib/settings/settingsClient";
 import { getSubscriptionStatus } from "@/lib/billing";
 
@@ -316,22 +317,12 @@ export function SettingsLayoutClient({
 			if (!activeOrgId) return;
 
 			try {
-				const authServiceUrl = getAuthCoreBaseUrl();
-
 				// Check compliance settings
-				const complianceResponse = await fetch(
-					`${authServiceUrl}/api/settings/organization/${activeOrgId}/aml-compliance`,
-					{ credentials: "include" },
-				);
-				if (complianceResponse.ok) {
-					const complianceData = (await complianceResponse.json()) as {
-						data?: { obligatedSubjectKey?: string };
-					};
-					setCompletionStatus((prev) => ({
-						...prev,
-						compliance: Boolean(complianceData.data?.obligatedSubjectKey),
-					}));
-				}
+				const amlSettings = await getAmlComplianceSettings(activeOrgId);
+				setCompletionStatus((prev) => ({
+					...prev,
+					compliance: Boolean(amlSettings?.obligatedSubjectKey),
+				}));
 
 				// Check subscription status (billing)
 				const subscriptionStatus = await getSubscriptionStatus();

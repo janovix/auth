@@ -1,3 +1,10 @@
+# [1.5.0-rc.10](https://github.com/janovix/auth/compare/v1.5.0-rc.9...v1.5.0-rc.10) (2026-01-17)
+
+
+### Bug Fixes
+
+* clarify onChange behavior in AvatarEditorDialog when using onSave handler ([afc508e](https://github.com/janovix/auth/commit/afc508eeb01764c8dcc26a4ad4d3d5bd8298a1ab))
+
 # [1.5.0-rc.9](https://github.com/janovix/auth/compare/v1.5.0-rc.8...v1.5.0-rc.9) (2026-01-17)
 
 

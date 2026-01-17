@@ -104,7 +104,10 @@ export function PersonalSettingsView() {
 		useState<DateFormat>("MM/DD/YYYY");
 	const [selectedClockFormat, setSelectedClockFormat] =
 		useState<ClockFormat>("12h");
-	const [avatarUrl, setAvatarUrl] = useState<string | null>("");
+	// Avatar URL: prefer user.image (Better Auth), fallback to settings.avatarUrl
+	const [avatarUrl, setAvatarUrl] = useState<string | null>(
+		user?.image || null,
+	);
 	const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
 
 	const activeOrgId = (
@@ -152,7 +155,8 @@ export function PersonalSettingsView() {
 					setSelectedLanguage(data.language || "en");
 					setSelectedDateFormat(data.dateFormat || "MM/DD/YYYY");
 					setSelectedClockFormat(data.clockFormat || "12h");
-					setAvatarUrl(data.avatarUrl || "");
+					// Prefer user.image (Better Auth) over settings.avatarUrl
+					setAvatarUrl(user?.image || data.avatarUrl || null);
 					setSidebarCollapsed(data.metadata?.sidebarCollapsed ?? false);
 				}
 
@@ -170,7 +174,7 @@ export function PersonalSettingsView() {
 			}
 		}
 		loadSettings();
-	}, [activeOrgId]);
+	}, [activeOrgId, user?.image]);
 
 	const showSuccess = useCallback((message: string) => {
 		toast.success(message);

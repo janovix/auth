@@ -275,7 +275,8 @@ export const LoginView = ({
 				setOtpNeedsResend(true);
 			} else {
 				// Invalid OTP - user can try again until server returns TOO_MANY_ATTEMPTS
-				setOtpError(result.error?.message || t("login.otp.invalid"));
+				// Always use translated message for better UX (server returns "Invalid OTP")
+				setOtpError(t("login.otp.invalid"));
 			}
 
 			setIsVerifyingOtp(false);

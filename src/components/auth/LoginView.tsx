@@ -140,6 +140,8 @@ export const LoginView = ({
 	const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 	const [captchaError, setCaptchaError] = useState(false);
 	const turnstileRef = useRef<TurnstileInstance>(null);
+	// Track if we're waiting for captcha to complete before resending OTP
+	const [pendingResend, setPendingResend] = useState(false);
 
 	// Set aurora page profile to login on mount
 	useEffect(() => {
@@ -315,29 +317,30 @@ export const LoginView = ({
 		}
 	}, [otpValue, userEmail, isVerifyingOtp, handleVerifyOtp]);
 
-	const handleResendOtp = async () => {
+	const handleResendOtp = async (tokenOverride?: string) => {
 		if (!userEmail) {
 			return;
 		}
 
-		// Require captcha token if Turnstile is configured
-		if (TURNSTILE_SITE_KEY && !captchaToken) {
-			setOtpError(
-				t("login.captcha.required") ||
-					"Please complete the captcha verification",
-			);
-			setStateModifier("error");
+		const token = tokenOverride || captchaToken;
+
+		// If captcha is required but no token, show captcha and wait for resolution
+		if (TURNSTILE_SITE_KEY && !token) {
+			setPendingResend(true);
+			setCaptchaError(false);
+			// Captcha widget will be shown, and when resolved, will auto-trigger resend
 			return;
 		}
 
 		setIsResending(true);
+		setPendingResend(false);
 		setOtpError(null);
 		setOtpNeedsResend(false);
 		setOtpValue("");
 		setStateModifier("loading"); // Blue aurora while resending
 
 		const result = await sendOtp(userEmail, "sign-in", {
-			captchaToken: captchaToken || undefined,
+			captchaToken: token || undefined,
 		});
 
 		// Reset captcha after use (token is single-use)
@@ -364,6 +367,7 @@ export const LoginView = ({
 		setOtpNeedsResend(false);
 		setIsBanned(false);
 		setSuccessMessage(null);
+		setPendingResend(false); // Reset pending resend state
 		setStateModifier("default"); // Reset to purple when going back
 		resetCooldown(); // Reset cooldown when going back to email
 	};
@@ -599,8 +603,8 @@ export const LoginView = ({
 										</Alert>
 									)}
 
-									{/* Turnstile Captcha Widget for Resend */}
-									{TURNSTILE_SITE_KEY && !captchaToken && (
+									{/* Turnstile Captcha Widget for Resend - only shown when user initiates resend */}
+									{TURNSTILE_SITE_KEY && pendingResend && (
 										<div className="flex justify-center">
 											<div className="rounded-lg border border-border bg-muted/30 p-1 overflow-hidden shadow-sm">
 												<Turnstile
@@ -609,13 +613,17 @@ export const LoginView = ({
 													onSuccess={(token) => {
 														setCaptchaToken(token);
 														setCaptchaError(false);
+														// Auto-trigger resend after captcha success
+														handleResendOtp(token);
 													}}
 													onError={() => {
 														setCaptchaToken(null);
 														setCaptchaError(true);
+														setPendingResend(false);
 													}}
 													onExpire={() => {
 														setCaptchaToken(null);
+														setPendingResend(false);
 													}}
 													options={{
 														theme: "auto",
@@ -625,7 +633,7 @@ export const LoginView = ({
 											</div>
 										</div>
 									)}
-									{captchaError && (
+									{captchaError && pendingResend && (
 										<p className="text-sm text-destructive text-center">
 											{t("login.captcha.error") ||
 												"Captcha verification failed. Please try again."}
@@ -635,15 +643,11 @@ export const LoginView = ({
 									{/* Resend button */}
 									{otpNeedsResend ? (
 										<Button
-											onClick={handleResendOtp}
-											disabled={
-												isResending ||
-												isOnCooldown ||
-												(TURNSTILE_SITE_KEY ? !captchaToken : false)
-											}
+											onClick={() => handleResendOtp()}
+											disabled={isResending || isOnCooldown || pendingResend}
 											className="w-full"
 										>
-											{isResending ? (
+											{isResending || pendingResend ? (
 												<>
 													<Loader2 className="mr-2 h-4 w-4 animate-spin" />
 													{t("login.otp.resendNew")}
@@ -665,18 +669,18 @@ export const LoginView = ({
 										</Button>
 									) : (
 										<Button
-											onClick={handleResendOtp}
+											onClick={() => handleResendOtp()}
 											disabled={
 												isResending ||
 												isVerifyingOtp ||
 												isOnCooldown ||
-												(TURNSTILE_SITE_KEY ? !captchaToken : false)
+												pendingResend
 											}
 											variant="outline"
 											className="w-full"
 										>
 											<Mail className="mr-2 h-4 w-4" />
-											{isResending
+											{isResending || pendingResend
 												? t("login.otp.resending")
 												: isOnCooldown
 													? t("login.otp.resendWait").replace(

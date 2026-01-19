@@ -524,8 +524,8 @@ const translations = {
 			"Advanced plan for companies with high volume of operations",
 		"settings.billing.plans.ultra.description":
 			"Enterprise plan for large corporations with high volume operations",
-		"settings.billing.month": "/month",
-		"settings.billing.year": "/year",
+		"settings.billing.month": "month",
+		"settings.billing.year": "year",
 		"settings.billing.perNotice": "per extra notice",
 		"settings.billing.contactSales": "Contact Sales",
 		"settings.billing.subscribe": "Subscribe",
@@ -1409,8 +1409,8 @@ const translations = {
 			"Plan avanzado para empresas con mayor volumen de operaciones",
 		"settings.billing.plans.ultra.description":
 			"Plan empresarial para grandes corporaciones con operaciones de alto volumen",
-		"settings.billing.month": "/mes",
-		"settings.billing.year": "/año",
+		"settings.billing.month": "mes",
+		"settings.billing.year": "año",
 		"settings.billing.perNotice": "por aviso extra",
 		"settings.billing.contactSales": "Contactar Ventas",
 		"settings.billing.subscribe": "Suscribirse",

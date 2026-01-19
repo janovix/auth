@@ -1,3 +1,10 @@
+# [1.5.0-rc.18](https://github.com/janovix/auth/compare/v1.5.0-rc.17...v1.5.0-rc.18) (2026-01-19)
+
+
+### Features
+
+* implement OTP error handling to prevent infinite submission loops and suggest new code after multiple failed attempts ([14849d9](https://github.com/janovix/auth/commit/14849d928f1ce31a3ff393562028d1a487a265e2))
+
 # [1.5.0-rc.17](https://github.com/janovix/auth/compare/v1.5.0-rc.16...v1.5.0-rc.17) (2026-01-17)
 
 

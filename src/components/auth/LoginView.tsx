@@ -127,9 +127,6 @@ export const LoginView = ({
 	const [otpNeedsResend, setOtpNeedsResend] = useState(false);
 	const [isResending, setIsResending] = useState(false);
 	const [isBanned, setIsBanned] = useState(false);
-	// Track failed attempts to suggest requesting new code after 2 failures
-	const [failedAttempts, setFailedAttempts] = useState(0);
-	const MAX_FRONTEND_ATTEMPTS = 2; // After 2 failed attempts, suggest new code
 
 	// Resend cooldown (60 seconds)
 	const { secondsRemaining, isOnCooldown, startCooldown, resetCooldown } =
@@ -271,24 +268,14 @@ export const LoginView = ({
 			} else if (isExpired) {
 				setOtpError(t("login.otp.expired"));
 				setOtpNeedsResend(true);
-				setFailedAttempts(0); // Reset counter on expiry
 			} else if (isTooManyAttempts) {
+				// Server returned TOO_MANY_ATTEMPTS - OTP is now invalid
+				// User must request a new code (Better Auth default: 3 attempts)
 				setOtpError(t("login.otp.tooManyAttempts"));
 				setOtpNeedsResend(true);
-				setFailedAttempts(0); // Reset counter
 			} else {
-				// Invalid OTP - increment failed attempts counter
-				const newAttempts = failedAttempts + 1;
-				setFailedAttempts(newAttempts);
-
-				if (newAttempts >= MAX_FRONTEND_ATTEMPTS) {
-					// After 2 failed attempts, suggest requesting a new code
-					setOtpError(t("login.otp.invalidSuggestResend"));
-					setOtpNeedsResend(true);
-				} else {
-					// First failure - let user try again
-					setOtpError(result.error?.message || t("login.otp.invalid"));
-				}
+				// Invalid OTP - user can try again until server returns TOO_MANY_ATTEMPTS
+				setOtpError(result.error?.message || t("login.otp.invalid"));
 			}
 
 			setIsVerifyingOtp(false);
@@ -346,7 +333,6 @@ export const LoginView = ({
 		setOtpError(null);
 		setOtpNeedsResend(false);
 		setOtpValue("");
-		setFailedAttempts(0); // Reset failed attempts counter on resend
 		setStateModifier("loading"); // Blue aurora while resending
 
 		const result = await sendOtp(userEmail, "sign-in", {
@@ -377,7 +363,6 @@ export const LoginView = ({
 		setOtpNeedsResend(false);
 		setIsBanned(false);
 		setSuccessMessage(null);
-		setFailedAttempts(0); // Reset failed attempts counter
 		setStateModifier("default"); // Reset to purple when going back
 		resetCooldown(); // Reset cooldown when going back to email
 	};

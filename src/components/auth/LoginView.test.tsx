@@ -490,4 +490,76 @@ describe("LoginView", () => {
 		await new Promise((resolve) => setTimeout(resolve, 100));
 		expect(signInWithOtp).toHaveBeenCalledTimes(2);
 	});
+
+	it("shows resend button when server returns TOO_MANY_ATTEMPTS", async () => {
+		const sendOtp = createSendOtp();
+		const signInWithOtp = createSignInWithOtp();
+
+		vi.mocked(sendOtp).mockResolvedValue({
+			success: true,
+			data: { message: "OTP sent" },
+			error: null,
+		});
+
+		// Create error with TOO_MANY_ATTEMPTS code (server-side limit exceeded)
+		const tooManyAttemptsError = new Error(
+			"Too many attempts. Request a new code.",
+		) as Error & { code: string };
+		tooManyAttemptsError.code = "TOO_MANY_ATTEMPTS";
+
+		vi.mocked(signInWithOtp).mockResolvedValue({
+			success: false,
+			data: null,
+			error: tooManyAttemptsError,
+		});
+
+		renderWithProviders(
+			<LoginView sendOtp={sendOtp} signInWithOtp={signInWithOtp} />,
+		);
+		const user = userEvent.setup();
+
+		// Step 1: Enter email
+		const emailInputs = screen.getAllByPlaceholderText("tu@empresa.com");
+		const emailInput = emailInputs[emailInputs.length - 1];
+		await user.type(emailInput, "ana@example.com");
+
+		const submitButtons = screen.getAllByRole("button", {
+			name: /enviar código/i,
+		});
+		const submitButton = submitButtons[submitButtons.length - 1];
+		fireEvent.click(submitButton);
+
+		// Wait for OTP input to appear
+		await waitFor(() => {
+			expect(
+				screen.getByLabelText(/código de verificación/i),
+			).toBeInTheDocument();
+		});
+
+		// Enter OTP (server will return TOO_MANY_ATTEMPTS)
+		const otpInput = screen.getByLabelText(/código de verificación/i);
+		await user.type(otpInput, "123456");
+
+		// Wait for the error to be shown
+		await waitFor(() => {
+			expect(signInWithOtp).toHaveBeenCalledTimes(1);
+		});
+
+		// Should show the error message for TOO_MANY_ATTEMPTS
+		await waitFor(() => {
+			expect(
+				screen.getByText(/has excedido el número de intentos/i),
+			).toBeInTheDocument();
+		});
+
+		// The resend button should be visible (may show cooldown timer or request new button)
+		// When otpNeedsResend is true, a prominent button appears for requesting new code
+		const allButtons = screen.getAllByRole("button");
+		const resendButton = allButtons.find(
+			(btn) =>
+				btn.textContent?.includes("Espera") ||
+				btn.textContent?.includes("Solicitar nuevo código"),
+		);
+		expect(resendButton).toBeInTheDocument();
+	});
 });

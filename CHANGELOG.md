@@ -1,3 +1,10 @@
+# [1.5.0-rc.21](https://github.com/janovix/auth/compare/v1.5.0-rc.20...v1.5.0-rc.21) (2026-01-19)
+
+
+### Features
+
+* enhance OTP resend functionality by introducing pending state for captcha resolution ([43a0162](https://github.com/janovix/auth/commit/43a01625e45e7c517a4ea2e90bf5f6d566b4514e))
+
 # [1.5.0-rc.20](https://github.com/janovix/auth/compare/v1.5.0-rc.19...v1.5.0-rc.20) (2026-01-19)
 
 

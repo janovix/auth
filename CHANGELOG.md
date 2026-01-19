@@ -1,3 +1,10 @@
+# [1.5.0-rc.20](https://github.com/janovix/auth/compare/v1.5.0-rc.19...v1.5.0-rc.20) (2026-01-19)
+
+
+### Bug Fixes
+
+* improve OTP error messaging by using a consistent translated message for invalid OTP attempts ([0dbedeb](https://github.com/janovix/auth/commit/0dbedeb544299b60e1956f7e4ff2a0da6d3e02c2))
+
 # [1.5.0-rc.19](https://github.com/janovix/auth/compare/v1.5.0-rc.18...v1.5.0-rc.19) (2026-01-19)
 
 

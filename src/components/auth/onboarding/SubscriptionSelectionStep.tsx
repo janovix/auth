@@ -344,11 +344,9 @@ export function SubscriptionSelectionStep({
 												<h3 className="text-xl font-semibold text-foreground">
 													{plan.displayName}
 												</h3>
-												{plan.description && (
-													<p className="text-xs text-muted-foreground mt-1">
-														{plan.description}
-													</p>
-												)}
+												<p className="text-xs text-muted-foreground mt-1">
+													{t(`settings.billing.plans.${plan.name}.description`)}
+												</p>
 												<div className="mt-3">
 													{subscriptionPrice ? (
 														<>
@@ -356,7 +354,10 @@ export function SubscriptionSelectionStep({
 																{formatPriceMXN(subscriptionPrice.amount)}
 															</span>
 															<span className="text-muted-foreground">
-																/{subscriptionPrice.interval || "mes"}
+																/
+																{t(
+																	`settings.billing.interval.${subscriptionPrice.interval || "month"}`,
+																)}
 															</span>
 														</>
 													) : (
@@ -490,7 +491,10 @@ export function SubscriptionSelectionStep({
 													{formatPriceMXN(displayPrice)}
 												</div>
 												<span className="text-xs text-muted-foreground">
-													/{subscriptionPrice?.interval || "mes"}
+													/
+													{t(
+														`settings.billing.interval.${subscriptionPrice?.interval || "month"}`,
+													)}
 												</span>
 											</div>
 											<Button

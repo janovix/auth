@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import {
-	Check,
 	Loader2,
 	Users,
 	Building2,
@@ -19,6 +18,7 @@ import {
 	type PublicPlanInfo,
 	type PublicPlanPrice,
 } from "@/lib/billing";
+import { useLanguage } from "@/contexts/language-context";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -43,63 +43,87 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-// Price type labels and descriptions
-const priceTypeInfo: Record<
+// Price type icons and translation keys
+const priceTypeConfig: Record<
 	string,
-	{ label: string; description: string; icon: typeof FileText }
+	{ labelKey: string; descriptionKey: string; icon: typeof FileText }
 > = {
 	subscription: {
-		label: "Monthly Subscription",
-		description: "Base monthly fee",
+		labelKey: "settings.billing.pricing.subscription.label",
+		descriptionKey: "settings.billing.pricing.subscription.description",
 		icon: Receipt,
 	},
 	seat: {
-		label: "Extra Seat",
-		description: "Per additional user beyond plan limit",
+		labelKey: "settings.billing.pricing.seat.label",
+		descriptionKey: "settings.billing.pricing.seat.description",
 		icon: UserPlus,
 	},
 	extra_org: {
-		label: "Extra Organization",
-		description: "Per additional organization beyond plan limit",
+		labelKey: "settings.billing.pricing.extraOrg.label",
+		descriptionKey: "settings.billing.pricing.extraOrg.description",
 		icon: Building2,
 	},
 	overage_report: {
-		label: "Extra Report",
-		description: "Per report beyond monthly limit",
+		labelKey: "settings.billing.pricing.overageReport.label",
+		descriptionKey: "settings.billing.pricing.overageReport.description",
 		icon: FileText,
 	},
 	overage_notice: {
-		label: "Extra Notice",
-		description: "Per notice beyond monthly limit",
+		labelKey: "settings.billing.pricing.overageNotice.label",
+		descriptionKey: "settings.billing.pricing.overageNotice.description",
 		icon: Bell,
 	},
 	overage_alert: {
-		label: "Extra Alert",
-		description: "Per alert beyond monthly limit",
+		labelKey: "settings.billing.pricing.overageAlert.label",
+		descriptionKey: "settings.billing.pricing.overageAlert.description",
 		icon: AlertTriangle,
 	},
 	overage_transaction: {
-		label: "Extra Transaction",
-		description: "Per transaction beyond monthly limit",
+		labelKey: "settings.billing.pricing.overageTransaction.label",
+		descriptionKey: "settings.billing.pricing.overageTransaction.description",
 		icon: Receipt,
 	},
 	overage_client: {
-		label: "Extra Client",
-		description: "Per client beyond monthly limit",
+		labelKey: "settings.billing.pricing.overageClient.label",
+		descriptionKey: "settings.billing.pricing.overageClient.description",
 		icon: Users,
 	},
 };
 
-// Limit labels
-const limitLabels: Record<string, { label: string; icon: typeof Users }> = {
-	maxOrganizations: { label: "Organizations", icon: Building2 },
-	usersPerOrg: { label: "Users per org", icon: Users },
-	reportsPerMonth: { label: "Reports/month", icon: FileText },
-	noticesPerMonth: { label: "Notices/month", icon: Bell },
-	alertsPerMonth: { label: "Alerts/month", icon: AlertTriangle },
-	transactionsPerMonth: { label: "Transactions/month", icon: Receipt },
-	clientsPerMonth: { label: "Clients/month", icon: Users },
-	watchlistQueriesPerDay: { label: "Watchlist queries/day/user", icon: Users },
+// Limit icons and translation keys
+const limitConfig: Record<string, { labelKey: string; icon: typeof Users }> = {
+	maxOrganizations: {
+		labelKey: "settings.billing.limits.organizations",
+		icon: Building2,
+	},
+	usersPerOrg: {
+		labelKey: "settings.billing.limits.usersPerOrg",
+		icon: Users,
+	},
+	reportsPerMonth: {
+		labelKey: "settings.billing.limits.reportsPerMonth",
+		icon: FileText,
+	},
+	noticesPerMonth: {
+		labelKey: "settings.billing.limits.noticesPerMonth",
+		icon: Bell,
+	},
+	alertsPerMonth: {
+		labelKey: "settings.billing.limits.alertsPerMonth",
+		icon: AlertTriangle,
+	},
+	transactionsPerMonth: {
+		labelKey: "settings.billing.limits.transactionsPerMonth",
+		icon: Receipt,
+	},
+	clientsPerMonth: {
+		labelKey: "settings.billing.limits.clientsPerMonth",
+		icon: Users,
+	},
+	watchlistQueriesPerDay: {
+		labelKey: "settings.billing.limits.watchlistQueries",
+		icon: Users,
+	},
 };
 
 interface PricingTableProps {
@@ -107,6 +131,7 @@ interface PricingTableProps {
 }
 
 export function PricingTable({ currentPlan }: PricingTableProps) {
+	const { t } = useLanguage();
 	const [plans, setPlans] = useState<PublicPlanInfo[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -145,7 +170,7 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 	if (error) {
 		return (
 			<div className="text-center py-8 text-muted-foreground">
-				<p>{error}</p>
+				<p>{t("settings.billing.pricing.loadError")}</p>
 			</div>
 		);
 	}
@@ -170,10 +195,10 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Building2 className="h-5 w-5" />
-						Plan Limits
+						{t("settings.billing.pricing.planLimitsTitle")}
 					</CardTitle>
 					<CardDescription>
-						Monthly included limits for each subscription plan
+						{t("settings.billing.pricing.planLimitsDesc")}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -182,7 +207,9 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead className="w-[200px]">Limit</TableHead>
+									<TableHead className="w-[200px]">
+										{t("settings.billing.pricing.limitHeader")}
+									</TableHead>
 									{plans.map((plan) => (
 										<TableHead
 											key={plan.id}
@@ -196,7 +223,7 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 												<span>{plan.displayName}</span>
 												{currentPlan === plan.name && (
 													<Badge variant="secondary" className="text-xs">
-														Current
+														{t("settings.billing.currentPlanBadge")}
 													</Badge>
 												)}
 											</div>
@@ -205,13 +232,13 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{Object.entries(limitLabels).map(
-									([key, { label, icon: Icon }]) => (
+								{Object.entries(limitConfig).map(
+									([key, { labelKey, icon: Icon }]) => (
 										<TableRow key={key}>
 											<TableCell className="font-medium">
 												<div className="flex items-center gap-2">
 													<Icon className="h-4 w-4 text-muted-foreground" />
-													{label}
+													{t(labelKey)}
 												</div>
 											</TableCell>
 											{plans.map((plan) => {
@@ -253,14 +280,16 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 											{plan.displayName}
 										</CardTitle>
 										{currentPlan === plan.name && (
-											<Badge variant="secondary">Current</Badge>
+											<Badge variant="secondary">
+												{t("settings.billing.currentPlanBadge")}
+											</Badge>
 										)}
 									</div>
 								</CardHeader>
 								<CardContent>
 									<div className="grid grid-cols-2 gap-3 text-sm">
-										{Object.entries(limitLabels).map(
-											([key, { label, icon: Icon }]) => {
+										{Object.entries(limitConfig).map(
+											([key, { labelKey, icon: Icon }]) => {
 												const value =
 													plan.limits?.[key as keyof typeof plan.limits];
 												return (
@@ -270,7 +299,7 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 													>
 														<div className="flex items-center gap-1.5 text-muted-foreground">
 															<Icon className="h-3.5 w-3.5" />
-															<span className="text-xs">{label}</span>
+															<span className="text-xs">{t(labelKey)}</span>
 														</div>
 														<span className="font-medium">{value ?? "—"}</span>
 													</div>
@@ -290,10 +319,10 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
 						<Receipt className="h-5 w-5" />
-						Pricing & Extra Fees
+						{t("settings.billing.pricing.pricingTitle")}
 					</CardTitle>
 					<CardDescription>
-						Monthly subscription prices and overage fees (prices in MXN)
+						{t("settings.billing.pricing.pricingDesc")}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -302,7 +331,9 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead className="w-[250px]">Price Type</TableHead>
+									<TableHead className="w-[250px]">
+										{t("settings.billing.pricing.priceTypeHeader")}
+									</TableHead>
 									{plans.map((plan) => (
 										<TableHead
 											key={plan.id}
@@ -319,8 +350,8 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 							</TableHeader>
 							<TableBody>
 								{allPriceTypes.map((priceType) => {
-									const info = priceTypeInfo[priceType];
-									const Icon = info?.icon ?? Receipt;
+									const config = priceTypeConfig[priceType];
+									const Icon = config?.icon ?? Receipt;
 
 									return (
 										<TableRow key={priceType}>
@@ -330,12 +361,18 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 														<TooltipTrigger asChild>
 															<div className="flex items-center gap-2 cursor-help">
 																<Icon className="h-4 w-4 text-muted-foreground" />
-																<span>{info?.label ?? priceType}</span>
+																<span>
+																	{config ? t(config.labelKey) : priceType}
+																</span>
 																<Info className="h-3.5 w-3.5 text-muted-foreground" />
 															</div>
 														</TooltipTrigger>
 														<TooltipContent>
-															<p>{info?.description ?? "Price per unit"}</p>
+															<p>
+																{config
+																	? t(config.descriptionKey)
+																	: t("settings.billing.pricing.pricePerUnit")}
+															</p>
 														</TooltipContent>
 													</Tooltip>
 												</TooltipProvider>
@@ -357,7 +394,10 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 																</span>
 																{price.interval && (
 																	<span className="text-xs text-muted-foreground">
-																		/{price.interval}
+																		/
+																		{t(
+																			`settings.billing.interval.${price.interval}`,
+																		)}
 																	</span>
 																)}
 															</div>
@@ -387,7 +427,9 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 											{plan.displayName}
 										</CardTitle>
 										{currentPlan === plan.name && (
-											<Badge variant="secondary">Current</Badge>
+											<Badge variant="secondary">
+												{t("settings.billing.currentPlanBadge")}
+											</Badge>
 										)}
 									</div>
 								</CardHeader>
@@ -395,8 +437,8 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 									<div className="space-y-3">
 										{allPriceTypes.map((priceType) => {
 											const price = getPriceByType(plan, priceType);
-											const info = priceTypeInfo[priceType];
-											const Icon = info?.icon ?? Receipt;
+											const config = priceTypeConfig[priceType];
+											const Icon = config?.icon ?? Receipt;
 
 											if (!price) return null;
 
@@ -408,7 +450,7 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 													<div className="flex items-center gap-2 text-muted-foreground">
 														<Icon className="h-4 w-4" />
 														<span className="text-sm">
-															{info?.label ?? priceType}
+															{config ? t(config.labelKey) : priceType}
 														</span>
 													</div>
 													<div className="text-right">
@@ -417,7 +459,10 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 														</span>
 														{price.interval && (
 															<span className="text-xs text-muted-foreground ml-1">
-																/{price.interval}
+																/
+																{t(
+																	`settings.billing.interval.${price.interval}`,
+																)}
 															</span>
 														)}
 													</div>
@@ -439,14 +484,14 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 						<Info className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
 						<div className="space-y-2 text-sm text-muted-foreground">
 							<p>
-								<strong>How billing works:</strong> You pay the monthly
-								subscription fee upfront, then any overages (extra users,
-								reports, notices, etc.) are calculated at the end of each
-								billing cycle and charged automatically.
+								<strong>
+									{t("settings.billing.pricing.howBillingWorks")}:
+								</strong>{" "}
+								{t("settings.billing.pricing.howBillingWorksDesc")}
 							</p>
 							<p>
-								<strong>Trial period:</strong> All plans include a 14-day free
-								trial. You won&apos;t be charged until the trial ends.
+								<strong>{t("settings.billing.pricing.trialPeriod")}:</strong>{" "}
+								{t("settings.billing.pricing.trialPeriodDesc")}
 							</p>
 						</div>
 					</div>

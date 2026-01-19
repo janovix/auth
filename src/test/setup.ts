@@ -47,6 +47,8 @@ const mockTranslations: Record<string, string> = {
 	"login.otp.tooManyAttempts":
 		"Has excedido el número de intentos. Por seguridad, solicita un nuevo código.",
 	"login.otp.invalid": "Código incorrecto. Inténtalo de nuevo.",
+	"login.otp.invalidSuggestResend":
+		"Varios intentos incorrectos. Por favor solicita un nuevo código.",
 	"login.otp.expiredTitle": "Código expirado o inválido",
 	"login.otp.errorTitle": "Error de verificación",
 	"login.otp.resendNew": "Enviando nuevo código...",

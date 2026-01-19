@@ -127,6 +127,9 @@ export const LoginView = ({
 	const [otpNeedsResend, setOtpNeedsResend] = useState(false);
 	const [isResending, setIsResending] = useState(false);
 	const [isBanned, setIsBanned] = useState(false);
+	// Track failed attempts to suggest requesting new code after 2 failures
+	const [failedAttempts, setFailedAttempts] = useState(0);
+	const MAX_FRONTEND_ATTEMPTS = 2; // After 2 failed attempts, suggest new code
 
 	// Resend cooldown (60 seconds)
 	const { secondsRemaining, isOnCooldown, startCooldown, resetCooldown } =
@@ -256,24 +259,36 @@ export const LoginView = ({
 			const isTooManyAttempts = isOtpTooManyAttemptsError(result.error);
 			const isBannedUser = isBannedUserError(result.error);
 
+			// IMPORTANT: Always clear OTP value on ANY error to prevent auto-submit loop.
+			// The auto-submit effect triggers when otpValue.length === 6 && !isVerifyingOtp,
+			// so keeping the OTP value would cause an infinite verification loop.
+			setOtpValue("");
+			otpAtErrorRef.current = "";
+
 			if (isBannedUser) {
 				setOtpError(t("login.banned.message"));
 				setIsBanned(true);
-				setOtpValue("");
-				otpAtErrorRef.current = "";
 			} else if (isExpired) {
 				setOtpError(t("login.otp.expired"));
 				setOtpNeedsResend(true);
-				setOtpValue("");
-				otpAtErrorRef.current = ""; // Capture OTP value at time of error (empty after clear)
+				setFailedAttempts(0); // Reset counter on expiry
 			} else if (isTooManyAttempts) {
 				setOtpError(t("login.otp.tooManyAttempts"));
 				setOtpNeedsResend(true);
-				setOtpValue("");
-				otpAtErrorRef.current = ""; // Capture OTP value at time of error (empty after clear)
+				setFailedAttempts(0); // Reset counter
 			} else {
-				setOtpError(result.error?.message || t("login.otp.invalid"));
-				otpAtErrorRef.current = otpValue; // Capture current OTP value at time of error
+				// Invalid OTP - increment failed attempts counter
+				const newAttempts = failedAttempts + 1;
+				setFailedAttempts(newAttempts);
+
+				if (newAttempts >= MAX_FRONTEND_ATTEMPTS) {
+					// After 2 failed attempts, suggest requesting a new code
+					setOtpError(t("login.otp.invalidSuggestResend"));
+					setOtpNeedsResend(true);
+				} else {
+					// First failure - let user try again
+					setOtpError(result.error?.message || t("login.otp.invalid"));
+				}
 			}
 
 			setIsVerifyingOtp(false);
@@ -331,6 +346,7 @@ export const LoginView = ({
 		setOtpError(null);
 		setOtpNeedsResend(false);
 		setOtpValue("");
+		setFailedAttempts(0); // Reset failed attempts counter on resend
 		setStateModifier("loading"); // Blue aurora while resending
 
 		const result = await sendOtp(userEmail, "sign-in", {
@@ -361,6 +377,7 @@ export const LoginView = ({
 		setOtpNeedsResend(false);
 		setIsBanned(false);
 		setSuccessMessage(null);
+		setFailedAttempts(0); // Reset failed attempts counter
 		setStateModifier("default"); // Reset to purple when going back
 		resetCooldown(); // Reset cooldown when going back to email
 	};

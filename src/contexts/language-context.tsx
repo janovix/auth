@@ -50,6 +50,8 @@ const translations = {
 		"login.otp.tooManyAttempts":
 			"You have exceeded the number of attempts. For security, request a new code.",
 		"login.otp.invalid": "Incorrect code. Try again.",
+		"login.otp.invalidSuggestResend":
+			"Multiple incorrect attempts. Please request a new code.",
 		"login.otp.expiredTitle": "Expired or invalid code",
 		"login.otp.errorTitle": "Verification error",
 		"login.otp.resendNew": "Sending new code...",
@@ -859,6 +861,8 @@ const translations = {
 		"login.otp.tooManyAttempts":
 			"Has excedido el número de intentos. Por seguridad, solicita un nuevo código.",
 		"login.otp.invalid": "Código incorrecto. Inténtalo de nuevo.",
+		"login.otp.invalidSuggestResend":
+			"Varios intentos incorrectos. Por favor solicita un nuevo código.",
 		"login.otp.expiredTitle": "Código expirado o inválido",
 		"login.otp.errorTitle": "Error de verificación",
 		"login.otp.resendNew": "Enviando nuevo código...",

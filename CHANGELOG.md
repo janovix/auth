@@ -1,3 +1,10 @@
+# [1.5.0-rc.19](https://github.com/janovix/auth/compare/v1.5.0-rc.18...v1.5.0-rc.19) (2026-01-19)
+
+
+### Features
+
+* enhance OTP handling by implementing resend button visibility for TOO_MANY_ATTEMPTS error and removing failed attempts tracking ([de3f167](https://github.com/janovix/auth/commit/de3f167099c95b63561c8e1118f99dfb981ca3fe))
+
 # [1.5.0-rc.18](https://github.com/janovix/auth/compare/v1.5.0-rc.17...v1.5.0-rc.18) (2026-01-19)
 
 

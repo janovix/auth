@@ -517,6 +517,13 @@ const translations = {
 		"settings.billing.amlPlans": "AML Compliance Plans",
 		"settings.billing.amlPlansDesc":
 			"Full AML compliance suite with watchlist screening, risk monitoring, SAT notice generation, and more.",
+		"settings.billing.plans.watchlist.description": "Watchlist screening only",
+		"settings.billing.plans.business.description":
+			"Ideal plan for small and medium businesses",
+		"settings.billing.plans.pro.description":
+			"Advanced plan for companies with high volume of operations",
+		"settings.billing.plans.ultra.description":
+			"Enterprise plan for large corporations with high volume operations",
 		"settings.billing.month": "/month",
 		"settings.billing.year": "/year",
 		"settings.billing.perNotice": "per extra notice",
@@ -1341,6 +1348,14 @@ const translations = {
 		"settings.billing.amlPlans": "Planes de Cumplimiento AML",
 		"settings.billing.amlPlansDesc":
 			"Suite completa de cumplimiento AML con verificación en listas, monitoreo de riesgos, generación de avisos SAT y más.",
+		"settings.billing.plans.watchlist.description":
+			"Solo verificación en listas de riesgo",
+		"settings.billing.plans.business.description":
+			"Plan ideal para pequeñas y medianas empresas",
+		"settings.billing.plans.pro.description":
+			"Plan avanzado para empresas con mayor volumen de operaciones",
+		"settings.billing.plans.ultra.description":
+			"Plan empresarial para grandes corporaciones con operaciones de alto volumen",
 		"settings.billing.month": "/mes",
 		"settings.billing.year": "/año",
 		"settings.billing.perNotice": "por aviso extra",
@@ -1508,18 +1523,18 @@ const translations = {
 		"onboarding.plans.detailed.trigger": "Ver tablas de precios detalladas",
 		"onboarding.plans.editProfile": "Editar perfil",
 		"onboarding.plans.features.watchlist.1": "1 organización",
-		"onboarding.plans.features.watchlist.2": "3 usuarios por org",
+		"onboarding.plans.features.watchlist.2": "3 usuarios por organización",
 		"onboarding.plans.features.watchlist.3": "Solo consultas de watchlist",
 		"onboarding.plans.features.watchlist.4": "50 consultas/día/usuario",
 		"onboarding.plans.features.watchlist.5": "Sin acceso AML",
 		"onboarding.plans.features.business.1": "1 organización",
-		"onboarding.plans.features.business.2": "2 usuarios por org",
+		"onboarding.plans.features.business.2": "2 usuarios por organización",
 		"onboarding.plans.features.business.3": "1 reporte/mes",
 		"onboarding.plans.features.business.4": "2 avisos/mes",
 		"onboarding.plans.features.business.5": "50 consultas/día/usuario",
 		"onboarding.plans.features.business.6": "Acceso AML + Watchlist",
 		"onboarding.plans.features.pro.1": "3 organizaciones",
-		"onboarding.plans.features.pro.2": "10 usuarios por org",
+		"onboarding.plans.features.pro.2": "10 usuarios por organización",
 		"onboarding.plans.features.pro.3": "15 reportes/mes",
 		"onboarding.plans.features.pro.4": "20 avisos/mes",
 		"onboarding.plans.features.pro.5": "200 consultas/día/usuario",

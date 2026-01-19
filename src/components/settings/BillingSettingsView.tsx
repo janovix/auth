@@ -68,35 +68,35 @@ import {
 	BillingSettingsViewSkeleton,
 } from "@/components/settings";
 
-// Plan icons and descriptions
+// Plan icons and styling (descriptions use translation keys)
 const planConfig: Record<
 	string,
 	{
 		icon: typeof Zap;
-		description: string;
+		descriptionKey: string;
 		highlight?: boolean;
 		color?: string;
 	}
 > = {
 	watchlist: {
 		icon: Search,
-		description: "Watchlist screening only",
+		descriptionKey: "settings.billing.plans.watchlist.description",
 		color: "text-blue-500",
 	},
 	business: {
 		icon: Zap,
-		description: "For small teams",
+		descriptionKey: "settings.billing.plans.business.description",
 		color: "text-primary",
 	},
 	pro: {
 		icon: Crown,
-		description: "For growing teams",
+		descriptionKey: "settings.billing.plans.pro.description",
 		highlight: true,
 		color: "text-primary",
 	},
 	ultra: {
 		icon: Rocket,
-		description: "For large organizations",
+		descriptionKey: "settings.billing.plans.ultra.description",
 		color: "text-purple-500",
 	},
 };
@@ -404,7 +404,7 @@ export function BillingSettingsView() {
 												</div>
 											</div>
 											<p className="text-xs text-muted-foreground">
-												{config.description}
+												{t(config.descriptionKey)}
 											</p>
 
 											{/* Price */}

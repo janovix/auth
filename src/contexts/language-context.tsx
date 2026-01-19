@@ -620,7 +620,7 @@ const translations = {
 		"onboarding.avatar.optional": "Optional - you can add a photo later",
 		"onboarding.avatar.dropzone": "Click or drag an image here",
 		"onboarding.avatar.formats": "JPG, PNG, GIF or WebP (max 5MB)",
-		"onboarding.avatar.select": "Select profile picture",
+		"onboarding.avatar.select": "Add photo",
 		"onboarding.avatar.remove": "Remove photo",
 		"onboarding.avatar.invalidType":
 			"Invalid file type. Please use JPG, PNG, GIF or WebP.",
@@ -1445,7 +1445,7 @@ const translations = {
 		"onboarding.avatar.optional": "Opcional - puedes agregar una foto después",
 		"onboarding.avatar.dropzone": "Haz clic o arrastra una imagen aquí",
 		"onboarding.avatar.formats": "JPG, PNG, GIF o WebP (máx 5MB)",
-		"onboarding.avatar.select": "Seleccionar foto de perfil",
+		"onboarding.avatar.select": "Agregar foto",
 		"onboarding.avatar.remove": "Eliminar foto",
 		"onboarding.avatar.invalidType":
 			"Tipo de archivo inválido. Usa JPG, PNG, GIF o WebP.",

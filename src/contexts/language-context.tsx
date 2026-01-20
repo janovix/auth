@@ -1138,7 +1138,7 @@ const translations = {
 		"settings.nav.signOut": "Cerrar sesión",
 		"settings.nav.products": "Productos",
 		"settings.nav.aml": "AML",
-		"settings.nav.watchlist": "Lista de Vigilancia",
+		"settings.nav.watchlist": "Watchlist",
 		"settings.nav.active": "Activo",
 		// App Switcher
 		"appSwitcher.title": "Apps de Janovix",

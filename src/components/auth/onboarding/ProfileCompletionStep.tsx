@@ -172,7 +172,7 @@ export function ProfileCompletionStep() {
 		(firstName.charAt(0) + lastName.charAt(0)).toUpperCase() || "?";
 
 	return (
-		<div className="w-full flex justify-center my-auto pt-6">
+		<div className="w-full flex justify-center my-auto pt-6 px-3">
 			<div className="w-full max-w-lg">
 				<div className="text-center mb-8">
 					<div className="flex justify-center mb-4">

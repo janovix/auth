@@ -243,24 +243,7 @@ export function CreateOrganizationStep({
 
 	return (
 		<div className="w-full flex justify-center my-auto">
-			<div className="w-full max-w-lg">
-				<div className="flex justify-end mb-4">
-					<Button
-						variant="outline"
-						size="sm"
-						onClick={handleLogout}
-						disabled={isLoggingOut || isCreating}
-						className="gap-2"
-					>
-						{isLoggingOut ? (
-							<Loader2 className="h-3.5 w-3.5 animate-spin" />
-						) : (
-							<LogOut className="h-3.5 w-3.5" />
-						)}
-						{t("settings.nav.signOut")}
-					</Button>
-				</div>
-
+			<div className="w-full max-w-lg px-3 py-6">
 				{/* Header */}
 				<div className="text-center mb-8">
 					<div className="flex justify-center mb-4">
@@ -401,6 +384,23 @@ export function CreateOrganizationStep({
 					<p className="text-xs text-muted-foreground">
 						{t("onboarding.org.footer")}
 					</p>
+				</div>
+
+				<div className="flex justify-end mb-4 pt-6">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleLogout}
+						disabled={isLoggingOut || isCreating}
+						className="gap-2"
+					>
+						{isLoggingOut ? (
+							<Loader2 className="h-3.5 w-3.5 animate-spin" />
+						) : (
+							<LogOut className="h-3.5 w-3.5" />
+						)}
+						{t("settings.nav.signOut")}
+					</Button>
 				</div>
 			</div>
 		</div>

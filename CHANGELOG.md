@@ -1,3 +1,10 @@
+# [1.5.0-rc.22](https://github.com/janovix/auth/compare/v1.5.0-rc.21...v1.5.0-rc.22) (2026-01-20)
+
+
+### Features
+
+* update scrollbar styles and improve sidebar trigger icon handling ([01f0332](https://github.com/janovix/auth/commit/01f03328ea4e9f37b93385633146641ba9ff6e13))
+
 # [1.5.0-rc.21](https://github.com/janovix/auth/compare/v1.5.0-rc.20...v1.5.0-rc.21) (2026-01-19)
 
 

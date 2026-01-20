@@ -1,3 +1,31 @@
+# [1.5.0-rc.21](https://github.com/janovix/auth/compare/v1.5.0-rc.20...v1.5.0-rc.21) (2026-01-19)
+
+
+### Features
+
+* enhance OTP resend functionality by introducing pending state for captcha resolution ([43a0162](https://github.com/janovix/auth/commit/43a01625e45e7c517a4ea2e90bf5f6d566b4514e))
+
+# [1.5.0-rc.20](https://github.com/janovix/auth/compare/v1.5.0-rc.19...v1.5.0-rc.20) (2026-01-19)
+
+
+### Bug Fixes
+
+* improve OTP error messaging by using a consistent translated message for invalid OTP attempts ([0dbedeb](https://github.com/janovix/auth/commit/0dbedeb544299b60e1956f7e4ff2a0da6d3e02c2))
+
+# [1.5.0-rc.19](https://github.com/janovix/auth/compare/v1.5.0-rc.18...v1.5.0-rc.19) (2026-01-19)
+
+
+### Features
+
+* enhance OTP handling by implementing resend button visibility for TOO_MANY_ATTEMPTS error and removing failed attempts tracking ([de3f167](https://github.com/janovix/auth/commit/de3f167099c95b63561c8e1118f99dfb981ca3fe))
+
+# [1.5.0-rc.18](https://github.com/janovix/auth/compare/v1.5.0-rc.17...v1.5.0-rc.18) (2026-01-19)
+
+
+### Features
+
+* implement OTP error handling to prevent infinite submission loops and suggest new code after multiple failed attempts ([14849d9](https://github.com/janovix/auth/commit/14849d928f1ce31a3ff393562028d1a487a265e2))
+
 # [1.5.0-rc.17](https://github.com/janovix/auth/compare/v1.5.0-rc.16...v1.5.0-rc.17) (2026-01-17)
 
 

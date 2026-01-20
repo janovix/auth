@@ -517,8 +517,15 @@ const translations = {
 		"settings.billing.amlPlans": "AML Compliance Plans",
 		"settings.billing.amlPlansDesc":
 			"Full AML compliance suite with watchlist screening, risk monitoring, SAT notice generation, and more.",
-		"settings.billing.month": "/month",
-		"settings.billing.year": "/year",
+		"settings.billing.plans.watchlist.description": "Watchlist screening only",
+		"settings.billing.plans.business.description":
+			"Ideal plan for small and medium businesses",
+		"settings.billing.plans.pro.description":
+			"Advanced plan for companies with high volume of operations",
+		"settings.billing.plans.ultra.description":
+			"Enterprise plan for large corporations with high volume operations",
+		"settings.billing.month": "month",
+		"settings.billing.year": "year",
 		"settings.billing.perNotice": "per extra notice",
 		"settings.billing.contactSales": "Contact Sales",
 		"settings.billing.subscribe": "Subscribe",
@@ -570,6 +577,59 @@ const translations = {
 		"settings.billing.customDeals":
 			"Need a custom plan or volume pricing? Contact our sales team for tailored solutions.",
 		"settings.billing.detailedPricing": "Detailed Pricing",
+		// Pricing table translations
+		"settings.billing.pricing.loadError": "Failed to load pricing information",
+		"settings.billing.pricing.planLimitsTitle": "Plan Limits",
+		"settings.billing.pricing.planLimitsDesc":
+			"Monthly included limits for each subscription plan",
+		"settings.billing.pricing.limitHeader": "Limit",
+		"settings.billing.pricing.pricingTitle": "Pricing & Extra Fees",
+		"settings.billing.pricing.pricingDesc":
+			"Monthly subscription prices and overage fees (prices in MXN)",
+		"settings.billing.pricing.priceTypeHeader": "Price Type",
+		"settings.billing.pricing.pricePerUnit": "Price per unit",
+		"settings.billing.pricing.howBillingWorks": "How billing works",
+		"settings.billing.pricing.howBillingWorksDesc":
+			"You pay the monthly subscription fee upfront, then any overages (extra users, reports, notices, etc.) are calculated at the end of each billing cycle and charged automatically.",
+		"settings.billing.pricing.trialPeriod": "Trial period",
+		"settings.billing.pricing.trialPeriodDesc":
+			"All plans include a 14-day free trial. You won't be charged until the trial ends.",
+		// Price type labels
+		"settings.billing.pricing.subscription.label": "Monthly Subscription",
+		"settings.billing.pricing.subscription.description": "Base monthly fee",
+		"settings.billing.pricing.seat.label": "Extra Seat",
+		"settings.billing.pricing.seat.description":
+			"Per additional user beyond plan limit",
+		"settings.billing.pricing.extraOrg.label": "Extra Organization",
+		"settings.billing.pricing.extraOrg.description":
+			"Per additional organization beyond plan limit",
+		"settings.billing.pricing.overageReport.label": "Extra Report",
+		"settings.billing.pricing.overageReport.description":
+			"Per report beyond monthly limit",
+		"settings.billing.pricing.overageNotice.label": "Extra Notice",
+		"settings.billing.pricing.overageNotice.description":
+			"Per notice beyond monthly limit",
+		"settings.billing.pricing.overageAlert.label": "Extra Alert",
+		"settings.billing.pricing.overageAlert.description":
+			"Per alert beyond monthly limit",
+		"settings.billing.pricing.overageTransaction.label": "Extra Transaction",
+		"settings.billing.pricing.overageTransaction.description":
+			"Per transaction beyond monthly limit",
+		"settings.billing.pricing.overageClient.label": "Extra Client",
+		"settings.billing.pricing.overageClient.description":
+			"Per client beyond monthly limit",
+		// Limit labels
+		"settings.billing.limits.organizations": "Organizations",
+		"settings.billing.limits.usersPerOrg": "Users per org",
+		"settings.billing.limits.reportsPerMonth": "Reports/month",
+		"settings.billing.limits.noticesPerMonth": "Notices/month",
+		"settings.billing.limits.alertsPerMonth": "Alerts/month",
+		"settings.billing.limits.transactionsPerMonth": "Transactions/month",
+		"settings.billing.limits.clientsPerMonth": "Clients/month",
+		"settings.billing.limits.watchlistQueries": "Watchlist queries/day/user",
+		// Interval translations
+		"settings.billing.interval.month": "month",
+		"settings.billing.interval.year": "year",
 		"settings.billing.cancelTitle": "Cancel Subscription?",
 		"settings.billing.cancelDesc": "Your subscription will remain active until",
 		"settings.billing.endOfPeriod": "the end of your billing period",
@@ -620,7 +680,7 @@ const translations = {
 		"onboarding.avatar.optional": "Optional - you can add a photo later",
 		"onboarding.avatar.dropzone": "Click or drag an image here",
 		"onboarding.avatar.formats": "JPG, PNG, GIF or WebP (max 5MB)",
-		"onboarding.avatar.select": "Select profile picture",
+		"onboarding.avatar.select": "Add photo",
 		"onboarding.avatar.remove": "Remove photo",
 		"onboarding.avatar.invalidType":
 			"Invalid file type. Please use JPG, PNG, GIF or WebP.",
@@ -1341,8 +1401,16 @@ const translations = {
 		"settings.billing.amlPlans": "Planes de Cumplimiento AML",
 		"settings.billing.amlPlansDesc":
 			"Suite completa de cumplimiento AML con verificación en listas, monitoreo de riesgos, generación de avisos SAT y más.",
-		"settings.billing.month": "/mes",
-		"settings.billing.year": "/año",
+		"settings.billing.plans.watchlist.description":
+			"Solo verificación en listas de riesgo",
+		"settings.billing.plans.business.description":
+			"Plan ideal para pequeñas y medianas empresas",
+		"settings.billing.plans.pro.description":
+			"Plan avanzado para empresas con mayor volumen de operaciones",
+		"settings.billing.plans.ultra.description":
+			"Plan empresarial para grandes corporaciones con operaciones de alto volumen",
+		"settings.billing.month": "mes",
+		"settings.billing.year": "año",
 		"settings.billing.perNotice": "por aviso extra",
 		"settings.billing.contactSales": "Contactar Ventas",
 		"settings.billing.subscribe": "Suscribirse",
@@ -1395,6 +1463,61 @@ const translations = {
 		"settings.billing.customDeals":
 			"¿Necesitas un plan personalizado o precios por volumen? Contacta a nuestro equipo de ventas para soluciones a medida.",
 		"settings.billing.detailedPricing": "Precios Detallados",
+		// Pricing table translations
+		"settings.billing.pricing.loadError":
+			"Error al cargar información de precios",
+		"settings.billing.pricing.planLimitsTitle": "Límites del Plan",
+		"settings.billing.pricing.planLimitsDesc":
+			"Límites mensuales incluidos para cada plan de suscripción",
+		"settings.billing.pricing.limitHeader": "Límite",
+		"settings.billing.pricing.pricingTitle": "Precios y Cargos Extra",
+		"settings.billing.pricing.pricingDesc":
+			"Precios de suscripción mensual y cargos por excedentes (precios en MXN)",
+		"settings.billing.pricing.priceTypeHeader": "Tipo de Precio",
+		"settings.billing.pricing.pricePerUnit": "Precio por unidad",
+		"settings.billing.pricing.howBillingWorks": "Cómo funciona la facturación",
+		"settings.billing.pricing.howBillingWorksDesc":
+			"Pagas la tarifa de suscripción mensual por adelantado, luego cualquier excedente (usuarios extra, reportes, avisos, etc.) se calcula al final de cada ciclo de facturación y se cobra automáticamente.",
+		"settings.billing.pricing.trialPeriod": "Período de prueba",
+		"settings.billing.pricing.trialPeriodDesc":
+			"Todos los planes incluyen una prueba gratuita de 14 días. No se te cobrará hasta que termine la prueba.",
+		// Price type labels
+		"settings.billing.pricing.subscription.label": "Suscripción Mensual",
+		"settings.billing.pricing.subscription.description": "Tarifa mensual base",
+		"settings.billing.pricing.seat.label": "Asiento Extra",
+		"settings.billing.pricing.seat.description":
+			"Por usuario adicional más allá del límite del plan",
+		"settings.billing.pricing.extraOrg.label": "Organización Extra",
+		"settings.billing.pricing.extraOrg.description":
+			"Por organización adicional más allá del límite del plan",
+		"settings.billing.pricing.overageReport.label": "Reporte Extra",
+		"settings.billing.pricing.overageReport.description":
+			"Por reporte más allá del límite mensual",
+		"settings.billing.pricing.overageNotice.label": "Aviso Extra",
+		"settings.billing.pricing.overageNotice.description":
+			"Por aviso más allá del límite mensual",
+		"settings.billing.pricing.overageAlert.label": "Alerta Extra",
+		"settings.billing.pricing.overageAlert.description":
+			"Por alerta más allá del límite mensual",
+		"settings.billing.pricing.overageTransaction.label": "Transacción Extra",
+		"settings.billing.pricing.overageTransaction.description":
+			"Por transacción más allá del límite mensual",
+		"settings.billing.pricing.overageClient.label": "Cliente Extra",
+		"settings.billing.pricing.overageClient.description":
+			"Por cliente más allá del límite mensual",
+		// Limit labels
+		"settings.billing.limits.organizations": "Organizaciones",
+		"settings.billing.limits.usersPerOrg": "Usuarios por org",
+		"settings.billing.limits.reportsPerMonth": "Reportes/mes",
+		"settings.billing.limits.noticesPerMonth": "Avisos/mes",
+		"settings.billing.limits.alertsPerMonth": "Alertas/mes",
+		"settings.billing.limits.transactionsPerMonth": "Transacciones/mes",
+		"settings.billing.limits.clientsPerMonth": "Clientes/mes",
+		"settings.billing.limits.watchlistQueries":
+			"Consultas watchlist/día/usuario",
+		// Interval translations
+		"settings.billing.interval.month": "mes",
+		"settings.billing.interval.year": "año",
 		"settings.billing.cancelTitle": "¿Cancelar Suscripción?",
 		"settings.billing.cancelDesc": "Tu suscripción permanecerá activa hasta",
 		"settings.billing.endOfPeriod": "el final del período de facturación",
@@ -1445,7 +1568,7 @@ const translations = {
 		"onboarding.avatar.optional": "Opcional - puedes agregar una foto después",
 		"onboarding.avatar.dropzone": "Haz clic o arrastra una imagen aquí",
 		"onboarding.avatar.formats": "JPG, PNG, GIF o WebP (máx 5MB)",
-		"onboarding.avatar.select": "Seleccionar foto de perfil",
+		"onboarding.avatar.select": "Agregar foto",
 		"onboarding.avatar.remove": "Eliminar foto",
 		"onboarding.avatar.invalidType":
 			"Tipo de archivo inválido. Usa JPG, PNG, GIF o WebP.",
@@ -1508,24 +1631,24 @@ const translations = {
 		"onboarding.plans.detailed.trigger": "Ver tablas de precios detalladas",
 		"onboarding.plans.editProfile": "Editar perfil",
 		"onboarding.plans.features.watchlist.1": "1 organización",
-		"onboarding.plans.features.watchlist.2": "3 usuarios por org",
+		"onboarding.plans.features.watchlist.2": "3 usuarios por organización",
 		"onboarding.plans.features.watchlist.3": "Solo consultas de watchlist",
 		"onboarding.plans.features.watchlist.4": "50 consultas/día/usuario",
 		"onboarding.plans.features.watchlist.5": "Sin acceso AML",
 		"onboarding.plans.features.business.1": "1 organización",
-		"onboarding.plans.features.business.2": "2 usuarios por org",
+		"onboarding.plans.features.business.2": "2 usuarios por organización",
 		"onboarding.plans.features.business.3": "1 reporte/mes",
 		"onboarding.plans.features.business.4": "2 avisos/mes",
 		"onboarding.plans.features.business.5": "50 consultas/día/usuario",
 		"onboarding.plans.features.business.6": "Acceso AML + Watchlist",
 		"onboarding.plans.features.pro.1": "3 organizaciones",
-		"onboarding.plans.features.pro.2": "10 usuarios por org",
+		"onboarding.plans.features.pro.2": "10 usuarios por organización",
 		"onboarding.plans.features.pro.3": "15 reportes/mes",
 		"onboarding.plans.features.pro.4": "20 avisos/mes",
 		"onboarding.plans.features.pro.5": "200 consultas/día/usuario",
 		"onboarding.plans.features.pro.6": "Soporte prioritario",
 		"onboarding.plans.features.ultra.1": "10 organizaciones",
-		"onboarding.plans.features.ultra.2": "20 usuarios por org",
+		"onboarding.plans.features.ultra.2": "20 usuarios por organización",
 		"onboarding.plans.features.ultra.3": "100 reportes/mes",
 		"onboarding.plans.features.ultra.4": "100 avisos/mes",
 		"onboarding.plans.features.ultra.5": "500 consultas/día/usuario",

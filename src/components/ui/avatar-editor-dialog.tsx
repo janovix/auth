@@ -191,9 +191,11 @@ export function AvatarEditorDialog({
 						className="w-full h-full object-cover"
 					/>
 				) : (
-					<div className="flex flex-col items-center justify-center text-muted-foreground gap-1">
-						<User className="w-1/3 h-1/3" />
-						<span className="text-xs">{placeholder}</span>
+					<div className="flex flex-col items-center justify-center text-muted-foreground gap-0.5 p-2">
+						<User className="w-1/3 h-1/3 flex-shrink-0" />
+						<span className="text-[10px] text-center leading-tight line-clamp-2 max-w-[80%]">
+							{placeholder}
+						</span>
 					</div>
 				)}
 			</div>

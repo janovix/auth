@@ -11,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuroraProvider } from "@/contexts/aurora-context";
+import { LanguageProvider } from "@/contexts/language-context";
 
 import { LoginView } from "./LoginView";
 
@@ -20,7 +21,9 @@ const originalLocation = window.location;
 const renderWithProviders = (ui: React.ReactElement) => {
 	return render(
 		<ThemeProvider>
-			<AuroraProvider>{ui}</AuroraProvider>
+			<LanguageProvider>
+				<AuroraProvider>{ui}</AuroraProvider>
+			</LanguageProvider>
 		</ThemeProvider>,
 	);
 };

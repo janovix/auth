@@ -1,3 +1,10 @@
+# [1.5.0-rc.23](https://github.com/janovix/auth/compare/v1.5.0-rc.22...v1.5.0-rc.23) (2026-01-21)
+
+
+### Bug Fixes
+
+* add LanguageProvider to LoginView stories and tests ([775e2f2](https://github.com/janovix/auth/commit/775e2f2d7d3e5c83dbddf5cb815860ee64c45d27))
+
 # [1.5.0-rc.22](https://github.com/janovix/auth/compare/v1.5.0-rc.21...v1.5.0-rc.22) (2026-01-20)
 
 

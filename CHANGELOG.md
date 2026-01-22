@@ -1,3 +1,10 @@
+# [1.5.0-rc.26](https://github.com/janovix/auth/compare/v1.5.0-rc.25...v1.5.0-rc.26) (2026-01-22)
+
+
+### Features
+
+* add @janovix/auth-ui package with shared UI components ([434f73f](https://github.com/janovix/auth/commit/434f73f851e55a746b4931338926cf35212a1c1e))
+
 # [1.5.0-rc.25](https://github.com/janovix/auth/compare/v1.5.0-rc.24...v1.5.0-rc.25) (2026-01-22)
 
 

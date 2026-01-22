@@ -3,7 +3,6 @@
 import { signOut } from "@/lib/auth/authActions";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { Clock, LogIn, Mail } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useRef } from "react";
 
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
@@ -88,11 +87,17 @@ export const BetaAccessView = () => {
 						</div>
 
 						{/* Back to Login Button */}
-						<Button asChild variant="outline" className="w-full h-12" size="lg">
-							<Link href="/login">
-								<LogIn className="mr-2 h-4 w-4" />
-								{t("beta.backToLogin")}
-							</Link>
+						<Button
+							variant="outline"
+							className="w-full h-12"
+							size="lg"
+							onClick={() => {
+								// Use full page navigation to ensure fresh session state
+								window.location.href = "/login";
+							}}
+						>
+							<LogIn className="mr-2 h-4 w-4" />
+							{t("beta.backToLogin")}
 						</Button>
 
 						{/* Footer Note */}
@@ -105,8 +110,9 @@ export const BetaAccessView = () => {
 				</Card>
 
 				{/* Footer with Language/Theme Switchers */}
-				<div className="border-t border-border pt-6 mt-6 flex items-center justify-center gap-2">
+				<div className="border-t border-border pt-6 mt-6 flex items-center justify-center gap-4">
 					<LanguageSwitcher showIcon />
+					<div className="h-6 w-px bg-border" aria-hidden="true" />
 					<ThemeSwitcher />
 				</div>
 			</div>

@@ -90,12 +90,11 @@ describe("BetaAccessView", () => {
 		expect(document.querySelector("svg")).toBeInTheDocument();
 	});
 
-	it("renders a back to login link", () => {
+	it("renders a back to login button", () => {
 		renderWithSession(createSnapshot({ data: createMockSession() }));
-		// Check for link element with login icon
-		const link = screen.getByRole("link");
-		expect(link).toBeInTheDocument();
-		expect(link).toHaveAttribute("href", "/login");
+		// Check for button element with login icon
+		const button = screen.getByRole("button", { name: /login/i });
+		expect(button).toBeInTheDocument();
 		expect(document.querySelector(".lucide-log-in")).toBeInTheDocument();
 	});
 

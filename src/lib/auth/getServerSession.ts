@@ -75,6 +75,7 @@ export async function getServerSession(): Promise<Session> {
 				emailVerified: boolean;
 				createdAt: string;
 				updatedAt: string;
+				role?: string;
 			};
 			session?: {
 				id: string;

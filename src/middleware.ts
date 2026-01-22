@@ -49,6 +49,10 @@ type OnboardingStatus = {
 		expiresAt: string | null;
 	} | null;
 	canCreateOrganization: boolean;
+	/** User role: 'visitor', 'user', or 'admin' */
+	role?: string;
+	/** Whether the user is a visitor (beta waiting) */
+	isVisitor?: boolean;
 };
 
 /**
@@ -201,12 +205,21 @@ export async function middleware(request: NextRequest) {
 	const isSettingsRoute = pathname.startsWith("/settings");
 	const isOnboardingRoute = pathname.startsWith("/onboarding");
 	const isInviteRoute = pathname.startsWith("/invite");
+	const isBetaAccessRoute = pathname.startsWith("/beta-access");
 	const isProtectedRoute = isAccountRoute || isSettingsRoute;
 
 	// Public routes that authenticated users should be redirected away from
-	// (unless they need onboarding)
+	// (unless they need onboarding or are visitors)
 	const isPublicAuthRoute =
-		!isProtectedRoute && !isOnboardingRoute && !isInviteRoute;
+		!isProtectedRoute &&
+		!isOnboardingRoute &&
+		!isInviteRoute &&
+		!isBetaAccessRoute;
+
+	// Beta-access is publicly accessible (visitors are signed out on the page itself)
+	if (isBetaAccessRoute) {
+		return NextResponse.next();
+	}
 
 	// No session cookie at all
 	if (!sessionCookie) {
@@ -223,8 +236,13 @@ export async function middleware(request: NextRequest) {
 	const sessionResult = await getSessionWithOnboardingStatus(cookieHeader);
 
 	if (!sessionResult.isValid) {
-		// Invalid session - redirect to login if on protected, onboarding, or invite route
-		if (isProtectedRoute || isOnboardingRoute || isInviteRoute) {
+		// Invalid session - redirect to login if on protected, onboarding, invite, or beta-access route
+		if (
+			isProtectedRoute ||
+			isOnboardingRoute ||
+			isInviteRoute ||
+			isBetaAccessRoute
+		) {
 			const loginUrl = new URL("/login", request.url);
 			return NextResponse.redirect(loginUrl);
 		}
@@ -234,6 +252,29 @@ export async function middleware(request: NextRequest) {
 
 	// Valid session - check onboarding status
 	const { onboardingStatus } = sessionResult;
+
+	// Check if user is a visitor (beta access waiting)
+	const isVisitor = onboardingStatus.isVisitor === true;
+
+	// Handle visitor flow - visitors can only access /beta-access and /login
+	if (isVisitor) {
+		// Already on beta-access page - allow access
+		if (isBetaAccessRoute) {
+			return NextResponse.next();
+		}
+		// On any other route - redirect to beta-access
+		return NextResponse.redirect(new URL("/beta-access", request.url));
+	}
+
+	// If on beta-access but not a visitor, redirect to appropriate page
+	if (isBetaAccessRoute) {
+		const userNeedsOnboarding = needsOnboarding(onboardingStatus);
+		if (userNeedsOnboarding) {
+			return NextResponse.redirect(new URL("/onboarding", request.url));
+		}
+		return NextResponse.redirect(new URL(getDefaultRedirectUrl(), request.url));
+	}
+
 	const userNeedsOnboarding = needsOnboarding(onboardingStatus);
 
 	// Handle invite route - user must be authenticated but can have incomplete onboarding

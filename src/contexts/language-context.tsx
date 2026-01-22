@@ -891,6 +891,14 @@ const translations = {
 		"timezone.trySearchingAnotherCity": "Try searching for another city",
 		"timezone.clearSearch": "Clear search",
 		"timezone.timezoneOptions": "Timezone options",
+
+		// Beta access page
+		"beta.title": "Beta Access",
+		"beta.greeting": "Hello, {name}",
+		"beta.message":
+			"We've received your registration. We are currently in a beta phase. Thank you for your interest — you will receive an email when public access is released or when access is granted to you.",
+		"beta.checkEmail": "Keep an eye on your inbox for updates.",
+		"beta.backToLogin": "Back to login",
 	},
 	es: {
 		// Common
@@ -1784,6 +1792,15 @@ const translations = {
 		"timezone.trySearchingAnotherCity": "Intenta buscar otra ciudad",
 		"timezone.clearSearch": "Limpiar búsqueda",
 		"timezone.timezoneOptions": "Opciones de zona horaria",
+
+		// Beta access page
+		"beta.title": "Acceso Beta",
+		"beta.greeting": "Hola, {name}",
+		"beta.message":
+			"Hemos recibido tu registro. Actualmente estamos en fase beta. Gracias por tu interés — recibirás un correo electrónico cuando el acceso público sea liberado o cuando se te otorgue acceso.",
+		"beta.checkEmail":
+			"Mantente atento a tu bandeja de entrada para actualizaciones.",
+		"beta.backToLogin": "Volver al inicio de sesión",
 	},
 };
 

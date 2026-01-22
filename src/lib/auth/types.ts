@@ -9,6 +9,8 @@ export type SessionUser = {
 	emailVerified: boolean;
 	createdAt: Date;
 	updatedAt: Date;
+	/** User role: 'visitor' (beta waiting), 'user' (active), or 'admin' */
+	role?: string;
 };
 
 /**

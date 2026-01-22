@@ -1,3 +1,10 @@
+# [1.5.0-rc.24](https://github.com/janovix/auth/compare/v1.5.0-rc.23...v1.5.0-rc.24) (2026-01-22)
+
+
+### Features
+
+* add beta access handling and user role management ([7dcc030](https://github.com/janovix/auth/commit/7dcc0306ae3f07ce67db0929ed3774e73e589921))
+
 # [1.5.0-rc.23](https://github.com/janovix/auth/compare/v1.5.0-rc.22...v1.5.0-rc.23) (2026-01-21)
 
 

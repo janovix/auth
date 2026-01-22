@@ -1,5 +1,6 @@
 import type { AuthResult } from "@/lib/auth/authActions";
 import {
+	act,
 	cleanup,
 	fireEvent,
 	render,
@@ -41,6 +42,8 @@ const createSignInWithOtp = (): SignInWithOtpFn => vi.fn();
 
 describe("LoginView", () => {
 	beforeEach(() => {
+		// Use fake timers to control async behavior
+		vi.useFakeTimers({ shouldAdvanceTime: true });
 		// Mock window.location.href as a writable property
 		Object.defineProperty(window, "location", {
 			value: { ...originalLocation, href: "" },
@@ -48,7 +51,13 @@ describe("LoginView", () => {
 		});
 	});
 
-	afterEach(() => {
+	afterEach(async () => {
+		// Flush all pending React updates and timers before cleanup
+		await act(async () => {
+			vi.runOnlyPendingTimers();
+			await new Promise((resolve) => setTimeout(resolve, 0));
+		});
+		vi.useRealTimers();
 		cleanup();
 	});
 
@@ -93,7 +102,6 @@ describe("LoginView", () => {
 	});
 
 	it("verifies OTP and redirects on success", async () => {
-		vi.useFakeTimers({ shouldAdvanceTime: true });
 		const sendOtp = createSendOtp();
 		const signInWithOtp = createSignInWithOtp();
 
@@ -173,8 +181,6 @@ describe("LoginView", () => {
 
 		// Check redirect happened
 		expect(window.location.href).toBe("https://app.example.com");
-
-		vi.useRealTimers();
 	});
 
 	it("shows error when OTP sending fails", async () => {

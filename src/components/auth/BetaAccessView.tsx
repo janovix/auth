@@ -110,9 +110,8 @@ export const BetaAccessView = () => {
 				</Card>
 
 				{/* Footer with Language/Theme Switchers */}
-				<div className="border-t border-border pt-6 mt-6 flex items-center justify-center gap-4">
+				<div className="border-t border-border pt-6 mt-6 flex items-center justify-between">
 					<LanguageSwitcher showIcon />
-					<div className="h-6 w-px bg-border" aria-hidden="true" />
 					<ThemeSwitcher />
 				</div>
 			</div>

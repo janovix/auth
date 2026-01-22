@@ -1,6 +1,9 @@
 /**
  * semantic-release configuration for @janovix/auth-ui package
  *
+ * Uses semantic-release-monorepo to filter commits by path
+ * Only commits affecting packages/ui/ will trigger a release
+ *
  * - main: stable releases (e.g. 1.2.3)
  * - dev: prerelease channel "rc" (e.g. 1.2.4-rc.1) + GitHub prerelease
  */
@@ -14,6 +17,7 @@ module.exports = {
 		},
 	],
 	tagFormat: "ui-v${version}",
+	extends: "semantic-release-monorepo",
 	plugins: [
 		[
 			"@semantic-release/commit-analyzer",

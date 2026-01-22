@@ -899,6 +899,8 @@ const translations = {
 			"We've received your registration. We are currently in a beta phase. Thank you for your interest — you will receive an email when public access is released or when access is granted to you.",
 		"beta.checkEmail": "Keep an eye on your inbox for updates.",
 		"beta.backToLogin": "Back to login",
+		"beta.footerNote":
+			"Thank you for your patience while we prepare everything for you.",
 	},
 	es: {
 		// Common
@@ -1801,6 +1803,8 @@ const translations = {
 		"beta.checkEmail":
 			"Mantente atento a tu bandeja de entrada para actualizaciones.",
 		"beta.backToLogin": "Volver al inicio de sesión",
+		"beta.footerNote":
+			"Gracias por tu paciencia mientras preparamos todo para ti.",
 	},
 };
 

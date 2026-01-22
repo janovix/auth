@@ -6,15 +6,10 @@ import { Clock, LogIn, Mail } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 
-import {
-	Button,
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { Logo } from "@/components/Logo";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import { Button, Card, CardContent } from "@/components/ui";
 import { useLanguage } from "@/contexts/language-context";
 
 /**
@@ -53,24 +48,30 @@ export const BetaAccessView = () => {
 	const userName = data?.user?.name || data?.user?.email?.split("@")[0] || "";
 
 	return (
-		<section className="min-h-screen bg-gradient-to-b from-background to-muted/30 px-4 py-12">
-			<div className="mx-auto w-full max-w-lg">
-				<Card className="border-border/50 shadow-lg">
-					<CardHeader className="text-center pb-2">
-						<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-							<Clock className="h-8 w-8 text-primary" aria-hidden="true" />
-						</div>
-						<CardTitle className="text-2xl font-semibold">
-							{t("beta.title")}
-						</CardTitle>
-						{userName && (
-							<CardDescription className="text-base">
-								{t("beta.greeting").replace("{name}", userName)}
-							</CardDescription>
-						)}
-					</CardHeader>
+		<div className="w-full flex justify-center my-auto pt-6 px-3">
+			<div className="w-full max-w-lg">
+				{/* Header with Logo and Icon */}
+				<div className="text-center mb-8">
+					<div className="flex justify-center mb-4">
+						<Logo variant="logo" />
+					</div>
+					<div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+						<Clock className="h-8 w-8 text-primary" aria-hidden="true" />
+					</div>
+					<h1 className="text-2xl font-bold text-foreground mb-2">
+						{t("beta.title")}
+					</h1>
+					{userName && (
+						<p className="text-muted-foreground">
+							{t("beta.greeting").replace("{name}", userName)}
+						</p>
+					)}
+				</div>
 
-					<CardContent className="space-y-6 pt-4">
+				{/* Main Card */}
+				<Card>
+					<CardContent className="pt-6 space-y-6">
+						{/* Message Box */}
 						<div className="flex items-start gap-3 rounded-lg bg-muted/50 p-4">
 							<Mail
 								className="mt-0.5 h-5 w-5 text-muted-foreground flex-shrink-0"
@@ -81,22 +82,35 @@ export const BetaAccessView = () => {
 							</p>
 						</div>
 
+						{/* Check Email Note */}
 						<div className="text-center text-sm text-muted-foreground">
 							<p>{t("beta.checkEmail")}</p>
 						</div>
-					</CardContent>
 
-					<CardFooter className="flex flex-col gap-3 pt-2">
-						<Button asChild variant="outline" className="w-full">
+						{/* Back to Login Button */}
+						<Button asChild variant="outline" className="w-full h-12" size="lg">
 							<Link href="/login">
 								<LogIn className="mr-2 h-4 w-4" />
 								{t("beta.backToLogin")}
 							</Link>
 						</Button>
-					</CardFooter>
+
+						{/* Footer Note */}
+						<div className="text-center">
+							<p className="text-xs text-muted-foreground">
+								{t("beta.footerNote")}
+							</p>
+						</div>
+					</CardContent>
 				</Card>
+
+				{/* Footer with Language/Theme Switchers */}
+				<div className="border-t border-border pt-6 mt-6 flex items-center justify-center gap-2">
+					<LanguageSwitcher showIcon />
+					<ThemeSwitcher />
+				</div>
 			</div>
-		</section>
+		</div>
 	);
 };
 

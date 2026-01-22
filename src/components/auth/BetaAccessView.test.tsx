@@ -75,16 +75,19 @@ describe("BetaAccessView", () => {
 		expect(document.querySelector(".lucide-clock")).toBeInTheDocument();
 	});
 
-	it("renders the card structure with title and content areas", () => {
+	it("renders the card structure with content area", () => {
 		renderWithSession(createSnapshot({ data: createMockSession() }));
 		// Check for card structure using data-slot attributes
 		expect(document.querySelector('[data-slot="card"]')).toBeInTheDocument();
 		expect(
-			document.querySelector('[data-slot="card-title"]'),
-		).toBeInTheDocument();
-		expect(
 			document.querySelector('[data-slot="card-content"]'),
 		).toBeInTheDocument();
+	});
+
+	it("renders the logo", () => {
+		renderWithSession(createSnapshot({ data: createMockSession() }));
+		// Check for logo SVG (Logo component renders an inline SVG)
+		expect(document.querySelector("svg")).toBeInTheDocument();
 	});
 
 	it("renders a back to login link", () => {

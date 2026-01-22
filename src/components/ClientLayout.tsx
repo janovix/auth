@@ -2,11 +2,12 @@
 
 import { usePathname } from "next/navigation";
 
+import { ThemeSwitcher } from "@janovix/auth-ui";
 import { GlobalAuroraBackground } from "@/components/aurora";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { Toaster } from "@/components/ui/sonner";
+import { useLanguage } from "@/contexts/language-context";
 import { AuroraProvider } from "@/contexts/aurora-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { OnboardingProvider } from "@/contexts/onboarding-context";
@@ -18,10 +19,18 @@ import { TurnstileProvider } from "@/contexts/turnstile-context";
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
 function SettingsBar() {
+	const { t } = useLanguage();
 	return (
 		<div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
 			<LanguageSwitcher showIcon />
-			<ThemeSwitcher />
+			<ThemeSwitcher
+				labels={{
+					theme: t("theme.label"),
+					system: t("theme.system"),
+					light: t("theme.light"),
+					dark: t("theme.dark"),
+				}}
+			/>
 		</div>
 	);
 }

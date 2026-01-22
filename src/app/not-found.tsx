@@ -4,9 +4,9 @@ import Link from "next/link";
 import { ArrowLeft, FileQuestion, Home } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { useSetPageStatus } from "@/contexts/page-status-context";
+import { ThemeSwitcher } from "@janovix/auth-ui";
 import { GlobalAuroraBackground } from "@/components/aurora";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { Logo } from "@/components/Logo";
 import { AuroraProvider } from "@/contexts/aurora-context";
 import { Button } from "@/components/ui/button";
@@ -20,10 +20,18 @@ import {
 } from "@/components/ui/card";
 
 function SettingsBar() {
+	const { t } = useLanguage();
 	return (
 		<div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
 			<LanguageSwitcher showIcon />
-			<ThemeSwitcher />
+			<ThemeSwitcher
+				labels={{
+					theme: t("theme.label"),
+					system: t("theme.system"),
+					light: t("theme.light"),
+					dark: t("theme.dark"),
+				}}
+			/>
 		</div>
 	);
 }

@@ -5,9 +5,9 @@ import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { Clock, LogIn, Mail } from "lucide-react";
 import { useEffect, useRef } from "react";
 
+import { ThemeSwitcher } from "@janovix/auth-ui";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Logo } from "@/components/Logo";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { Button, Card, CardContent } from "@/components/ui";
 import { useLanguage } from "@/contexts/language-context";
 
@@ -112,7 +112,14 @@ export const BetaAccessView = () => {
 				{/* Footer with Language/Theme Switchers */}
 				<div className="border-t border-border pt-6 mt-6 flex items-center justify-between">
 					<LanguageSwitcher showIcon />
-					<ThemeSwitcher />
+					<ThemeSwitcher
+						labels={{
+							theme: t("theme.label"),
+							system: t("theme.system"),
+							light: t("theme.light"),
+							dark: t("theme.dark"),
+						}}
+					/>
 				</div>
 			</div>
 		</div>

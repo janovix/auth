@@ -13,6 +13,7 @@
 		"publish": true
 	},
 	"dependencies": {
+		"@janovix/auth-ui": "^1.0.0-rc.1",
 		"@better-auth/stripe": "^1.4.12",
 		"@hookform/resolvers": "^5.2.2",
 		"@marsidev/react-turnstile": "^1.4.0",

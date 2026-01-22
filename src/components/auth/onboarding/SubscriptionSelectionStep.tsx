@@ -29,9 +29,9 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import { ThemeSwitcher } from "@janovix/auth-ui";
 import { Card, CardContent } from "@/components/ui/card";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { useLanguage } from "@/contexts/language-context";
 import { useOnboarding, type Plan } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
@@ -536,7 +536,14 @@ export function SubscriptionSelectionStep({
 			<div className="border-t border-border pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div className="flex items-center gap-2">
 					<LanguageSwitcher showIcon />
-					<ThemeSwitcher />
+					<ThemeSwitcher
+						labels={{
+							theme: t("theme.label"),
+							system: t("theme.system"),
+							light: t("theme.light"),
+							dark: t("theme.dark"),
+						}}
+					/>
 				</div>
 				<Button
 					variant="outline"

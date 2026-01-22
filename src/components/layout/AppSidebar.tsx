@@ -37,9 +37,9 @@ import {
 	type Organization,
 } from "./OrganizationSwitcher";
 import { NavUser } from "./NavUser";
+import { ThemeSwitcher } from "@janovix/auth-ui";
 import { AppSwitcher } from "./AppSwitcher";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { getAmlAppUrl, getWatchlistAppUrl } from "@/lib/auth/authCoreConfig";
 import { useLanguage } from "@/contexts/language-context";
 
@@ -377,6 +377,12 @@ export function AppSidebar({
 						side="right"
 						align="start"
 						className="group-data-[collapsible=icon]:hidden"
+						labels={{
+							theme: t("theme.label"),
+							system: t("theme.system"),
+							light: t("theme.light"),
+							dark: t("theme.dark"),
+						}}
 					/>
 					<ThemeSwitcher
 						variant="mini"
@@ -385,6 +391,12 @@ export function AppSidebar({
 						side="right"
 						align="center"
 						className="hidden group-data-[collapsible=icon]:flex"
+						labels={{
+							theme: t("theme.label"),
+							system: t("theme.system"),
+							light: t("theme.light"),
+							dark: t("theme.dark"),
+						}}
 					/>
 				</div>
 				<NavUser user={user} isLoading={isPending} onLogout={handleLogout} />

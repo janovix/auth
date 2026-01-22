@@ -103,10 +103,10 @@ export function SettingsLayoutClient({
 			const collapsed = !open;
 			setIsCollapsed(collapsed);
 
-			// Update cookie for fast reload
+			// Update cookie for fast reload - write the actual open state (true = open, false = collapsed)
 			setCookieValue(
 				SIDEBAR_COOKIE_NAME,
-				collapsed ? "false" : "true",
+				open ? "true" : "false",
 				60 * 60 * 24 * 7,
 			);
 

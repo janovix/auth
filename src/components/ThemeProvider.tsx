@@ -38,6 +38,11 @@ function ThemeSettingsSyncer({ children }: { children: React.ReactNode }) {
 		// Step 2: Fetch from API to verify/sync
 		getResolvedSettings()
 			.then((settings) => {
+				// Null-check settings before accessing properties
+				if (!settings) {
+					setSettingsSynced(true);
+					return;
+				}
 				const apiTheme = settings.theme;
 				if (apiTheme && ["light", "dark", "system"].includes(apiTheme)) {
 					setTheme(apiTheme);

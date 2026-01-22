@@ -1,6 +1,7 @@
 "use client";
 
-import { LogOut, Settings, User, ChevronsUpDown } from "lucide-react";
+import Link from "next/link";
+import { LogOut, Settings, ChevronsUpDown } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -119,24 +120,14 @@ export function NavUser({ user, isLoading = false, onLogout }: NavUserProps) {
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
 							<DropdownMenuItem asChild>
-								<a
+								<Link
 									href="/settings"
 									className="flex items-center gap-2"
 									onClick={handleLinkClick}
 								>
 									<Settings className="size-4" />
 									{t("settings.title")}
-								</a>
-							</DropdownMenuItem>
-							<DropdownMenuItem asChild>
-								<a
-									href="/settings"
-									className="flex items-center gap-2"
-									onClick={handleLinkClick}
-								>
-									<User className="size-4" />
-									{t("settings.profile.title")}
-								</a>
+								</Link>
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />

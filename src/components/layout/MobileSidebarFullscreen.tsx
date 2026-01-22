@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { motion, AnimatePresence, type PanInfo } from "motion/react";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -351,16 +352,25 @@ export function MobileNavItem({
 	);
 
 	if (href) {
+		// Use Next.js Link for internal links, plain <a> for external links
+		if (external) {
+			return (
+				<a
+					href={href}
+					target="_blank"
+					rel="noopener noreferrer"
+					className={className}
+					onClick={onClick}
+				>
+					{content}
+				</a>
+			);
+		}
+
 		return (
-			<a
-				href={href}
-				target={external ? "_blank" : undefined}
-				rel={external ? "noopener noreferrer" : undefined}
-				className={className}
-				onClick={onClick}
-			>
+			<Link href={href} className={className} onClick={onClick}>
 				{content}
-			</a>
+			</Link>
 		);
 	}
 

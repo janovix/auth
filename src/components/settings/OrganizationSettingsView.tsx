@@ -118,7 +118,17 @@ export function OrganizationSettingsView() {
 					getOrganizationMembership(activeOrgId),
 				]);
 
-				if (orgResult.data) {
+				// Check for error in organization fetch result
+				if (orgResult.error) {
+					console.error(
+						"Failed to fetch organization:",
+						orgResult.error.message,
+					);
+					toast.error(
+						orgResult.error.message || "Failed to load organization data",
+					);
+					// Don't set org data if there was an error
+				} else if (orgResult.data) {
 					const org = orgResult.data;
 					setOrgData({
 						id: org.id,
@@ -219,14 +229,22 @@ export function OrganizationSettingsView() {
 				const uploadedUrl = result.data.url;
 
 				// Update Better Auth organization's logo
-				await authClient.organization.update({
+				const updateResult = await authClient.organization.update({
 					organizationId: activeOrgId,
 					data: {
 						logo: uploadedUrl,
 					},
 				});
 
-				// Update organization settings with the avatar URL
+				// Check for error in update result
+				if (updateResult.error) {
+					toast.error(
+						updateResult.error.message || t("settings.organization.saveError"),
+					);
+					return false;
+				}
+
+				// Update organization settings with the avatar URL only on success
 				setOrgLogo(uploadedUrl);
 				await updateOrganizationSettings(activeOrgId, {
 					avatarUrl: uploadedUrl,
@@ -252,13 +270,33 @@ export function OrganizationSettingsView() {
 		if (!activeOrgId || !isOwner) return;
 		try {
 			setSaving(true);
-			await authClient.organization.update({
+			const updateResult = await authClient.organization.update({
 				organizationId: activeOrgId,
 				data: {
 					name: orgName,
 					slug: orgSlug,
 				},
 			});
+
+			// Check for error in update result
+			if (updateResult.error) {
+				toast.error(
+					updateResult.error.message || t("settings.organization.saveError"),
+				);
+				return;
+			}
+
+			// Sync the local orgData with the updated values
+			setOrgData((prev) =>
+				prev
+					? {
+							...prev,
+							name: orgName,
+							slug: orgSlug,
+						}
+					: prev,
+			);
+
 			showSuccess(t("settings.organization.savedSuccess"));
 		} catch (err) {
 			toast.error(

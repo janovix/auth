@@ -207,10 +207,30 @@ export function BillingSettingsView() {
 	const [redeemingLicense, setRedeemingLicense] = useState(false);
 
 	const handleRedeemLicense = async () => {
-		if (!licenseKey.trim()) return;
+		const trimmedKey = licenseKey.trim();
+		if (!trimmedKey) return;
 		setRedeemingLicense(true);
 		try {
-			// TODO: Implement license redemption API call
+			// Call the license activation API
+			const response = await fetch("/api/subscription/license/activate", {
+				method: "POST",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ key: trimmedKey }),
+			});
+
+			const result = (await response.json()) as {
+				success: boolean;
+				data?: { message: string; plan: string };
+				error?: string;
+			};
+
+			if (!response.ok || !result.success) {
+				throw new Error(result.error || t("settings.billing.error"));
+			}
+
 			toast({
 				title: t("settings.billing.licenseRedeemed"),
 				description: t("settings.billing.licenseRedeemedDesc"),

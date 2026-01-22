@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronsUpDown, Plus, Settings } from "lucide-react";
 
 import {
@@ -157,11 +158,15 @@ export function OrganizationSwitcher({
 							>
 								<div className="flex items-center justify-center">
 									{activeOrganization?.logo ? (
-										<img
-											src={activeOrganization.logo}
-											alt={activeOrganization.name}
-											className="size-8 rounded-lg object-cover"
-										/>
+										<div className="relative size-8 overflow-hidden rounded-lg">
+											<Image
+												src={activeOrganization.logo}
+												alt={activeOrganization.name}
+												fill
+												className="object-cover"
+												unoptimized
+											/>
+										</div>
 									) : (
 										<div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-semibold">
 											{activeOrganization
@@ -200,11 +205,15 @@ export function OrganizationSwitcher({
 									className="gap-2 p-2"
 								>
 									{org.logo ? (
-										<img
-											src={org.logo}
-											alt={org.name}
-											className="size-6 rounded-md object-cover"
-										/>
+										<div className="relative size-6 overflow-hidden rounded-md">
+											<Image
+												src={org.logo}
+												alt={org.name}
+												fill
+												className="object-cover"
+												unoptimized
+											/>
+										</div>
 									) : (
 										<div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground text-xs font-semibold">
 											{getOrgInitials(org.name)}
@@ -285,11 +294,15 @@ export function OrganizationSwitcher({
 						>
 							<div className="flex items-center justify-center shrink-0">
 								{activeOrganization?.logo ? (
-									<img
-										src={activeOrganization.logo}
-										alt={activeOrganization.name}
-										className="size-8 rounded-lg object-cover"
-									/>
+									<div className="relative size-8 overflow-hidden rounded-lg">
+										<Image
+											src={activeOrganization.logo}
+											alt={activeOrganization.name}
+											fill
+											className="object-cover"
+											unoptimized
+										/>
+									</div>
 								) : (
 									<div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-semibold">
 										{activeOrganization
@@ -339,11 +352,15 @@ export function OrganizationSwitcher({
 								className="gap-2 p-2"
 							>
 								{org.logo ? (
-									<img
-										src={org.logo}
-										alt={org.name}
-										className="size-6 rounded-md object-cover"
-									/>
+									<div className="relative size-6 overflow-hidden rounded-md">
+										<Image
+											src={org.logo}
+											alt={org.name}
+											fill
+											className="object-cover"
+											unoptimized
+										/>
+									</div>
 								) : (
 									<div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground text-xs font-semibold">
 										{getOrgInitials(org.name)}

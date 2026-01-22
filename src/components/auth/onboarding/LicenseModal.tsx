@@ -60,19 +60,27 @@ export function LicenseModal({ open, onOpenChange }: LicenseModalProps) {
 		setIsActivating(true);
 		setError(null);
 
-		const result = await activateLicense(validatedLicense);
+		try {
+			const result = await activateLicense(validatedLicense);
 
-		setIsActivating(false);
+			if (!result.success) {
+				setError(result.error || t("onboarding.license.activateFailed"));
+				return;
+			}
 
-		if (!result.success) {
-			setError(result.error || t("onboarding.license.activateFailed"));
-			return;
+			// Refresh onboarding status and close modal only on success
+			await refreshOnboardingStatus();
+			onOpenChange(false);
+			resetState();
+		} catch (err) {
+			setError(
+				err instanceof Error
+					? err.message
+					: t("onboarding.license.activateFailed"),
+			);
+		} finally {
+			setIsActivating(false);
 		}
-
-		// Refresh onboarding status and close modal
-		await refreshOnboardingStatus();
-		onOpenChange(false);
-		resetState();
 	};
 
 	const resetState = () => {

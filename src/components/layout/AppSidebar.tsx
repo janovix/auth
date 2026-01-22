@@ -157,8 +157,14 @@ export function AppSidebar({
 	}, [router]);
 
 	const handleLogout = async () => {
-		await authClient.signOut();
-		window.location.href = "/login";
+		try {
+			await authClient.signOut();
+			window.location.href = "/login";
+		} catch (error) {
+			console.error("Failed to sign out:", error);
+			// Still redirect to login on failure - session may be invalid anyway
+			window.location.href = "/login";
+		}
 	};
 
 	const user = session?.user

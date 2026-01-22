@@ -123,6 +123,10 @@ export function SubscriptionSelectionStep({
 
 			if (result.url) {
 				window.location.href = result.url;
+			} else {
+				// No URL returned - clear loading state
+				console.error("No checkout URL returned from subscription flow");
+				setIsRedirecting(false);
 			}
 		} catch (error) {
 			console.error("Failed to start subscription:", error);

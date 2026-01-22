@@ -122,8 +122,35 @@ const VULNERABLE_ACTIVITIES = [
 	},
 ];
 
-// RFC validation regex (Mexican format)
-const RFC_REGEX = /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/;
+// RFC validation regexes (Mexican format)
+// Persona Física: 4 letters + 6-digit date (YYMMDD) + 3 alphanumeric (homoclave)
+const RFC_PERSONA_FISICA = /^[A-ZÑ&]{4}(\d{2})(\d{2})(\d{2})[A-Z0-9]{3}$/;
+// Persona Moral: 3 letters + 6-digit date (YYMMDD) + 3 alphanumeric (homoclave)
+const RFC_PERSONA_MORAL = /^[A-ZÑ&]{3}(\d{2})(\d{2})(\d{2})[A-Z0-9]{3}$/;
+
+/**
+ * Validates the YYMMDD date portion of an RFC
+ * Returns true if the date is valid
+ */
+function isValidRfcDate(yy: string, mm: string, dd: string): boolean {
+	const year = parseInt(yy, 10);
+	const month = parseInt(mm, 10);
+	const day = parseInt(dd, 10);
+
+	// Month must be 1-12
+	if (month < 1 || month > 12) return false;
+
+	// Day must be at least 1
+	if (day < 1) return false;
+
+	// Days in each month (ignoring leap years for simplicity since we only have YY)
+	const daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+	if (day > daysInMonth[month - 1]) return false;
+
+	// Year reasonableness check (00-99 maps to 1900-2099)
+	// Any 2-digit year is technically valid for RFC purposes
+	return year >= 0 && year <= 99;
+}
 
 // Reporting thresholds (in UMAs)
 const REPORTING_THRESHOLDS = {
@@ -220,10 +247,27 @@ export function ComplianceSettingsView() {
 				setRfcError(t("settings.compliance.rfcLength"));
 				return false;
 			}
-			if (!RFC_REGEX.test(value)) {
+
+			// Validate based on RFC type (persona física = 13 chars, persona moral = 12 chars)
+			let match: RegExpMatchArray | null;
+			if (value.length === 13) {
+				match = value.match(RFC_PERSONA_FISICA);
+			} else {
+				match = value.match(RFC_PERSONA_MORAL);
+			}
+
+			if (!match) {
 				setRfcError(t("settings.compliance.rfcFormat"));
 				return false;
 			}
+
+			// Extract and validate the date portion (groups 1, 2, 3 are YY, MM, DD)
+			const [, yy, mm, dd] = match;
+			if (!isValidRfcDate(yy, mm, dd)) {
+				setRfcError(t("settings.compliance.rfcInvalidDate"));
+				return false;
+			}
+
 			setRfcError(null);
 			return true;
 		},

@@ -14,6 +14,31 @@ const nextConfig: NextConfig = {
 		NEXT_PUBLIC_AUTH_APP_URL: process.env.NEXT_PUBLIC_AUTH_APP_URL,
 		NEXT_PUBLIC_AUTH_REDIRECT_URL: process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL,
 	},
+	images: {
+		// Allow external images from user-uploaded content and common avatar services
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "**.r2.cloudflarestorage.com",
+			},
+			{
+				protocol: "https",
+				hostname: "**.cloudflare.com",
+			},
+			{
+				protocol: "https",
+				hostname: "avatars.githubusercontent.com",
+			},
+			{
+				protocol: "https",
+				hostname: "lh3.googleusercontent.com",
+			},
+			{
+				protocol: "https",
+				hostname: "*.janovix.com",
+			},
+		],
+	},
 };
 
 export default withSentryConfig(nextConfig, {

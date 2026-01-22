@@ -1,3 +1,10 @@
+# [1.5.0-rc.25](https://github.com/janovix/auth/compare/v1.5.0-rc.24...v1.5.0-rc.25) (2026-01-22)
+
+
+### Features
+
+* integrate ThemeProvider and LanguageProvider in Storybook preview; enhance BetaAccessView with logo and footer note ([ed7d7fc](https://github.com/janovix/auth/commit/ed7d7fce719af34f05d80ab524d63e1bc434fa97))
+
 # [1.5.0-rc.24](https://github.com/janovix/auth/compare/v1.5.0-rc.23...v1.5.0-rc.24) (2026-01-22)
 
 

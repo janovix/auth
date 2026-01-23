@@ -75,6 +75,11 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build UI package
         run: pnpm --filter @janovix/auth-ui build
+      # Capture version before semantic-release
+      - name: Get version before release
+        id: version_before
+        working-directory: packages/ui
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
       # Run semantic-release for versioning, changelog, git, and github release
       # npm publishing is disabled in .releaserc.cjs (we use OIDC below)
       - name: Semantic Release (version + changelog)
@@ -82,19 +87,31 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm run release
-      # Publish to npm using OIDC trusted publishing
-      # npm CLI 11.5.1+ automatically detects GitHub Actions OIDC environment
-      - name: Publish to npm (OIDC)
+      # Get version after semantic-release (need to pull changes)
+      - name: Get version after release
+        id: version_after
         working-directory: packages/ui
         run: |
-          # Get the version from package.json
-          VERSION=$(node -p "require('./package.json').version")
-          echo "Attempting to publish version $VERSION..."
+          git pull origin ${{ github.ref_name }} --rebase || true
+          echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+      # Publish to npm using OIDC trusted publishing
+      # Only publish if version was actually bumped by semantic-release
+      - name: Publish to npm (OIDC)
+        if: steps.version_before.outputs.version != steps.version_after.outputs.version
+        working-directory: packages/ui
+        run: |
+          VERSION="${{ steps.version_after.outputs.version }}"
+          echo "Publishing new version $VERSION..."
           echo "npm version: $(npm --version)"
 
           # Determine the dist-tag based on branch
           if [[ "${{ github.ref_name }}" == "main" ]]; then
-            npm publish --access public --provenance || echo "Version $VERSION may already exist or no changes"
+            npm publish --access public --provenance
           else
-            npm publish --access public --tag rc --provenance || echo "Version $VERSION may already exist or no changes"
+            npm publish --access public --tag rc --provenance
           fi
+      - name: Skip publish (no new version)
+        if: steps.version_before.outputs.version == steps.version_after.outputs.version
+        run: |
+          echo "No new version to publish (version is still ${{ steps.version_before.outputs.version }})"
+          echo "Semantic-release did not detect any releasable commits for this package."

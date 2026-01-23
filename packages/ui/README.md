@@ -1,5 +1,7 @@
 # @janovix/auth-ui
 
+> Shared UI components for Janovix applications
+
 Shared UI components for Janovix applications.
 
 ## Installation

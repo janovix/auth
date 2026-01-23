@@ -8,7 +8,7 @@ Shared UI components for Janovix applications.
 pnpm add @janovix/auth-ui
 ```
 
-> **Note**: This package is published to GitHub Package Registry. Ensure your `.npmrc` is configured for the `@janovix` scope.
+> **Note**: This package is published to [npmjs.com](https://www.npmjs.com/package/@janovix/auth-ui).
 
 ## Peer Dependencies
 
@@ -82,9 +82,61 @@ function LocalizedThemeSwitcher() {
 <ThemeSwitcher shape="pill" size="md" />
 ```
 
+### LanguageSwitcher
+
+A language switcher component with segmented control and dropdown variants.
+
+```tsx
+import { LanguageSwitcher } from "@janovix/auth-ui";
+
+const languages = [
+	{ key: "en", label: "EN", nativeName: "English" },
+	{ key: "es", label: "ES", nativeName: "Español" },
+];
+
+function App() {
+	const [language, setLanguage] = useState("en");
+
+	return (
+		<LanguageSwitcher
+			languages={languages}
+			currentLanguage={language}
+			onLanguageChange={setLanguage}
+			labels={{ language: "Language" }}
+		/>
+	);
+}
+```
+
+#### Props
+
+| Prop               | Type                                     | Default     | Description                       |
+| ------------------ | ---------------------------------------- | ----------- | --------------------------------- |
+| `languages`        | `Language[]`                             | (required)  | Available languages               |
+| `currentLanguage`  | `string`                                 | (required)  | Current selected language key     |
+| `onLanguageChange` | `(key: string) => void`                  | (required)  | Callback when language changes    |
+| `labels`           | `LanguageSwitcherLabels`                 | `{}`        | Translation labels for tooltips   |
+| `className`        | `string`                                 | -           | Additional CSS classes            |
+| `size`             | `"sm" \| "md" \| "lg"`                   | `"sm"`      | Size of the switcher              |
+| `shape`            | `"rounded" \| "squared" \| "pill"`       | `"rounded"` | Shape of the button               |
+| `variant`          | `"default" \| "mini"`                    | `"default"` | Display variant                   |
+| `showIcon`         | `boolean`                                | `true`      | Show language icon                |
+| `align`            | `"start" \| "center" \| "end"`           | `"center"`  | Dropdown alignment (mini variant) |
+| `side`             | `"top" \| "bottom" \| "left" \| "right"` | `"top"`     | Dropdown side (mini variant)      |
+
+#### Language Type
+
+```tsx
+type Language = {
+	key: string; // Language code (e.g., "en", "es")
+	label: string; // Short label (e.g., "EN", "ES")
+	nativeName: string; // Full name (e.g., "English", "Español")
+};
+```
+
 ## UI Primitives
 
-This package also exports the following UI primitives used by ThemeSwitcher:
+This package also exports the following UI primitives used by the components:
 
 - `Button` / `buttonVariants`
 - `DropdownMenu` and related components

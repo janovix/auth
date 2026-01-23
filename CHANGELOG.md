@@ -1,3 +1,10 @@
+# [1.5.0-rc.31](https://github.com/janovix/auth/compare/v1.5.0-rc.30...v1.5.0-rc.31) (2026-01-23)
+
+
+### Bug Fixes
+
+* **ui:** add debug logging for semantic-release and improve commit analyzer config ([f8f2440](https://github.com/janovix/auth/commit/f8f2440c2c0a1167b005547475171a082bd7e964))
+
 # [1.5.0-rc.30](https://github.com/janovix/auth/compare/v1.5.0-rc.29...v1.5.0-rc.30) (2026-01-23)
 
 

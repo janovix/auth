@@ -25,7 +25,13 @@ module.exports = {
 		[
 			"@semantic-release/commit-analyzer",
 			{
+				// Only analyze commits with (ui) scope or that affect this package
 				releaseRules: [
+					{ type: "feat", scope: "ui", release: "minor" },
+					{ type: "fix", scope: "ui", release: "patch" },
+					{ type: "perf", scope: "ui", release: "patch" },
+					{ type: "refactor", scope: "ui", release: "patch" },
+					// Also support commits without scope that touch package files
 					{ type: "feat", release: "minor" },
 					{ type: "fix", release: "patch" },
 					{ type: "perf", release: "patch" },

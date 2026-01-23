@@ -80,12 +80,31 @@ jobs:
         id: version_before
         working-directory: packages/ui
         run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+      # Debug: Show commits that should trigger a release
+      - name: Debug - Show package commits since last tag
+        working-directory: packages/ui
+        run: |
+          echo "Last package tag:"
+          git describe --tags --match "ui-v*" --abbrev=0 2>/dev/null || echo "No ui-v* tags found"
+          echo ""
+          echo "Commits since last package tag affecting packages/ui/:"
+          LAST_TAG=$(git describe --tags --match "ui-v*" --abbrev=0 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then
+            git log --oneline "$LAST_TAG"..HEAD -- . || echo "No commits found"
+          else
+            echo "No previous tag found, showing last 10 commits:"
+            git log --oneline -10 -- .
+          fi
+          echo ""
+          echo "Current HEAD:"
+          git rev-parse HEAD
       # Run semantic-release for versioning, changelog, git, and github release
       # npm publishing is disabled in .releaserc.cjs (we use OIDC below)
       - name: Semantic Release (version + changelog)
         working-directory: packages/ui
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEBUG: semantic-release:*
         run: pnpm run release
       # Get version after semantic-release (need to pull changes)
       - name: Get version after release

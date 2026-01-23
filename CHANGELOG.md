@@ -1,3 +1,10 @@
+# [1.5.0-rc.30](https://github.com/janovix/auth/compare/v1.5.0-rc.29...v1.5.0-rc.30) (2026-01-23)
+
+
+### Bug Fixes
+
+* **ui:** export LanguageSwitcher from package index ([8a932e6](https://github.com/janovix/auth/commit/8a932e6421d1418d2ec2ba568764affda7fd5016))
+
 # [1.5.0-rc.29](https://github.com/janovix/auth/compare/v1.5.0-rc.28...v1.5.0-rc.29) (2026-01-23)
 
 

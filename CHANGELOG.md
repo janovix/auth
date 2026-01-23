@@ -1,3 +1,15 @@
+# [1.5.0-rc.27](https://github.com/janovix/auth/compare/v1.5.0-rc.26...v1.5.0-rc.27) (2026-01-23)
+
+
+### Bug Fixes
+
+* update @janovix/auth-ui dependency version in package.json and pnpm-lock.yaml to remove caret (^) for consistent versioning ([d6ffd7f](https://github.com/janovix/auth/commit/d6ffd7f2c6fe648f5d34d05c608c4652709f2056))
+
+
+### Features
+
+* integrate @janovix/auth-ui ThemeSwitcher across components and update dependencies ([b6a126a](https://github.com/janovix/auth/commit/b6a126af4d9a4257107314e088a30e5bd0f4023c))
+
 # [1.5.0-rc.26](https://github.com/janovix/auth/compare/v1.5.0-rc.25...v1.5.0-rc.26) (2026-01-22)
 
 

@@ -66,6 +66,11 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
           # Don't set registry-url - it creates .npmrc that interferes with OIDC
+      # npm trusted publishing requires npm 11.5.1+, Node.js 22 comes with npm 10.x
+      - name: Upgrade npm for trusted publishing
+        run: |
+          npm install -g npm@latest
+          echo "npm version: $(npm --version)"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build UI package
@@ -78,17 +83,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: pnpm run release
       # Publish to npm using OIDC trusted publishing
-      # npm CLI automatically detects GitHub Actions OIDC environment
+      # npm CLI 11.5.1+ automatically detects GitHub Actions OIDC environment
       - name: Publish to npm (OIDC)
         working-directory: packages/ui
         run: |
           # Get the version from package.json
           VERSION=$(node -p "require('./package.json').version")
           echo "Attempting to publish version $VERSION..."
+          echo "npm version: $(npm --version)"
 
           # Determine the dist-tag based on branch
           if [[ "${{ github.ref_name }}" == "main" ]]; then
-            npm publish --access public || echo "Version $VERSION may already exist or no changes"
+            npm publish --access public --provenance || echo "Version $VERSION may already exist or no changes"
           else
-            npm publish --access public --tag rc || echo "Version $VERSION may already exist or no changes"
+            npm publish --access public --tag rc --provenance || echo "Version $VERSION may already exist or no changes"
           fi

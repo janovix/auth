@@ -1,3 +1,10 @@
+# [1.5.0-rc.28](https://github.com/janovix/auth/compare/v1.5.0-rc.27...v1.5.0-rc.28) (2026-01-23)
+
+
+### Features
+
+* add LanguageSwitcher component to @janovix/auth-ui and update README with usage instructions ([cfb4624](https://github.com/janovix/auth/commit/cfb46246d494fb1cf3886e13c9f94f71995222cb))
+
 # [1.5.0-rc.27](https://github.com/janovix/auth/compare/v1.5.0-rc.26...v1.5.0-rc.27) (2026-01-23)
 
 

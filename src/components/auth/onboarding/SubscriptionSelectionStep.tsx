@@ -29,10 +29,14 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ThemeSwitcher } from "@janovix/auth-ui";
+import { ThemeSwitcher, LanguageSwitcher } from "@janovix/auth-ui";
 import { Card, CardContent } from "@/components/ui/card";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/language-context";
+
+const languages = [
+	{ key: "en", label: "EN", nativeName: "English" },
+	{ key: "es", label: "ES", nativeName: "Español" },
+];
 import { useOnboarding, type Plan } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
 import {
@@ -63,7 +67,7 @@ interface SubscriptionSelectionStepProps {
 export function SubscriptionSelectionStep({
 	onOpenLicenseModal,
 }: SubscriptionSelectionStepProps) {
-	const { t } = useLanguage();
+	const { language, setLanguage, t } = useLanguage();
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const { state, setSelectedPlan, startSubscriptionFlow } = useOnboarding();
@@ -535,7 +539,13 @@ export function SubscriptionSelectionStep({
 
 			<div className="border-t border-border pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 				<div className="flex items-center gap-2">
-					<LanguageSwitcher showIcon />
+					<LanguageSwitcher
+						languages={languages}
+						currentLanguage={language}
+						onLanguageChange={(key) => setLanguage(key as "en" | "es")}
+						labels={{ language: t("language.label") }}
+						showIcon
+					/>
 					<ThemeSwitcher
 						labels={{
 							theme: t("theme.label"),

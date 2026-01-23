@@ -20,10 +20,14 @@ import {
 	Input,
 	Label,
 } from "@/components/ui";
-import { ThemeSwitcher } from "@janovix/auth-ui";
+import { ThemeSwitcher, LanguageSwitcher } from "@janovix/auth-ui";
 import { AvatarEditorDialog } from "@/components/ui/avatar-editor-dialog";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useLanguage } from "@/contexts/language-context";
+
+const languages = [
+	{ key: "en", label: "EN", nativeName: "English" },
+	{ key: "es", label: "ES", nativeName: "Español" },
+];
 import { useOnboarding } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
 import { updateProfile } from "@/lib/auth/authActions";
@@ -50,7 +54,7 @@ function dataURLtoBlob(dataUrl: string): Blob {
 }
 
 export function ProfileCompletionStep() {
-	const { t } = useLanguage();
+	const { language, setLanguage, t } = useLanguage();
 	const { state, updateUserProfile, refreshOnboardingStatus } = useOnboarding();
 	const router = useRouter();
 	const searchParams = useSearchParams();
@@ -316,7 +320,13 @@ export function ProfileCompletionStep() {
 
 				<div className="border-t border-border pt-6 mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 					<div className="flex items-center gap-2">
-						<LanguageSwitcher showIcon />
+						<LanguageSwitcher
+							languages={languages}
+							currentLanguage={language}
+							onLanguageChange={(key) => setLanguage(key as "en" | "es")}
+							labels={{ language: t("language.label") }}
+							showIcon
+						/>
 						<ThemeSwitcher
 							labels={{
 								theme: t("theme.label"),

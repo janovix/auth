@@ -37,11 +37,15 @@ import {
 	type Organization,
 } from "./OrganizationSwitcher";
 import { NavUser } from "./NavUser";
-import { ThemeSwitcher } from "@janovix/auth-ui";
+import { ThemeSwitcher, LanguageSwitcher } from "@janovix/auth-ui";
 import { AppSwitcher } from "./AppSwitcher";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { getAmlAppUrl, getWatchlistAppUrl } from "@/lib/auth/authCoreConfig";
 import { useLanguage } from "@/contexts/language-context";
+
+const languages = [
+	{ key: "en", label: "EN", nativeName: "English" },
+	{ key: "es", label: "ES", nativeName: "Español" },
+];
 
 type NavItem = {
 	name: string;
@@ -70,7 +74,7 @@ export function AppSidebar({
 	organizationsLimit = 0,
 	...props
 }: AppSidebarProps) {
-	const { t } = useLanguage();
+	const { language, setLanguage, t } = useLanguage();
 	const pathname = usePathname();
 	const router = useRouter();
 	const { isMobile, setOpenMobile } = useSidebar();
@@ -354,6 +358,10 @@ export function AppSidebar({
 				{/* Language and Theme Switchers */}
 				<div className="flex items-center justify-between px-2 py-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-1">
 					<LanguageSwitcher
+						languages={languages}
+						currentLanguage={language}
+						onLanguageChange={(key) => setLanguage(key as "en" | "es")}
+						labels={{ language: t("language.label") }}
 						variant="default"
 						size="sm"
 						shape="rounded"
@@ -363,6 +371,10 @@ export function AppSidebar({
 						className="group-data-[collapsible=icon]:hidden"
 					/>
 					<LanguageSwitcher
+						languages={languages}
+						currentLanguage={language}
+						onLanguageChange={(key) => setLanguage(key as "en" | "es")}
+						labels={{ language: t("language.label") }}
 						variant="mini"
 						size="sm"
 						shape="rounded"

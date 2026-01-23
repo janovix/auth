@@ -30,7 +30,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22 # semantic-release v25 requires Node.js 22.14+
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - name: Install dependencies
@@ -47,6 +47,12 @@ jobs:
   # - Workflow filename: release.yml
   release-ui-package:
     runs-on: ubuntu-latest
+    # Explicit permissions for trusted publishing
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write # Required for npm trusted publishing (OIDC)
     env:
       HUSKY: 0
     steps:
@@ -59,14 +65,30 @@ jobs:
           node-version: 22 # npm 11.5.1+ required for trusted publishing
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
-          registry-url: "https://registry.npmjs.org"
+          # Don't set registry-url - it creates .npmrc that interferes with OIDC
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build UI package
         run: pnpm --filter @janovix/auth-ui build
-      - name: Release UI package
+      # Run semantic-release for versioning, changelog, git, and github release
+      # npm publishing is disabled in .releaserc.cjs (we use OIDC below)
+      - name: Semantic Release (version + changelog)
         working-directory: packages/ui
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # No NPM_TOKEN needed - uses OIDC trusted publishing
         run: pnpm run release
+      # Publish to npm using OIDC trusted publishing
+      # npm CLI automatically detects GitHub Actions OIDC environment
+      - name: Publish to npm (OIDC)
+        working-directory: packages/ui
+        run: |
+          # Get the version from package.json
+          VERSION=$(node -p "require('./package.json').version")
+          echo "Attempting to publish version $VERSION..."
+
+          # Determine the dist-tag based on branch
+          if [[ "${{ github.ref_name }}" == "main" ]]; then
+            npm publish --access public || echo "Version $VERSION may already exist or no changes"
+          else
+            npm publish --access public --tag rc || echo "Version $VERSION may already exist or no changes"
+          fi

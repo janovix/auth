@@ -6,6 +6,9 @@
  *
  * - main: stable releases (e.g. 1.2.3)
  * - dev: prerelease channel "rc" (e.g. 1.2.4-rc.1) + GitHub prerelease
+ *
+ * NOTE: npm publishing is disabled here because we use npm trusted publishing (OIDC)
+ * The actual npm publish happens in the GitHub Actions workflow after semantic-release
  */
 module.exports = {
 	branches: [
@@ -40,7 +43,9 @@ module.exports = {
 		[
 			"@semantic-release/npm",
 			{
-				npmPublish: true,
+				// Only prepare (update version), don't publish
+				// Publishing happens via npm CLI with OIDC trusted publishing
+				npmPublish: false,
 			},
 		],
 		[

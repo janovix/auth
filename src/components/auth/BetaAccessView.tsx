@@ -5,15 +5,11 @@ import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { Clock, LogIn, Mail } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import { ThemeSwitcher, LanguageSwitcher } from "@janovix/auth-ui";
+import { ThemeSwitcher } from "@janovix/auth-ui";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Logo } from "@/components/Logo";
 import { Button, Card, CardContent } from "@/components/ui";
 import { useLanguage } from "@/contexts/language-context";
-
-const languages = [
-	{ key: "en", label: "EN", nativeName: "English" },
-	{ key: "es", label: "ES", nativeName: "Español" },
-];
 
 /**
  * BetaAccessView displays a waiting page for users with "visitor" role.
@@ -29,7 +25,7 @@ const languages = [
  * to the login page.
  */
 export const BetaAccessView = () => {
-	const { language, setLanguage, t } = useLanguage();
+	const { t } = useLanguage();
 	const session = useAuthSession();
 	const data = session.data;
 	const signOutAttempted = useRef(false);
@@ -115,13 +111,7 @@ export const BetaAccessView = () => {
 
 				{/* Footer with Language/Theme Switchers */}
 				<div className="border-t border-border pt-6 mt-6 flex items-center justify-between">
-					<LanguageSwitcher
-						languages={languages}
-						currentLanguage={language}
-						onLanguageChange={(key) => setLanguage(key as "en" | "es")}
-						labels={{ language: t("language.label") }}
-						showIcon
-					/>
+					<LanguageSwitcher showIcon />
 					<ThemeSwitcher
 						labels={{
 							theme: t("theme.label"),

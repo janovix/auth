@@ -4,14 +4,10 @@ import Link from "next/link";
 import { ArrowLeft, FileQuestion, Home } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { useSetPageStatus } from "@/contexts/page-status-context";
-import { ThemeSwitcher, LanguageSwitcher } from "@janovix/auth-ui";
+import { ThemeSwitcher } from "@janovix/auth-ui";
 import { GlobalAuroraBackground } from "@/components/aurora";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { Logo } from "@/components/Logo";
-
-const languages = [
-	{ key: "en", label: "EN", nativeName: "English" },
-	{ key: "es", label: "ES", nativeName: "Español" },
-];
 import { AuroraProvider } from "@/contexts/aurora-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,16 +20,10 @@ import {
 } from "@/components/ui/card";
 
 function SettingsBar() {
-	const { language, setLanguage, t } = useLanguage();
+	const { t } = useLanguage();
 	return (
 		<div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
-			<LanguageSwitcher
-				languages={languages}
-				currentLanguage={language}
-				onLanguageChange={(key) => setLanguage(key as "en" | "es")}
-				labels={{ language: t("language.label") }}
-				showIcon
-			/>
+			<LanguageSwitcher showIcon />
 			<ThemeSwitcher
 				labels={{
 					theme: t("theme.label"),

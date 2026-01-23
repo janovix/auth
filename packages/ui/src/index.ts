@@ -7,6 +7,13 @@ export type {
 	ThemeSwitcherLabels,
 } from "./components/ThemeSwitcher";
 
+export { LanguageSwitcher } from "./components/LanguageSwitcher";
+export type {
+	LanguageSwitcherProps,
+	LanguageSwitcherLabels,
+	Language,
+} from "./components/LanguageSwitcher";
+
 // UI Primitives
 export { Button, buttonVariants } from "./components/ui/button";
 export {

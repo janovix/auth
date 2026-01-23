@@ -1,3 +1,10 @@
+# [1.5.0-rc.29](https://github.com/janovix/auth/compare/v1.5.0-rc.28...v1.5.0-rc.29) (2026-01-23)
+
+
+### Bug Fixes
+
+* **ci:** only publish npm package when version changes ([7bc61e7](https://github.com/janovix/auth/commit/7bc61e7b0089d5d0ad2b14a1062bd959a3b98af4))
+
 # [1.5.0-rc.28](https://github.com/janovix/auth/compare/v1.5.0-rc.27...v1.5.0-rc.28) (2026-01-23)
 
 

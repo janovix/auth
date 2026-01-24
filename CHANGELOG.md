@@ -1,3 +1,10 @@
+# [1.5.0-rc.33](https://github.com/janovix/auth/compare/v1.5.0-rc.32...v1.5.0-rc.33) (2026-01-24)
+
+
+### Features
+
+* update notifications context and SettingsLayoutClient to support local read state and new markAsRead functionality ([3a6f035](https://github.com/janovix/auth/commit/3a6f035ea4461910d0ff69347b1653fe35e2f390))
+
 # [1.5.0-rc.32](https://github.com/janovix/auth/compare/v1.5.0-rc.31...v1.5.0-rc.32) (2026-01-24)
 
 

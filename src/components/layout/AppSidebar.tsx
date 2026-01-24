@@ -37,7 +37,7 @@ import {
 	type Organization,
 } from "./OrganizationSwitcher";
 import { NavUser } from "./NavUser";
-import { ThemeSwitcher, LanguageSwitcher } from "@janovix/auth-ui";
+import { ThemeSwitcher, LanguageSwitcher } from "@janovix/blocks";
 import { AppSwitcher } from "./AppSwitcher";
 import { getAmlAppUrl, getWatchlistAppUrl } from "@/lib/auth/authCoreConfig";
 import { useLanguage } from "@/contexts/language-context";

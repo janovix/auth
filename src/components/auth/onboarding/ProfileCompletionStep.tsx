@@ -20,7 +20,7 @@ import {
 	Input,
 	Label,
 } from "@/components/ui";
-import { ThemeSwitcher, LanguageSwitcher } from "@janovix/auth-ui";
+import { ThemeSwitcher, LanguageSwitcher } from "@janovix/blocks";
 import { AvatarEditorDialog } from "@/components/ui/avatar-editor-dialog";
 import { useLanguage } from "@/contexts/language-context";
 

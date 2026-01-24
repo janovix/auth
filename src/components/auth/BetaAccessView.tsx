@@ -5,7 +5,7 @@ import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { Clock, LogIn, Mail } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import { ThemeSwitcher, LanguageSwitcher } from "@janovix/auth-ui";
+import { ThemeSwitcher, LanguageSwitcher } from "@janovix/blocks";
 import { Logo } from "@/components/Logo";
 import { Button, Card, CardContent } from "@/components/ui";
 import { useLanguage } from "@/contexts/language-context";

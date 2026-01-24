@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ThemeSwitcher } from "@janovix/auth-ui";
+import { ThemeSwitcher } from "@janovix/blocks";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 const defaultLabels = {

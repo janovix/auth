@@ -426,7 +426,8 @@ function SettingsLayoutInner({
 	};
 
 	// Get notifications context
-	const { notifications, unreadCount, markAsRead } = useNotifications();
+	const { notifications, unreadCount, markNotificationAsRead, markAllAsRead } =
+		useNotifications();
 
 	// Handle notification click
 	const handleNotificationClick = useCallback(
@@ -435,17 +436,15 @@ function SettingsLayoutInner({
 			channelId: string | null;
 			callbackUrl: string | null;
 		}) => {
-			// Mark as read if channelId exists
-			if (notification.channelId) {
-				markAsRead(notification.channelId, notification.id);
-			}
+			// Mark as read locally
+			markNotificationAsRead(notification.id);
 
 			// Navigate to callback URL if provided
 			if (notification.callbackUrl) {
 				router.push(notification.callbackUrl);
 			}
 		},
-		[markAsRead, router],
+		[markNotificationAsRead, router],
 	);
 
 	// Map notification severity to NotificationWidget type
@@ -482,6 +481,7 @@ function SettingsLayoutInner({
 							message: n.body,
 							timestamp: new Date(n.createdAt),
 							type: mapSeverityToType(n.severity),
+							read: n.read,
 						}))}
 						onNotificationClick={(notification) =>
 							handleNotificationClick({
@@ -494,6 +494,8 @@ function SettingsLayoutInner({
 										?.callbackUrl || null,
 							})
 						}
+						onMarkAsRead={(id) => markNotificationAsRead(id)}
+						onMarkAllAsRead={markAllAsRead}
 						size="md"
 						maxVisible={50}
 						playSound={true}

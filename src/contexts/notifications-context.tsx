@@ -24,6 +24,7 @@ export interface Notification {
 	severity: "info" | "warn" | "error";
 	callbackUrl: string | null;
 	createdAt: string;
+	read?: boolean; // Local read state (not from server)
 }
 
 interface NotificationsContextValue {
@@ -31,6 +32,8 @@ interface NotificationsContextValue {
 	unreadCount: number;
 	isConnected: boolean;
 	markAsRead: (channelId: string, upToNotificationId: string) => Promise<void>;
+	markNotificationAsRead: (notificationId: string) => void;
+	markAllAsRead: () => void;
 	clearAll: () => void;
 }
 
@@ -118,7 +121,10 @@ export function NotificationsProvider({
 					if (message.type === "notify") {
 						// New notification received
 						const notification = message.notification;
-						setNotifications((prev) => [notification, ...prev].slice(0, 50)); // Keep last 50
+						// Mark as unread by default
+						setNotifications((prev) =>
+							[{ ...notification, read: false }, ...prev].slice(0, 50),
+						); // Keep last 50
 						setUnreadCount((prev) => prev + 1);
 
 						// Show toast notification (optional)
@@ -220,7 +226,12 @@ export function NotificationsProvider({
 					success: boolean;
 					data?: Notification[];
 				};
-				setNotifications(data.data || []);
+				// Mark all fetched notifications as unread initially
+				const notificationsWithReadState = (data.data || []).map((n) => ({
+					...n,
+					read: false,
+				}));
+				setNotifications(notificationsWithReadState);
 			}
 		} catch (error) {
 			console.error("[Notifications] Failed to fetch notifications:", error);
@@ -258,6 +269,15 @@ export function NotificationsProvider({
 						data?: { unreadCount: number };
 					};
 					setUnreadCount(data.data?.unreadCount || 0);
+
+					// Update local notification read state
+					setNotifications((prev) =>
+						prev.map((n) =>
+							n.channelId === channelId && n.id <= upToNotificationId
+								? { ...n, read: true }
+								: n,
+						),
+					);
 				}
 			} catch (error) {
 				console.error("[Notifications] Failed to mark as read:", error);
@@ -265,6 +285,20 @@ export function NotificationsProvider({
 		},
 		[activeOrgId],
 	);
+
+	// Mark single notification as read (local only for widget)
+	const markNotificationAsRead = useCallback((notificationId: string) => {
+		setNotifications((prev) =>
+			prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n)),
+		);
+		setUnreadCount((prev) => Math.max(0, prev - 1));
+	}, []);
+
+	// Mark all notifications as read (local only for widget)
+	const markAllAsRead = useCallback(() => {
+		setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+		setUnreadCount(0);
+	}, []);
 
 	// Clear all notifications
 	const clearAll = useCallback(() => {
@@ -295,6 +329,8 @@ export function NotificationsProvider({
 		unreadCount,
 		isConnected,
 		markAsRead,
+		markNotificationAsRead,
+		markAllAsRead,
 		clearAll,
 	};
 

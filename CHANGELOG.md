@@ -1,3 +1,10 @@
+# [1.5.0-rc.32](https://github.com/janovix/auth/compare/v1.5.0-rc.31...v1.5.0-rc.32) (2026-01-24)
+
+
+### Features
+
+* enhance SettingsLayoutClient with sound and pulse effects for notifications ([e789444](https://github.com/janovix/auth/commit/e7894448b1884dd702714d17d5374914dcb8387f))
+
 # [1.5.0-rc.31](https://github.com/janovix/auth/compare/v1.5.0-rc.30...v1.5.0-rc.31) (2026-01-23)
 
 

@@ -10,7 +10,7 @@ import {
 	type ReactNode,
 } from "react";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
-import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
+import { getNotificationsServiceUrl } from "@/lib/auth/authCoreConfig";
 
 export interface Notification {
 	id: string;
@@ -68,6 +68,24 @@ export function NotificationsProvider({
 
 	const userId = session?.user?.id;
 
+	// Extract JWT token from session for WebSocket authentication
+	const getAuthToken = useCallback((): string | null => {
+		// Try to get token from document cookie
+		const cookies = document.cookie.split(";");
+		for (const cookie of cookies) {
+			const [name, value] = cookie.trim().split("=");
+			// Better Auth typically uses 'better-auth.session_token' or similar
+			if (
+				name === "better-auth.session_token" ||
+				name === "session_token" ||
+				name === "auth_session"
+			) {
+				return decodeURIComponent(value);
+			}
+		}
+		return null;
+	}, []);
+
 	// Connect to WebSocket
 	const connect = useCallback(() => {
 		if (!activeOrgId || !userId) return;
@@ -79,12 +97,22 @@ export function NotificationsProvider({
 		}
 
 		try {
-			const baseUrl = getAuthCoreBaseUrl();
+			const baseUrl = getNotificationsServiceUrl();
 			const wsProtocol = baseUrl.startsWith("https") ? "wss" : "ws";
 			const wsHost = baseUrl.replace(/^https?:\/\//, "");
 
-			// Connect to org-wide broadcasts
-			const orgWs = new WebSocket(`${wsProtocol}://${wsHost}/api/realtime/org`);
+			// Get auth token for WebSocket authentication
+			const token = getAuthToken();
+			if (!token) {
+				console.error(
+					"[Notifications] No auth token found, cannot connect to WebSocket",
+				);
+				return;
+			}
+
+			// Connect to org-wide broadcasts with token in query param
+			const wsUrl = `${wsProtocol}://${wsHost}/realtime/org?token=${encodeURIComponent(token)}`;
+			const orgWs = new WebSocket(wsUrl);
 
 			orgWs.onopen = () => {
 				console.log("[Notifications] WebSocket connected");
@@ -155,7 +183,7 @@ export function NotificationsProvider({
 		if (!activeOrgId) return;
 
 		try {
-			const baseUrl = getAuthCoreBaseUrl();
+			const baseUrl = getNotificationsServiceUrl();
 			const response = await fetch(`${baseUrl}/api/notifications/unread`, {
 				credentials: "include",
 			});
@@ -177,7 +205,7 @@ export function NotificationsProvider({
 		if (!activeOrgId) return;
 
 		try {
-			const baseUrl = getAuthCoreBaseUrl();
+			const baseUrl = getNotificationsServiceUrl();
 			const response = await fetch(`${baseUrl}/api/notifications?limit=20`, {
 				credentials: "include",
 			});
@@ -200,7 +228,7 @@ export function NotificationsProvider({
 			if (!activeOrgId) return;
 
 			try {
-				const baseUrl = getAuthCoreBaseUrl();
+				const baseUrl = getNotificationsServiceUrl();
 				const response = await fetch(`${baseUrl}/api/notifications/read`, {
 					method: "POST",
 					credentials: "include",

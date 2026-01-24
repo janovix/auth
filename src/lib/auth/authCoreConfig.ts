@@ -79,3 +79,14 @@ export const getSettingsAppUrl = (): string => {
 		"https://settings.janovix.workers.dev"
 	);
 };
+
+/**
+ * Gets the Notifications service URL from environment variables.
+ * @returns The base URL for the Notifications service (e.g., https://notifications-svc.janovix.workers.dev)
+ */
+export const getNotificationsServiceUrl = (): string => {
+	return (
+		process.env.NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL ||
+		"https://notifications-svc.janovix.workers.dev"
+	);
+};

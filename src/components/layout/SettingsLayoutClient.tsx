@@ -22,6 +22,11 @@ import {
 	getAmlComplianceSettings,
 } from "@/lib/settings/settingsClient";
 import { getSubscriptionStatus } from "@/lib/billing";
+import {
+	NotificationsProvider,
+	useNotifications,
+} from "@/contexts/notifications-context";
+import { NotificationsWidget } from "@janovix/blocks";
 
 interface SettingsLayoutClientProps {
 	children: React.ReactNode;
@@ -38,7 +43,10 @@ function setCookieValue(name: string, value: string, maxAge: number): void {
 	document.cookie = `${name}=${value}; path=/; max-age=${maxAge}`;
 }
 
-export function SettingsLayoutClient({
+/**
+ * Inner layout component that has access to notifications context
+ */
+function SettingsLayoutInner({
 	children,
 	initialSidebarCollapsed,
 }: SettingsLayoutClientProps) {
@@ -417,6 +425,37 @@ export function SettingsLayoutClient({
 		}
 	};
 
+	// Get notifications context
+	const { notifications, unreadCount, markAsRead } = useNotifications();
+
+	// Handle notification click
+	const handleNotificationClick = useCallback(
+		(notification: {
+			id: string;
+			channelId: string | null;
+			callbackUrl: string | null;
+		}) => {
+			// Mark as read if channelId exists
+			if (notification.channelId) {
+				markAsRead(notification.channelId, notification.id);
+			}
+
+			// Navigate to callback URL if provided
+			if (notification.callbackUrl) {
+				router.push(notification.callbackUrl);
+			}
+		},
+		[markAsRead, router],
+	);
+
+	// Map notification severity to NotificationWidget type
+	const mapSeverityToType = (
+		severity: "info" | "warn" | "error",
+	): "info" | "success" | "warning" | "error" => {
+		if (severity === "warn") return "warning";
+		return severity;
+	};
+
 	return (
 		<SidebarProvider open={!isCollapsed} onOpenChange={handleSidebarOpenChange}>
 			<AppSidebar
@@ -436,6 +475,28 @@ export function SettingsLayoutClient({
 					<div className="flex-1 min-w-0">
 						<NavBreadcrumb />
 					</div>
+					<NotificationsWidget
+						notifications={notifications.map((n) => ({
+							id: n.id,
+							title: n.title,
+							message: n.body,
+							timestamp: new Date(n.createdAt),
+							type: mapSeverityToType(n.severity),
+						}))}
+						onNotificationClick={(notification) =>
+							handleNotificationClick({
+								id: notification.id,
+								channelId:
+									notifications.find((n) => n.id === notification.id)
+										?.channelId || null,
+								callbackUrl:
+									notifications.find((n) => n.id === notification.id)
+										?.callbackUrl || null,
+							})
+						}
+						size="md"
+						maxVisible={50}
+					/>
 					<NavbarClock
 						timezone={effectiveTimezone || undefined}
 						defaultFormat={effectiveClockFormat}
@@ -450,5 +511,21 @@ export function SettingsLayoutClient({
 				</main>
 			</SidebarInset>
 		</SidebarProvider>
+	);
+}
+
+/**
+ * Main layout component that wraps everything with NotificationsProvider
+ */
+export function SettingsLayoutClient({
+	children,
+	initialSidebarCollapsed,
+}: SettingsLayoutClientProps) {
+	return (
+		<NotificationsProvider>
+			<SettingsLayoutInner initialSidebarCollapsed={initialSidebarCollapsed}>
+				{children}
+			</SettingsLayoutInner>
+		</NotificationsProvider>
 	);
 }

@@ -21,7 +21,7 @@ import {
 	Label,
 } from "@/components/ui";
 import { ThemeSwitcher, LanguageSwitcher } from "@janovix/blocks";
-import { AvatarEditorDialog } from "@/components/ui/avatar-editor-dialog";
+import { AvatarEditorDialog } from "@janovix/blocks";
 import { useLanguage } from "@/contexts/language-context";
 
 const languages = [

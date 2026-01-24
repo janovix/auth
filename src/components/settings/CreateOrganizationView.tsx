@@ -14,7 +14,7 @@ import { toast } from "sonner";
 
 import { Button, Label } from "@/components/ui";
 import { Input } from "@/components/ui/input";
-import { AvatarEditorDialog } from "@/components/ui/avatar-editor-dialog";
+import { AvatarEditorDialog } from "@janovix/blocks";
 import { useLanguage } from "@/contexts/language-context";
 import { authClient } from "@/lib/auth/authClient";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";

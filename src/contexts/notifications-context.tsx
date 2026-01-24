@@ -167,8 +167,19 @@ export function NotificationsProvider({
 
 		try {
 			const baseUrl = getNotificationsServiceUrl();
+			const token = await getClientJwt();
+			if (!token) {
+				console.error(
+					"[Notifications] No JWT token available for unread count fetch",
+				);
+				return;
+			}
+
 			const response = await fetch(`${baseUrl}/api/notifications/unread`, {
 				credentials: "include",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
 			});
 
 			if (response.ok) {
@@ -189,8 +200,19 @@ export function NotificationsProvider({
 
 		try {
 			const baseUrl = getNotificationsServiceUrl();
+			const token = await getClientJwt();
+			if (!token) {
+				console.error(
+					"[Notifications] No JWT token available for notifications fetch",
+				);
+				return;
+			}
+
 			const response = await fetch(`${baseUrl}/api/notifications?limit=20`, {
 				credentials: "include",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
 			});
 
 			if (response.ok) {
@@ -212,10 +234,21 @@ export function NotificationsProvider({
 
 			try {
 				const baseUrl = getNotificationsServiceUrl();
+				const token = await getClientJwt();
+				if (!token) {
+					console.error(
+						"[Notifications] No JWT token available for mark as read",
+					);
+					return;
+				}
+
 				const response = await fetch(`${baseUrl}/api/notifications/read`, {
 					method: "POST",
 					credentials: "include",
-					headers: { "Content-Type": "application/json" },
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
 					body: JSON.stringify({ channelId, upToNotificationId }),
 				});
 

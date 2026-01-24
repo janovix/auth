@@ -496,6 +496,10 @@ function SettingsLayoutInner({
 						}
 						size="md"
 						maxVisible={50}
+						playSound={true}
+						showPulse={true}
+						soundType="chime"
+						pulseStyle="ring"
 					/>
 					<NavbarClock
 						timezone={effectiveTimezone || undefined}

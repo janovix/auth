@@ -11,6 +11,7 @@ import {
 } from "react";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { getNotificationsServiceUrl } from "@/lib/auth/authCoreConfig";
+import { getClientJwt } from "@/lib/auth/authClient";
 
 export interface Notification {
 	id: string;
@@ -68,26 +69,8 @@ export function NotificationsProvider({
 
 	const userId = session?.user?.id;
 
-	// Extract JWT token from session for WebSocket authentication
-	const getAuthToken = useCallback((): string | null => {
-		// Try to get token from document cookie
-		const cookies = document.cookie.split(";");
-		for (const cookie of cookies) {
-			const [name, value] = cookie.trim().split("=");
-			// Better Auth typically uses 'better-auth.session_token' or similar
-			if (
-				name === "better-auth.session_token" ||
-				name === "session_token" ||
-				name === "auth_session"
-			) {
-				return decodeURIComponent(value);
-			}
-		}
-		return null;
-	}, []);
-
 	// Connect to WebSocket
-	const connect = useCallback(() => {
+	const connect = useCallback(async () => {
 		if (!activeOrgId || !userId) return;
 
 		// Clean up existing connection
@@ -102,7 +85,7 @@ export function NotificationsProvider({
 			const wsHost = baseUrl.replace(/^https?:\/\//, "");
 
 			// Get auth token for WebSocket authentication
-			const token = getAuthToken();
+			const token = await getClientJwt();
 			if (!token) {
 				console.error(
 					"[Notifications] No auth token found, cannot connect to WebSocket",

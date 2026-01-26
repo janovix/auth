@@ -131,7 +131,7 @@ export function NotificationsProvider({
 					if (message.type === "notify") {
 						// New notification received
 						const notification = message.notification;
-						// Mark as unread by default
+						// Mark as unread by default (new notifications are always unread)
 						setNotifications((prev) =>
 							[{ ...notification, read: false }, ...prev].slice(0, 50),
 						); // Keep last 50
@@ -236,12 +236,8 @@ export function NotificationsProvider({
 					success: boolean;
 					data?: Notification[];
 				};
-				// Mark all fetched notifications as unread initially
-				const notificationsWithReadState = (data.data || []).map((n) => ({
-					...n,
-					read: false,
-				}));
-				setNotifications(notificationsWithReadState);
+				// Use the read status from the server (already computed)
+				setNotifications(data.data || []);
 			}
 		} catch (error) {
 			console.error("[Notifications] Failed to fetch notifications:", error);

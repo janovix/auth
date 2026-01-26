@@ -1,3 +1,10 @@
+# [1.5.0-rc.34](https://github.com/janovix/auth/compare/v1.5.0-rc.33...v1.5.0-rc.34) (2026-01-26)
+
+
+### Features
+
+* **notifications:** use async mark-as-read with optimistic updates ([666ff26](https://github.com/janovix/auth/commit/666ff26fc77c727bf514dd77a7468e31c0421a0d))
+
 # [1.5.0-rc.33](https://github.com/janovix/auth/compare/v1.5.0-rc.32...v1.5.0-rc.33) (2026-01-24)
 
 

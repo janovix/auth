@@ -426,12 +426,16 @@ function SettingsLayoutInner({
 	};
 
 	// Get notifications context
-	const { notifications, unreadCount, markNotificationAsRead, markAllAsRead } =
-		useNotifications();
+	const {
+		notifications,
+		unreadCount,
+		markNotificationAsReadAsync,
+		markAllAsReadAsync,
+	} = useNotifications();
 
 	// Debug: Log blocks version and unread count
 	useEffect(() => {
-		console.log("[SettingsLayoutClient] @janovix/blocks version: 1.2.0-rc.6");
+		console.log("[SettingsLayoutClient] @janovix/blocks version: 1.2.0-rc.7");
 		console.log("[SettingsLayoutClient] Unread count:", unreadCount);
 		console.log(
 			"[SettingsLayoutClient] Total notifications:",
@@ -439,22 +443,20 @@ function SettingsLayoutInner({
 		);
 	}, [unreadCount, notifications.length]);
 
-	// Handle notification click
+	// Handle notification click - navigate to callback URL
+	// Note: marking as read is handled by the NotificationsWidget via onMarkAsRead
 	const handleNotificationClick = useCallback(
 		(notification: {
 			id: string;
 			channelId: string | null;
 			callbackUrl: string | null;
 		}) => {
-			// Mark as read locally
-			markNotificationAsRead(notification.id);
-
 			// Navigate to callback URL if provided
 			if (notification.callbackUrl) {
 				router.push(notification.callbackUrl);
 			}
 		},
-		[markNotificationAsRead, router],
+		[router],
 	);
 
 	// Map notification severity to NotificationWidget type
@@ -504,8 +506,8 @@ function SettingsLayoutInner({
 										?.callbackUrl || null,
 							})
 						}
-						onMarkAsRead={(id) => markNotificationAsRead(id)}
-						onMarkAllAsRead={markAllAsRead}
+						onMarkAsRead={markNotificationAsReadAsync}
+						onMarkAllAsRead={markAllAsReadAsync}
 						size="md"
 						maxVisible={50}
 						playSound={true}

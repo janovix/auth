@@ -32,7 +32,17 @@ interface NotificationsContextValue {
 	unreadCount: number;
 	isConnected: boolean;
 	markAsRead: (channelId: string, upToNotificationId: string) => Promise<void>;
+	/**
+	 * Mark a single notification as read via API call.
+	 * Throws on failure so the widget can handle rollback.
+	 */
+	markNotificationAsReadAsync: (notificationId: string) => Promise<void>;
 	markNotificationAsRead: (notificationId: string) => void;
+	/**
+	 * Mark all notifications as read via API call.
+	 * Throws on failure so the widget can handle rollback.
+	 */
+	markAllAsReadAsync: () => Promise<void>;
 	markAllAsRead: () => void;
 	clearAll: () => void;
 }
@@ -294,11 +304,139 @@ export function NotificationsProvider({
 		setUnreadCount((prev) => Math.max(0, prev - 1));
 	}, []);
 
+	/**
+	 * Mark a single notification as read via API call.
+	 * Throws on failure so the widget can handle rollback.
+	 */
+	const markNotificationAsReadAsync = useCallback(
+		async (notificationId: string) => {
+			if (!activeOrgId) {
+				throw new Error("No active organization");
+			}
+
+			// Find the notification to get its channelId
+			const notification = notifications.find((n) => n.id === notificationId);
+			if (!notification) {
+				throw new Error("Notification not found");
+			}
+
+			// Use a default channel if none specified
+			const channelId = notification.channelId || "system";
+
+			const baseUrl = getNotificationsServiceUrl();
+			const token = await getClientJwt();
+			if (!token) {
+				throw new Error("No JWT token available");
+			}
+
+			const response = await fetch(`${baseUrl}/api/notifications/read`, {
+				method: "POST",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`,
+				},
+				body: JSON.stringify({ channelId, upToNotificationId: notificationId }),
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				throw new Error(
+					`Failed to mark as read: ${response.status} ${JSON.stringify(errorData)}`,
+				);
+			}
+
+			const data = (await response.json()) as {
+				success: boolean;
+				data?: { unreadCount: number };
+			};
+
+			// Update local state on success
+			setNotifications((prev) =>
+				prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n)),
+			);
+			if (data.data?.unreadCount !== undefined) {
+				setUnreadCount(data.data.unreadCount);
+			} else {
+				setUnreadCount((prev) => Math.max(0, prev - 1));
+			}
+		},
+		[activeOrgId, notifications],
+	);
+
 	// Mark all notifications as read (local only for widget)
 	const markAllAsRead = useCallback(() => {
 		setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
 		setUnreadCount(0);
 	}, []);
+
+	/**
+	 * Mark all notifications as read via API call.
+	 * Groups notifications by channelId and marks each channel.
+	 * Throws on failure so the widget can handle rollback.
+	 */
+	const markAllAsReadAsync = useCallback(async () => {
+		if (!activeOrgId) {
+			throw new Error("No active organization");
+		}
+
+		const baseUrl = getNotificationsServiceUrl();
+		const token = await getClientJwt();
+		if (!token) {
+			throw new Error("No JWT token available");
+		}
+
+		// Group unread notifications by channelId and find the latest in each
+		const unreadByChannel = new Map<string, string>();
+		for (const n of notifications) {
+			if (!n.read) {
+				const channelId = n.channelId || "system";
+				// Keep the latest (highest) notification ID per channel
+				const existing = unreadByChannel.get(channelId);
+				if (!existing || n.id > existing) {
+					unreadByChannel.set(channelId, n.id);
+				}
+			}
+		}
+
+		if (unreadByChannel.size === 0) return;
+
+		// Mark each channel as read (parallel requests)
+		const results = await Promise.allSettled(
+			Array.from(unreadByChannel.entries()).map(
+				async ([channelId, upToNotificationId]) => {
+					const response = await fetch(`${baseUrl}/api/notifications/read`, {
+						method: "POST",
+						credentials: "include",
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${token}`,
+						},
+						body: JSON.stringify({ channelId, upToNotificationId }),
+					});
+
+					if (!response.ok) {
+						throw new Error(`Failed to mark channel ${channelId} as read`);
+					}
+					return response.json();
+				},
+			),
+		);
+
+		// Check if any failed
+		const failures = results.filter((r) => r.status === "rejected");
+		if (failures.length > 0) {
+			console.error(
+				"[Notifications] Some channels failed to mark as read:",
+				failures,
+			);
+			throw new Error(`Failed to mark ${failures.length} channel(s) as read`);
+		}
+
+		// Update local state on success
+		setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+		setUnreadCount(0);
+	}, [activeOrgId, notifications]);
 
 	// Clear all notifications
 	const clearAll = useCallback(() => {
@@ -329,7 +467,9 @@ export function NotificationsProvider({
 		unreadCount,
 		isConnected,
 		markAsRead,
+		markNotificationAsReadAsync,
 		markNotificationAsRead,
+		markAllAsReadAsync,
 		markAllAsRead,
 		clearAll,
 	};

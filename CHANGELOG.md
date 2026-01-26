@@ -1,3 +1,10 @@
+# [1.5.0-rc.35](https://github.com/janovix/auth/compare/v1.5.0-rc.34...v1.5.0-rc.35) (2026-01-26)
+
+
+### Bug Fixes
+
+* **notifications:** use server read status instead of hardcoding false ([24e5ceb](https://github.com/janovix/auth/commit/24e5ceb6d95f0cdc6be28f051e2abd14ac8d3173))
+
 # [1.5.0-rc.34](https://github.com/janovix/auth/compare/v1.5.0-rc.33...v1.5.0-rc.34) (2026-01-26)
 
 

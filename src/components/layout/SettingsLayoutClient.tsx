@@ -429,6 +429,16 @@ function SettingsLayoutInner({
 	const { notifications, unreadCount, markNotificationAsRead, markAllAsRead } =
 		useNotifications();
 
+	// Debug: Log blocks version and unread count
+	useEffect(() => {
+		console.log("[SettingsLayoutClient] @janovix/blocks version: 1.2.0-rc.6");
+		console.log("[SettingsLayoutClient] Unread count:", unreadCount);
+		console.log(
+			"[SettingsLayoutClient] Total notifications:",
+			notifications.length,
+		);
+	}, [unreadCount, notifications.length]);
+
 	// Handle notification click
 	const handleNotificationClick = useCallback(
 		(notification: {

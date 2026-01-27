@@ -26,7 +26,7 @@ import {
 	NotificationsProvider,
 	useNotifications,
 } from "@/contexts/notifications-context";
-import { NotificationsWidget } from "@janovix/blocks";
+import { NotificationsWidget } from "@/components/ui/notifications-widget";
 
 interface SettingsLayoutClientProps {
 	children: React.ReactNode;

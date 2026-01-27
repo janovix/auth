@@ -1,3 +1,10 @@
+# [1.5.0-rc.40](https://github.com/janovix/auth/compare/v1.5.0-rc.39...v1.5.0-rc.40) (2026-01-27)
+
+
+### Features
+
+* **notifications:** update Tailwind class scanning and replace NotificationsWidget import path ([716a546](https://github.com/janovix/auth/commit/716a5465216431808e9423de18e4ea3471cc276d))
+
 # [1.5.0-rc.39](https://github.com/janovix/auth/compare/v1.5.0-rc.38...v1.5.0-rc.39) (2026-01-27)
 
 

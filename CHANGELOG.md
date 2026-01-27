@@ -1,3 +1,10 @@
+# [1.5.0-rc.36](https://github.com/janovix/auth/compare/v1.5.0-rc.35...v1.5.0-rc.36) (2026-01-27)
+
+
+### Bug Fixes
+
+* **turnstile:** restrict captcha to auth routes only ([1680300](https://github.com/janovix/auth/commit/16803008dfb468633c6710b6bc6c4b496e541ce8))
+
 # [1.5.0-rc.35](https://github.com/janovix/auth/compare/v1.5.0-rc.34...v1.5.0-rc.35) (2026-01-26)
 
 

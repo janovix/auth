@@ -1,3 +1,10 @@
+# [1.5.0-rc.38](https://github.com/janovix/auth/compare/v1.5.0-rc.37...v1.5.0-rc.38) (2026-01-27)
+
+
+### Features
+
+* **notifications:** introduce NotificationsWidget component and update import path in SettingsLayoutClient ([4833927](https://github.com/janovix/auth/commit/4833927a370ceb326b36c0def762064049ae3266))
+
 # [1.5.0-rc.37](https://github.com/janovix/auth/compare/v1.5.0-rc.36...v1.5.0-rc.37) (2026-01-27)
 
 

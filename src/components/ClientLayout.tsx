@@ -88,10 +88,22 @@ export default function ClientLayout({
 	const isOnboardingRoute =
 		pathname.startsWith("/onboarding") || pathname.startsWith("/invite");
 
+	// Only enable Turnstile on auth routes (login, recover, verify)
+	// Don't enable on authenticated pages (settings, account, etc.)
+	const shouldEnableTurnstile = isAuthRoute && TURNSTILE_SITE_KEY;
+
+	const authContent = shouldEnableTurnstile ? (
+		<TurnstileProvider siteKey={TURNSTILE_SITE_KEY}>
+			<AuthLayout>{children}</AuthLayout>
+		</TurnstileProvider>
+	) : (
+		<AuthLayout>{children}</AuthLayout>
+	);
+
 	const content = (
 		<>
 			{isAuthRoute || isErrorPageRoute ? (
-				<AuthLayout>{children}</AuthLayout>
+				authContent
 			) : isOnboardingRoute ? (
 				<OnboardingProvider>
 					<AuroraProvider>{children}</AuroraProvider>
@@ -107,15 +119,7 @@ export default function ClientLayout({
 	return (
 		<ThemeProvider>
 			<LanguageProvider>
-				<PageStatusProvider>
-					{TURNSTILE_SITE_KEY ? (
-						<TurnstileProvider siteKey={TURNSTILE_SITE_KEY}>
-							{content}
-						</TurnstileProvider>
-					) : (
-						content
-					)}
-				</PageStatusProvider>
+				<PageStatusProvider>{content}</PageStatusProvider>
 			</LanguageProvider>
 		</ThemeProvider>
 	);

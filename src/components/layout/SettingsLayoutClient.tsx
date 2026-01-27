@@ -433,16 +433,6 @@ function SettingsLayoutInner({
 		markAllAsReadAsync,
 	} = useNotifications();
 
-	// Debug: Log blocks version and unread count
-	useEffect(() => {
-		console.log("[SettingsLayoutClient] @janovix/blocks version: 1.2.0-rc.7");
-		console.log("[SettingsLayoutClient] Unread count:", unreadCount);
-		console.log(
-			"[SettingsLayoutClient] Total notifications:",
-			notifications.length,
-		);
-	}, [unreadCount, notifications.length]);
-
 	// Handle notification click - navigate to callback URL
 	// Note: marking as read is handled by the NotificationsWidget via onMarkAsRead
 	const handleNotificationClick = useCallback(
@@ -487,14 +477,25 @@ function SettingsLayoutInner({
 						<NavBreadcrumb />
 					</div>
 					<NotificationsWidget
-						notifications={notifications.map((n) => ({
-							id: n.id,
-							title: n.title,
-							message: n.body,
-							timestamp: new Date(n.createdAt),
-							type: mapSeverityToType(n.severity),
-							read: n.read,
-						}))}
+						notifications={notifications.map((n) => {
+							const mapped = {
+								id: n.id,
+								title: n.title,
+								message: n.body,
+								timestamp: new Date(n.createdAt),
+								type: mapSeverityToType(n.severity),
+								read: n.read,
+							};
+							console.log(
+								"[SettingsLayoutClient] Mapping notification:",
+								n.id,
+								"read:",
+								n.read,
+								"->",
+								mapped.read,
+							);
+							return mapped;
+						})}
 						onNotificationClick={(notification) =>
 							handleNotificationClick({
 								id: notification.id,

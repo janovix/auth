@@ -77,6 +77,7 @@ const translations = {
 		"login.banned.message":
 			"Your account has been suspended. Please contact support if you believe this is an error.",
 		"login.banned.tryDifferentEmail": "Try a different email",
+		"login.captcha.error": "Please complete the security verification",
 
 		// Verify email page
 		"verify.title": "Email verification",
@@ -299,6 +300,9 @@ const translations = {
 		"settings.personal.preferences": "Preferences",
 		"settings.personal.preferencesDesc": "Customize your experience",
 		"settings.personal.themeDesc": "Select your preferred color scheme",
+		"settings.personal.timezoneDesc": "Used for displaying dates and times",
+		"settings.personal.languageDesc": "Interface display language",
+		"settings.personal.dateFormatDesc": "How dates are displayed",
 		"settings.personal.useOrgDefault": "Use organization default",
 		"settings.personal.avatarHelp": "Enter a URL for your avatar image",
 		"settings.personal.dateExample": "Example",
@@ -956,6 +960,7 @@ const translations = {
 		"login.banned.message":
 			"Tu cuenta ha sido suspendida. Por favor contacta a soporte si crees que esto es un error.",
 		"login.banned.tryDifferentEmail": "Probar con otro correo",
+		"login.captcha.error": "Por favor completa la verificación de seguridad",
 
 		// Verify email page
 		"verify.title": "Verificación de correo",
@@ -1187,6 +1192,9 @@ const translations = {
 		"settings.personal.preferences": "Preferencias",
 		"settings.personal.preferencesDesc": "Personaliza tu experiencia",
 		"settings.personal.themeDesc": "Selecciona tu esquema de color preferido",
+		"settings.personal.timezoneDesc": "Se usa para mostrar fechas y horas",
+		"settings.personal.languageDesc": "Idioma de la interfaz",
+		"settings.personal.dateFormatDesc": "Cómo se muestran las fechas",
 		"settings.personal.useOrgDefault": "Usar valor de organización",
 		"settings.personal.avatarHelp": "Ingresa una URL para tu imagen de avatar",
 		"settings.personal.dateExample": "Ejemplo",

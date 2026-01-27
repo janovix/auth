@@ -7,6 +7,7 @@ import {
 	useState,
 	useEffect,
 	useCallback,
+	useMemo,
 } from "react";
 import { getCookie, setCookie, COOKIE_NAMES } from "@/lib/cookies";
 import {
@@ -14,6 +15,11 @@ import {
 	updateUserSettings,
 	type LanguageCode,
 } from "@/lib/settings";
+import {
+	LanguageContext as BlocksLanguageContext,
+	type LanguageContextValue as BlocksLanguageContextValue,
+	type BlocksLanguage,
+} from "@janovix/blocks";
 
 type Language = "en" | "es";
 
@@ -1884,6 +1890,24 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 		[language],
 	);
 
+	// Create blocks context value
+	// Note: We wrap handleSetLanguage to accept string and validate it's a valid Language
+	const blocksContextValue: BlocksLanguageContextValue = useMemo(
+		() => ({
+			language,
+			setLanguage: (lang: string) => {
+				if (lang === "en" || lang === "es") {
+					handleSetLanguage(lang);
+				}
+			},
+			languages: [
+				{ code: "en", name: "English" },
+				{ code: "es", name: "Español" },
+			] satisfies BlocksLanguage[],
+		}),
+		[language, handleSetLanguage],
+	);
+
 	// Prevent hydration mismatch by not rendering until mounted
 	if (!mounted) {
 		return null;
@@ -1893,7 +1917,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 		<LanguageContext.Provider
 			value={{ language, setLanguage: handleSetLanguage, t }}
 		>
-			{children}
+			<BlocksLanguageContext.Provider value={blocksContextValue}>
+				{children}
+			</BlocksLanguageContext.Provider>
 		</LanguageContext.Provider>
 	);
 }

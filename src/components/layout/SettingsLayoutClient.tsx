@@ -22,10 +22,7 @@ import {
 	getAmlComplianceSettings,
 } from "@/lib/settings/settingsClient";
 import { getSubscriptionStatus } from "@/lib/billing";
-import {
-	NotificationsProvider,
-	useNotifications,
-} from "@/contexts/notifications-context";
+import { NotificationsProvider } from "@/contexts/notifications-context";
 import { NotificationsWidget } from "@janovix/blocks";
 
 interface SettingsLayoutClientProps {
@@ -425,37 +422,17 @@ function SettingsLayoutInner({
 		}
 	};
 
-	// Get notifications context
-	const {
-		notifications,
-		unreadCount,
-		markNotificationAsReadAsync,
-		markAllAsReadAsync,
-	} = useNotifications();
-
-	// Handle notification click - navigate to callback URL
-	// Note: marking as read is handled by the NotificationsWidget via onMarkAsRead
+	// Handle notification click - navigate to href (callbackUrl)
+	// Note: Marking as read is handled automatically by the NotificationsWidget via context
 	const handleNotificationClick = useCallback(
-		(notification: {
-			id: string;
-			channelId: string | null;
-			callbackUrl: string | null;
-		}) => {
-			// Navigate to callback URL if provided
-			if (notification.callbackUrl) {
-				router.push(notification.callbackUrl);
+		(notification: { href?: string }) => {
+			// Navigate to href if provided
+			if (notification.href) {
+				router.push(notification.href);
 			}
 		},
 		[router],
 	);
-
-	// Map notification severity to NotificationWidget type
-	const mapSeverityToType = (
-		severity: "info" | "warn" | "error",
-	): "info" | "success" | "warning" | "error" => {
-		if (severity === "warn") return "warning";
-		return severity;
-	};
 
 	return (
 		<SidebarProvider open={!isCollapsed} onOpenChange={handleSidebarOpenChange}>
@@ -476,28 +453,9 @@ function SettingsLayoutInner({
 					<div className="flex-1 min-w-0">
 						<NavBreadcrumb />
 					</div>
+					{/* NotificationsWidget now consumes data from BlocksNotificationsContext automatically */}
 					<NotificationsWidget
-						notifications={notifications.map((n) => ({
-							id: n.id,
-							title: n.title,
-							message: n.body,
-							timestamp: new Date(n.createdAt),
-							type: mapSeverityToType(n.severity),
-							read: n.read,
-						}))}
-						onNotificationClick={(notification) =>
-							handleNotificationClick({
-								id: notification.id,
-								channelId:
-									notifications.find((n) => n.id === notification.id)
-										?.channelId || null,
-								callbackUrl:
-									notifications.find((n) => n.id === notification.id)
-										?.callbackUrl || null,
-							})
-						}
-						onMarkAsRead={markNotificationAsReadAsync}
-						onMarkAllAsRead={markAllAsReadAsync}
+						onNotificationClick={handleNotificationClick}
 						size="md"
 						maxVisible={50}
 						playSound={true}

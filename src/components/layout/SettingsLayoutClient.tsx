@@ -477,25 +477,14 @@ function SettingsLayoutInner({
 						<NavBreadcrumb />
 					</div>
 					<NotificationsWidget
-						notifications={notifications.map((n) => {
-							const mapped = {
-								id: n.id,
-								title: n.title,
-								message: n.body,
-								timestamp: new Date(n.createdAt),
-								type: mapSeverityToType(n.severity),
-								read: n.read,
-							};
-							console.log(
-								"[SettingsLayoutClient] Mapping notification:",
-								n.id,
-								"read:",
-								n.read,
-								"->",
-								mapped.read,
-							);
-							return mapped;
-						})}
+						notifications={notifications.map((n) => ({
+							id: n.id,
+							title: n.title,
+							message: n.body,
+							timestamp: new Date(n.createdAt),
+							type: mapSeverityToType(n.severity),
+							read: n.read,
+						}))}
 						onNotificationClick={(notification) =>
 							handleNotificationClick({
 								id: notification.id,

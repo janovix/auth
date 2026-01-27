@@ -351,10 +351,12 @@ export function NotificationsProvider({
 			// When we mark notification X as read, the server marks ALL notifications
 			// with id <= X in the same channel as read
 			// So we need to update all older notifications in the same channel
+			// Note: We use the same channelId fallback logic as above for comparison
 			setNotifications((prev) =>
 				prev.map((n) => {
+					const notificationChannelId = n.channelId || "system";
 					// Mark this notification and all older ones in the same channel as read
-					if (n.channelId === channelId && n.id <= notificationId) {
+					if (notificationChannelId === channelId && n.id <= notificationId) {
 						return { ...n, read: true };
 					}
 					return n;

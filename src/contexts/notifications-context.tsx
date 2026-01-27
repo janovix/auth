@@ -7,11 +7,17 @@ import {
 	useState,
 	useRef,
 	useCallback,
+	useMemo,
 	type ReactNode,
 } from "react";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { getNotificationsServiceUrl } from "@/lib/auth/authCoreConfig";
 import { getClientJwt } from "@/lib/auth/authClient";
+import {
+	NotificationsContext as BlocksNotificationsContext,
+	type BlocksNotification,
+	type NotificationsContextValue as BlocksNotificationsContextValue,
+} from "@janovix/blocks";
 
 export interface Notification {
 	id: string;
@@ -50,6 +56,23 @@ interface NotificationsContextValue {
 const NotificationsContext = createContext<NotificationsContextValue | null>(
 	null,
 );
+
+/**
+ * Map auth's severity to blocks' notification type.
+ */
+function mapSeverityToType(
+	severity: "info" | "warn" | "error",
+): "info" | "success" | "warning" | "error" {
+	switch (severity) {
+		case "warn":
+			return "warning";
+		case "error":
+			return "error";
+		case "info":
+		default:
+			return "info";
+	}
+}
 
 export function useNotifications() {
 	const context = useContext(NotificationsContext);
@@ -487,9 +510,42 @@ export function NotificationsProvider({
 		clearAll,
 	};
 
+	// Create blocks context value by mapping auth's notification format to blocks' format
+	const blocksContextValue: BlocksNotificationsContextValue = useMemo(
+		() => ({
+			notifications: notifications.map(
+				(n): BlocksNotification => ({
+					id: n.id,
+					title: n.title,
+					message: n.body,
+					timestamp: new Date(n.createdAt),
+					type: mapSeverityToType(n.severity),
+					read: n.read,
+					href: n.callbackUrl || undefined,
+					channelId: n.channelId || undefined,
+				}),
+			),
+			unreadCount,
+			markAsRead: markNotificationAsReadAsync,
+			markAllAsRead: markAllAsReadAsync,
+			dismiss: undefined, // Not implemented - notifications are managed by server
+			clearAll,
+			onNotificationClick: undefined, // Let the widget handle this via props if needed
+		}),
+		[
+			notifications,
+			unreadCount,
+			markNotificationAsReadAsync,
+			markAllAsReadAsync,
+			clearAll,
+		],
+	);
+
 	return (
 		<NotificationsContext.Provider value={value}>
-			{children}
+			<BlocksNotificationsContext.Provider value={blocksContextValue}>
+				{children}
+			</BlocksNotificationsContext.Provider>
 		</NotificationsContext.Provider>
 	);
 }

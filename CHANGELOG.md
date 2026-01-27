@@ -1,3 +1,10 @@
+# [1.5.0-rc.37](https://github.com/janovix/auth/compare/v1.5.0-rc.36...v1.5.0-rc.37) (2026-01-27)
+
+
+### Bug Fixes
+
+* **notifications:** mark older notifications as read per cursor system ([5dca528](https://github.com/janovix/auth/commit/5dca528e6e7c95a9b3dd6484b8f9d6ecfa56471f))
+
 # [1.5.0-rc.36](https://github.com/janovix/auth/compare/v1.5.0-rc.35...v1.5.0-rc.36) (2026-01-27)
 
 

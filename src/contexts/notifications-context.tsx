@@ -347,14 +347,29 @@ export function NotificationsProvider({
 				data?: { unreadCount: number };
 			};
 
-			// Update local state on success
+			// IMPORTANT: The server uses cursor-based read tracking
+			// When we mark notification X as read, the server marks ALL notifications
+			// with id <= X in the same channel as read
+			// So we need to update all older notifications in the same channel
 			setNotifications((prev) =>
-				prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n)),
+				prev.map((n) => {
+					// Mark this notification and all older ones in the same channel as read
+					if (n.channelId === channelId && n.id <= notificationId) {
+						return { ...n, read: true };
+					}
+					return n;
+				}),
 			);
+
 			if (data.data?.unreadCount !== undefined) {
 				setUnreadCount(data.data.unreadCount);
 			} else {
-				setUnreadCount((prev) => Math.max(0, prev - 1));
+				// Recalculate unread count based on updated notifications
+				const newUnreadCount = notifications.filter(
+					(n) =>
+						!(n.channelId === channelId && n.id <= notificationId && !n.read),
+				).length;
+				setUnreadCount(newUnreadCount);
 			}
 		},
 		[activeOrgId, notifications],

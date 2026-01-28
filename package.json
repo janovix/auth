@@ -15,7 +15,7 @@
 	"dependencies": {
 		"@better-auth/stripe": "^1.4.12",
 		"@hookform/resolvers": "^5.2.2",
-		"@janovix/blocks": "1.2.0-rc.16",
+		"@janovix/blocks": "1.2.0-rc.17",
 		"@marsidev/react-turnstile": "^1.4.0",
 		"@opennextjs/cloudflare": "1.14.0",
 		"@radix-ui/react-accordion": "^1.2.12",

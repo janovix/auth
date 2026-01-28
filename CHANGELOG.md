@@ -1,3 +1,10 @@
+# [1.5.0-rc.42](https://github.com/janovix/auth/compare/v1.5.0-rc.41...v1.5.0-rc.42) (2026-01-28)
+
+
+### Features
+
+* **auth:** add Google sign-in functionality and update translations ([e515e82](https://github.com/janovix/auth/commit/e515e82cf2be73371bbbc153119ff3f37a8abd98))
+
 # [1.5.0-rc.41](https://github.com/janovix/auth/compare/v1.5.0-rc.40...v1.5.0-rc.41) (2026-01-28)
 
 

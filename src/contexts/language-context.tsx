@@ -46,6 +46,10 @@ const translations = {
 		"login.email.description": "Enter your email address",
 		"login.button.send": "Send access code",
 		"login.button.sending": "Sending code...",
+		"login.button.google": "Sign in with Google",
+		"login.or": "Or continue with",
+		"login.error.google": "Failed to sign in with Google",
+		"login.captcha.required": "Please complete the captcha verification",
 		"login.otp.sent": "Code sent",
 		"login.otp.sentDescription":
 			"We sent a 6-digit code to {email}. Check your inbox and spam.",
@@ -929,6 +933,10 @@ const translations = {
 		"login.email.description": "Ingresa tu dirección de correo",
 		"login.button.send": "Enviar código de acceso",
 		"login.button.sending": "Enviando código...",
+		"login.button.google": "Iniciar sesión con Google",
+		"login.or": "O continúa con",
+		"login.error.google": "Error al iniciar sesión con Google",
+		"login.captcha.required": "Por favor completa la verificación de captcha",
 		"login.otp.sent": "Código enviado",
 		"login.otp.sentDescription":
 			"Enviamos un código de 6 dígitos a {email}. Revisa tu bandeja de entrada y spam.",

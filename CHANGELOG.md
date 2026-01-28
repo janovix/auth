@@ -1,3 +1,10 @@
+# [1.5.0-rc.41](https://github.com/janovix/auth/compare/v1.5.0-rc.40...v1.5.0-rc.41) (2026-01-28)
+
+
+### Features
+
+* **notifications:** integrate Sentry for error tracking in NotificationsProvider ([6298fe5](https://github.com/janovix/auth/commit/6298fe51ef3585b02af2d967a6264c969112da6d))
+
 # [1.5.0-rc.40](https://github.com/janovix/auth/compare/v1.5.0-rc.39...v1.5.0-rc.40) (2026-01-27)
 
 

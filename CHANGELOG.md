@@ -1,3 +1,10 @@
+# [1.5.0-rc.43](https://github.com/janovix/auth/compare/v1.5.0-rc.42...v1.5.0-rc.43) (2026-01-29)
+
+
+### Bug Fixes
+
+* **auth:** update Google sign-in callback URL handling for improved redirect logic ([ce9b712](https://github.com/janovix/auth/commit/ce9b712579347e2add71959e02645d53160302bf))
+
 # [1.5.0-rc.42](https://github.com/janovix/auth/compare/v1.5.0-rc.41...v1.5.0-rc.42) (2026-01-28)
 
 

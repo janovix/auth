@@ -491,39 +491,30 @@ export const LoginView = ({
 										/>
 									</Field>
 
-									{/* Turnstile Captcha Widget */}
+									{/* Turnstile Captcha Widget - hidden when invisible */}
 									{TURNSTILE_SITE_KEY && (
-										<Field>
-											<div className="flex justify-center">
-												<div className="rounded-lg border border-border bg-muted/30 p-1 overflow-hidden shadow-sm">
-													<Turnstile
-														ref={turnstileRef}
-														siteKey={TURNSTILE_SITE_KEY}
-														onSuccess={(token) => {
-															setCaptchaToken(token);
-															setCaptchaError(false);
-														}}
-														onError={() => {
-															setCaptchaToken(null);
-															setCaptchaError(true);
-														}}
-														onExpire={() => {
-															setCaptchaToken(null);
-														}}
-														options={{
-															theme: "auto",
-															size: "normal",
-														}}
-													/>
-												</div>
-											</div>
-											{captchaError && (
-												<p className="text-sm text-destructive text-center mt-2">
-													{t("login.captcha.error") ||
-														"Captcha verification failed. Please try again."}
-												</p>
-											)}
-										</Field>
+										<div className="sr-only">
+											<Turnstile
+												ref={turnstileRef}
+												siteKey={TURNSTILE_SITE_KEY}
+												onSuccess={(token) => {
+													setCaptchaToken(token);
+													setCaptchaError(false);
+												}}
+												onError={() => {
+													setCaptchaToken(null);
+													setCaptchaError(true);
+												}}
+												onExpire={() => {
+													setCaptchaToken(null);
+												}}
+												options={{
+													theme: "auto",
+													size: "invisible",
+													appearance: "interaction-only",
+												}}
+											/>
+										</div>
 									)}
 
 									<Field>
@@ -674,41 +665,34 @@ export const LoginView = ({
 										</Alert>
 									)}
 
-									{/* Turnstile Captcha Widget for Resend - only shown when user initiates resend */}
+									{/* Turnstile Captcha Widget for Resend - hidden when invisible */}
 									{TURNSTILE_SITE_KEY && pendingResend && (
-										<div className="flex justify-center">
-											<div className="rounded-lg border border-border bg-muted/30 p-1 overflow-hidden shadow-sm">
-												<Turnstile
-													ref={turnstileRef}
-													siteKey={TURNSTILE_SITE_KEY}
-													onSuccess={(token) => {
-														setCaptchaToken(token);
-														setCaptchaError(false);
-														// Auto-trigger resend after captcha success
-														handleResendOtp(token);
-													}}
-													onError={() => {
-														setCaptchaToken(null);
-														setCaptchaError(true);
-														setPendingResend(false);
-													}}
-													onExpire={() => {
-														setCaptchaToken(null);
-														setPendingResend(false);
-													}}
-													options={{
-														theme: "auto",
-														size: "normal",
-													}}
-												/>
-											</div>
+										<div className="sr-only">
+											<Turnstile
+												ref={turnstileRef}
+												siteKey={TURNSTILE_SITE_KEY}
+												onSuccess={(token) => {
+													setCaptchaToken(token);
+													setCaptchaError(false);
+													// Auto-trigger resend after captcha success
+													handleResendOtp(token);
+												}}
+												onError={() => {
+													setCaptchaToken(null);
+													setCaptchaError(true);
+													setPendingResend(false);
+												}}
+												onExpire={() => {
+													setCaptchaToken(null);
+													setPendingResend(false);
+												}}
+												options={{
+													theme: "auto",
+													size: "invisible",
+													appearance: "interaction-only",
+												}}
+											/>
 										</div>
-									)}
-									{captchaError && pendingResend && (
-										<p className="text-sm text-destructive text-center">
-											{t("login.captcha.error") ||
-												"Captcha verification failed. Please try again."}
-										</p>
 									)}
 
 									{/* Resend button */}

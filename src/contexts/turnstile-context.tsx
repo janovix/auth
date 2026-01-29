@@ -82,18 +82,20 @@ export function TurnstileProvider({
 			}}
 		>
 			{children}
-			{/* Invisible Turnstile widget */}
-			<Turnstile
-				ref={turnstileRef}
-				siteKey={siteKey}
-				onSuccess={handleSuccess}
-				onExpire={handleExpire}
-				onError={handleError}
-				options={{
-					size: "invisible",
-					theme: "auto",
-				}}
-			/>
+			{/* Invisible Turnstile widget - hidden from view */}
+			<div style={{ position: "fixed", opacity: 0, pointerEvents: "none" }}>
+				<Turnstile
+					ref={turnstileRef}
+					siteKey={siteKey}
+					onSuccess={handleSuccess}
+					onExpire={handleExpire}
+					onError={handleError}
+					options={{
+						size: "invisible",
+						theme: "auto",
+					}}
+				/>
+			</div>
 		</TurnstileContext.Provider>
 	);
 }

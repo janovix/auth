@@ -1,3 +1,10 @@
+# [1.5.0-rc.44](https://github.com/janovix/auth/compare/v1.5.0-rc.43...v1.5.0-rc.44) (2026-01-29)
+
+
+### Bug Fixes
+
+* **auth:** adjust default redirect URL for Google sign-in to point to the root ([8a35629](https://github.com/janovix/auth/commit/8a35629d2d292f48c1283dd3a7dffe693c594593))
+
 # [1.5.0-rc.43](https://github.com/janovix/auth/compare/v1.5.0-rc.42...v1.5.0-rc.43) (2026-01-29)
 
 

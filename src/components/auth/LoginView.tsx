@@ -379,12 +379,15 @@ export const LoginView = ({
 			setStateModifier("loading"); // Blue aurora while loading
 
 			// Sign in with Google - this will redirect to Google OAuth flow
-			// The OAuth callback will be handled by Better Auth at /api/auth/callback/google
-			// After successful auth, Better Auth will redirect based on the session/redirectTo
+			// callbackURL is where the user should be sent AFTER successful OAuth
+			// (not the OAuth callback endpoint - that's automatic at /api/auth/callback/google)
+			const finalRedirectUrl = redirectTo
+				? redirectTo
+				: `${window.location.origin}/account`;
+
 			await authClient.signIn.social({
 				provider: "google",
-				// Don't set callbackURL - let Better Auth handle the OAuth callback
-				// and redirect logic automatically
+				callbackURL: finalRedirectUrl,
 			});
 		} catch (error) {
 			console.error("Google sign-in error:", error);

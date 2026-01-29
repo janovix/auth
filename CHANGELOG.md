@@ -1,3 +1,17 @@
+# [2.0.0-rc.1](https://github.com/janovix/auth/compare/v1.5.0-rc.44...v2.0.0-rc.1) (2026-01-29)
+
+
+### Bug Fixes
+
+* **avatar:** migrate to new AvatarEditor API from blocks v1.2.0-rc.23 ([ab0b607](https://github.com/janovix/auth/commit/ab0b60712736431f8bc5ef907535262e175c0f36))
+
+
+### BREAKING CHANGES
+
+* **avatar:** Requires @janovix/blocks >= 1.2.0-rc.23 with new avatar API
+
+Co-authored-by: Cursor <cursoragent@cursor.com>
+
 # [1.5.0-rc.44](https://github.com/janovix/auth/compare/v1.5.0-rc.43...v1.5.0-rc.44) (2026-01-29)
 
 

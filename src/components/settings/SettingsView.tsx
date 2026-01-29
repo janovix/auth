@@ -670,18 +670,11 @@ export function SettingsView() {
 							<div className="flex flex-col items-center gap-4">
 								<div className="w-full max-w-[280px] relative">
 									<AvatarEditor
+										value={pendingAvatarDataUrl}
 										outputSize={256}
 										outputFormat="webp"
 										outputQuality={0.9}
-										defaultImage={avatarUrl || undefined}
 										onChange={handleAvatarEditorChange}
-										initials={
-											currentUserName
-												.split(" ")
-												.map((n) => n[0])
-												.join("")
-												.toUpperCase() || "?"
-										}
 									/>
 									{/* Upload overlay */}
 									{uploadingAvatar && (

@@ -468,8 +468,8 @@ describe("SettingsView", () => {
 			expect(screen.getByText("Foto de perfil")).toBeInTheDocument();
 		});
 
-		// Check for avatar uploaded indicator (since mockSettings has an avatarUrl)
-		// The component now uses inline AvatarEditor instead of a "Cambiar avatar" button
+		// Check for avatar set indicator (since mockSettings has an avatarUrl)
+		// and pendingAvatarDataUrl is null (no pending changes)
 		expect(screen.getByText("Avatar subido")).toBeInTheDocument();
 	});
 

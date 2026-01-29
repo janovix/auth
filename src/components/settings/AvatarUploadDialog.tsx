@@ -46,7 +46,9 @@ export function AvatarUploadDialog({
 	const [open, setOpen] = useState(false);
 	const [uploading, setUploading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const [avatarDataUrl, setAvatarDataUrl] = useState<string | null>(null);
+	const [avatarDataUrl, setAvatarDataUrl] = useState<string | null>(
+		currentAvatarUrl || null,
+	);
 
 	const handleAvatarChange = useCallback((dataUrl: string | null) => {
 		setAvatarDataUrl(dataUrl);
@@ -143,9 +145,8 @@ export function AvatarUploadDialog({
 				<div className="py-4">
 					<div className="max-w-[280px] mx-auto">
 						<AvatarEditor
+							value={avatarDataUrl}
 							onChange={handleAvatarChange}
-							initials={initials}
-							defaultImage={currentAvatarUrl || undefined}
 							outputSize={256}
 							outputFormat="png"
 						/>

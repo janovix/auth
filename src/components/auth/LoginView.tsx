@@ -383,7 +383,7 @@ export const LoginView = ({
 			// (not the OAuth callback endpoint - that's automatic at /api/auth/callback/google)
 			const finalRedirectUrl = redirectTo
 				? redirectTo
-				: `${window.location.origin}/account`;
+				: `${window.location.origin}`;
 
 			await authClient.signIn.social({
 				provider: "google",

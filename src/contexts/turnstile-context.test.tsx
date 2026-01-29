@@ -95,12 +95,14 @@ describe("TurnstileProvider", () => {
 			</TurnstileProvider>,
 		);
 
-		// Check that the wrapper div is completely hidden with display: none
+		// Check that the wrapper div has styles to completely hide it
 		const wrapperDiv = container.querySelector(
-			'div[style*="display: none"]',
+			'div[style*="visibility: hidden"]',
 		) as HTMLElement;
 		expect(wrapperDiv).toBeInTheDocument();
-		expect(wrapperDiv?.style.display).toBe("none");
+		expect(wrapperDiv?.style.width).toBe("0px");
+		expect(wrapperDiv?.style.height).toBe("0px");
+		expect(wrapperDiv?.style.visibility).toBe("hidden");
 	});
 });
 

@@ -82,8 +82,17 @@ export function TurnstileProvider({
 			}}
 		>
 			{children}
-			{/* Invisible Turnstile widget - completely hidden */}
-			<div style={{ display: "none" }}>
+			{/* Invisible Turnstile widget - positioned off-screen with zero dimensions */}
+			<div
+				style={{
+					position: "absolute",
+					width: "0",
+					height: "0",
+					overflow: "hidden",
+					visibility: "hidden",
+					pointerEvents: "none",
+				}}
+			>
 				<Turnstile
 					ref={turnstileRef}
 					siteKey={siteKey}
@@ -93,6 +102,7 @@ export function TurnstileProvider({
 					options={{
 						size: "invisible",
 						theme: "auto",
+						appearance: "interaction-only",
 					}}
 				/>
 			</div>

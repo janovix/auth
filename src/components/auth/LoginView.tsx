@@ -766,7 +766,7 @@ export const LoginView = ({
 						<Shield className="h-3 w-3 inline-block mr-1" aria-hidden="true" />
 						{t("login.terms")}{" "}
 						<Link
-							href="/privacy"
+							href="https://www.janovix.com/privacy"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
@@ -775,7 +775,7 @@ export const LoginView = ({
 						</Link>{" "}
 						{t("login.and")}{" "}
 						<Link
-							href="/privacy"
+							href="https://www.janovix.com/terms"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"

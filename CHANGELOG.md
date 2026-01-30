@@ -1,3 +1,10 @@
+# [2.0.0-rc.9](https://github.com/janovix/auth/compare/v2.0.0-rc.8...v2.0.0-rc.9) (2026-01-30)
+
+
+### Bug Fixes
+
+* **layout:** add required Tailwind classes for blocks components ([d4ff7c9](https://github.com/janovix/auth/commit/d4ff7c988f11edb94a1ef77f0c330f64b3dce58f))
+
 # [2.0.0-rc.8](https://github.com/janovix/auth/compare/v2.0.0-rc.7...v2.0.0-rc.8) (2026-01-30)
 
 

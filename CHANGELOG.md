@@ -1,3 +1,10 @@
+# [2.0.0-rc.3](https://github.com/janovix/auth/compare/v2.0.0-rc.2...v2.0.0-rc.3) (2026-01-30)
+
+
+### Bug Fixes
+
+* **deps:** remove motion package to prevent animation library conflicts with blocks ([bc74e00](https://github.com/janovix/auth/commit/bc74e0069e756dac29d0023985166571381cf9ee))
+
 # [2.0.0-rc.2](https://github.com/janovix/auth/compare/v2.0.0-rc.1...v2.0.0-rc.2) (2026-01-30)
 
 

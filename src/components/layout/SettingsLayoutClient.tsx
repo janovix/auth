@@ -461,7 +461,6 @@ function SettingsLayoutInner({
 							showTimezoneMismatch={Boolean(effectiveTimezone)}
 						/>
 						{/* NotificationsWidget now consumes data from BlocksNotificationsContext automatically */}
-						{/* Required classes for NotificationsWidget and switchers (from @janovix/blocks): bg-red-500 ml-1.5 mr-1.5 h-7 p-0.5 h-6 px-2 size-3 text-xs */}
 						<NotificationsWidget
 							onNotificationClick={handleNotificationClick}
 							size="md"

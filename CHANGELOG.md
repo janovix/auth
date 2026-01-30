@@ -1,3 +1,10 @@
+# [2.0.0-rc.6](https://github.com/janovix/auth/compare/v2.0.0-rc.5...v2.0.0-rc.6) (2026-01-30)
+
+
+### Bug Fixes
+
+* **layout:** wrap NotificationsWidget in flex container for proper stacking context ([85653a6](https://github.com/janovix/auth/commit/85653a6588ff1a3dbfb457b3e9eff4cd26ab44d9))
+
 # [2.0.0-rc.5](https://github.com/janovix/auth/compare/v2.0.0-rc.4...v2.0.0-rc.5) (2026-01-30)
 
 

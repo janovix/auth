@@ -453,22 +453,24 @@ function SettingsLayoutInner({
 					<div className="flex-1 min-w-0">
 						<NavBreadcrumb />
 					</div>
-					{/* NotificationsWidget now consumes data from BlocksNotificationsContext automatically */}
-					<NotificationsWidget
-						onNotificationClick={handleNotificationClick}
-						size="md"
-						maxVisible={50}
-						playSound={true}
-						showPulse={true}
-						soundType="chime"
-						pulseStyle="ring"
-					/>
-					<NavbarClock
-						timezone={effectiveTimezone || undefined}
-						defaultFormat={effectiveClockFormat}
-						size="sm"
-						showTimezoneMismatch={Boolean(effectiveTimezone)}
-					/>
+					<div className="flex shrink-0 items-center gap-2">
+						<NavbarClock
+							timezone={effectiveTimezone || undefined}
+							defaultFormat={effectiveClockFormat}
+							size="sm"
+							showTimezoneMismatch={Boolean(effectiveTimezone)}
+						/>
+						{/* NotificationsWidget now consumes data from BlocksNotificationsContext automatically */}
+						<NotificationsWidget
+							onNotificationClick={handleNotificationClick}
+							size="md"
+							maxVisible={50}
+							playSound={true}
+							showPulse={true}
+							soundType="chime"
+							pulseStyle="ring"
+						/>
+					</div>
 				</header>
 
 				{/* Main Content */}

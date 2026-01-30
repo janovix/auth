@@ -4,7 +4,7 @@
 /* Tailwind v4: explicitly declare where to scan for class usage. */
 @source "../**/*.{js,ts,jsx,tsx,mdx}";
 /* Scan @janovix/blocks package for utility classes */
-@source "../../../node_modules/@janovix/blocks/dist/**/*.{js,cjs,mjs}";
+@source "../../node_modules/@janovix/blocks/dist/*.{js,cjs,mjs}";
 
 @custom-variant dark (&:is(.dark *));
 

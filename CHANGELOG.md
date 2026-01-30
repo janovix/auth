@@ -1,3 +1,10 @@
+# [2.0.0-rc.4](https://github.com/janovix/auth/compare/v2.0.0-rc.3...v2.0.0-rc.4) (2026-01-30)
+
+
+### Bug Fixes
+
+* **tailwind:** match AML PostCSS config format to fix class generation ([d186002](https://github.com/janovix/auth/commit/d1860027a19c2e5a58d6c9899bd75037f686def1))
+
 # [2.0.0-rc.3](https://github.com/janovix/auth/compare/v2.0.0-rc.2...v2.0.0-rc.3) (2026-01-30)
 
 

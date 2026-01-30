@@ -107,9 +107,6 @@ importers:
       lucide-react:
         specifier: ^0.560.0
         version: 0.560.0(react@19.2.1)
-      motion:
-        specifier: ^12.24.12
-        version: 12.24.12(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       nanostores:
         specifier: ^1.1.0
         version: 1.1.0

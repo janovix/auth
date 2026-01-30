@@ -283,8 +283,13 @@ export function NotificationsProvider({
 					success: boolean;
 					data?: Notification[];
 				};
-				// Use the read status from the server (already computed)
-				setNotifications(data.data || []);
+				// Server notifications don't include read status
+				// Assume all fetched notifications are unread unless explicitly marked
+				const fetchedNotifications = (data.data || []).map((n) => ({
+					...n,
+					read: n.read ?? false, // Default to unread if not specified
+				}));
+				setNotifications(fetchedNotifications);
 			} else {
 				Sentry.captureMessage(
 					`Failed to fetch notifications: ${response.status}`,
@@ -572,7 +577,7 @@ export function NotificationsProvider({
 					message: n.body,
 					timestamp: new Date(n.createdAt),
 					type: mapSeverityToType(n.severity),
-					read: n.read,
+					read: n.read ?? false, // Default to unread if not specified
 					href: n.callbackUrl || undefined,
 					channelId: n.channelId || undefined,
 				}),

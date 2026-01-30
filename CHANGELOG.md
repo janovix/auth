@@ -1,3 +1,10 @@
+# [2.0.0-rc.2](https://github.com/janovix/auth/compare/v2.0.0-rc.1...v2.0.0-rc.2) (2026-01-30)
+
+
+### Bug Fixes
+
+* **notifications:** ensure read property defaults to false for red dot visibility ([f94414b](https://github.com/janovix/auth/commit/f94414be341b0593043dc40aa896ec232d6d64c8))
+
 # [2.0.0-rc.1](https://github.com/janovix/auth/compare/v1.5.0-rc.44...v2.0.0-rc.1) (2026-01-29)
 
 

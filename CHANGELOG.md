@@ -1,3 +1,10 @@
+# [2.0.0-rc.5](https://github.com/janovix/auth/compare/v2.0.0-rc.4...v2.0.0-rc.5) (2026-01-30)
+
+
+### Bug Fixes
+
+* **css:** remove conflicting animations and match AML globals.css structure ([666e2db](https://github.com/janovix/auth/commit/666e2db980f434c28e6ec30da98235ed86cac4b3))
+
 # [2.0.0-rc.4](https://github.com/janovix/auth/compare/v2.0.0-rc.3...v2.0.0-rc.4) (2026-01-30)
 
 

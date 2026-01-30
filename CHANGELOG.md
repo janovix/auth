@@ -1,3 +1,10 @@
+# [2.0.0-rc.8](https://github.com/janovix/auth/compare/v2.0.0-rc.7...v2.0.0-rc.8) (2026-01-30)
+
+
+### Bug Fixes
+
+* **layout:** add required classes for NotificationsWidget ([0a936ed](https://github.com/janovix/auth/commit/0a936edee26109e55df8f872d0709e0cc5168c0e))
+
 # [2.0.0-rc.7](https://github.com/janovix/auth/compare/v2.0.0-rc.6...v2.0.0-rc.7) (2026-01-30)
 
 

@@ -1,3 +1,10 @@
+# [2.0.0-rc.7](https://github.com/janovix/auth/compare/v2.0.0-rc.6...v2.0.0-rc.7) (2026-01-30)
+
+
+### Bug Fixes
+
+* **deps:** switch from framer-motion to motion to match AML working config ([796ab96](https://github.com/janovix/auth/commit/796ab9668de091bd298e004010c0c6dceda49a45))
+
 # [2.0.0-rc.6](https://github.com/janovix/auth/compare/v2.0.0-rc.5...v2.0.0-rc.6) (2026-01-30)
 
 

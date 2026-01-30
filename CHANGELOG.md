@@ -1,3 +1,10 @@
+# [2.0.0-rc.11](https://github.com/janovix/auth/compare/v2.0.0-rc.10...v2.0.0-rc.11) (2026-01-30)
+
+
+### Bug Fixes
+
+* **styles:** correct path to blocks package for Tailwind scanning ([c139d01](https://github.com/janovix/auth/commit/c139d0129b1ef0c2c713d1c5cb35c89b791fb0c3))
+
 # [2.0.0-rc.10](https://github.com/janovix/auth/compare/v2.0.0-rc.9...v2.0.0-rc.10) (2026-01-30)
 
 

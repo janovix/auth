@@ -1,3 +1,10 @@
+# [2.0.0-rc.10](https://github.com/janovix/auth/compare/v2.0.0-rc.9...v2.0.0-rc.10) (2026-01-30)
+
+
+### Bug Fixes
+
+* **styles:** scan blocks package for Tailwind classes ([dd0e008](https://github.com/janovix/auth/commit/dd0e00826776fca652b2e894d81937899ec07987))
+
 # [2.0.0-rc.9](https://github.com/janovix/auth/compare/v2.0.0-rc.8...v2.0.0-rc.9) (2026-01-30)
 
 

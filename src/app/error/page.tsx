@@ -88,14 +88,6 @@ export default function SigninErrorPage() {
 								<p>{t("errorServerHelp")}</p>
 							</CardContent>
 							<CardFooter className="flex gap-3 pb-6">
-								<Button
-									variant="outline"
-									className="flex-1"
-									onClick={() => window.history.back()}
-								>
-									<ArrowLeft className="mr-2 h-4 w-4" />
-									{t("errorGoBack")}
-								</Button>
 								<Button asChild className="flex-1">
 									<Link href="/">
 										<Home className="mr-2 h-4 w-4" />

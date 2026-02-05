@@ -1,3 +1,10 @@
+# [2.0.0-rc.13](https://github.com/janovix/auth/compare/v2.0.0-rc.12...v2.0.0-rc.13) (2026-02-05)
+
+
+### Features
+
+* **error:** enhance SigninErrorPage with logo and back button ([86bf90f](https://github.com/janovix/auth/commit/86bf90fc9db84bce30792d8d41975555d76a308e))
+
 # [2.0.0-rc.12](https://github.com/janovix/auth/compare/v2.0.0-rc.11...v2.0.0-rc.12) (2026-02-05)
 
 

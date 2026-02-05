@@ -887,6 +887,9 @@ const translations = {
 		errorHome: "Home",
 		errorTryAgain: "Try again",
 		errorSignIn: "Sign in",
+		errorSigninTitle: "Error",
+		errorSigninDescription:
+			"We encountered an error during the signin process.",
 		// Navbar clock
 		"clock.clickForInfo": "Click for timezone info",
 		"clock.timezoneInfo": "Timezone Information",
@@ -1798,6 +1801,9 @@ const translations = {
 		errorHome: "Inicio",
 		errorTryAgain: "Intentar de nuevo",
 		errorSignIn: "Iniciar sesión",
+		errorSigninTitle: "Error",
+		errorSigninDescription:
+			"Encontramos un error durante el proceso de inicio de sesión.",
 		// Navbar clock
 		"clock.clickForInfo": "Clic para ver información de zona horaria",
 		"clock.timezoneInfo": "Información de zona horaria",

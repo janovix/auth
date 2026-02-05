@@ -1,3 +1,10 @@
+# [2.0.0-rc.12](https://github.com/janovix/auth/compare/v2.0.0-rc.11...v2.0.0-rc.12) (2026-02-05)
+
+
+### Features
+
+* **error:** add SigninErrorPage component for handling signin errors ([aa3bfa8](https://github.com/janovix/auth/commit/aa3bfa8eb4046399a6e3184a5a3030a0487d0f1d))
+
 # [2.0.0-rc.11](https://github.com/janovix/auth/compare/v2.0.0-rc.10...v2.0.0-rc.11) (2026-01-30)
 
 

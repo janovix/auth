@@ -1,3 +1,10 @@
+# [2.0.0-rc.14](https://github.com/janovix/auth/compare/v2.0.0-rc.13...v2.0.0-rc.14) (2026-02-05)
+
+
+### Features
+
+* **error:** enhance SigninErrorPage with language and theme switchers ([a88998a](https://github.com/janovix/auth/commit/a88998a970de78deb9f26b7c2b311d935eda2c04))
+
 # [2.0.0-rc.13](https://github.com/janovix/auth/compare/v2.0.0-rc.12...v2.0.0-rc.13) (2026-02-05)
 
 

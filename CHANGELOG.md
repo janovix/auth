@@ -1,3 +1,10 @@
+# [2.0.0-rc.16](https://github.com/janovix/auth/compare/v2.0.0-rc.15...v2.0.0-rc.16) (2026-02-06)
+
+
+### Features
+
+* **translations:** add rate limit messaging for OTP requests in English and Spanish ([22b3860](https://github.com/janovix/auth/commit/22b3860a76af48721e4610400c43247aab2a1e08))
+
 # [2.0.0-rc.15](https://github.com/janovix/auth/compare/v2.0.0-rc.14...v2.0.0-rc.15) (2026-02-06)
 
 

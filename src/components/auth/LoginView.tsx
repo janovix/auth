@@ -6,6 +6,7 @@ import {
 	isOtpExpiredError,
 	isOtpTooManyAttemptsError,
 	isBannedUserError,
+	isRateLimitError,
 	type AuthResult,
 	type SendOtpOptions,
 } from "@/lib/auth/authActions";
@@ -141,7 +142,8 @@ export const LoginView = ({
 	const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 	const [captchaError, setCaptchaError] = useState(false);
 	const turnstileRef = useRef<TurnstileInstance>(null);
-	// Track if we're waiting for captcha to complete before resending OTP
+	// Track if we're waiting for captcha to complete before sending/resending OTP
+	const [pendingSend, setPendingSend] = useState(false);
 	const [pendingResend, setPendingResend] = useState(false);
 
 	// Set aurora page profile to login on mount
@@ -189,7 +191,8 @@ export const LoginView = ({
 		}
 	}, [otpValue, otpError, setStateModifier]);
 
-	const handleSendOtp = async (values: EmailValues) => {
+	// Internal function to send OTP with token
+	const sendOtpWithToken = async (email: string, token: string | null) => {
 		setServerError(null);
 		setSuccessMessage(null);
 		setOtpError(null);
@@ -197,34 +200,36 @@ export const LoginView = ({
 		emailAtErrorRef.current = null;
 		setStateModifier("loading"); // Blue aurora while loading
 
-		// Require captcha token if Turnstile is configured
-		if (TURNSTILE_SITE_KEY && !captchaToken) {
-			setServerError(
-				t("login.captcha.required") ||
-					"Please complete the captcha verification",
-			);
-			setStateModifier("error");
-			return;
-		}
+		// Optimistically transition to OTP input screen immediately
+		setUserEmail(email);
+		setOtpSent(true);
+		setSuccessMessage(t("login.success.message"));
 
-		const email = values.email.trim();
 		const result = await sendOtp(email, "sign-in", {
-			captchaToken: captchaToken || undefined,
+			captchaToken: token || undefined,
 		});
 
 		// Reset captcha after use (token is single-use)
 		setCaptchaToken(null);
 		turnstileRef.current?.reset();
 
+		// Now safe to clear pendingSend since we've transitioned
+		setPendingSend(false);
+
 		if (!result.success) {
-			setServerError(getAuthErrorMessage(result.error));
-			emailAtErrorRef.current = email; // Capture email at time of error
-			setStateModifier("error"); // Red aurora on error
+			// Revert to email input screen on error
+			setOtpSent(false);
+			setUserEmail(null);
+			setSuccessMessage(null);
+			const errorMessage =
+				result.error && isRateLimitError(result.error)
+					? t("login.otp.rateLimited")
+					: getAuthErrorMessage(result.error);
+			setServerError(errorMessage);
+			emailAtErrorRef.current = email;
+			setStateModifier("error");
 			return;
 		}
-
-		setUserEmail(email);
-		setOtpSent(true);
 
 		// Show different message if rate-limited (OTP already sent)
 		if (result.data?.rateLimited) {
@@ -232,12 +237,24 @@ export const LoginView = ({
 				t("login.success.rateLimited") ||
 					"A code was already sent. Check your email.",
 			);
-		} else {
-			setSuccessMessage(t("login.success.message"));
 		}
 
-		setStateModifier("default"); // Back to purple after OTP sent
-		startCooldown(); // Start 60s cooldown for resend
+		setStateModifier("default");
+		startCooldown();
+	};
+
+	const handleSendOtp = async (values: EmailValues) => {
+		const email = values.email.trim();
+
+		// If captcha is required but no token, show captcha and wait for resolution
+		if (TURNSTILE_SITE_KEY && !captchaToken) {
+			setPendingSend(true);
+			setCaptchaError(false);
+			return;
+		}
+
+		setPendingSend(true);
+		await sendOtpWithToken(email, captchaToken);
 	};
 
 	// Handle OTP verification and sign-in
@@ -349,8 +366,12 @@ export const LoginView = ({
 		turnstileRef.current?.reset();
 
 		if (!result.success) {
-			setOtpError(result.error?.message || t("login.otp.resendError"));
-			setStateModifier("error"); // Red aurora on error
+			const errorMessage =
+				result.error && isRateLimitError(result.error)
+					? t("login.otp.rateLimited")
+					: result.error?.message || t("login.otp.resendError");
+			setOtpError(errorMessage);
+			setStateModifier("error");
 		} else {
 			setSuccessMessage(t("login.otp.resendSuccess"));
 			setStateModifier("default"); // Back to purple after success
@@ -368,9 +389,10 @@ export const LoginView = ({
 		setOtpNeedsResend(false);
 		setIsBanned(false);
 		setSuccessMessage(null);
-		setPendingResend(false); // Reset pending resend state
-		setStateModifier("default"); // Reset to purple when going back
-		resetCooldown(); // Reset cooldown when going back to email
+		setPendingSend(false);
+		setPendingResend(false);
+		setStateModifier("default");
+		resetCooldown();
 	};
 
 	const handleGoogleSignIn = async () => {
@@ -491,8 +513,8 @@ export const LoginView = ({
 										/>
 									</Field>
 
-									{/* Turnstile Captcha Widget - hidden when invisible */}
-									{TURNSTILE_SITE_KEY && (
+									{/* Turnstile Captcha Widget for Initial Send - hidden when invisible */}
+									{TURNSTILE_SITE_KEY && pendingSend && (
 										<div className="sr-only">
 											<Turnstile
 												ref={turnstileRef}
@@ -500,13 +522,17 @@ export const LoginView = ({
 												onSuccess={(token) => {
 													setCaptchaToken(token);
 													setCaptchaError(false);
+													const currentEmail = form.getValues("email");
+													sendOtpWithToken(currentEmail, token);
 												}}
 												onError={() => {
 													setCaptchaToken(null);
 													setCaptchaError(true);
+													setPendingSend(false);
 												}}
 												onExpire={() => {
 													setCaptchaToken(null);
+													setPendingSend(false);
 												}}
 												options={{
 													theme: "auto",
@@ -521,13 +547,10 @@ export const LoginView = ({
 										<Button
 											type="submit"
 											className="w-full"
-											disabled={
-												isSubmitting ||
-												(TURNSTILE_SITE_KEY ? !captchaToken : false)
-											}
-											aria-busy={isSubmitting}
+											disabled={isSubmitting || pendingSend}
+											aria-busy={isSubmitting || pendingSend}
 										>
-											{isSubmitting ? (
+											{isSubmitting || pendingSend ? (
 												<span className="flex items-center justify-center gap-2">
 													<Mail
 														className="h-4 w-4 animate-pulse"

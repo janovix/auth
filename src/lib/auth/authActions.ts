@@ -229,6 +229,20 @@ export async function sendVerificationOtp(
 		);
 
 		if (result.error) {
+			// Check if it's a rate limit error (HTTP 429)
+			const errorStatus = (result.error as { status?: number }).status;
+			if (errorStatus === 429) {
+				const retryAfter = 60;
+				return {
+					success: false,
+					data: null,
+					error: createRateLimitError(
+						"Too many OTP requests. Please wait before requesting another code.",
+						retryAfter,
+					),
+				};
+			}
+
 			return {
 				success: false,
 				data: null,
@@ -253,6 +267,19 @@ export async function sendVerificationOtp(
 			error: null,
 		};
 	} catch (err) {
+		// Check if the caught error indicates rate limiting
+		if (
+			err instanceof Error &&
+			(err.message.toLowerCase().includes("rate limit") ||
+				err.message.toLowerCase().includes("too many requests"))
+		) {
+			return {
+				success: false,
+				data: null,
+				error: createRateLimitError(err.message),
+			};
+		}
+
 		return {
 			success: false,
 			data: null,
@@ -409,6 +436,61 @@ export function isOtpTooManyAttemptsError(
 export function isBannedUserError(error: Error | null | undefined): boolean {
 	if (!error) return false;
 	return (error as OtpVerificationError).code === "BANNED";
+}
+
+// ============================================================================
+// Rate Limit Error Handling
+// ============================================================================
+
+/**
+ * Translation key for rate limit error messages.
+ * Components should use this key with the translation function to display
+ * localized error messages.
+ */
+export const RATE_LIMIT_ERROR_TRANSLATION_KEY = "login.otp.rateLimited";
+
+/**
+ * Error code for rate limiting errors.
+ */
+export type RateLimitErrorCode = "RATE_LIMITED";
+
+/**
+ * Extended error interface for rate limit errors.
+ * Includes the retry-after duration for displaying countdown to users.
+ */
+export interface RateLimitError extends Error {
+	/** Error code identifying this as a rate limit error */
+	code: RateLimitErrorCode;
+	/** Number of seconds until the user can retry (from X-Retry-After header) */
+	retryAfter?: number;
+}
+
+/**
+ * Creates a RateLimitError with optional retry-after duration.
+ *
+ * @param message - Error message to display
+ * @param retryAfter - Optional seconds until retry is allowed
+ */
+export function createRateLimitError(
+	message: string = "Too many requests. Please wait before trying again.",
+	retryAfter?: number,
+): RateLimitError {
+	const error = new Error(message) as RateLimitError;
+	error.code = "RATE_LIMITED";
+	if (retryAfter !== undefined) {
+		error.retryAfter = retryAfter;
+	}
+	return error;
+}
+
+/**
+ * Type guard to check if an error is a rate limit error.
+ */
+export function isRateLimitError(
+	error: Error | null | undefined,
+): error is RateLimitError {
+	if (!error) return false;
+	return (error as RateLimitError).code === "RATE_LIMITED";
 }
 
 /**

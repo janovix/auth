@@ -11,6 +11,23 @@ import { stripeClient } from "@better-auth/stripe/client";
 import { getAuthCoreBaseUrl } from "./authCoreConfig";
 
 /**
+ * Custom event detail for rate limit events.
+ * Dispatched when the server returns HTTP 429 (Too Many Requests).
+ */
+export interface RateLimitEventDetail {
+	/** Number of seconds until the user can retry, from X-Retry-After header */
+	retryAfter: number | null;
+	/** The URL that was rate limited */
+	url?: string;
+}
+
+/**
+ * Custom event name for rate limit notifications.
+ * Components can listen for this event to show appropriate UI feedback.
+ */
+export const AUTH_RATE_LIMIT_EVENT = "auth:rate-limited";
+
+/**
  * Better Auth client instance.
  *
  * Single source of truth for the Better Auth client. All auth operations
@@ -26,6 +43,11 @@ import { getAuthCoreBaseUrl } from "./authCoreConfig";
  * - stripeClient: Enables subscription management via Better Auth Stripe plugin.
  * - jwtClient: Enables JWT token exchange for service-to-service authentication.
  *
+ * Rate Limiting:
+ * - Global onError handler detects HTTP 429 responses and dispatches AUTH_RATE_LIMIT_EVENT
+ * - Components can listen for this event to show user-friendly rate limit messages
+ * - The X-Retry-After header is parsed and included in the event detail
+ *
  * Note: Cloudflare Turnstile captcha protection is handled via x-captcha-response
  * header in fetchOptions. Use useTurnstile() hook to get the token.
  */
@@ -33,6 +55,32 @@ export const authClient = createAuthClient({
 	baseURL: getAuthCoreBaseUrl(),
 	fetchOptions: {
 		credentials: "include",
+		onError: async (context) => {
+			const { response } = context;
+
+			// Handle rate limit errors (HTTP 429)
+			if (response.status === 429) {
+				const retryAfterHeader = response.headers.get("X-Retry-After");
+				const retryAfter = retryAfterHeader
+					? parseInt(retryAfterHeader, 10)
+					: null;
+
+				console.warn(
+					`[Auth] Rate limited. Retry after ${retryAfter ?? "unknown"} seconds`,
+				);
+
+				// Dispatch custom event for UI components to handle
+				if (typeof window !== "undefined") {
+					const detail: RateLimitEventDetail = {
+						retryAfter,
+						url: response.url,
+					};
+					window.dispatchEvent(
+						new CustomEvent(AUTH_RATE_LIMIT_EVENT, { detail }),
+					);
+				}
+			}
+		},
 	},
 	plugins: [
 		emailOTPClient(),

@@ -1,3 +1,10 @@
+# [2.0.0-rc.15](https://github.com/janovix/auth/compare/v2.0.0-rc.14...v2.0.0-rc.15) (2026-02-06)
+
+
+### Features
+
+* **auth:** implement rate limit handling for OTP requests ([d60a034](https://github.com/janovix/auth/commit/d60a034be70b0bb75939344944c8ca6b12669397))
+
 # [2.0.0-rc.14](https://github.com/janovix/auth/compare/v2.0.0-rc.13...v2.0.0-rc.14) (2026-02-05)
 
 

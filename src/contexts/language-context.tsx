@@ -67,6 +67,8 @@ const translations = {
 		"login.otp.resend": "Resend code",
 		"login.otp.resending": "Sending...",
 		"login.otp.resendError": "Error resending code. Try again.",
+		"login.otp.rateLimited":
+			"Too many requests. Please wait a moment before requesting another code.",
 		"login.otp.resendSuccess":
 			"New code sent. Check your email (valid for 5 minutes).",
 		"login.otp.resendWait": "Wait {seconds}s to resend",
@@ -957,6 +959,8 @@ const translations = {
 		"login.otp.resend": "Reenviar código",
 		"login.otp.resending": "Enviando...",
 		"login.otp.resendError": "Error al reenviar el código. Intenta de nuevo.",
+		"login.otp.rateLimited":
+			"Demasiadas solicitudes. Espera un momento antes de pedir otro código.",
 		"login.otp.resendSuccess":
 			"Nuevo código enviado. Revisa tu correo (válido por 5 minutos).",
 		"login.otp.resendWait": "Espera {seconds}s para reenviar",

@@ -54,6 +54,8 @@ const mockTranslations: Record<string, string> = {
 	"login.otp.resend": "Reenviar código",
 	"login.otp.resending": "Enviando...",
 	"login.otp.resendError": "Error al reenviar el código. Intenta de nuevo.",
+	"login.otp.rateLimited":
+		"Demasiadas solicitudes. Espera un momento antes de pedir otro código.",
 	"login.otp.resendSuccess":
 		"Nuevo código enviado. Revisa tu correo (válido por 5 minutos).",
 	"login.otp.resendWait": "Espera {seconds}s para reenviar",

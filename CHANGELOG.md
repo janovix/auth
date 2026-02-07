@@ -1,3 +1,10 @@
+# [2.0.0-rc.17](https://github.com/janovix/auth/compare/v2.0.0-rc.16...v2.0.0-rc.17) (2026-02-07)
+
+
+### Features
+
+* **api-keys:** implement API keys management interface ([6b0eeab](https://github.com/janovix/auth/commit/6b0eeabe6a568cb4c933f74f55f6b91222e983a5))
+
 # [2.0.0-rc.16](https://github.com/janovix/auth/compare/v2.0.0-rc.15...v2.0.0-rc.16) (2026-02-06)
 
 

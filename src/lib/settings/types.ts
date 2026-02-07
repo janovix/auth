@@ -131,3 +131,25 @@ export interface CreateAmlComplianceSettingsInput {
 	obligatedSubjectKey: string;
 	activityKey: string;
 }
+
+// ============================================================================
+// API Keys (organization-scoped, for third-party programmatic access)
+// ============================================================================
+
+export interface ApiKey {
+	id: string;
+	name: string;
+	keyPrefix: string;
+	organizationId: string;
+	createdById: string;
+	lastUsedAt: string | null;
+	expiresAt: string | null;
+	revokedAt: string | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface ApiKeyCreateResponse {
+	apiKey: ApiKey;
+	plainKey: string;
+}

@@ -47,7 +47,7 @@ import {
 	SettingsPageHeader,
 	PersonalSettingsViewSkeleton,
 } from "@/components/settings";
-import { AvatarEditorDialog } from "@janovix/blocks";
+import { AvatarEditorDialog } from "@algenium/blocks";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 import { updateProfile } from "@/lib/auth/authActions";
 

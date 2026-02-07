@@ -78,7 +78,7 @@ const priceTypeConfig: Record<
 		descriptionKey: "settings.billing.pricing.overageAlert.description",
 		icon: AlertTriangle,
 	},
-	overage_transaction: {
+	overage_operation: {
 		labelKey: "settings.billing.pricing.overageTransaction.label",
 		descriptionKey: "settings.billing.pricing.overageTransaction.description",
 		icon: Receipt,

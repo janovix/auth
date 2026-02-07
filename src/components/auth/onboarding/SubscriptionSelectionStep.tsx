@@ -29,7 +29,7 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ThemeSwitcher, LanguageSwitcher } from "@janovix/blocks";
+import { ThemeSwitcher, LanguageSwitcher } from "@algenium/blocks";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
 

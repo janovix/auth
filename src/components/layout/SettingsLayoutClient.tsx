@@ -23,7 +23,7 @@ import {
 } from "@/lib/settings/settingsClient";
 import { getSubscriptionStatus } from "@/lib/billing";
 import { NotificationsProvider } from "@/contexts/notifications-context";
-import { NotificationsWidget } from "@janovix/blocks";
+import { NotificationsWidget } from "@algenium/blocks";
 
 interface SettingsLayoutClientProps {
 	children: React.ReactNode;

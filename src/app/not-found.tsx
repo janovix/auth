@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, FileQuestion, Home } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { useSetPageStatus } from "@/contexts/page-status-context";
-import { ThemeSwitcher, LanguageSwitcher } from "@janovix/blocks";
+import { ThemeSwitcher, LanguageSwitcher } from "@algenium/blocks";
 import { GlobalAuroraBackground } from "@/components/aurora";
 import { Logo } from "@/components/Logo";
 

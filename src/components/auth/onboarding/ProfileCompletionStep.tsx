@@ -20,8 +20,8 @@ import {
 	Input,
 	Label,
 } from "@/components/ui";
-import { ThemeSwitcher, LanguageSwitcher } from "@janovix/blocks";
-import { AvatarEditorDialog } from "@janovix/blocks";
+import { ThemeSwitcher, LanguageSwitcher } from "@algenium/blocks";
+import { AvatarEditorDialog } from "@algenium/blocks";
 import { useLanguage } from "@/contexts/language-context";
 
 const languages = [

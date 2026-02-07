@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 
-import { ThemeSwitcher, LanguageSwitcher } from "@janovix/blocks";
+import { ThemeSwitcher, LanguageSwitcher } from "@algenium/blocks";
 import { GlobalAuroraBackground } from "@/components/aurora";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";

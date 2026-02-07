@@ -19,7 +19,7 @@ import {
 	LanguageContext as BlocksLanguageContext,
 	type LanguageContextValue as BlocksLanguageContextValue,
 	type BlocksLanguage,
-} from "@janovix/blocks";
+} from "@algenium/blocks";
 
 type Language = "en" | "es";
 

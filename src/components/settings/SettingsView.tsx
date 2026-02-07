@@ -39,7 +39,7 @@ import {
 	AvatarFallback,
 	AvatarImage,
 } from "@/components/ui";
-import { AvatarEditor } from "@janovix/blocks";
+import { AvatarEditor } from "@algenium/blocks";
 import { useLanguage } from "@/contexts/language-context";
 import {
 	getUserSettings,

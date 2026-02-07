@@ -12,7 +12,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { AvatarEditor } from "@janovix/blocks";
+import { AvatarEditor } from "@algenium/blocks";
 import { useLanguage } from "@/contexts/language-context";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 

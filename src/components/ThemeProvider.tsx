@@ -82,6 +82,11 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
 		setMounted(true);
 	}, []);
 
+	// Don't render in SSR/test environments where window is not available
+	if (typeof window === "undefined") {
+		return <>{children}</>;
+	}
+
 	return (
 		<NextThemesProvider
 			attribute="class"

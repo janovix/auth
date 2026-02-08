@@ -1,3 +1,10 @@
+# [2.0.0-rc.18](https://github.com/janovix/auth/compare/v2.0.0-rc.17...v2.0.0-rc.18) (2026-02-08)
+
+
+### Features
+
+* **translations:** add API keys management translations in English and Spanish ([3b632b5](https://github.com/janovix/auth/commit/3b632b58b0f40032f3aac9dc6b0190729bc32732))
+
 # [2.0.0-rc.17](https://github.com/janovix/auth/compare/v2.0.0-rc.16...v2.0.0-rc.17) (2026-02-07)
 
 

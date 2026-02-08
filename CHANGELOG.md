@@ -1,3 +1,24 @@
+# [2.0.0-rc.19](https://github.com/janovix/auth/compare/v2.0.0-rc.18...v2.0.0-rc.19) (2026-02-08)
+
+
+### Bug Fixes
+
+* **ThemeProvider:** prevent rendering in SSR/test environments ([d4250ab](https://github.com/janovix/auth/commit/d4250ab2bd2680642c41a9cff4f9f188dc0b7deb))
+
+# [2.0.0-rc.18](https://github.com/janovix/auth/compare/v2.0.0-rc.17...v2.0.0-rc.18) (2026-02-08)
+
+
+### Features
+
+* **translations:** add API keys management translations in English and Spanish ([3b632b5](https://github.com/janovix/auth/commit/3b632b58b0f40032f3aac9dc6b0190729bc32732))
+
+# [2.0.0-rc.17](https://github.com/janovix/auth/compare/v2.0.0-rc.16...v2.0.0-rc.17) (2026-02-07)
+
+
+### Features
+
+* **api-keys:** implement API keys management interface ([6b0eeab](https://github.com/janovix/auth/commit/6b0eeabe6a568cb4c933f74f55f6b91222e983a5))
+
 # [2.0.0-rc.16](https://github.com/janovix/auth/compare/v2.0.0-rc.15...v2.0.0-rc.16) (2026-02-06)
 
 

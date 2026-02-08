@@ -480,6 +480,47 @@ const translations = {
 		"settings.team.perm.view": "View organization data",
 		"settings.team.perm.use": "Use organization features",
 
+		// API Keys settings
+		"settings.apiKeys.title": "API Keys",
+		"settings.apiKeys.description":
+			"Manage API keys for programmatic access to the Janovix API",
+		"settings.apiKeys.created": "API key created successfully",
+		"settings.apiKeys.revoked": "API key revoked",
+		"settings.apiKeys.rotated": "API key rotated successfully",
+		"settings.apiKeys.never": "Never",
+		"settings.apiKeys.justNow": "Just now",
+		"settings.apiKeys.create": "Create API Key",
+		"settings.apiKeys.createTitle": "Create API Key",
+		"settings.apiKeys.createDesc":
+			"Give your API key a descriptive name to identify its usage.",
+		"settings.apiKeys.keyName": "Key Name",
+		"settings.apiKeys.cancel": "Cancel",
+		"settings.apiKeys.creating": "Creating...",
+		"settings.apiKeys.createBtn": "Create Key",
+		"settings.apiKeys.keyCreated": "Your API Key",
+		"settings.apiKeys.keyWarning":
+			"This key will only be shown once. Copy it now and store it securely. You will not be able to see it again.",
+		"settings.apiKeys.done": "Done",
+		"settings.apiKeys.activeKeys": "Active Keys",
+		"settings.apiKeys.activeKeysDesc":
+			"Keys currently authorized for API access",
+		"settings.apiKeys.noKeys": "No API keys yet. Create one to get started.",
+		"settings.apiKeys.createdOn": "Created",
+		"settings.apiKeys.lastUsed": "Last used",
+		"settings.apiKeys.rotate": "Rotate",
+		"settings.apiKeys.rotateTitle": "Rotate API Key?",
+		"settings.apiKeys.rotateDesc":
+			"This will revoke the current key and generate a new one. Any systems using the old key will immediately stop working.",
+		"settings.apiKeys.rotateBtn": "Rotate Key",
+		"settings.apiKeys.revoke": "Revoke",
+		"settings.apiKeys.revokeTitle": "Revoke API Key?",
+		"settings.apiKeys.revokeDesc":
+			"This action cannot be undone. The key will immediately stop working for any system using it.",
+		"settings.apiKeys.revokeBtn": "Revoke Key",
+		"settings.apiKeys.revokedKeys": "Revoked Keys",
+		"settings.apiKeys.revokedBadge": "Revoked",
+		"settings.apiKeys.revokedOn": "Revoked",
+
 		// Billing settings
 		"settings.nav.billing": "Billing",
 		"settings.billing.title": "Billing & Subscription",
@@ -1384,6 +1425,47 @@ const translations = {
 		"settings.team.perm.settings": "Editar configuración de organización",
 		"settings.team.perm.view": "Ver datos de la organización",
 		"settings.team.perm.use": "Usar funciones de la organización",
+
+		// API Keys settings
+		"settings.apiKeys.title": "Claves API",
+		"settings.apiKeys.description":
+			"Administra las claves API para acceso programático a la API de Janovix",
+		"settings.apiKeys.created": "Clave API creada exitosamente",
+		"settings.apiKeys.revoked": "Clave API revocada",
+		"settings.apiKeys.rotated": "Clave API rotada exitosamente",
+		"settings.apiKeys.never": "Nunca",
+		"settings.apiKeys.justNow": "Justo ahora",
+		"settings.apiKeys.create": "Crear Clave API",
+		"settings.apiKeys.createTitle": "Crear Clave API",
+		"settings.apiKeys.createDesc":
+			"Da a tu clave API un nombre descriptivo para identificar su uso.",
+		"settings.apiKeys.keyName": "Nombre de la Clave",
+		"settings.apiKeys.cancel": "Cancelar",
+		"settings.apiKeys.creating": "Creando...",
+		"settings.apiKeys.createBtn": "Crear Clave",
+		"settings.apiKeys.keyCreated": "Tu Clave API",
+		"settings.apiKeys.keyWarning":
+			"Esta clave solo se mostrará una vez. Cópiala ahora y guárdala de forma segura. No podrás verla nuevamente.",
+		"settings.apiKeys.done": "Listo",
+		"settings.apiKeys.activeKeys": "Claves Activas",
+		"settings.apiKeys.activeKeysDesc":
+			"Claves actualmente autorizadas para acceso API",
+		"settings.apiKeys.noKeys": "Aún no hay claves API. Crea una para comenzar.",
+		"settings.apiKeys.createdOn": "Creada",
+		"settings.apiKeys.lastUsed": "Último uso",
+		"settings.apiKeys.rotate": "Rotar",
+		"settings.apiKeys.rotateTitle": "¿Rotar Clave API?",
+		"settings.apiKeys.rotateDesc":
+			"Esto revocará la clave actual y generará una nueva. Cualquier sistema que use la clave antigua dejará de funcionar inmediatamente.",
+		"settings.apiKeys.rotateBtn": "Rotar Clave",
+		"settings.apiKeys.revoke": "Revocar",
+		"settings.apiKeys.revokeTitle": "¿Revocar Clave API?",
+		"settings.apiKeys.revokeDesc":
+			"Esta acción no se puede deshacer. La clave dejará de funcionar inmediatamente para cualquier sistema que la use.",
+		"settings.apiKeys.revokeBtn": "Revocar Clave",
+		"settings.apiKeys.revokedKeys": "Claves Revocadas",
+		"settings.apiKeys.revokedBadge": "Revocada",
+		"settings.apiKeys.revokedOn": "Revocada",
 
 		// Billing settings
 		"settings.nav.billing": "Facturación",

@@ -7,6 +7,7 @@ export { CreateOrganizationView } from "./CreateOrganizationView";
 export { ComplianceSettingsView } from "./ComplianceSettingsView";
 export { TeamSettingsView } from "./TeamSettingsView";
 export { BillingSettingsView } from "./BillingSettingsView";
+export { ApiKeysView } from "./ApiKeysView";
 
 // Shared UI components
 export { SettingsCard } from "./SettingsCard";

@@ -13,6 +13,7 @@ import {
 	Circle,
 	Search,
 	LayoutDashboard,
+	KeyRound,
 } from "lucide-react";
 
 import {
@@ -115,6 +116,12 @@ export function AppSidebar({
 			href: "/settings/team",
 			icon: Users,
 			complete: completionStatus.team ?? true,
+		},
+		{
+			name: t("settings.nav.apiKeys") || "API Keys",
+			href: "/settings/api-keys",
+			icon: KeyRound,
+			complete: true,
 		},
 	];
 

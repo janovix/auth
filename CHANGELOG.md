@@ -1,3 +1,10 @@
+# [2.0.0-rc.19](https://github.com/janovix/auth/compare/v2.0.0-rc.18...v2.0.0-rc.19) (2026-02-08)
+
+
+### Bug Fixes
+
+* **ThemeProvider:** prevent rendering in SSR/test environments ([d4250ab](https://github.com/janovix/auth/commit/d4250ab2bd2680642c41a9cff4f9f188dc0b7deb))
+
 # [2.0.0-rc.18](https://github.com/janovix/auth/compare/v2.0.0-rc.17...v2.0.0-rc.18) (2026-02-08)
 
 

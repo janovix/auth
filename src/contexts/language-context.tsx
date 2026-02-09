@@ -275,6 +275,7 @@ const translations = {
 		"settings.nav.aml": "AML",
 		"settings.nav.watchlist": "Watchlist",
 		"settings.nav.active": "Active",
+		"settings.nav.apiKeys": "API Keys",
 		// App Switcher
 		"appSwitcher.title": "Janovix Apps",
 		"appSwitcher.homepage": "Homepage",
@@ -1217,6 +1218,7 @@ const translations = {
 		"settings.nav.aml": "AML",
 		"settings.nav.watchlist": "Watchlist",
 		"settings.nav.active": "Activo",
+		"settings.nav.apiKeys": "Claves API",
 		// App Switcher
 		"appSwitcher.title": "Apps de Janovix",
 		"appSwitcher.homepage": "Página principal",

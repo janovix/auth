@@ -33,7 +33,7 @@ const ENTITY_TYPES = [
 	"invitation",
 	"session",
 	"settings",
-	"transaction",
+	"operation",
 	"client",
 	"alert",
 	"report",

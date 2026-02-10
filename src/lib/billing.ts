@@ -22,7 +22,7 @@ export interface PlanLimits {
 	reportsPerMonth: number; // Metered: overage billed via Stripe
 	noticesPerMonth: number; // Metered: overage billed via Stripe
 	alertsPerMonth: number; // Metered: overage billed via Stripe
-	transactionsPerMonth: number; // Metered: overage billed via Stripe
+	operationsPerMonth: number; // Metered: overage billed via Stripe
 	clientsPerMonth: number; // Metered: overage billed via Stripe
 	watchlistQueriesPerDay: number; // Per user per day limit
 }
@@ -54,7 +54,7 @@ export interface OrganizationUsage {
 	reports: number;
 	notices: number;
 	alerts: number;
-	transactions: number;
+	operations: number;
 	clients: number;
 	users: number;
 }
@@ -65,7 +65,7 @@ export interface UsageResponse {
 		reports: number;
 		notices: number;
 		alerts: number;
-		transactions: number;
+		operations: number;
 		clients: number;
 		users: number;
 	} | null;
@@ -371,7 +371,7 @@ export async function getPlans(): Promise<
 				reportsPerMonth: 0,
 				noticesPerMonth: 0,
 				alertsPerMonth: 0,
-				transactionsPerMonth: 0,
+				operationsPerMonth: 0,
 				clientsPerMonth: 0,
 				watchlistQueriesPerDay: 50,
 			},
@@ -385,7 +385,7 @@ export async function getPlans(): Promise<
 				reportsPerMonth: 1,
 				noticesPerMonth: 2,
 				alertsPerMonth: 20,
-				transactionsPerMonth: 50,
+				operationsPerMonth: 50,
 				clientsPerMonth: 25,
 				watchlistQueriesPerDay: 50,
 			},
@@ -399,7 +399,7 @@ export async function getPlans(): Promise<
 				reportsPerMonth: 15,
 				noticesPerMonth: 20,
 				alertsPerMonth: 100,
-				transactionsPerMonth: 500,
+				operationsPerMonth: 500,
 				clientsPerMonth: 250,
 				watchlistQueriesPerDay: 200,
 			},
@@ -413,7 +413,7 @@ export async function getPlans(): Promise<
 				reportsPerMonth: 100,
 				noticesPerMonth: 100,
 				alertsPerMonth: 500,
-				transactionsPerMonth: 2000,
+				operationsPerMonth: 2000,
 				clientsPerMonth: 1000,
 				watchlistQueriesPerDay: 500,
 			},
@@ -488,7 +488,7 @@ export interface LicenseStatus {
 	limits: {
 		noticesPerMonth: number;
 		maxUsers: number;
-		maxTransactions?: number;
+		maxOperations?: number;
 		maxAlerts?: number;
 	};
 	features: string[];

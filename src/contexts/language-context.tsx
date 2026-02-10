@@ -385,7 +385,7 @@ const translations = {
 		"settings.org.deleteButton": "Delete organization",
 		"settings.org.deleteConfirmTitle": "Delete organization?",
 		"settings.org.deleteConfirmDesc":
-			"This action cannot be undone. This will permanently delete {name} and all associated data including members, transactions, and alerts.",
+			"This action cannot be undone. This will permanently delete {name} and all associated data including members, operations, and alerts.",
 		"settings.org.deleteWarning":
 			"This is a destructive action. All organization data, members, and settings will be permanently removed.",
 		"settings.org.deleteSlugPrompt":
@@ -534,7 +534,7 @@ const translations = {
 		"settings.billing.notices": "Notices",
 		"settings.billing.users": "Users",
 		"settings.billing.alerts": "Alerts",
-		"settings.billing.transactions": "Transactions",
+		"settings.billing.operations": "Operations",
 		"settings.billing.included": "included",
 		"settings.billing.unlimited": "Unlimited",
 		"settings.billing.overage": "overage",
@@ -670,9 +670,9 @@ const translations = {
 		"settings.billing.pricing.overageAlert.label": "Extra Alert",
 		"settings.billing.pricing.overageAlert.description":
 			"Per alert beyond monthly limit",
-		"settings.billing.pricing.overageTransaction.label": "Extra Transaction",
-		"settings.billing.pricing.overageTransaction.description":
-			"Per transaction beyond monthly limit",
+		"settings.billing.pricing.overageOperation.label": "Extra Operation",
+		"settings.billing.pricing.overageOperation.description":
+			"Per operation beyond monthly limit",
 		"settings.billing.pricing.overageClient.label": "Extra Client",
 		"settings.billing.pricing.overageClient.description":
 			"Per client beyond monthly limit",
@@ -682,7 +682,7 @@ const translations = {
 		"settings.billing.limits.reportsPerMonth": "Reports/month",
 		"settings.billing.limits.noticesPerMonth": "Notices/month",
 		"settings.billing.limits.alertsPerMonth": "Alerts/month",
-		"settings.billing.limits.transactionsPerMonth": "Transactions/month",
+		"settings.billing.limits.operationsPerMonth": "Operations/month",
 		"settings.billing.limits.clientsPerMonth": "Clients/month",
 		"settings.billing.limits.watchlistQueries": "Watchlist queries/day/user",
 		// Interval translations
@@ -718,7 +718,7 @@ const translations = {
 		"billing.upgrade.notices": "notices",
 		"billing.upgrade.users": "users",
 		"billing.upgrade.alerts": "alerts",
-		"billing.upgrade.transactions": "transactions",
+		"billing.upgrade.operations": "operations",
 		"billing.upgrade.general": "resources",
 
 		// Onboarding page
@@ -1329,7 +1329,7 @@ const translations = {
 		"settings.org.deleteButton": "Eliminar organización",
 		"settings.org.deleteConfirmTitle": "¿Eliminar organización?",
 		"settings.org.deleteConfirmDesc":
-			"Esta acción no se puede deshacer. Esto eliminará permanentemente {name} y todos los datos asociados incluyendo miembros, transacciones y alertas.",
+			"Esta acción no se puede deshacer. Esto eliminará permanentemente {name} y todos los datos asociados incluyendo miembros, operaciones y alertas.",
 		"settings.org.deleteWarning":
 			"Esta es una acción destructiva. Todos los datos, miembros y configuraciones de la organización serán eliminados permanentemente.",
 		"settings.org.deleteSlugPrompt":
@@ -1482,7 +1482,7 @@ const translations = {
 		"settings.billing.notices": "Avisos",
 		"settings.billing.users": "Usuarios",
 		"settings.billing.alerts": "Alertas",
-		"settings.billing.transactions": "Transacciones",
+		"settings.billing.operations": "Operaciones",
 		"settings.billing.included": "incluidos",
 		"settings.billing.unlimited": "Ilimitado",
 		"settings.billing.overage": "excedente",
@@ -1622,9 +1622,9 @@ const translations = {
 		"settings.billing.pricing.overageAlert.label": "Alerta Extra",
 		"settings.billing.pricing.overageAlert.description":
 			"Por alerta más allá del límite mensual",
-		"settings.billing.pricing.overageTransaction.label": "Transacción Extra",
-		"settings.billing.pricing.overageTransaction.description":
-			"Por transacción más allá del límite mensual",
+		"settings.billing.pricing.overageOperation.label": "Operación Extra",
+		"settings.billing.pricing.overageOperation.description":
+			"Por operación más allá del límite mensual",
 		"settings.billing.pricing.overageClient.label": "Cliente Extra",
 		"settings.billing.pricing.overageClient.description":
 			"Por cliente más allá del límite mensual",
@@ -1634,7 +1634,7 @@ const translations = {
 		"settings.billing.limits.reportsPerMonth": "Reportes/mes",
 		"settings.billing.limits.noticesPerMonth": "Avisos/mes",
 		"settings.billing.limits.alertsPerMonth": "Alertas/mes",
-		"settings.billing.limits.transactionsPerMonth": "Transacciones/mes",
+		"settings.billing.limits.operationsPerMonth": "Operaciones/mes",
 		"settings.billing.limits.clientsPerMonth": "Clientes/mes",
 		"settings.billing.limits.watchlistQueries":
 			"Consultas watchlist/día/usuario",
@@ -1671,7 +1671,7 @@ const translations = {
 		"billing.upgrade.notices": "avisos",
 		"billing.upgrade.users": "usuarios",
 		"billing.upgrade.alerts": "alertas",
-		"billing.upgrade.transactions": "transacciones",
+		"billing.upgrade.operations": "operaciones",
 		"billing.upgrade.general": "recursos",
 
 		// Onboarding page

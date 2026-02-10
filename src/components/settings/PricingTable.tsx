@@ -79,8 +79,8 @@ const priceTypeConfig: Record<
 		icon: AlertTriangle,
 	},
 	overage_operation: {
-		labelKey: "settings.billing.pricing.overageTransaction.label",
-		descriptionKey: "settings.billing.pricing.overageTransaction.description",
+		labelKey: "settings.billing.pricing.overageOperation.label",
+		descriptionKey: "settings.billing.pricing.overageOperation.description",
 		icon: Receipt,
 	},
 	overage_client: {
@@ -112,8 +112,8 @@ const limitConfig: Record<string, { labelKey: string; icon: typeof Users }> = {
 		labelKey: "settings.billing.limits.alertsPerMonth",
 		icon: AlertTriangle,
 	},
-	transactionsPerMonth: {
-		labelKey: "settings.billing.limits.transactionsPerMonth",
+	operationsPerMonth: {
+		labelKey: "settings.billing.limits.operationsPerMonth",
 		icon: Receipt,
 	},
 	clientsPerMonth: {

@@ -1,3 +1,10 @@
+# [2.0.0-rc.20](https://github.com/janovix/auth/compare/v2.0.0-rc.19...v2.0.0-rc.20) (2026-02-10)
+
+
+### Features
+
+* **translations:** add API keys navigation translations in English and Spanish ([6db91d3](https://github.com/janovix/auth/commit/6db91d39550ab52ed392e0d5f990c725b5b9d4e2))
+
 # [2.0.0-rc.19](https://github.com/janovix/auth/compare/v2.0.0-rc.18...v2.0.0-rc.19) (2026-02-08)
 
 

@@ -3,9 +3,10 @@
 /**
  * React hook for cross-tab and cross-app session synchronization.
  *
- * Activates two sync mechanisms:
+ * Activates three sync mechanisms:
  * 1. BroadcastChannel listener - receives instant notifications from other same-origin tabs
- * 2. visibilitychange listener - revalidates session when tab gains focus
+ * 2. visibilitychange listener - revalidates session when tab becomes visible (hidden → visible)
+ * 3. focus listener - revalidates session when window gains focus (handles side-by-side windows)
  *
  * Usage:
  * Call this hook once in your app's root client component (e.g., ClientLayout).
@@ -130,12 +131,21 @@ export function useSessionSync(): void {
 			}
 		};
 
+		// Handle window focus (for separate windows - visibilitychange doesn't fire for side-by-side windows)
+		const handleFocus = () => {
+			console.log("[SessionSync] Window focused");
+			// Use the same logic as visibilitychange
+			handleVisibilityChange();
+		};
+
 		document.addEventListener("visibilitychange", handleVisibilityChange);
+		window.addEventListener("focus", handleFocus);
 
 		// Cleanup listeners on unmount
 		return () => {
 			cleanupSync();
 			document.removeEventListener("visibilitychange", handleVisibilityChange);
+			window.removeEventListener("focus", handleFocus);
 		};
 	}, []); // Empty deps - only run once on mount
 }

@@ -19,6 +19,7 @@ import {
 	type SessionSyncMessage,
 } from "./sessionSync";
 import { clearSession } from "./sessionStore";
+import { getDefaultRedirectUrl } from "./redirectConfig";
 
 /**
  * Minimum interval (ms) between revalidations triggered by visibilitychange.
@@ -88,10 +89,11 @@ export function useSessionSync(): void {
 						);
 
 						if (isOnPublicRoute) {
+							const redirectUrl = getDefaultRedirectUrl();
 							console.log(
-								"[useSessionSync] Valid session detected on public route, redirecting to /settings",
+								`[useSessionSync] Valid session detected on public route, redirecting to ${redirectUrl}`,
 							);
-							window.location.href = "/settings";
+							window.location.href = redirectUrl;
 						} else {
 							console.log(
 								"[useSessionSync] Valid session detected, staying on current page",

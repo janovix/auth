@@ -1,3 +1,16 @@
+# [2.0.0-rc.22](https://github.com/janovix/auth/compare/v2.0.0-rc.21...v2.0.0-rc.22) (2026-02-11)
+
+
+### Features
+
+* **auth:** refactor sign-out functionality to use centralized signOut action ([534ad11](https://github.com/janovix/auth/commit/534ad11a47efe1639d1689ac923bc0be1fdd6d7d))
+* **session-sync:** add focus listener for enhanced session revalidation ([0032031](https://github.com/janovix/auth/commit/0032031e56b4bb8ab28576136b2d6a291b820ee7))
+* **session-sync:** enhance logging for session revalidation process ([6411545](https://github.com/janovix/auth/commit/6411545edad1ca02a1e68e16bcf64c16849a64c2))
+* **session-sync:** enhance logging for session synchronization events ([094728d](https://github.com/janovix/auth/commit/094728dddc2d455ecfbc1a79a8fd6f5c3746eb3e))
+* **session-sync:** enhance session validation and redirection logic in useSessionSync hook ([8edac32](https://github.com/janovix/auth/commit/8edac325362f0a1d6a92c84e9b1cdc73d763d459))
+* **session-sync:** implement cross-tab session synchronization and add related tests ([bfe2950](https://github.com/janovix/auth/commit/bfe295097afb7809e922a23fdc342955667bbbbb))
+* **session-sync:** update redirection logic to use dynamic redirect URL in useSessionSync hook ([b748da4](https://github.com/janovix/auth/commit/b748da435e1547e9ca4a9cb84e7a4c55698798a5))
+
 # [2.0.0-rc.21](https://github.com/janovix/auth/compare/v2.0.0-rc.20...v2.0.0-rc.21) (2026-02-11)
 
 

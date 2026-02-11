@@ -30,7 +30,7 @@ const languages = [
 ];
 import { useOnboarding } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
-import { updateProfile } from "@/lib/auth/authActions";
+import { updateProfile, signOut } from "@/lib/auth/authActions";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 
 type ProfileFormValues = {
@@ -68,7 +68,7 @@ export function ProfileCompletionStep() {
 
 	const handleLogout = async () => {
 		setIsLoggingOut(true);
-		await authClient.signOut();
+		await signOut();
 		window.location.href = "/login";
 	};
 

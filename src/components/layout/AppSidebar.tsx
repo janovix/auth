@@ -34,6 +34,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { authClient } from "@/lib/auth/authClient";
+import { signOut } from "@/lib/auth/authActions";
 import {
 	OrganizationSwitcher,
 	type Organization,
@@ -171,7 +172,7 @@ export function AppSidebar({
 	}, [router]);
 
 	const handleLogout = async () => {
-		await authClient.signOut();
+		await signOut();
 		window.location.href = "/login";
 	};
 

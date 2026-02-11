@@ -127,14 +127,25 @@ export function broadcastSessionUpdate(): void {
  * @returns true if session is valid, false if invalid/expired
  */
 export async function revalidateSession(): Promise<boolean> {
+	console.log("[SessionSync] Revalidating session...");
+
 	try {
 		const result = await authClient.getSession();
 
 		if (result.error || !result.data) {
 			// Session is invalid or expired
+			console.log(
+				"[SessionSync] Session invalid/expired, clearing session",
+				result.error,
+			);
 			clearSession();
 			return false;
 		}
+
+		console.log("[SessionSync] Session valid, updating store with:", {
+			userId: result.data.user.id,
+			userName: result.data.user.name,
+		});
 
 		// Session is valid - update the store
 		const session: Session = {
@@ -176,6 +187,7 @@ export async function revalidateSession(): Promise<boolean> {
 		};
 
 		setSession(session);
+		console.log("[SessionSync] Session store updated successfully");
 		return true;
 	} catch (err) {
 		console.error("[SessionSync] Revalidation failed:", err);

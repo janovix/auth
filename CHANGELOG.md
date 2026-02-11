@@ -1,3 +1,10 @@
+# [2.0.0-rc.21](https://github.com/janovix/auth/compare/v2.0.0-rc.20...v2.0.0-rc.21) (2026-02-11)
+
+
+### Features
+
+* **sidebar:** add pending invitations indicator to AppSidebar and update SettingsLayoutClient ([17db9cf](https://github.com/janovix/auth/commit/17db9cfd2019a5a0a074bd8e2ed9e9e2dced74f4))
+
 # [2.0.0-rc.20](https://github.com/janovix/auth/compare/v2.0.0-rc.19...v2.0.0-rc.20) (2026-02-10)
 
 

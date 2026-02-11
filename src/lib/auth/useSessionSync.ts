@@ -52,15 +52,26 @@ export function useSessionSync(): void {
 
 		// Handle messages from other tabs (BroadcastChannel or localStorage)
 		const handleMessage = (message: SessionSyncMessage) => {
+			console.log("[useSessionSync] Handling message:", message);
+
 			if (message.type === "SESSION_SIGNED_OUT") {
+				console.log(
+					"[useSessionSync] SESSION_SIGNED_OUT received - clearing session and redirecting",
+				);
 				// Another tab signed out - clear local state and redirect
 				clearSession();
 
 				// Full page navigation to ensure middleware runs
 				if (window.location.pathname !== "/login") {
+					console.log("[useSessionSync] Redirecting to /login");
 					window.location.href = "/login";
+				} else {
+					console.log("[useSessionSync] Already on /login, skipping redirect");
 				}
 			} else if (message.type === "SESSION_UPDATED") {
+				console.log(
+					"[useSessionSync] SESSION_UPDATED received - revalidating session",
+				);
 				// Another tab updated the session - revalidate to pick up changes
 				void revalidateSession();
 			}

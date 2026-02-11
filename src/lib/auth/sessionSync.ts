@@ -75,14 +75,19 @@ function postMessage(type: SessionSyncMessageType): void {
 		timestamp: Date.now(),
 	};
 
+	console.log(`[SessionSync] Broadcasting message:`, message);
+
 	// Try BroadcastChannel first
 	const channel = getBroadcastChannel();
 	if (channel) {
 		try {
 			channel.postMessage(message);
+			console.log(`[SessionSync] Message sent via BroadcastChannel`);
 		} catch (err) {
 			console.warn("[SessionSync] BroadcastChannel post failed:", err);
 		}
+	} else {
+		console.warn("[SessionSync] BroadcastChannel not available");
 	}
 
 	// Fallback to localStorage event
@@ -92,6 +97,7 @@ function postMessage(type: SessionSyncMessageType): void {
 			window.localStorage.setItem(STORAGE_KEY, JSON.stringify(message));
 			// Immediately remove it to keep storage clean
 			window.localStorage.removeItem(STORAGE_KEY);
+			console.log(`[SessionSync] Message sent via localStorage fallback`);
 		} catch (err) {
 			console.warn("[SessionSync] localStorage fallback failed:", err);
 		}
@@ -197,12 +203,23 @@ export function initSessionSync(onMessage: SessionSyncCallback): () => void {
 
 	const cleanupFunctions: Array<() => void> = [];
 
+	console.log("[SessionSync] Initializing session sync listeners");
+
 	// Setup BroadcastChannel listener
 	const channel = getBroadcastChannel();
 	if (channel) {
+		console.log(
+			"[SessionSync] BroadcastChannel created/retrieved:",
+			channel.name,
+		);
+
 		const handleBroadcastMessage = (
 			event: MessageEvent<SessionSyncMessage>,
 		) => {
+			console.log(
+				"[SessionSync] Received BroadcastChannel message:",
+				event.data,
+			);
 			if (event.data && typeof event.data.type === "string") {
 				onMessage(event.data);
 			}
@@ -212,11 +229,16 @@ export function initSessionSync(onMessage: SessionSyncCallback): () => void {
 		cleanupFunctions.push(() => {
 			channel.removeEventListener("message", handleBroadcastMessage);
 		});
+	} else {
+		console.warn(
+			"[SessionSync] BroadcastChannel not available, relying on localStorage fallback",
+		);
 	}
 
 	// Setup localStorage fallback listener
 	const handleStorageEvent = (event: StorageEvent) => {
 		if (event.key === STORAGE_KEY && event.newValue) {
+			console.log("[SessionSync] Received localStorage event:", event.newValue);
 			try {
 				const message = JSON.parse(event.newValue) as SessionSyncMessage;
 				if (message && typeof message.type === "string") {
@@ -233,8 +255,11 @@ export function initSessionSync(onMessage: SessionSyncCallback): () => void {
 		window.removeEventListener("storage", handleStorageEvent);
 	});
 
+	console.log("[SessionSync] All listeners registered successfully");
+
 	// Return cleanup function that calls all cleanup functions
 	return () => {
+		console.log("[SessionSync] Cleaning up session sync listeners");
 		cleanupFunctions.forEach((cleanup) => cleanup());
 	};
 }

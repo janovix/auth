@@ -276,6 +276,9 @@ const translations = {
 		"settings.nav.watchlist": "Watchlist",
 		"settings.nav.active": "Active",
 		"settings.nav.apiKeys": "API Keys",
+		"settings.sidebar.pendingInvitations": "Pending Invitations",
+		"settings.sidebar.invitation": "invitation",
+		"settings.sidebar.invitations": "invitations",
 		// App Switcher
 		"appSwitcher.title": "Janovix Apps",
 		"appSwitcher.homepage": "Homepage",
@@ -1219,6 +1222,9 @@ const translations = {
 		"settings.nav.watchlist": "Watchlist",
 		"settings.nav.active": "Activo",
 		"settings.nav.apiKeys": "Claves API",
+		"settings.sidebar.pendingInvitations": "Invitaciones Pendientes",
+		"settings.sidebar.invitation": "invitación",
+		"settings.sidebar.invitations": "invitaciones",
 		// App Switcher
 		"appSwitcher.title": "Apps de Janovix",
 		"appSwitcher.homepage": "Página principal",

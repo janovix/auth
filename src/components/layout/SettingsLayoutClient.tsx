@@ -80,6 +80,9 @@ function SettingsLayoutInner({
 	const [organizationsOwned, setOrganizationsOwned] = useState(0);
 	const [organizationsLimit, setOrganizationsLimit] = useState(0);
 
+	// Pending invitations count for sidebar indicator
+	const [pendingInvitationsCount, setPendingInvitationsCount] = useState(0);
+
 	// Effective timezone for the navbar clock (resolved from user > org > browser)
 	const [effectiveTimezone, setEffectiveTimezone] = useState<string | null>(
 		null,
@@ -339,6 +342,27 @@ function SettingsLayoutInner({
 					setOrganizationsOwned(subscriptionStatus.organizationsOwned);
 					setOrganizationsLimit(subscriptionStatus.organizationsLimit);
 				}
+
+				// Check for pending invitations
+				const authServiceUrl = getAuthCoreBaseUrl();
+				const onboardingResponse = await fetch(
+					`${authServiceUrl}/api/subscription/onboarding-status`,
+					{
+						credentials: "include",
+					},
+				);
+
+				if (onboardingResponse.ok) {
+					const result = (await onboardingResponse.json()) as {
+						success: boolean;
+						data?: {
+							pendingInvitations?: Array<{ id: string }>;
+						};
+					};
+					if (result.success && result.data?.pendingInvitations) {
+						setPendingInvitationsCount(result.data.pendingInvitations.length);
+					}
+				}
 			} catch {
 				// Silently fail - completion status is optional
 			}
@@ -444,6 +468,7 @@ function SettingsLayoutInner({
 				isLoading={orgsLoading}
 				organizationsOwned={organizationsOwned}
 				organizationsLimit={organizationsLimit}
+				pendingInvitationsCount={pendingInvitationsCount}
 			/>
 			<SidebarInset className="flex h-screen flex-col overflow-hidden">
 				{/* Header - Fixed navbar */}

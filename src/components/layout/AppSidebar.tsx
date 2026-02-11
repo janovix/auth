@@ -14,6 +14,7 @@ import {
 	Search,
 	LayoutDashboard,
 	KeyRound,
+	Mail,
 } from "lucide-react";
 
 import {
@@ -63,6 +64,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 	isLoading?: boolean;
 	organizationsOwned?: number;
 	organizationsLimit?: number;
+	pendingInvitationsCount?: number;
 }
 
 export function AppSidebar({
@@ -73,6 +75,7 @@ export function AppSidebar({
 	isLoading = false,
 	organizationsOwned = 0,
 	organizationsLimit = 0,
+	pendingInvitationsCount = 0,
 	...props
 }: AppSidebarProps) {
 	const { language, setLanguage, t } = useLanguage();
@@ -200,6 +203,33 @@ export function AppSidebar({
 						organizationsLimit={organizationsLimit}
 					/>
 				</div>
+
+				{/* Pending Invitations Indicator */}
+				{pendingInvitationsCount > 0 && (
+					<div className="px-2 pt-2">
+						<Link href="/invite" onClick={handleLinkClick}>
+							<div className="rounded-lg bg-primary/10 border border-primary/20 p-3 hover:bg-primary/15 transition-colors cursor-pointer">
+								<div className="flex items-center gap-3">
+									<div className="h-8 w-8 rounded-md bg-primary/15 flex items-center justify-center shrink-0">
+										<Mail className="h-4 w-4 text-primary" />
+									</div>
+									<div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
+										<p className="text-sm font-medium text-foreground">
+											{t("settings.sidebar.pendingInvitations")}
+										</p>
+										<p className="text-xs text-muted-foreground">
+											{pendingInvitationsCount}{" "}
+											{pendingInvitationsCount === 1
+												? t("settings.sidebar.invitation")
+												: t("settings.sidebar.invitations")}
+										</p>
+									</div>
+								</div>
+							</div>
+						</Link>
+					</div>
+				)}
+
 				{/* User Settings Group */}
 				<SidebarGroup>
 					{/* User Progress Header */}

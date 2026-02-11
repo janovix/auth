@@ -73,7 +73,32 @@ export function useSessionSync(): void {
 					"[useSessionSync] SESSION_UPDATED received - revalidating session",
 				);
 				// Another tab updated the session - revalidate to pick up changes
-				void revalidateSession();
+				void revalidateSession().then((isValid) => {
+					if (isValid) {
+						// Session is now valid - if we're on a public auth route, redirect to app
+						const publicAuthRoutes = [
+							"/login",
+							"/",
+							"/verify",
+							"/recover",
+							"/beta-access",
+						];
+						const isOnPublicRoute = publicAuthRoutes.some((route) =>
+							window.location.pathname.startsWith(route),
+						);
+
+						if (isOnPublicRoute) {
+							console.log(
+								"[useSessionSync] Valid session detected on public route, redirecting to /settings",
+							);
+							window.location.href = "/settings";
+						} else {
+							console.log(
+								"[useSessionSync] Valid session detected, staying on current page",
+							);
+						}
+					}
+				});
 			}
 		};
 

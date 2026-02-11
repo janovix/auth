@@ -99,18 +99,33 @@ export function useSessionSync(): void {
 				const now = Date.now();
 				const timeSinceLastRevalidation = now - lastRevalidationRef.current;
 
+				console.log(
+					`[SessionSync] Tab visible - time since last revalidation: ${timeSinceLastRevalidation}ms (throttle: ${REVALIDATION_THROTTLE_MS}ms)`,
+				);
+
 				if (timeSinceLastRevalidation >= REVALIDATION_THROTTLE_MS) {
 					lastRevalidationRef.current = now;
 
+					console.log("[SessionSync] Revalidating session...");
+
 					// Revalidate session against server
 					void revalidateSession().then((isValid) => {
+						console.log(`[SessionSync] Revalidation result: ${isValid}`);
+
 						if (!isValid) {
 							// Session is invalid/expired - redirect to login
 							if (window.location.pathname !== "/login") {
+								console.log(
+									"[SessionSync] Invalid session detected, redirecting to /login",
+								);
 								window.location.href = "/login";
 							}
 						}
 					});
+				} else {
+					console.log(
+						`[SessionSync] Throttled - skipping revalidation (${REVALIDATION_THROTTLE_MS - timeSinceLastRevalidation}ms remaining)`,
+					);
 				}
 			}
 		};

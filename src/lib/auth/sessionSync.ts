@@ -121,14 +121,25 @@ export function broadcastSessionUpdate(): void {
  * @returns true if session is valid, false if invalid/expired
  */
 export async function revalidateSession(): Promise<boolean> {
+	console.log("[DEBUG sessionSync] Starting revalidation...");
+
 	try {
 		const result = await authClient.getSession();
 
+		console.log("[DEBUG sessionSync] getSession result:", {
+			hasError: !!result.error,
+			hasData: !!result.data,
+			error: result.error,
+		});
+
 		if (result.error || !result.data) {
 			// Session is invalid or expired
+			console.log("[DEBUG sessionSync] Session invalid, clearing");
 			clearSession();
 			return false;
 		}
+
+		console.log("[DEBUG sessionSync] Session valid, updating store");
 
 		// Session is valid - update the store
 		const session: Session = {

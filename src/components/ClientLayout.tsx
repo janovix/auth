@@ -7,6 +7,7 @@ import { GlobalAuroraBackground } from "@/components/aurora";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { useLanguage } from "@/contexts/language-context";
+import { useSessionSync } from "@/lib/auth/useSessionSync";
 
 const languages = [
 	{ key: "en", label: "EN", nativeName: "English" },
@@ -72,6 +73,9 @@ export default function ClientLayout({
 	children: React.ReactNode;
 }) {
 	const pathname = usePathname();
+
+	// Enable cross-tab session synchronization
+	useSessionSync();
 
 	// Show centered layout with backdrop blur for auth routes (excluding onboarding which has its own layout)
 	const isAuthRoute =

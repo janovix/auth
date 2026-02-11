@@ -25,6 +25,7 @@ import {
 	type PendingInvitation,
 } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
+import { signOut } from "@/lib/auth/authActions";
 import { getAuthRedirectUrl } from "@/lib/auth/redirectConfig";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 
@@ -341,7 +342,7 @@ export function InviteView() {
 
 	const handleLogout = async () => {
 		setIsLoggingOut(true);
-		await authClient.signOut();
+		await signOut();
 		window.location.href = "/login";
 	};
 

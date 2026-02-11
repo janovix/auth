@@ -14,6 +14,7 @@
 
 import { authClient } from "./authClient";
 import { setSession, clearSession } from "./sessionStore";
+import { broadcastSignOut, broadcastSessionUpdate } from "./sessionSync";
 import type { Session, AuthResult } from "./types";
 
 // Re-export types for convenience
@@ -125,6 +126,7 @@ export async function signInWithOtp(
 
 		const session = toSession(sessionResult.data);
 		setSession(session);
+		broadcastSessionUpdate(); // Notify other tabs of sign-in
 
 		return {
 			success: true,
@@ -152,6 +154,7 @@ export async function signOut(): Promise<AuthResult<null>> {
 
 		// Clear session regardless of result
 		clearSession();
+		broadcastSignOut(); // Notify other tabs of sign-out
 
 		if (result.error) {
 			return {
@@ -169,6 +172,7 @@ export async function signOut(): Promise<AuthResult<null>> {
 	} catch (err) {
 		// Still clear session even on error
 		clearSession();
+		broadcastSignOut(); // Notify other tabs even on error
 		return {
 			success: false,
 			data: null,
@@ -520,6 +524,7 @@ export async function updateProfile(updates: {
 		if (sessionResult.data) {
 			const session = toSession(sessionResult.data);
 			setSession(session);
+			broadcastSessionUpdate(); // Notify other tabs of profile update
 			return {
 				success: true,
 				data: session,

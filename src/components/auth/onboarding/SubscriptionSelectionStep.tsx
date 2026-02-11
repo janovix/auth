@@ -39,6 +39,7 @@ const languages = [
 ];
 import { useOnboarding, type Plan } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
+import { signOut } from "@/lib/auth/authActions";
 import {
 	getPublicPlans,
 	getSubscriptionPrice,
@@ -99,7 +100,7 @@ export function SubscriptionSelectionStep({
 
 	const handleLogout = async () => {
 		setIsLoggingOut(true);
-		await authClient.signOut();
+		await signOut();
 		window.location.href = "/login";
 	};
 

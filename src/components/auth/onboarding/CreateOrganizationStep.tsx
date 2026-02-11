@@ -20,6 +20,7 @@ import { AvatarEditorDialog } from "@algenium/blocks";
 import { useLanguage } from "@/contexts/language-context";
 import { useOnboarding } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
+import { signOut } from "@/lib/auth/authActions";
 import { getAuthRedirectUrl } from "@/lib/auth/redirectConfig";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 import { cn } from "@/lib/utils";
@@ -185,7 +186,7 @@ export function CreateOrganizationStep({
 
 	const handleLogout = async () => {
 		setIsLoggingOut(true);
-		await authClient.signOut();
+		await signOut();
 		window.location.href = "/login";
 	};
 

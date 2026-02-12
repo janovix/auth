@@ -1,3 +1,10 @@
+# [2.0.0-rc.26](https://github.com/janovix/auth/compare/v2.0.0-rc.25...v2.0.0-rc.26) (2026-02-12)
+
+
+### Features
+
+* **billing:** enhance BillingSettingsView for enterprise license management ([f642a73](https://github.com/janovix/auth/commit/f642a737c5d286d2ee76b6b8fcb36259ee9ff2bb))
+
 # [2.0.0-rc.25](https://github.com/janovix/auth/compare/v2.0.0-rc.24...v2.0.0-rc.25) (2026-02-12)
 
 

@@ -34,13 +34,23 @@ export type PendingInvitation = {
 	expiresAt: Date | null;
 };
 
+export type LicenseLimits = {
+	maxOrganizations: number;
+	maxUsers: number;
+	reportsPerMonth: number;
+	noticesPerMonth: number;
+	alertsPerMonth: number;
+	operationsPerMonth: number;
+	clientsPerMonth: number;
+	watchlistQueriesPerDay: number;
+};
+
 export type License = {
 	key: string;
 	organizationName: string;
 	plan: string;
-	expiresAt: string;
-	maxUsers: number;
-	noticesIncluded: number;
+	expiresAt: string | null;
+	limits: LicenseLimits | null;
 	isActive: boolean;
 };
 
@@ -465,9 +475,8 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 						key: string;
 						organizationName: string;
 						plan: string;
-						expiresAt: string;
-						maxUsers: number;
-						noticesIncluded: number;
+						expiresAt: string | null;
+						limits: LicenseLimits | null;
 						isActive: boolean;
 					};
 					error?: string;

@@ -923,6 +923,8 @@ const translations = {
 		"onboarding.license.cancel": "Cancel",
 		"onboarding.license.activating": "Activating...",
 		"onboarding.license.activate": "Activate License",
+		"onboarding.license.noExpiration": "No expiration",
+		"onboarding.license.unlimited": "Unlimited",
 		// Breadcrumb error labels
 		"breadcrumb.notFound": "Not Found",
 		"breadcrumb.error": "Error",
@@ -1896,6 +1898,8 @@ const translations = {
 		"onboarding.license.cancel": "Cancelar",
 		"onboarding.license.activating": "Activando...",
 		"onboarding.license.activate": "Activar licencia",
+		"onboarding.license.noExpiration": "Sin expiración",
+		"onboarding.license.unlimited": "Ilimitado",
 		// Breadcrumb error labels
 		"breadcrumb.notFound": "No encontrado",
 		"breadcrumb.error": "Error",

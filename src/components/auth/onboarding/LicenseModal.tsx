@@ -88,12 +88,19 @@ export function LicenseModal({ open, onOpenChange }: LicenseModalProps) {
 		resetState();
 	};
 
-	const formatDate = (dateStr: string) => {
+	const formatDate = (dateStr: string | null) => {
+		if (!dateStr) return t("onboarding.license.noExpiration");
 		return new Date(dateStr).toLocaleDateString(undefined, {
 			year: "numeric",
 			month: "long",
 			day: "numeric",
 		});
+	};
+
+	const formatLimit = (value: number | undefined) => {
+		if (value === undefined || value === null) return "—";
+		if (value === 0) return t("onboarding.license.unlimited");
+		return value.toLocaleString();
 	};
 
 	return (
@@ -185,7 +192,7 @@ export function LicenseModal({ open, onOpenChange }: LicenseModalProps) {
 											{t("onboarding.license.users")}:
 										</span>
 										<span className="font-medium text-foreground">
-											{validatedLicense.maxUsers}
+											{formatLimit(validatedLicense.limits?.maxUsers)}
 										</span>
 									</div>
 									<div className="flex justify-between">
@@ -193,7 +200,7 @@ export function LicenseModal({ open, onOpenChange }: LicenseModalProps) {
 											{t("onboarding.license.notices")}:
 										</span>
 										<span className="font-medium text-foreground">
-											{validatedLicense.noticesIncluded.toLocaleString()}
+											{formatLimit(validatedLicense.limits?.noticesPerMonth)}
 										</span>
 									</div>
 								</div>

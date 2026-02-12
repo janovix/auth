@@ -1,3 +1,10 @@
+# [2.0.0-rc.25](https://github.com/janovix/auth/compare/v2.0.0-rc.24...v2.0.0-rc.25) (2026-02-12)
+
+
+### Features
+
+* **onboarding:** enhance LicenseModal with improved date and limit formatting ([3597ec2](https://github.com/janovix/auth/commit/3597ec2ae4d48a96e3936284c7d815fc0187a257))
+
 # [2.0.0-rc.24](https://github.com/janovix/auth/compare/v2.0.0-rc.23...v2.0.0-rc.24) (2026-02-12)
 
 

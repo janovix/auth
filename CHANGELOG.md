@@ -1,3 +1,10 @@
+# [2.0.0-rc.24](https://github.com/janovix/auth/compare/v2.0.0-rc.23...v2.0.0-rc.24) (2026-02-12)
+
+
+### Features
+
+* **billing:** add license activation functionality with confirmation dialog ([6673bd7](https://github.com/janovix/auth/commit/6673bd7c36d93631ad85fd798a003b9f26c7ef25))
+
 # [2.0.0-rc.23](https://github.com/janovix/auth/compare/v2.0.0-rc.22...v2.0.0-rc.23) (2026-02-12)
 
 

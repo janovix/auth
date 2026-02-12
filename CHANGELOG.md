@@ -1,3 +1,10 @@
+# [2.0.0-rc.23](https://github.com/janovix/auth/compare/v2.0.0-rc.22...v2.0.0-rc.23) (2026-02-12)
+
+
+### Features
+
+* **team-settings:** add ownership transfer functionality with confirmation dialog ([c7fd76e](https://github.com/janovix/auth/commit/c7fd76ea118e1a610d8ea94591ac36b3745cf270))
+
 # [2.0.0-rc.22](https://github.com/janovix/auth/compare/v2.0.0-rc.21...v2.0.0-rc.22) (2026-02-11)
 
 

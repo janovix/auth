@@ -27,6 +27,7 @@ import {
 	startSubscription,
 	cancelSubscription,
 	getPortalUrl,
+	activateLicenseKey,
 	type UserSubscriptionStatus,
 	type PublicPlanInfo,
 	isSubscriptionActive,
@@ -112,6 +113,7 @@ export function BillingSettingsView() {
 		useState<UserSubscriptionStatus | null>(null);
 	const [plans, setPlans] = useState<PublicPlanInfo[]>([]);
 	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+	const [redeemDialogOpen, setRedeemDialogOpen] = useState(false);
 
 	// Load billing data
 	const loadBillingData = useCallback(async () => {
@@ -206,14 +208,31 @@ export function BillingSettingsView() {
 	const [licenseKey, setLicenseKey] = useState("");
 	const [redeemingLicense, setRedeemingLicense] = useState(false);
 
+	// Initiate license redemption: if user has an active subscription show
+	// confirmation dialog first, otherwise proceed directly.
+	const handleRedeemLicenseClick = () => {
+		if (!licenseKey.trim()) return;
+		if (isSubscriptionActive(subscription)) {
+			setRedeemDialogOpen(true);
+		} else {
+			handleRedeemLicense();
+		}
+	};
+
 	const handleRedeemLicense = async () => {
 		if (!licenseKey.trim()) return;
+		setRedeemDialogOpen(false);
 		setRedeemingLicense(true);
 		try {
-			// TODO: Implement license redemption API call
+			const result = await activateLicenseKey(licenseKey.trim());
+
+			const description = result.previousPlanCancelled
+				? `${t("settings.billing.licenseRedeemedDesc")} ${t("settings.billing.previousPlanCancelled")}`
+				: t("settings.billing.licenseRedeemedDesc");
+
 			toast({
 				title: t("settings.billing.licenseRedeemed"),
-				description: t("settings.billing.licenseRedeemedDesc"),
+				description,
 			});
 			setLicenseKey("");
 			await loadBillingData();
@@ -543,7 +562,7 @@ export function BillingSettingsView() {
 									/>
 								</div>
 								<Button
-									onClick={handleRedeemLicense}
+									onClick={handleRedeemLicenseClick}
 									disabled={!licenseKey.trim() || redeemingLicense}
 								>
 									{redeemingLicense ? (
@@ -665,6 +684,28 @@ export function BillingSettingsView() {
 							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 						>
 							{t("settings.billing.cancelSubscription")}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
+
+			{/* License Redeem Confirmation Dialog */}
+			<AlertDialog open={redeemDialogOpen} onOpenChange={setRedeemDialogOpen}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>
+							{t("settings.billing.redeemConfirmTitle")}
+						</AlertDialogTitle>
+						<AlertDialogDescription>
+							{t("settings.billing.redeemConfirmDesc")}
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel>
+							{t("settings.billing.redeemKeepSubscription")}
+						</AlertDialogCancel>
+						<AlertDialogAction onClick={handleRedeemLicense}>
+							{t("settings.billing.redeemConfirmAction")}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

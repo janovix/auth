@@ -580,12 +580,39 @@ export async function getLicenseStatus(): Promise<LicenseStatus | null> {
 }
 
 /**
- * @deprecated Enterprise licenses removed
+ * Activate an enterprise license key for the current user.
+ * If the user has an active Stripe subscription it will be cancelled server-side.
  */
-export async function activateLicense(
-	_licenseKey: string,
-): Promise<LicenseStatus> {
-	throw new Error("Enterprise licenses deprecated in user-based model");
+export interface LicenseActivationResult {
+	message: string;
+	plan: string;
+	organizationName: string;
+	previousPlanCancelled: boolean;
+	previousPlan: string | null;
+	limits: PlanLimits | null;
+}
+
+export async function activateLicenseKey(
+	licenseKey: string,
+): Promise<LicenseActivationResult> {
+	const response = await fetch(`${API_BASE()}/subscription/license/activate`, {
+		method: "POST",
+		credentials: "include",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ key: licenseKey }),
+	});
+
+	const result = (await response.json()) as {
+		success: boolean;
+		data?: LicenseActivationResult;
+		error?: string;
+	};
+
+	if (!response.ok || !result.success || !result.data) {
+		throw new Error(result.error || "Failed to activate license");
+	}
+
+	return result.data;
 }
 
 // ============================================================================

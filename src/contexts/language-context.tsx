@@ -641,6 +641,14 @@ const translations = {
 		"settings.billing.licenseRedeemed": "License Redeemed",
 		"settings.billing.licenseRedeemedDesc":
 			"Your enterprise license has been activated successfully.",
+		"settings.billing.redeemConfirmTitle": "Cancel current subscription?",
+		"settings.billing.redeemConfirmDesc":
+			"Activating this license will cancel your current subscription immediately. Your license will take effect right away.",
+		"settings.billing.redeemConfirmAction":
+			"Cancel Subscription & Activate License",
+		"settings.billing.redeemKeepSubscription": "Keep Subscription",
+		"settings.billing.previousPlanCancelled":
+			"Your previous subscription has been cancelled.",
 		"settings.billing.customDeals":
 			"Need a custom plan or volume pricing? Contact our sales team for tailored solutions.",
 		"settings.billing.detailedPricing": "Detailed Pricing",
@@ -1601,6 +1609,14 @@ const translations = {
 		"settings.billing.licenseRedeemed": "Licencia Canjeada",
 		"settings.billing.licenseRedeemedDesc":
 			"Tu licencia empresarial ha sido activada exitosamente.",
+		"settings.billing.redeemConfirmTitle": "¿Cancelar suscripción actual?",
+		"settings.billing.redeemConfirmDesc":
+			"Activar esta licencia cancelará tu suscripción actual de forma inmediata. Tu licencia entrará en vigor de inmediato.",
+		"settings.billing.redeemConfirmAction":
+			"Cancelar Suscripción y Activar Licencia",
+		"settings.billing.redeemKeepSubscription": "Mantener Suscripción",
+		"settings.billing.previousPlanCancelled":
+			"Tu suscripción anterior ha sido cancelada.",
 		"settings.billing.customDeals":
 			"¿Necesitas un plan personalizado o precios por volumen? Contacta a nuestro equipo de ventas para soluciones a medida.",
 		"settings.billing.detailedPricing": "Precios Detallados",

@@ -469,6 +469,12 @@ const translations = {
 		"settings.team.removeError": "Failed to remove member",
 		"settings.team.invitationCanceled": "Invitation canceled",
 		"settings.team.cancelError": "Failed to cancel invitation",
+		"settings.team.transferOwnership": "Transfer ownership",
+		"settings.team.transferConfirmTitle": "Transfer ownership?",
+		"settings.team.transferConfirmDesc":
+			"Are you sure you want to transfer ownership of this organization to {name}? You will become an admin and lose owner privileges.",
+		"settings.team.transferSuccess": "Ownership transferred successfully",
+		"settings.team.transferError": "Failed to transfer ownership",
 		"settings.team.removeConfirmTitle": "Remove member?",
 		"settings.team.removeConfirmDesc":
 			"Are you sure you want to remove {name} from the organization? They will lose access immediately.",
@@ -1419,6 +1425,12 @@ const translations = {
 		"settings.team.removeError": "Error al remover miembro",
 		"settings.team.invitationCanceled": "Invitación cancelada",
 		"settings.team.cancelError": "Error al cancelar invitación",
+		"settings.team.transferOwnership": "Transferir propiedad",
+		"settings.team.transferConfirmTitle": "¿Transferir propiedad?",
+		"settings.team.transferConfirmDesc":
+			"¿Estás seguro de que deseas transferir la propiedad de esta organización a {name}? Te convertirás en administrador y perderás los privilegios de propietario.",
+		"settings.team.transferSuccess": "Propiedad transferida exitosamente",
+		"settings.team.transferError": "Error al transferir propiedad",
 		"settings.team.removeConfirmTitle": "¿Remover miembro?",
 		"settings.team.removeConfirmDesc":
 			"¿Estás seguro de que deseas remover a {name} de la organización? Perderá acceso inmediatamente.",

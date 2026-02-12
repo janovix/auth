@@ -13,6 +13,7 @@ import {
 	X,
 	Loader2,
 	Trash2,
+	ArrowRightLeft,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button, Label, Badge } from "@/components/ui";
@@ -58,6 +59,7 @@ import {
 	type OrganizationMembership,
 } from "@/lib/settings";
 import { authClient } from "@/lib/auth/authClient";
+import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import {
 	SettingsCard,
@@ -288,6 +290,41 @@ export function TeamSettingsView() {
 		}
 	};
 
+	const handleTransferOwnership = async (newOwnerUserId: string) => {
+		if (!activeOrgId || !isOwner) return;
+
+		try {
+			const response = await fetch(
+				`${getAuthCoreBaseUrl()}/api/organization/transfer-ownership`,
+				{
+					method: "POST",
+					credentials: "include",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						organizationId: activeOrgId,
+						newOwnerUserId,
+					}),
+				},
+			);
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				throw new Error(
+					(result as { error?: string }).error ??
+						"Failed to transfer ownership",
+				);
+			}
+
+			showSuccess(t("settings.team.transferSuccess"));
+			loadData();
+		} catch (err) {
+			toast.error(
+				err instanceof Error ? err.message : t("settings.team.transferError"),
+			);
+		}
+	};
+
 	const RoleBadge = ({ role }: { role: Role }) => {
 		const config = ROLE_CONFIG[role];
 		const Icon = config.icon;
@@ -476,6 +513,41 @@ export function TeamSettingsView() {
 													{t("settings.team.makeMember")}
 												</DropdownMenuItem>
 												<DropdownMenuSeparator />
+												<AlertDialog>
+													<AlertDialogTrigger asChild>
+														<DropdownMenuItem
+															onSelect={(e) => e.preventDefault()}
+														>
+															<ArrowRightLeft className="mr-2 h-4 w-4" />
+															{t("settings.team.transferOwnership")}
+														</DropdownMenuItem>
+													</AlertDialogTrigger>
+													<AlertDialogContent>
+														<AlertDialogHeader>
+															<AlertDialogTitle>
+																{t("settings.team.transferConfirmTitle")}
+															</AlertDialogTitle>
+															<AlertDialogDescription>
+																{t("settings.team.transferConfirmDesc").replace(
+																	"{name}",
+																	member.user.name,
+																)}
+															</AlertDialogDescription>
+														</AlertDialogHeader>
+														<AlertDialogFooter>
+															<AlertDialogCancel>
+																{t("settings.team.cancel")}
+															</AlertDialogCancel>
+															<AlertDialogAction
+																onClick={() =>
+																	handleTransferOwnership(member.userId)
+																}
+															>
+																{t("settings.team.transferOwnership")}
+															</AlertDialogAction>
+														</AlertDialogFooter>
+													</AlertDialogContent>
+												</AlertDialog>
 												<AlertDialog>
 													<AlertDialogTrigger asChild>
 														<DropdownMenuItem

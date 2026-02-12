@@ -275,9 +275,13 @@ export function BillingSettingsView() {
 							</CardTitle>
 							<CardDescription>
 								{subscription?.hasSubscription
-									? subscription.isTrialing
-										? `${t("settings.billing.trial")} - ${subscription.trialDaysRemaining} ${t("settings.billing.daysRemaining")}`
-										: `${t("settings.billing.activeSince")} ${subscription.currentPeriodStart ? formatDate(subscription.currentPeriodStart) : "N/A"}`
+									? subscription.isLicenseBased
+										? subscription.licenseExpiresAt
+											? `${t("settings.billing.licenseExpires")} ${formatDate(subscription.licenseExpiresAt)}`
+											: t("settings.billing.licenseNoExpiry")
+										: subscription.isTrialing
+											? `${t("settings.billing.trial")} - ${subscription.trialDaysRemaining} ${t("settings.billing.daysRemaining")}`
+											: `${t("settings.billing.activeSince")} ${subscription.currentPeriodStart ? formatDate(subscription.currentPeriodStart) : "N/A"}`
 									: t("settings.billing.subscribePrompt")}
 							</CardDescription>
 						</div>
@@ -293,20 +297,32 @@ export function BillingSettingsView() {
 							<span className="text-sm">
 								{t("settings.billing.organizations")}:{" "}
 								{subscription?.organizationsOwned ?? 0} /{" "}
-								{subscription?.organizationsLimit ?? 0}
+								{subscription?.organizationsLimit === 0
+									? t("settings.billing.unlimited")
+									: (subscription?.organizationsLimit ?? 0)}
 							</span>
 						</div>
-						{subscription?.currentPeriodEnd && (
-							<div className="flex items-center gap-2">
-								<FileText className="h-4 w-4 text-muted-foreground" />
-								<span className="text-sm">
-									{subscription.cancelAtPeriodEnd
-										? t("settings.billing.ends")
-										: t("settings.billing.renews")}
-									: {formatDate(subscription.currentPeriodEnd)}
-								</span>
-							</div>
-						)}
+						{subscription?.isLicenseBased
+							? subscription.licenseExpiresAt && (
+									<div className="flex items-center gap-2">
+										<KeyRound className="h-4 w-4 text-muted-foreground" />
+										<span className="text-sm">
+											{t("settings.billing.licenseExpires")}:{" "}
+											{formatDate(subscription.licenseExpiresAt)}
+										</span>
+									</div>
+								)
+							: subscription?.currentPeriodEnd && (
+									<div className="flex items-center gap-2">
+										<FileText className="h-4 w-4 text-muted-foreground" />
+										<span className="text-sm">
+											{subscription.cancelAtPeriodEnd
+												? t("settings.billing.ends")
+												: t("settings.billing.renews")}
+											: {formatDate(subscription.currentPeriodEnd)}
+										</span>
+									</div>
+								)}
 					</div>
 
 					{/* Organization Usage Progress */}
@@ -331,7 +347,7 @@ export function BillingSettingsView() {
 							</div>
 						)}
 				</CardContent>
-				{isActive && (
+				{isActive && !subscription?.isLicenseBased && (
 					<CardFooter className="flex flex-wrap gap-2 px-6 py-4 border-t">
 						<Button
 							variant="default"
@@ -364,6 +380,13 @@ export function BillingSettingsView() {
 						>
 							{t("settings.billing.cancel")}
 						</Button>
+					</CardFooter>
+				)}
+				{isActive && subscription?.isLicenseBased && (
+					<CardFooter className="px-6 py-4 border-t">
+						<p className="text-sm text-muted-foreground">
+							{t("settings.billing.licenseManagedExternally")}
+						</p>
 					</CardFooter>
 				)}
 			</Card>

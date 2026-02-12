@@ -39,13 +39,16 @@ export interface UserSubscriptionStatus {
 		| "incomplete_expired"
 		| "paused"
 		| null;
-	plan: "watchlist" | "business" | "pro" | "ultra" | null;
+	plan: "watchlist" | "business" | "pro" | "ultra" | "enterprise" | null;
 	limits: PlanLimits | null;
 	isTrialing: boolean;
 	trialDaysRemaining: number | null;
 	currentPeriodStart: string | null;
 	currentPeriodEnd: string | null;
 	cancelAtPeriodEnd: boolean;
+	// License info (enterprise licenses)
+	isLicenseBased?: boolean;
+	licenseExpiresAt?: string | null;
 	organizationsOwned: number;
 	organizationsLimit: number;
 }

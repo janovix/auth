@@ -561,7 +561,10 @@ const translations = {
 		"settings.billing.enterprise": "Enterprise License",
 		"settings.billing.activateLicense": "Activate License",
 		"settings.billing.licenseActive": "License Active",
-		"settings.billing.licenseExpires": "Expires {date}",
+		"settings.billing.licenseExpires": "Expires",
+		"settings.billing.licenseNoExpiry": "Perpetual license - no expiry",
+		"settings.billing.licenseManagedExternally":
+			"This enterprise license is managed outside Stripe. Contact your administrator for changes.",
 		"settings.billing.licensePlaceholder": "Enter your license key",
 		"settings.billing.selectPlan": "Select a Plan",
 		"settings.billing.selectPlanDesc":
@@ -1528,7 +1531,10 @@ const translations = {
 		"settings.billing.enterprise": "Licencia Empresarial",
 		"settings.billing.activateLicense": "Activar Licencia",
 		"settings.billing.licenseActive": "Licencia Activa",
-		"settings.billing.licenseExpires": "Expira el {date}",
+		"settings.billing.licenseExpires": "Expira",
+		"settings.billing.licenseNoExpiry": "Licencia perpetua - sin vencimiento",
+		"settings.billing.licenseManagedExternally":
+			"Esta licencia empresarial se administra fuera de Stripe. Contacta a tu administrador para cambios.",
 		"settings.billing.licensePlaceholder": "Ingresa tu clave de licencia",
 		"settings.billing.selectPlan": "Selecciona un Plan",
 		"settings.billing.selectPlanDesc":

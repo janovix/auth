@@ -21,7 +21,11 @@ import {
 	RefreshCw,
 	Shield,
 } from "lucide-react";
-import { authClient } from "@/lib/auth/authClient";
+import {
+	authClient,
+	AUTH_RATE_LIMIT_EVENT,
+	type RateLimitEventDetail,
+} from "@/lib/auth/authClient";
 import Link from "next/link";
 import { useCallback, useEffect, useState, useRef, useMemo } from "react";
 import { useForm } from "react-hook-form";
@@ -130,9 +134,9 @@ export const LoginView = ({
 	const [isResending, setIsResending] = useState(false);
 	const [isBanned, setIsBanned] = useState(false);
 
-	// Resend cooldown (60 seconds)
+	// Resend cooldown - duration is dynamically set from X-Retry-After header
 	const { secondsRemaining, isOnCooldown, startCooldown, resetCooldown } =
-		useResendCooldown(60);
+		useResendCooldown();
 
 	// Success animation state
 	const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
@@ -150,6 +154,27 @@ export const LoginView = ({
 	useEffect(() => {
 		setPageProfile("login");
 	}, [setPageProfile]);
+
+	// Listen for rate limit events from authClient to set cooldown dynamically
+	useEffect(() => {
+		const handleRateLimit = (event: Event) => {
+			const customEvent = event as CustomEvent<RateLimitEventDetail>;
+			const retryAfter = customEvent.detail?.retryAfter;
+
+			if (retryAfter && retryAfter > 0) {
+				console.log(
+					`[LoginView] Rate limited. Starting ${retryAfter}s cooldown from X-Retry-After header`,
+				);
+				startCooldown(retryAfter);
+			}
+		};
+
+		window.addEventListener(AUTH_RATE_LIMIT_EVENT, handleRateLimit);
+
+		return () => {
+			window.removeEventListener(AUTH_RATE_LIMIT_EVENT, handleRateLimit);
+		};
+	}, [startCooldown]);
 
 	const form = useForm<EmailValues>({
 		resolver: zodResolver(emailSchema),
@@ -240,7 +265,8 @@ export const LoginView = ({
 		}
 
 		setStateModifier("default");
-		startCooldown();
+		// Note: Cooldown is now started automatically by the AUTH_RATE_LIMIT_EVENT listener
+		// when the server returns a 429 response with X-Retry-After header
 	};
 
 	const handleSendOtp = async (values: EmailValues) => {
@@ -375,7 +401,8 @@ export const LoginView = ({
 		} else {
 			setSuccessMessage(t("login.otp.resendSuccess"));
 			setStateModifier("default"); // Back to purple after success
-			startCooldown(); // Restart 60s cooldown after successful resend
+			// Note: Cooldown is now started automatically by the AUTH_RATE_LIMIT_EVENT listener
+			// when the server returns a 429 response with X-Retry-After header
 		}
 
 		setIsResending(false);

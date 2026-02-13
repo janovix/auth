@@ -234,15 +234,16 @@ export async function sendVerificationOtp(
 
 		if (result.error) {
 			// Check if it's a rate limit error (HTTP 429)
+			// Note: The X-Retry-After header is parsed by authClient and dispatched
+			// via AUTH_RATE_LIMIT_EVENT. Components should listen for that event
+			// to get the retry-after duration for displaying countdown to users.
 			const errorStatus = (result.error as { status?: number }).status;
 			if (errorStatus === 429) {
-				const retryAfter = 60;
 				return {
 					success: false,
 					data: null,
 					error: createRateLimitError(
 						"Too many OTP requests. Please wait before requesting another code.",
-						retryAfter,
 					),
 				};
 			}

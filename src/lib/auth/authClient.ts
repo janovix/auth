@@ -15,8 +15,8 @@ import { getAuthCoreBaseUrl } from "./authCoreConfig";
  * Dispatched when the server returns HTTP 429 (Too Many Requests).
  */
 export interface RateLimitEventDetail {
-	/** Number of seconds until the user can retry, from X-Retry-After header */
-	retryAfter: number | null;
+	/** Number of seconds until the user can retry, from X-Retry-After header (defaults to 60) */
+	retryAfter: number;
 	/** The URL that was rate limited */
 	url?: string;
 }
@@ -61,13 +61,22 @@ export const authClient = createAuthClient({
 			// Handle rate limit errors (HTTP 429)
 			if (response.status === 429) {
 				const retryAfterHeader = response.headers.get("X-Retry-After");
-				const retryAfter = retryAfterHeader
-					? parseInt(retryAfterHeader, 10)
-					: null;
-
-				console.warn(
-					`[Auth] Rate limited. Retry after ${retryAfter ?? "unknown"} seconds`,
+				console.log(
+					"[AuthClient] 429 detected, X-Retry-After:",
+					retryAfterHeader,
 				);
+
+				if (!retryAfterHeader) {
+					console.warn("[AuthClient] X-Retry-After header missing!");
+					return;
+				}
+
+				const retryAfter = parseInt(retryAfterHeader, 10);
+
+				if (isNaN(retryAfter) || retryAfter <= 0) {
+					console.warn("[AuthClient] Invalid X-Retry-After:", retryAfterHeader);
+					return;
+				}
 
 				// Dispatch custom event for UI components to handle
 				if (typeof window !== "undefined") {
@@ -75,6 +84,10 @@ export const authClient = createAuthClient({
 						retryAfter,
 						url: response.url,
 					};
+					console.log(
+						"[AuthClient] Dispatching event with retryAfter:",
+						retryAfter,
+					);
 					window.dispatchEvent(
 						new CustomEvent(AUTH_RATE_LIMIT_EVENT, { detail }),
 					);

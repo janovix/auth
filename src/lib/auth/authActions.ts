@@ -12,7 +12,11 @@
  * - New users without a name are redirected to onboarding after login
  */
 
-import { authClient } from "./authClient";
+import {
+	authClient,
+	AUTH_RATE_LIMIT_EVENT,
+	type RateLimitEventDetail,
+} from "./authClient";
 import { setSession, clearSession } from "./sessionStore";
 import { broadcastSignOut, broadcastSessionUpdate } from "./sessionSync";
 import type { Session, AuthResult } from "./types";
@@ -235,14 +239,40 @@ export async function sendVerificationOtp(
 		if (result.error) {
 			// Check if it's a rate limit error (HTTP 429)
 			const errorStatus = (result.error as { status?: number }).status;
+
 			if (errorStatus === 429) {
-				const retryAfter = 60;
+				// Try to extract X-Retry-After from the error object as fallback
+				const errorWithResponse = result.error as any;
+
+				// Check if the error has a response with headers
+				if (errorWithResponse.response?.headers) {
+					const retryAfterHeader =
+						errorWithResponse.response.headers.get?.("X-Retry-After") ||
+						errorWithResponse.response.headers["X-Retry-After"] ||
+						errorWithResponse.response.headers["x-retry-after"];
+
+					if (retryAfterHeader) {
+						const retryAfter = parseInt(retryAfterHeader, 10);
+						if (!isNaN(retryAfter) && retryAfter > 0) {
+							// Dispatch the event here as fallback if authClient didn't catch it
+							if (typeof window !== "undefined") {
+								const detail: RateLimitEventDetail = {
+									retryAfter,
+									url: errorWithResponse.response?.url,
+								};
+								window.dispatchEvent(
+									new CustomEvent(AUTH_RATE_LIMIT_EVENT, { detail }),
+								);
+							}
+						}
+					}
+				}
+
 				return {
 					success: false,
 					data: null,
 					error: createRateLimitError(
 						"Too many OTP requests. Please wait before requesting another code.",
-						retryAfter,
 					),
 				};
 			}
@@ -460,30 +490,26 @@ export type RateLimitErrorCode = "RATE_LIMITED";
 
 /**
  * Extended error interface for rate limit errors.
- * Includes the retry-after duration for displaying countdown to users.
+ * The retry-after duration is communicated via the AUTH_RATE_LIMIT_EVENT
+ * which components listen to for displaying countdowns.
  */
 export interface RateLimitError extends Error {
 	/** Error code identifying this as a rate limit error */
 	code: RateLimitErrorCode;
-	/** Number of seconds until the user can retry (from X-Retry-After header) */
-	retryAfter?: number;
 }
 
 /**
- * Creates a RateLimitError with optional retry-after duration.
+ * Creates a RateLimitError.
+ * Note: The retry-after duration comes from the X-Retry-After header
+ * and is dispatched via AUTH_RATE_LIMIT_EVENT in authClient.
  *
  * @param message - Error message to display
- * @param retryAfter - Optional seconds until retry is allowed
  */
 export function createRateLimitError(
 	message: string = "Too many requests. Please wait before trying again.",
-	retryAfter?: number,
 ): RateLimitError {
 	const error = new Error(message) as RateLimitError;
 	error.code = "RATE_LIMITED";
-	if (retryAfter !== undefined) {
-		error.retryAfter = retryAfter;
-	}
 	return error;
 }
 

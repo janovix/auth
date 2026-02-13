@@ -12,7 +12,11 @@
  * - New users without a name are redirected to onboarding after login
  */
 
-import { authClient } from "./authClient";
+import {
+	authClient,
+	AUTH_RATE_LIMIT_EVENT,
+	type RateLimitEventDetail,
+} from "./authClient";
 import { setSession, clearSession } from "./sessionStore";
 import { broadcastSignOut, broadcastSessionUpdate } from "./sessionSync";
 import type { Session, AuthResult } from "./types";
@@ -234,11 +238,49 @@ export async function sendVerificationOtp(
 
 		if (result.error) {
 			// Check if it's a rate limit error (HTTP 429)
-			// Note: The X-Retry-After header is parsed by authClient and dispatched
-			// via AUTH_RATE_LIMIT_EVENT. Components should listen for that event
-			// to get the retry-after duration for displaying countdown to users.
 			const errorStatus = (result.error as { status?: number }).status;
+			console.log("[authActions] Error status:", errorStatus);
+
 			if (errorStatus === 429) {
+				console.log("[authActions] 429 detected in sendVerificationOtp");
+
+				// Try to extract X-Retry-After from the error object
+				const errorWithResponse = result.error as any;
+				console.log("[authActions] Error object:", errorWithResponse);
+
+				// Check if the error has a response with headers
+				if (errorWithResponse.response?.headers) {
+					const retryAfterHeader =
+						errorWithResponse.response.headers.get?.("X-Retry-After") ||
+						errorWithResponse.response.headers["X-Retry-After"] ||
+						errorWithResponse.response.headers["x-retry-after"];
+
+					console.log(
+						"[authActions] X-Retry-After from error:",
+						retryAfterHeader,
+					);
+
+					if (retryAfterHeader) {
+						const retryAfter = parseInt(retryAfterHeader, 10);
+						if (!isNaN(retryAfter) && retryAfter > 0) {
+							console.log(
+								`[authActions] Dispatching rate limit event with ${retryAfter}s`,
+							);
+
+							// Dispatch the event here as fallback if authClient didn't catch it
+							if (typeof window !== "undefined") {
+								const detail: RateLimitEventDetail = {
+									retryAfter,
+									url: errorWithResponse.response?.url,
+								};
+								window.dispatchEvent(
+									new CustomEvent(AUTH_RATE_LIMIT_EVENT, { detail }),
+								);
+							}
+						}
+					}
+				}
+
 				return {
 					success: false,
 					data: null,

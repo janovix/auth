@@ -56,11 +56,19 @@ export const authClient = createAuthClient({
 	fetchOptions: {
 		credentials: "include",
 		onError: async (context) => {
+			console.log("[Auth] onError callback triggered", {
+				status: context.response.status,
+				url: context.response.url,
+			});
+
 			const { response } = context;
 
 			// Handle rate limit errors (HTTP 429)
 			if (response.status === 429) {
+				console.log("[Auth] 429 detected, processing rate limit...");
+
 				const retryAfterHeader = response.headers.get("X-Retry-After");
+				console.log("[Auth] X-Retry-After header value:", retryAfterHeader);
 
 				if (!retryAfterHeader) {
 					console.error(
@@ -75,6 +83,7 @@ export const authClient = createAuthClient({
 				}
 
 				const retryAfter = parseInt(retryAfterHeader, 10);
+				console.log("[Auth] Parsed retryAfter value:", retryAfter);
 
 				if (isNaN(retryAfter) || retryAfter <= 0) {
 					console.error(
@@ -88,17 +97,23 @@ export const authClient = createAuthClient({
 				);
 
 				// Dispatch custom event for UI components to handle
+				// Do this synchronously to ensure it happens immediately
 				if (typeof window !== "undefined") {
 					const detail: RateLimitEventDetail = {
 						retryAfter,
 						url: response.url,
 					};
 					console.log(
-						`[Auth] Dispatching ${AUTH_RATE_LIMIT_EVENT} event with retryAfter=${retryAfter}`,
+						`[Auth] Dispatching ${AUTH_RATE_LIMIT_EVENT} event with detail:`,
+						detail,
 					);
-					window.dispatchEvent(
-						new CustomEvent(AUTH_RATE_LIMIT_EVENT, { detail }),
-					);
+
+					const event = new CustomEvent(AUTH_RATE_LIMIT_EVENT, { detail });
+					window.dispatchEvent(event);
+
+					console.log(`[Auth] Event dispatched successfully`);
+				} else {
+					console.error("[Auth] window is undefined, cannot dispatch event");
 				}
 			}
 		},

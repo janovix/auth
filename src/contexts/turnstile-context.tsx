@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import {
 	createContext,
 	useContext,
@@ -58,7 +59,10 @@ export function TurnstileProvider({
 	const handleError = useCallback(() => {
 		setToken(null);
 		setIsVerifying(false);
-		console.error("[Turnstile] Verification failed");
+		Sentry.captureMessage("Turnstile verification failed", {
+			level: "error",
+			tags: { context: "turnstile-verification-failed" },
+		});
 	}, []);
 
 	const reset = useCallback(() => {

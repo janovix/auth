@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import {
 	sendVerificationOtp as localSendOtp,
 	signInWithOtp as localSignInWithOtp,
@@ -173,11 +174,9 @@ export const LoginView = ({
 				return;
 			}
 
-			console.log("[LoginView] Starting cooldown:", retryAfter);
 			startCooldown(retryAfter);
 		};
 
-		console.log("[LoginView] Registering rate limit listener");
 		window.addEventListener(AUTH_RATE_LIMIT_EVENT, handleRateLimit);
 
 		return () => {
@@ -448,7 +447,9 @@ export const LoginView = ({
 				callbackURL: finalRedirectUrl,
 			});
 		} catch (error) {
-			console.error("Google sign-in error:", error);
+			Sentry.captureException(error, {
+				tags: { context: "google-signin-error" },
+			});
 			setServerError(
 				error instanceof Error
 					? error.message

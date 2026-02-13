@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 import {
 	Loader2,
@@ -150,7 +151,9 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 				});
 				setPlans(fetchedPlans);
 			} catch (err) {
-				console.error("Failed to load plans:", err);
+				Sentry.captureException(err, {
+					tags: { context: "pricing-plans-load-failed" },
+				});
 				setError("Failed to load pricing information");
 			} finally {
 				setIsLoading(false);

@@ -11,6 +11,7 @@
  * this ensures signing out in one app is detected by all other apps when they gain focus.
  */
 
+import * as Sentry from "@sentry/nextjs";
 import { authClient } from "./authClient";
 import { setSession, clearSession } from "./sessionStore";
 import type { Session } from "./types";
@@ -57,7 +58,6 @@ function getBroadcastChannel(): BroadcastChannel | null {
 		try {
 			broadcastChannel = new BroadcastChannel(CHANNEL_NAME);
 		} catch (err) {
-			console.warn("[SessionSync] BroadcastChannel creation failed:", err);
 			return null;
 		}
 	}
@@ -81,7 +81,7 @@ function postMessage(type: SessionSyncMessageType): void {
 		try {
 			channel.postMessage(message);
 		} catch (err) {
-			console.warn("[SessionSync] BroadcastChannel post failed:", err);
+			// Silently fail - not critical
 		}
 	}
 
@@ -93,7 +93,7 @@ function postMessage(type: SessionSyncMessageType): void {
 			// Immediately remove it to keep storage clean
 			window.localStorage.removeItem(STORAGE_KEY);
 		} catch (err) {
-			console.warn("[SessionSync] localStorage fallback failed:", err);
+			// Silently fail - not critical
 		}
 	}
 }
@@ -121,25 +121,14 @@ export function broadcastSessionUpdate(): void {
  * @returns true if session is valid, false if invalid/expired
  */
 export async function revalidateSession(): Promise<boolean> {
-	console.log("[DEBUG sessionSync] Starting revalidation...");
-
 	try {
 		const result = await authClient.getSession();
 
-		console.log("[DEBUG sessionSync] getSession result:", {
-			hasError: !!result.error,
-			hasData: !!result.data,
-			error: result.error,
-		});
-
 		if (result.error || !result.data) {
 			// Session is invalid or expired
-			console.log("[DEBUG sessionSync] Session invalid, clearing");
 			clearSession();
 			return false;
 		}
-
-		console.log("[DEBUG sessionSync] Session valid, updating store");
 
 		// Session is valid - update the store
 		const session: Session = {
@@ -183,7 +172,9 @@ export async function revalidateSession(): Promise<boolean> {
 		setSession(session);
 		return true;
 	} catch (err) {
-		console.error("[SessionSync] Revalidation failed:", err);
+		Sentry.captureException(err, {
+			tags: { context: "session-revalidation-failed" },
+		});
 		clearSession();
 		return false;
 	}
@@ -234,7 +225,7 @@ export function initSessionSync(onMessage: SessionSyncCallback): () => void {
 					onMessage(message);
 				}
 			} catch (err) {
-				console.warn("[SessionSync] Failed to parse storage event:", err);
+				// Silently fail - not critical
 			}
 		}
 	};

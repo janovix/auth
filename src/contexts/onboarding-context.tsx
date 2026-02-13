@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import type React from "react";
 import {
 	createContext,
@@ -279,7 +280,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 				isLoading: false,
 			});
 		} catch (error) {
-			console.error("Failed to fetch onboarding status:", error);
+			Sentry.captureException(error, {
+				tags: { context: "onboarding-status-fetch-failed" },
+			});
 			setState((prev) => ({ ...prev, isLoading: false }));
 		}
 	}, []);
@@ -394,7 +397,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 						body: JSON.stringify({ organizationId }),
 					}).catch((err) => {
 						// Log but don't fail - seat update can be synced later
-						console.warn("[Onboarding] Failed to update seats:", err);
+						Sentry.captureException(err, {
+							tags: { context: "onboarding-seat-update-failed" },
+						});
 					});
 				}
 

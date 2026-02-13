@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import type React from "react";
 import {
 	createContext,
@@ -2002,9 +2003,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 				}
 				setSettingsSynced(true);
 			})
-			.catch((error) => {
+			.catch(() => {
 				// API unavailable, keep using cookie/browser value
-				console.debug("Settings API unavailable:", error);
 				setSettingsSynced(true);
 			});
 	}, []);
@@ -2018,11 +2018,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
 			// Update API in background (only if we've already synced with API)
 			if (settingsSynced) {
-				updateUserSettings({ language: lang as LanguageCode }).catch(
-					(error) => {
-						console.debug("Failed to update language in API:", error);
-					},
-				);
+				updateUserSettings({ language: lang as LanguageCode }).catch(() => {
+					// Silently fail - not critical
+				});
 			}
 		},
 		[settingsSynced],

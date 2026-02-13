@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -107,7 +108,9 @@ export function AvatarUploadDialog({
 			setOpen(false);
 			setAvatarDataUrl(null);
 		} catch (err) {
-			console.error("[AvatarUpload] Error:", err);
+			Sentry.captureException(err, {
+				tags: { context: "avatar-upload-error" },
+			});
 			setError(
 				err instanceof Error
 					? err.message

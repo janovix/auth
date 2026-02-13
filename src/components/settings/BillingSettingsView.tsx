@@ -1,5 +1,6 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState, useCallback } from "react";
 import {
 	CreditCard,
@@ -134,7 +135,9 @@ export function BillingSettingsView() {
 			setSubscription(subStatus);
 			setPlans(planList);
 		} catch (error) {
-			console.error("Failed to load billing data:", error);
+			Sentry.captureException(error, {
+				tags: { context: "billing-data-load-failed" },
+			});
 			toast({
 				title: t("settings.billing.error"),
 				variant: "destructive",
@@ -171,7 +174,9 @@ export function BillingSettingsView() {
 				window.location.href = url;
 			}
 		} catch (error) {
-			console.error("Checkout error:", error);
+			Sentry.captureException(error, {
+				tags: { context: "checkout-error" },
+			});
 			toast({
 				title: t("settings.billing.error"),
 				description: error instanceof Error ? error.message : undefined,
@@ -193,7 +198,9 @@ export function BillingSettingsView() {
 			});
 			await loadBillingData();
 		} catch (error) {
-			console.error("Cancel error:", error);
+			Sentry.captureException(error, {
+				tags: { context: "cancel-subscription-error" },
+			});
 			toast({
 				title: t("settings.billing.error"),
 				description: error instanceof Error ? error.message : undefined,

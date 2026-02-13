@@ -4,6 +4,27 @@ import { getSessionCookie } from "better-auth/cookies";
 import { getDefaultRedirectUrl } from "@/lib/auth/redirectConfig";
 
 /**
+ * Helper to add Set-Cookie headers from auth-svc to a Next.js response.
+ * This is CRITICAL for cookie cache refresh - without forwarding these headers,
+ * the browser never receives refreshed session cookies and sessions expire prematurely.
+ */
+function addAuthCookies(
+	response: NextResponse,
+	cookies: string[],
+): NextResponse {
+	if (!cookies || cookies.length === 0) {
+		return response;
+	}
+
+	// Add the auth-svc Set-Cookie headers to the response
+	for (const cookie of cookies) {
+		response.headers.append("Set-Cookie", cookie);
+	}
+
+	return response;
+}
+
+/**
  * Gets the auth service URL from environment variables.
  * For middleware (Edge Runtime), prefer internal URL that doesn't need DNS resolution.
  * This allows local development where hosts file entries aren't available in Edge Runtime.
@@ -56,13 +77,14 @@ type OnboardingStatus = {
 };
 
 /**
- * Session validation result including user data and onboarding status.
+ * Session validation result including user data, onboarding status, and Set-Cookie headers.
  */
 type SessionResult =
 	| {
 			isValid: false;
 			user: null;
 			onboardingStatus: null;
+			setCookieHeaders: string[];
 	  }
 	| {
 			isValid: true;
@@ -72,6 +94,7 @@ type SessionResult =
 				email: string;
 			};
 			onboardingStatus: OnboardingStatus;
+			setCookieHeaders: string[];
 	  };
 
 /**
@@ -96,8 +119,18 @@ async function getSessionWithOnboardingStatus(
 			},
 		);
 
+		// CRITICAL: Capture Set-Cookie headers from auth-svc
+		// These headers contain refreshed session cookies that MUST be forwarded to the browser
+		// Without this, the cookie cache never refreshes and sessions expire prematurely
+		const setCookieHeaders = sessionResponse.headers.getSetCookie?.() || [];
+
 		if (!sessionResponse.ok) {
-			return { isValid: false, user: null, onboardingStatus: null };
+			return {
+				isValid: false,
+				user: null,
+				onboardingStatus: null,
+				setCookieHeaders,
+			};
 		}
 
 		const sessionData = (await sessionResponse.json()) as {
@@ -115,7 +148,12 @@ async function getSessionWithOnboardingStatus(
 			!sessionData.user.id ||
 			!sessionData.user.email
 		) {
-			return { isValid: false, user: null, onboardingStatus: null };
+			return {
+				isValid: false,
+				user: null,
+				onboardingStatus: null,
+				setCookieHeaders,
+			};
 		}
 
 		// Then, get onboarding status
@@ -159,9 +197,15 @@ async function getSessionWithOnboardingStatus(
 				email: sessionData.user.email,
 			},
 			onboardingStatus,
+			setCookieHeaders,
 		};
 	} catch {
-		return { isValid: false, user: null, onboardingStatus: null };
+		return {
+			isValid: false,
+			user: null,
+			onboardingStatus: null,
+			setCookieHeaders: [],
+		};
 	}
 }
 
@@ -234,6 +278,7 @@ export async function middleware(request: NextRequest) {
 
 	// Session cookie exists - validate it with auth service and get onboarding status
 	const sessionResult = await getSessionWithOnboardingStatus(cookieHeader);
+	const { setCookieHeaders } = sessionResult;
 
 	if (!sessionResult.isValid) {
 		// Invalid session - redirect to login if on protected, onboarding, invite, or beta-access route
@@ -244,10 +289,12 @@ export async function middleware(request: NextRequest) {
 			isBetaAccessRoute
 		) {
 			const loginUrl = new URL("/login", request.url);
-			return NextResponse.redirect(loginUrl);
+			const redirectResponse = NextResponse.redirect(loginUrl);
+			return addAuthCookies(redirectResponse, setCookieHeaders);
 		}
 		// Allow access to public routes so user can re-authenticate
-		return NextResponse.next();
+		const nextResponse = NextResponse.next();
+		return addAuthCookies(nextResponse, setCookieHeaders);
 	}
 
 	// Valid session - check onboarding status
@@ -260,19 +307,29 @@ export async function middleware(request: NextRequest) {
 	if (isVisitor) {
 		// Already on beta-access page - allow access
 		if (isBetaAccessRoute) {
-			return NextResponse.next();
+			const nextResponse = NextResponse.next();
+			return addAuthCookies(nextResponse, setCookieHeaders);
 		}
 		// On any other route - redirect to beta-access
-		return NextResponse.redirect(new URL("/beta-access", request.url));
+		const redirectResponse = NextResponse.redirect(
+			new URL("/beta-access", request.url),
+		);
+		return addAuthCookies(redirectResponse, setCookieHeaders);
 	}
 
 	// If on beta-access but not a visitor, redirect to appropriate page
 	if (isBetaAccessRoute) {
 		const userNeedsOnboarding = needsOnboarding(onboardingStatus);
 		if (userNeedsOnboarding) {
-			return NextResponse.redirect(new URL("/onboarding", request.url));
+			const redirectResponse = NextResponse.redirect(
+				new URL("/onboarding", request.url),
+			);
+			return addAuthCookies(redirectResponse, setCookieHeaders);
 		}
-		return NextResponse.redirect(new URL(getDefaultRedirectUrl(), request.url));
+		const redirectResponse = NextResponse.redirect(
+			new URL(getDefaultRedirectUrl(), request.url),
+		);
+		return addAuthCookies(redirectResponse, setCookieHeaders);
 	}
 
 	const userNeedsOnboarding = needsOnboarding(onboardingStatus);
@@ -282,20 +339,28 @@ export async function middleware(request: NextRequest) {
 	if (isInviteRoute) {
 		// If user has a pending invitation, allow access to invite page
 		if (onboardingStatus.pendingInvitation) {
-			return NextResponse.next();
+			const nextResponse = NextResponse.next();
+			return addAuthCookies(nextResponse, setCookieHeaders);
 		}
 		// No pending invitation - redirect to onboarding or settings
 		if (userNeedsOnboarding) {
-			return NextResponse.redirect(new URL("/onboarding", request.url));
+			const redirectResponse = NextResponse.redirect(
+				new URL("/onboarding", request.url),
+			);
+			return addAuthCookies(redirectResponse, setCookieHeaders);
 		}
-		return NextResponse.redirect(new URL(getDefaultRedirectUrl(), request.url));
+		const redirectResponse = NextResponse.redirect(
+			new URL(getDefaultRedirectUrl(), request.url),
+		);
+		return addAuthCookies(redirectResponse, setCookieHeaders);
 	}
 
 	// User needs onboarding (profile incomplete OR no organization)
 	if (userNeedsOnboarding) {
 		// Already on onboarding page - allow access
 		if (isOnboardingRoute) {
-			return NextResponse.next();
+			const nextResponse = NextResponse.next();
+			return addAuthCookies(nextResponse, setCookieHeaders);
 		}
 
 		// On any other route - redirect to onboarding
@@ -315,7 +380,8 @@ export async function middleware(request: NextRequest) {
 			onboardingUrl.searchParams.set("redirect_to", getDefaultRedirectUrl());
 		}
 
-		return NextResponse.redirect(onboardingUrl);
+		const redirectResponse = NextResponse.redirect(onboardingUrl);
+		return addAuthCookies(redirectResponse, setCookieHeaders);
 	}
 
 	// User has completed onboarding - normal flow
@@ -326,23 +392,31 @@ export async function middleware(request: NextRequest) {
 
 		// Ensure we're not redirecting back to onboarding
 		if (targetUrl.includes("/onboarding")) {
-			return NextResponse.redirect(
+			const redirectResponse = NextResponse.redirect(
 				new URL(getDefaultRedirectUrl(), request.url),
 			);
+			return addAuthCookies(redirectResponse, setCookieHeaders);
 		}
 
-		return NextResponse.redirect(new URL(targetUrl, request.url));
+		const redirectResponse = NextResponse.redirect(
+			new URL(targetUrl, request.url),
+		);
+		return addAuthCookies(redirectResponse, setCookieHeaders);
 	}
 
 	// Redirect authenticated users away from public auth routes
 	if (isPublicAuthRoute) {
 		const redirectTo = request.nextUrl.searchParams.get("redirect_to");
 		const targetUrl = redirectTo || getDefaultRedirectUrl();
-		return NextResponse.redirect(new URL(targetUrl, request.url));
+		const redirectResponse = NextResponse.redirect(
+			new URL(targetUrl, request.url),
+		);
+		return addAuthCookies(redirectResponse, setCookieHeaders);
 	}
 
 	// Allow access to protected routes
-	return NextResponse.next();
+	const nextResponse = NextResponse.next();
+	return addAuthCookies(nextResponse, setCookieHeaders);
 }
 
 export const config = {

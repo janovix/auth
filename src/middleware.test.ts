@@ -96,6 +96,9 @@ describe("middleware", () => {
 							session: { id: "123" },
 							user: { id: "u1", name: "John Doe", email: "john@example.com" },
 						}),
+					headers: {
+						getSetCookie: () => [],
+					},
 				})
 				.mockResolvedValueOnce({
 					ok: true,
@@ -186,6 +189,9 @@ describe("middleware", () => {
 							session: { id: "123" },
 							user: { id: "u1", name: null, email: "john@example.com" },
 						}),
+					headers: {
+						getSetCookie: () => [],
+					},
 				})
 				.mockResolvedValueOnce({
 					ok: true,
@@ -286,6 +292,9 @@ describe("middleware", () => {
 							session: { id: "123" },
 							user: { id: "u1", name: "   ", email: "john@example.com" },
 						}),
+					headers: {
+						getSetCookie: () => [],
+					},
 				})
 				.mockResolvedValueOnce({
 					ok: true,
@@ -324,6 +333,9 @@ describe("middleware", () => {
 			mockFetch.mockResolvedValue({
 				ok: false,
 				json: () => Promise.resolve({}),
+				headers: {
+					getSetCookie: () => [],
+				},
 			});
 
 			const request = new NextRequest("https://auth.example.com/account");
@@ -339,6 +351,9 @@ describe("middleware", () => {
 			mockFetch.mockResolvedValue({
 				ok: true,
 				json: () => Promise.resolve({}), // No session or user
+				headers: {
+					getSetCookie: () => [],
+				},
 			});
 
 			const request = new NextRequest("https://auth.example.com/account");
@@ -366,6 +381,9 @@ describe("middleware", () => {
 			mockFetch.mockResolvedValue({
 				ok: false,
 				json: () => Promise.resolve({}),
+				headers: {
+					getSetCookie: () => [],
+				},
 			});
 
 			const request = new NextRequest("https://auth.example.com/login");
@@ -379,6 +397,9 @@ describe("middleware", () => {
 			mockFetch.mockResolvedValue({
 				ok: false,
 				json: () => Promise.resolve({}),
+				headers: {
+					getSetCookie: () => [],
+				},
 			});
 
 			const request = new NextRequest("https://auth.example.com/onboarding");
@@ -405,6 +426,9 @@ describe("middleware", () => {
 							session: { id: "123" },
 							user: { id: "u1", name: "John", email: "john@example.com" },
 						}),
+					headers: {
+						getSetCookie: () => [],
+					},
 				})
 				.mockResolvedValueOnce({
 					ok: true,

@@ -156,17 +156,24 @@ export const LoginView = ({
 	}, [setPageProfile]);
 
 	// Listen for rate limit events from authClient to set cooldown dynamically
+	// The cooldown duration comes from the server's X-Retry-After header
 	useEffect(() => {
 		const handleRateLimit = (event: Event) => {
 			const customEvent = event as CustomEvent<RateLimitEventDetail>;
 			const retryAfter = customEvent.detail?.retryAfter;
 
-			if (retryAfter && retryAfter > 0) {
-				console.log(
-					`[LoginView] Rate limited. Starting ${retryAfter}s cooldown from X-Retry-After header`,
+			if (!retryAfter || retryAfter <= 0) {
+				console.error(
+					"[LoginView] Rate limit event received but no valid retryAfter value",
+					customEvent.detail,
 				);
-				startCooldown(retryAfter);
+				return;
 			}
+
+			console.log(
+				`[LoginView] Rate limit detected. Starting ${retryAfter}s cooldown from X-Retry-After header`,
+			);
+			startCooldown(retryAfter);
 		};
 
 		window.addEventListener(AUTH_RATE_LIMIT_EVENT, handleRateLimit);
@@ -574,7 +581,7 @@ export const LoginView = ({
 										<Button
 											type="submit"
 											className="w-full"
-											disabled={isSubmitting || pendingSend}
+											disabled={isSubmitting || pendingSend || isOnCooldown}
 											aria-busy={isSubmitting || pendingSend}
 										>
 											{isSubmitting || pendingSend ? (
@@ -585,6 +592,14 @@ export const LoginView = ({
 													/>
 													{t("login.button.sending")}
 												</span>
+											) : isOnCooldown ? (
+												<>
+													<RefreshCw className="h-4 w-4" aria-hidden="true" />
+													{t("login.otp.resendWait").replace(
+														"{seconds}",
+														String(secondsRemaining),
+													)}
+												</>
 											) : (
 												<>
 													<Mail className="h-4 w-4" aria-hidden="true" />

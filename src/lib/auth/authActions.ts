@@ -461,30 +461,26 @@ export type RateLimitErrorCode = "RATE_LIMITED";
 
 /**
  * Extended error interface for rate limit errors.
- * Includes the retry-after duration for displaying countdown to users.
+ * The retry-after duration is communicated via the AUTH_RATE_LIMIT_EVENT
+ * which components listen to for displaying countdowns.
  */
 export interface RateLimitError extends Error {
 	/** Error code identifying this as a rate limit error */
 	code: RateLimitErrorCode;
-	/** Number of seconds until the user can retry (from X-Retry-After header) */
-	retryAfter?: number;
 }
 
 /**
- * Creates a RateLimitError with optional retry-after duration.
+ * Creates a RateLimitError.
+ * Note: The retry-after duration comes from the X-Retry-After header
+ * and is dispatched via AUTH_RATE_LIMIT_EVENT in authClient.
  *
  * @param message - Error message to display
- * @param retryAfter - Optional seconds until retry is allowed
  */
 export function createRateLimitError(
 	message: string = "Too many requests. Please wait before trying again.",
-	retryAfter?: number,
 ): RateLimitError {
 	const error = new Error(message) as RateLimitError;
 	error.code = "RATE_LIMITED";
-	if (retryAfter !== undefined) {
-		error.retryAfter = retryAfter;
-	}
 	return error;
 }
 

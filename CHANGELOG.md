@@ -1,3 +1,10 @@
+# [2.0.0-rc.28](https://github.com/janovix/auth/compare/v2.0.0-rc.27...v2.0.0-rc.28) (2026-02-13)
+
+
+### Features
+
+* **auth:** integrate Sentry for enhanced error tracking across components ([ca00036](https://github.com/janovix/auth/commit/ca0003662e3593976c8396791066215cd6c89ce7))
+
 # [2.0.0-rc.27](https://github.com/janovix/auth/compare/v2.0.0-rc.26...v2.0.0-rc.27) (2026-02-13)
 
 

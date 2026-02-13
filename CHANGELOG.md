@@ -1,3 +1,10 @@
+# [2.0.0-rc.29](https://github.com/janovix/auth/compare/v2.0.0-rc.28...v2.0.0-rc.29) (2026-02-13)
+
+
+### Features
+
+* **auth:** add Set-Cookie header management in middleware for session validation ([325f7ad](https://github.com/janovix/auth/commit/325f7ad6d0d0ea1497306fe8ab9e566f3750ab02))
+
 # [2.0.0-rc.28](https://github.com/janovix/auth/compare/v2.0.0-rc.27...v2.0.0-rc.28) (2026-02-13)
 
 

@@ -239,14 +239,10 @@ export async function sendVerificationOtp(
 		if (result.error) {
 			// Check if it's a rate limit error (HTTP 429)
 			const errorStatus = (result.error as { status?: number }).status;
-			console.log("[authActions] Error status:", errorStatus);
 
 			if (errorStatus === 429) {
-				console.log("[authActions] 429 detected in sendVerificationOtp");
-
-				// Try to extract X-Retry-After from the error object
+				// Try to extract X-Retry-After from the error object as fallback
 				const errorWithResponse = result.error as any;
-				console.log("[authActions] Error object:", errorWithResponse);
 
 				// Check if the error has a response with headers
 				if (errorWithResponse.response?.headers) {
@@ -255,18 +251,9 @@ export async function sendVerificationOtp(
 						errorWithResponse.response.headers["X-Retry-After"] ||
 						errorWithResponse.response.headers["x-retry-after"];
 
-					console.log(
-						"[authActions] X-Retry-After from error:",
-						retryAfterHeader,
-					);
-
 					if (retryAfterHeader) {
 						const retryAfter = parseInt(retryAfterHeader, 10);
 						if (!isNaN(retryAfter) && retryAfter > 0) {
-							console.log(
-								`[authActions] Dispatching rate limit event with ${retryAfter}s`,
-							);
-
 							// Dispatch the event here as fallback if authClient didn't catch it
 							if (typeof window !== "undefined") {
 								const detail: RateLimitEventDetail = {

@@ -162,26 +162,28 @@ export const LoginView = ({
 			const customEvent = event as CustomEvent<RateLimitEventDetail>;
 			const retryAfter = customEvent.detail?.retryAfter;
 
+			console.log("[LoginView] Rate limit event received:", {
+				retryAfter,
+				isOnCooldown,
+				secondsRemaining,
+			});
+
 			if (!retryAfter || retryAfter <= 0) {
-				console.error(
-					"[LoginView] Rate limit event received but no valid retryAfter value",
-					customEvent.detail,
-				);
+				console.warn("[LoginView] Invalid retryAfter value");
 				return;
 			}
 
-			console.log(
-				`[LoginView] Rate limit detected. Starting ${retryAfter}s cooldown from X-Retry-After header`,
-			);
+			console.log("[LoginView] Starting cooldown:", retryAfter);
 			startCooldown(retryAfter);
 		};
 
+		console.log("[LoginView] Registering rate limit listener");
 		window.addEventListener(AUTH_RATE_LIMIT_EVENT, handleRateLimit);
 
 		return () => {
 			window.removeEventListener(AUTH_RATE_LIMIT_EVENT, handleRateLimit);
 		};
-	}, [startCooldown]);
+	}, [startCooldown, isOnCooldown, secondsRemaining]);
 
 	const form = useForm<EmailValues>({
 		resolver: zodResolver(emailSchema),

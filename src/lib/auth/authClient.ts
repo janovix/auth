@@ -56,64 +56,41 @@ export const authClient = createAuthClient({
 	fetchOptions: {
 		credentials: "include",
 		onError: async (context) => {
-			console.log("[Auth] onError callback triggered", {
-				status: context.response.status,
-				url: context.response.url,
-			});
-
 			const { response } = context;
 
 			// Handle rate limit errors (HTTP 429)
 			if (response.status === 429) {
-				console.log("[Auth] 429 detected, processing rate limit...");
-
 				const retryAfterHeader = response.headers.get("X-Retry-After");
-				console.log("[Auth] X-Retry-After header value:", retryAfterHeader);
+				console.log(
+					"[AuthClient] 429 detected, X-Retry-After:",
+					retryAfterHeader,
+				);
 
 				if (!retryAfterHeader) {
-					console.error(
-						"[Auth] Rate limit error (429) but X-Retry-After header is missing!",
-					);
-					console.log(`[Auth] Response URL: ${response.url}`);
-					console.log(
-						`[Auth] All headers:`,
-						Array.from(response.headers.entries()),
-					);
+					console.warn("[AuthClient] X-Retry-After header missing!");
 					return;
 				}
 
 				const retryAfter = parseInt(retryAfterHeader, 10);
-				console.log("[Auth] Parsed retryAfter value:", retryAfter);
 
 				if (isNaN(retryAfter) || retryAfter <= 0) {
-					console.error(
-						`[Auth] Invalid X-Retry-After value: ${retryAfterHeader}`,
-					);
+					console.warn("[AuthClient] Invalid X-Retry-After:", retryAfterHeader);
 					return;
 				}
 
-				console.warn(
-					`[Auth] Rate limited. Retry after ${retryAfter} seconds (from X-Retry-After header)`,
-				);
-
 				// Dispatch custom event for UI components to handle
-				// Do this synchronously to ensure it happens immediately
 				if (typeof window !== "undefined") {
 					const detail: RateLimitEventDetail = {
 						retryAfter,
 						url: response.url,
 					};
 					console.log(
-						`[Auth] Dispatching ${AUTH_RATE_LIMIT_EVENT} event with detail:`,
-						detail,
+						"[AuthClient] Dispatching event with retryAfter:",
+						retryAfter,
 					);
-
-					const event = new CustomEvent(AUTH_RATE_LIMIT_EVENT, { detail });
-					window.dispatchEvent(event);
-
-					console.log(`[Auth] Event dispatched successfully`);
-				} else {
-					console.error("[Auth] window is undefined, cannot dispatch event");
+					window.dispatchEvent(
+						new CustomEvent(AUTH_RATE_LIMIT_EVENT, { detail }),
+					);
 				}
 			}
 		},

@@ -1,3 +1,17 @@
+# [2.0.0-rc.27](https://github.com/janovix/auth/compare/v2.0.0-rc.26...v2.0.0-rc.27) (2026-02-13)
+
+
+### Bug Fixes
+
+* **auth:** enhance error handling for rate limit events in authClient and authActions ([63665f6](https://github.com/janovix/auth/commit/63665f6f90e6c571b428b2b93f6f850b2c08a23a))
+* **auth:** improve error handling for rate limit events and enhance cooldown logic ([df0f4fd](https://github.com/janovix/auth/commit/df0f4fd247748b4e94d51285b7432acd1b295b89))
+* **auth:** refine logging and error handling for rate limit events in LoginView and authClient ([08e60e9](https://github.com/janovix/auth/commit/08e60e97d1bb4077c9efaecf8b6c937a8d1b8775))
+
+
+### Features
+
+* **auth:** enhance LoginView to handle dynamic resend cooldown based on rate limit events ([016021b](https://github.com/janovix/auth/commit/016021b53d11dfa34fffba8bf7f8db08f0e2ed20))
+
 # [2.0.0-rc.26](https://github.com/janovix/auth/compare/v2.0.0-rc.25...v2.0.0-rc.26) (2026-02-12)
 
 

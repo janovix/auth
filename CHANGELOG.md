@@ -1,3 +1,10 @@
+# [2.0.0-rc.30](https://github.com/janovix/auth/compare/v2.0.0-rc.29...v2.0.0-rc.30) (2026-02-16)
+
+
+### Bug Fixes
+
+* **auth:** wait for server response before transitioning to OTP input in LoginView ([feae340](https://github.com/janovix/auth/commit/feae340d9c6107050ca81348df11619c4e830367))
+
 # [2.0.0-rc.29](https://github.com/janovix/auth/compare/v2.0.0-rc.28...v2.0.0-rc.29) (2026-02-13)
 
 

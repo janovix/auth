@@ -233,11 +233,9 @@ export const LoginView = ({
 		emailAtErrorRef.current = null;
 		setStateModifier("loading"); // Blue aurora while loading
 
-		// Optimistically transition to OTP input screen immediately
-		setUserEmail(email);
-		setOtpSent(true);
-		setSuccessMessage(t("login.success.message"));
-
+		// IMPORTANT: Wait for the server response before transitioning to OTP input
+		// Previously this was optimistic, but caused users to see the input page
+		// even when the OTP send failed or timed out on the backend
 		const result = await sendOtp(email, "sign-in", {
 			captchaToken: token || undefined,
 		});
@@ -246,14 +244,11 @@ export const LoginView = ({
 		setCaptchaToken(null);
 		turnstileRef.current?.reset();
 
-		// Now safe to clear pendingSend since we've transitioned
+		// Now safe to clear pendingSend since request completed
 		setPendingSend(false);
 
 		if (!result.success) {
-			// Revert to email input screen on error
-			setOtpSent(false);
-			setUserEmail(null);
-			setSuccessMessage(null);
+			// Show error on email input screen
 			const errorMessage =
 				result.error && isRateLimitError(result.error)
 					? t("login.otp.rateLimited")
@@ -263,6 +258,11 @@ export const LoginView = ({
 			setStateModifier("error");
 			return;
 		}
+
+		// Success! Now transition to OTP input screen
+		setUserEmail(email);
+		setOtpSent(true);
+		setSuccessMessage(t("login.success.message"));
 
 		// Show different message if rate-limited (OTP already sent)
 		if (result.data?.rateLimited) {

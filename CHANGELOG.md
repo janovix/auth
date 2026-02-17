@@ -1,3 +1,10 @@
+# [2.0.0-rc.32](https://github.com/janovix/auth/compare/v2.0.0-rc.31...v2.0.0-rc.32) (2026-02-17)
+
+
+### Features
+
+* **auth:** add activeOrganizationId to session management ([d74e82b](https://github.com/janovix/auth/commit/d74e82b09e5ed925c475675307a54fcd9fe68773))
+
 # [2.0.0-rc.31](https://github.com/janovix/auth/compare/v2.0.0-rc.30...v2.0.0-rc.31) (2026-02-17)
 
 

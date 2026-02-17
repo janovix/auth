@@ -25,6 +25,7 @@ export type SessionData = {
 	updatedAt: Date;
 	ipAddress?: string;
 	userAgent?: string;
+	activeOrganizationId?: string | null;
 };
 
 /**

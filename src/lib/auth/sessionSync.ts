@@ -172,6 +172,9 @@ export async function revalidateSession(): Promise<boolean> {
 						: new Date(result.data.session.updatedAt),
 				ipAddress: result.data.session.ipAddress ?? undefined,
 				userAgent: result.data.session.userAgent ?? undefined,
+				activeOrganizationId:
+					(result.data.session as { activeOrganizationId?: string | null })
+						.activeOrganizationId ?? undefined,
 			},
 		};
 

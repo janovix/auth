@@ -86,6 +86,7 @@ export async function getServerSession(): Promise<Session> {
 				updatedAt: string;
 				ipAddress?: string;
 				userAgent?: string;
+				activeOrganizationId?: string | null;
 			};
 		} | null;
 

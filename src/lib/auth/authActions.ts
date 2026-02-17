@@ -46,6 +46,7 @@ function toSession(data: {
 		updatedAt: Date;
 		ipAddress?: string | null;
 		userAgent?: string | null;
+		activeOrganizationId?: string | null;
 	};
 }): Session {
 	return {
@@ -82,6 +83,7 @@ function toSession(data: {
 					: new Date(data.session.updatedAt),
 			ipAddress: data.session.ipAddress ?? undefined,
 			userAgent: data.session.userAgent ?? undefined,
+			activeOrganizationId: data.session.activeOrganizationId ?? undefined,
 		},
 	};
 }

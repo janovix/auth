@@ -1,3 +1,10 @@
+# [2.0.0-rc.31](https://github.com/janovix/auth/compare/v2.0.0-rc.30...v2.0.0-rc.31) (2026-02-17)
+
+
+### Features
+
+* **auth:** add banned user handling in session management ([448b6bb](https://github.com/janovix/auth/commit/448b6bb68498397d6c0b6a0b04f4964feb6f21cf))
+
 # [2.0.0-rc.30](https://github.com/janovix/auth/compare/v2.0.0-rc.29...v2.0.0-rc.30) (2026-02-16)
 
 

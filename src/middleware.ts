@@ -92,6 +92,7 @@ type SessionResult =
 				id: string;
 				name: string | null;
 				email: string;
+				banned?: boolean;
 			};
 			onboardingStatus: OnboardingStatus;
 			setCookieHeaders: string[];
@@ -139,6 +140,7 @@ async function getSessionWithOnboardingStatus(
 				id?: string;
 				name?: string | null;
 				email?: string;
+				banned?: boolean;
 			};
 		};
 
@@ -195,6 +197,7 @@ async function getSessionWithOnboardingStatus(
 				id: sessionData.user.id,
 				name: sessionData.user.name ?? null,
 				email: sessionData.user.email,
+				banned: sessionData.user.banned,
 			},
 			onboardingStatus,
 			setCookieHeaders,
@@ -299,6 +302,14 @@ export async function middleware(request: NextRequest) {
 
 	// Valid session - check onboarding status
 	const { onboardingStatus } = sessionResult;
+
+	// Check if user is banned
+	if (sessionResult.user && (sessionResult.user as any).banned) {
+		const loginUrl = new URL("/login", request.url);
+		loginUrl.searchParams.set("banned", "true");
+		const redirectResponse = NextResponse.redirect(loginUrl);
+		return addAuthCookies(redirectResponse, setCookieHeaders);
+	}
 
 	// Check if user is a visitor (beta access waiting)
 	const isVisitor = onboardingStatus.isVisitor === true;

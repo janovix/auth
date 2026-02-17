@@ -130,6 +130,12 @@ export async function revalidateSession(): Promise<boolean> {
 			return false;
 		}
 
+		// Check if user is banned
+		if ((result.data.user as any).banned === true) {
+			clearSession();
+			return false;
+		}
+
 		// Session is valid - update the store
 		const session: Session = {
 			user: {

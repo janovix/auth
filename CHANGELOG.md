@@ -1,3 +1,10 @@
+# [2.0.0-rc.36](https://github.com/janovix/auth/compare/v2.0.0-rc.35...v2.0.0-rc.36) (2026-02-18)
+
+
+### Features
+
+* **settings:** enhance organization loading with user role mapping ([2376e43](https://github.com/janovix/auth/commit/2376e4365e498aeb0cbf987c5deaebd36bf617b3))
+
 # [2.0.0-rc.35](https://github.com/janovix/auth/compare/v2.0.0-rc.34...v2.0.0-rc.35) (2026-02-18)
 
 

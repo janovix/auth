@@ -263,9 +263,8 @@ describe("ComplianceSettingsView", () => {
 			render(<ComplianceSettingsView />);
 
 			await waitFor(() => {
-				expect(
-					screen.getByText("settings.compliance.saveChanges"),
-				).toBeInTheDocument();
+				const buttons = screen.getAllByText("settings.compliance.saveChanges");
+				expect(buttons.length).toBeGreaterThan(0);
 			});
 		});
 
@@ -284,12 +283,13 @@ describe("ComplianceSettingsView", () => {
 			render(<ComplianceSettingsView />);
 
 			await waitFor(() => {
-				expect(
-					screen.getByText("settings.compliance.saveChanges"),
-				).toBeInTheDocument();
+				const buttons = screen.getAllByText("settings.compliance.saveChanges");
+				expect(buttons.length).toBeGreaterThan(0);
 			});
 
-			await user.click(screen.getByText("settings.compliance.saveChanges"));
+			// Click the first button (in the Obligated Subject section, not the disabled one in self-service)
+			const buttons = screen.getAllByText("settings.compliance.saveChanges");
+			await user.click(buttons[0]);
 
 			await waitFor(() => {
 				expect(

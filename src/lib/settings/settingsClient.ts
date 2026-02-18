@@ -15,6 +15,7 @@ import type {
 	AmlComplianceSettings,
 	CreateAmlComplianceSettingsInput,
 	UpdateAmlComplianceSettingsInput,
+	UpdateSelfServiceSettingsInput,
 	UIPreferences,
 } from "./types";
 
@@ -272,6 +273,44 @@ export async function updateAmlComplianceSettings(
 		};
 		throw new Error(
 			errorResponse.error || "Failed to update AML compliance settings",
+		);
+	}
+
+	const result =
+		(await response.json()) as SettingsApiResponse<AmlComplianceSettings>;
+	return result.data;
+}
+
+/**
+ * Update KYC self-service settings (owner/admin only)
+ */
+export async function updateSelfServiceSettings(
+	organizationId: string,
+	input: UpdateSelfServiceSettingsInput,
+): Promise<AmlComplianceSettings> {
+	const response = await fetch(
+		`${getBaseUrl()}/api/settings/aml-compliance/${organizationId}/self-service`,
+		{
+			method: "PATCH",
+			credentials: "include",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(input),
+		},
+	);
+
+	if (!response.ok) {
+		const errorResponse = (await response
+			.json()
+			.catch(() => ({ error: "Unknown error" }))) as {
+			error?: string;
+			message?: string;
+		};
+		throw new Error(
+			errorResponse.error ||
+				errorResponse.message ||
+				"Failed to update KYC self-service settings",
 		);
 	}
 

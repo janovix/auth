@@ -39,6 +39,7 @@ import {
 	getOrganizationMembership,
 	type AmlComplianceSettings,
 	type OrganizationMembership,
+	updateSelfServiceSettings,
 } from "@/lib/settings";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import {
@@ -164,6 +165,13 @@ export function ComplianceSettingsView() {
 	const [rfcError, setRfcError] = useState<string | null>(null);
 	const [thresholdsOpen, setThresholdsOpen] = useState(false);
 
+	// Self-Service state
+	const [selfServiceMode, setSelfServiceMode] = useState<
+		"disabled" | "manual" | "automatic"
+	>("disabled");
+	const [selfServiceExpiryHours, setSelfServiceExpiryHours] = useState(72);
+	const [savingSelfService, setSavingSelfService] = useState(false);
+
 	const activeOrgId = (
 		session?.session as { activeOrganizationId?: string } | undefined
 	)?.activeOrganizationId;
@@ -191,6 +199,11 @@ export function ComplianceSettingsView() {
 				if (complianceSettings) {
 					setRfc(complianceSettings.obligatedSubjectKey);
 					setActivityKey(complianceSettings.activityKey);
+					// Load self-service settings
+					setSelfServiceMode(complianceSettings.selfServiceMode || "disabled");
+					setSelfServiceExpiryHours(
+						complianceSettings.selfServiceExpiryHours || 72,
+					);
 				}
 			} catch (err) {
 				toast.error(
@@ -270,6 +283,39 @@ export function ComplianceSettingsView() {
 			setSaving(false);
 		}
 	}, [activeOrgId, canEdit, rfc, activityKey, validateRfc, showSuccess, t]);
+
+	const handleSaveSelfService = useCallback(async () => {
+		if (!activeOrgId || !canEdit) return;
+
+		try {
+			setSavingSelfService(true);
+
+			await updateSelfServiceSettings(activeOrgId, {
+				selfServiceMode,
+				selfServiceExpiryHours,
+			});
+
+			showSuccess(t("settings.compliance.selfServiceSavedSuccess"));
+		} catch (err) {
+			toast.error(
+				err instanceof Error ? err.message : t("settings.compliance.saveError"),
+			);
+		} finally {
+			setSavingSelfService(false);
+		}
+	}, [
+		activeOrgId,
+		canEdit,
+		selfServiceMode,
+		selfServiceExpiryHours,
+		showSuccess,
+		t,
+	]);
+
+	const isDirtySelfService =
+		settings &&
+		(selfServiceMode !== (settings.selfServiceMode || "disabled") ||
+			selfServiceExpiryHours !== (settings.selfServiceExpiryHours || 72));
 
 	const selectedActivity = VULNERABLE_ACTIVITIES.find(
 		(a) => a.value === activityKey,
@@ -487,6 +533,121 @@ export function ComplianceSettingsView() {
 						</SettingsCard>
 					</Collapsible>
 				</SettingsSection>
+
+				{/* KYC Self-Service Settings */}
+				{settings && (
+					<SettingsSection
+						title={t("settings.compliance.kycSelfService")}
+						description={t("settings.compliance.kycSelfServiceDesc")}
+					>
+						<SettingsCard>
+							<div className="space-y-6">
+								{/* Mode selector */}
+								<div className="space-y-2">
+									<div className="flex items-center gap-2">
+										<Label htmlFor="self-service-mode">
+											{t("settings.compliance.selfServiceMode")}
+										</Label>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+											</TooltipTrigger>
+											<TooltipContent className="max-w-xs">
+												<p>{t("settings.compliance.selfServiceModeHelp")}</p>
+											</TooltipContent>
+										</Tooltip>
+									</div>
+									<Select
+										value={selfServiceMode}
+										onValueChange={(v) =>
+											setSelfServiceMode(
+												v as "disabled" | "manual" | "automatic",
+											)
+										}
+										disabled={!canEdit || savingSelfService}
+									>
+										<SelectTrigger id="self-service-mode">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="disabled">
+												{t("settings.compliance.selfServiceDisabled")}
+											</SelectItem>
+											<SelectItem value="manual">
+												{t("settings.compliance.selfServiceManual")}
+											</SelectItem>
+											<SelectItem value="automatic">
+												{t("settings.compliance.selfServiceAutomatic")}
+											</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+
+								{/* Expiry hours */}
+								{selfServiceMode !== "disabled" && (
+									<div className="space-y-2">
+										<Label htmlFor="expiry-hours">
+											{t("settings.compliance.selfServiceExpiryHours")}
+										</Label>
+										<div className="flex items-center gap-3">
+											<Input
+												id="expiry-hours"
+												type="number"
+												min={1}
+												max={720}
+												value={selfServiceExpiryHours}
+												onChange={(e) =>
+													setSelfServiceExpiryHours(Number(e.target.value))
+												}
+												disabled={!canEdit || savingSelfService}
+												className="w-28"
+											/>
+											<span className="text-sm text-muted-foreground">
+												≈{" "}
+												{selfServiceExpiryHours >= 24
+													? `${Math.round(selfServiceExpiryHours / 24)} día${Math.round(selfServiceExpiryHours / 24) !== 1 ? "s" : ""}`
+													: `${selfServiceExpiryHours} hora${selfServiceExpiryHours !== 1 ? "s" : ""}`}
+											</span>
+										</div>
+										<p className="text-xs text-muted-foreground">
+											{t("settings.compliance.selfServiceExpiryHoursHelp")}
+										</p>
+									</div>
+								)}
+
+								{/* Compliance notice */}
+								<div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-3">
+									<AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+									<p className="text-xs text-amber-700 dark:text-amber-300">
+										{t("settings.compliance.kycComplianceNotice")}
+									</p>
+								</div>
+
+								{/* Save button */}
+								<div className="flex justify-end">
+									<Button
+										onClick={handleSaveSelfService}
+										disabled={
+											!canEdit || savingSelfService || !isDirtySelfService
+										}
+									>
+										{savingSelfService ? (
+											<>
+												<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+												{t("settings.saving")}
+											</>
+										) : (
+											<>
+												<Check className="mr-2 h-4 w-4" />
+												{t("settings.compliance.saveChanges")}
+											</>
+										)}
+									</Button>
+								</div>
+							</div>
+						</SettingsCard>
+					</SettingsSection>
+				)}
 			</div>
 		</TooltipProvider>
 	);

@@ -118,6 +118,10 @@ export interface AmlComplianceSettings {
 	organizationId: string;
 	obligatedSubjectKey: string; // RFC (clave_sujeto_obligado) - 12 characters
 	activityKey: string; // Vulnerable activity code (e.g., "VEH")
+	// KYC Self-Service settings
+	selfServiceMode?: "disabled" | "manual" | "automatic";
+	selfServiceExpiryHours?: number;
+	selfServiceRequiredSections?: string[] | null;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -125,6 +129,12 @@ export interface AmlComplianceSettings {
 export interface UpdateAmlComplianceSettingsInput {
 	obligatedSubjectKey?: string;
 	activityKey?: string;
+}
+
+export interface UpdateSelfServiceSettingsInput {
+	selfServiceMode?: "disabled" | "manual" | "automatic";
+	selfServiceExpiryHours?: number;
+	selfServiceRequiredSections?: string[] | null;
 }
 
 export interface CreateAmlComplianceSettingsInput {

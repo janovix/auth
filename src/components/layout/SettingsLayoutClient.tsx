@@ -343,10 +343,11 @@ function SettingsLayoutInner({
 					setOrganizationsLimit(subscriptionStatus.organizationsLimit);
 				}
 
-				// Check for pending invitations
+				// Check for pending invitations — use the lightweight fast path to avoid
+				// the expensive subscription/Stripe checks in the full endpoint
 				const authServiceUrl = getAuthCoreBaseUrl();
 				const onboardingResponse = await fetch(
-					`${authServiceUrl}/api/subscription/onboarding-status`,
+					`${authServiceUrl}/api/subscription/onboarding-status?pendingInvitationsOnly=true`,
 					{
 						credentials: "include",
 					},

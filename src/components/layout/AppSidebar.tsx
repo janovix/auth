@@ -208,7 +208,7 @@ export function AppSidebar({
 				{/* Pending Invitations Indicator */}
 				{pendingInvitationsCount > 0 && (
 					<div className="px-2 pt-2">
-						<Link href="/invite" onClick={handleLinkClick}>
+						<Link href="/invite" prefetch={false} onClick={handleLinkClick}>
 							<div className="rounded-lg bg-primary/10 border border-primary/20 p-3 hover:bg-primary/15 transition-colors cursor-pointer">
 								<div className="flex items-center gap-3">
 									<div className="h-8 w-8 rounded-md bg-primary/15 flex items-center justify-center shrink-0">
@@ -265,7 +265,11 @@ export function AppSidebar({
 											isActive={isActive}
 											tooltip={item.name}
 										>
-											<Link href={item.href} onClick={handleLinkClick}>
+											<Link
+												href={item.href}
+												prefetch={false}
+												onClick={handleLinkClick}
+											>
 												<Icon />
 												<span className="flex-1">{item.name}</span>
 												{item.complete ? (
@@ -330,7 +334,11 @@ export function AppSidebar({
 											isActive={isActive}
 											tooltip={item.name}
 										>
-											<Link href={item.href} onClick={handleLinkClick}>
+											<Link
+												href={item.href}
+												prefetch={false}
+												onClick={handleLinkClick}
+											>
 												<Icon />
 												<span className="flex-1">{item.name}</span>
 												{item.complete ? (

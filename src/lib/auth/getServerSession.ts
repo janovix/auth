@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 import { getAuthCoreBaseUrl } from "./authCoreConfig";
 import type { Session } from "./types";
@@ -36,6 +36,72 @@ export type ServerSession = Session;
  */
 export async function getServerSession(): Promise<Session> {
 	try {
+		// Fast path: if the middleware validated the session it forwards the raw
+		// JSON via x-middleware-session to avoid a redundant get-session HTTP call.
+		const incomingHeaders = await headers();
+		const middlewareSessionJson = incomingHeaders.get("x-middleware-session");
+		if (middlewareSessionJson) {
+			try {
+				const parsed = JSON.parse(middlewareSessionJson) as {
+					user?: {
+						id?: string;
+						name?: string | null;
+						email?: string;
+						emailVerified?: boolean;
+						image?: string | null;
+						createdAt?: string;
+						updatedAt?: string;
+						role?: string;
+					};
+					session?: {
+						id?: string;
+						userId?: string;
+						token?: string;
+						expiresAt?: string;
+						createdAt?: string;
+						updatedAt?: string;
+						ipAddress?: string | null;
+						userAgent?: string | null;
+						activeOrganizationId?: string | null;
+					};
+				};
+				// Only use the header if it has the minimum required fields
+				if (
+					parsed.user?.id &&
+					parsed.user.email &&
+					parsed.session?.id &&
+					parsed.session.token &&
+					parsed.session.expiresAt
+				) {
+					return {
+						user: {
+							id: parsed.user.id,
+							name: parsed.user.name ?? "",
+							email: parsed.user.email,
+							image: parsed.user.image ?? null,
+							emailVerified: parsed.user.emailVerified ?? false,
+							createdAt: new Date(parsed.user.createdAt ?? 0),
+							updatedAt: new Date(parsed.user.updatedAt ?? 0),
+							role: parsed.user.role,
+						},
+						session: {
+							id: parsed.session.id,
+							userId: parsed.session.userId ?? parsed.user.id,
+							token: parsed.session.token,
+							expiresAt: new Date(parsed.session.expiresAt),
+							createdAt: new Date(parsed.session.createdAt ?? 0),
+							updatedAt: new Date(parsed.session.updatedAt ?? 0),
+							ipAddress: parsed.session.ipAddress ?? undefined,
+							userAgent: parsed.session.userAgent ?? undefined,
+							activeOrganizationId: parsed.session.activeOrganizationId,
+						},
+					};
+				}
+			} catch {
+				// Malformed header - fall through to HTTP fetch
+			}
+		}
+
 		const cookieStore = await cookies();
 		const cookieHeader = cookieStore.toString();
 

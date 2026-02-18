@@ -1,3 +1,10 @@
+# [2.0.0-rc.35](https://github.com/janovix/auth/compare/v2.0.0-rc.34...v2.0.0-rc.35) (2026-02-18)
+
+
+### Features
+
+* **organization-switcher:** enhance organization management with role-based grouping and creation options ([7b9583a](https://github.com/janovix/auth/commit/7b9583abc9d7cffa5cb262e76f9c7e87dc56f85c))
+
 # [2.0.0-rc.34](https://github.com/janovix/auth/compare/v2.0.0-rc.33...v2.0.0-rc.34) (2026-02-18)
 
 

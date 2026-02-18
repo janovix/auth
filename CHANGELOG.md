@@ -1,3 +1,10 @@
+# [2.0.0-rc.34](https://github.com/janovix/auth/compare/v2.0.0-rc.33...v2.0.0-rc.34) (2026-02-18)
+
+
+### Features
+
+* **middleware:** optimize session handling and onboarding status fetch logic ([c49afe1](https://github.com/janovix/auth/commit/c49afe12497c0ecb26ab3a90449ae162093dabb1))
+
 # [2.0.0-rc.33](https://github.com/janovix/auth/compare/v2.0.0-rc.32...v2.0.0-rc.33) (2026-02-18)
 
 

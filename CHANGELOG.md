@@ -1,3 +1,10 @@
+# [2.0.0-rc.33](https://github.com/janovix/auth/compare/v2.0.0-rc.32...v2.0.0-rc.33) (2026-02-18)
+
+
+### Features
+
+* **settings:** add KYC self-service settings management ([bffc123](https://github.com/janovix/auth/commit/bffc123d10a3054ea68609c8b887dff96ac58c6e))
+
 # [2.0.0-rc.32](https://github.com/janovix/auth/compare/v2.0.0-rc.31...v2.0.0-rc.32) (2026-02-17)
 
 

@@ -201,6 +201,7 @@ function SettingsLayoutInner({
 								name: string;
 								slug: string;
 								logo?: string | null;
+								member?: { role?: string };
 						  }>
 						| {
 								organizations?: Array<{
@@ -208,6 +209,7 @@ function SettingsLayoutInner({
 									name: string;
 									slug: string;
 									logo?: string | null;
+									member?: { role?: string };
 								}>;
 						  };
 					const orgs = Array.isArray(data) ? data : data.organizations || [];
@@ -217,11 +219,16 @@ function SettingsLayoutInner({
 							name: string;
 							slug: string;
 							logo?: string | null;
+							member?: { role?: string };
 						}) => ({
 							id: org.id,
 							name: org.name,
 							slug: org.slug,
 							logo: org.logo || null,
+							role: (org.member?.role ?? "member") as
+								| "owner"
+								| "admin"
+								| "member",
 						}),
 					);
 					setOrganizations(formattedOrgs);

@@ -298,6 +298,10 @@ const translations = {
 		"settings.nav.orgSettings": "Organization Settings",
 		"settings.nav.orgSettingsLink": "Settings",
 		"settings.nav.createOrganization": "Create organization",
+		"settings.nav.myOrganizations": "My organizations",
+		"settings.nav.memberOf": "Member of",
+		"settings.nav.orgLimitReached":
+			"You've reached your organization limit. Upgrade your plan to create more.",
 		"settings.userProgress": "User Progress",
 		"settings.orgProgress": "Org Progress",
 		"settings.saving": "Saving...",
@@ -1263,6 +1267,10 @@ const translations = {
 		"settings.nav.orgSettings": "Configuración de Organización",
 		"settings.nav.orgSettingsLink": "Configuración",
 		"settings.nav.createOrganization": "Crear organización",
+		"settings.nav.myOrganizations": "Mis organizaciones",
+		"settings.nav.memberOf": "Miembro de",
+		"settings.nav.orgLimitReached":
+			"Has alcanzado el límite de organizaciones. Actualiza tu plan para crear más.",
 		"settings.userProgress": "Progreso Usuario",
 		"settings.orgProgress": "Progreso Org",
 		"settings.saving": "Guardando...",

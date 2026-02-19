@@ -1,3 +1,10 @@
+# [2.0.0-rc.38](https://github.com/janovix/auth/compare/v2.0.0-rc.37...v2.0.0-rc.38) (2026-02-19)
+
+
+### Features
+
+* **middleware:** implement fetch timeout handling for session and onboarding status requests ([fc64651](https://github.com/janovix/auth/commit/fc64651976203e749bdec8d3565ce650c4afcb0b))
+
 # [2.0.0-rc.37](https://github.com/janovix/auth/compare/v2.0.0-rc.36...v2.0.0-rc.37) (2026-02-19)
 
 

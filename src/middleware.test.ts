@@ -463,6 +463,81 @@ describe("middleware", () => {
 		});
 	});
 
+	describe("fetch timeout behavior", () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		/**
+		 * Returns a mock fetch implementation that honours the AbortSignal passed
+		 * via `options.signal`. The returned promise rejects with an AbortError
+		 * as soon as `controller.abort()` is called, which is what the real
+		 * fetch() does. Without this the fake-timer tests would hang because
+		 * the plain `new Promise(() => {})` mock ignores the signal entirely.
+		 */
+		function hangingFetch(
+			_url: string,
+			options?: RequestInit,
+		): Promise<Response> {
+			return new Promise<Response>((_resolve, reject) => {
+				options?.signal?.addEventListener("abort", () => {
+					reject(new DOMException("The operation was aborted.", "AbortError"));
+				});
+			});
+		}
+
+		it("should redirect to login when get-session fetch hangs past 8s timeout", async () => {
+			mockGetSessionCookie.mockReturnValue("valid-session-token");
+			mockFetch.mockImplementation(hangingFetch);
+
+			const request = new NextRequest("https://auth.example.com/account");
+			const responsePromise = middleware(request);
+
+			// Advance past the 8s timeout so AbortController fires → signal aborts
+			await vi.advanceTimersByTimeAsync(8001);
+
+			const response = await responsePromise;
+
+			expect(response.status).toBe(307);
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/login",
+			);
+		});
+
+		it("should redirect to login when onboarding-status fetch hangs past 8s timeout", async () => {
+			mockGetSessionCookie.mockReturnValue("valid-session-token");
+			// get-session resolves immediately with a user who has no name → triggers slow path
+			mockFetch
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							session: { id: "123" },
+							user: { id: "u1", name: null, email: "john@example.com" },
+						}),
+					headers: { getSetCookie: () => [] },
+				})
+				// onboarding-status hangs indefinitely
+				.mockImplementationOnce(hangingFetch);
+
+			const request = new NextRequest("https://auth.example.com/account");
+			const responsePromise = middleware(request);
+
+			await vi.advanceTimersByTimeAsync(8001);
+
+			const response = await responsePromise;
+
+			expect(response.status).toBe(307);
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/login",
+			);
+		});
+	});
+
 	describe("fallback auth service URL", () => {
 		it("should use fallback URL when env var is not set", async () => {
 			delete process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;

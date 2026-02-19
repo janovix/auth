@@ -3,6 +3,28 @@ import { getSessionCookie } from "better-auth/cookies";
 
 import { getDefaultRedirectUrl } from "@/lib/auth/redirectConfig";
 
+const AUTH_SVC_TIMEOUT_MS = 8000;
+
+/**
+ * Wraps fetch() with an AbortController timeout. If auth-svc does not respond
+ * within timeoutMs, the request is aborted and the caller's catch block handles
+ * the resulting AbortError. This prevents unbounded hangs that cause Cloudflare
+ * to kill the middleware Worker with "Network connection lost."
+ */
+async function fetchWithTimeout(
+	url: string,
+	options: RequestInit,
+	timeoutMs = AUTH_SVC_TIMEOUT_MS,
+): Promise<Response> {
+	const controller = new AbortController();
+	const timeout = setTimeout(() => controller.abort(), timeoutMs);
+	try {
+		return await fetch(url, { ...options, signal: controller.signal });
+	} finally {
+		clearTimeout(timeout);
+	}
+}
+
 /**
  * Helper to add Set-Cookie headers from auth-svc to a Next.js response.
  * This is CRITICAL for cookie cache refresh - without forwarding these headers,
@@ -137,7 +159,7 @@ async function getSessionWithOnboardingStatus(
 		const authServiceUrl = getAuthServiceUrl();
 
 		// First, validate the session
-		const sessionResponse = await fetch(
+		const sessionResponse = await fetchWithTimeout(
 			`${authServiceUrl}/api/auth/get-session`,
 			{
 				headers: {
@@ -243,7 +265,7 @@ async function getSessionWithOnboardingStatus(
 
 		// Slow path: user may need onboarding (no name, or no active org).
 		// Fetch onboarding-status to get accurate state including pending invitations.
-		const onboardingResponse = await fetch(
+		const onboardingResponse = await fetchWithTimeout(
 			`${authServiceUrl}/api/subscription/onboarding-status`,
 			{
 				headers: {

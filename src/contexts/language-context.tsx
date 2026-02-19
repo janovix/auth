@@ -357,6 +357,7 @@ const translations = {
 		"settings.createOrg.details": "Organization Details",
 		"settings.createOrg.detailsDesc":
 			"Enter the basic information for your new organization",
+		"settings.createOrg.logoHelp": "Optional: Add a logo for your organization",
 		"settings.createOrg.name": "Organization name",
 		"settings.createOrg.namePlaceholder": "Acme Corporation",
 		"settings.createOrg.nameHelp":
@@ -364,6 +365,7 @@ const translations = {
 		"settings.createOrg.subdomain": "Organization subdomain",
 		"settings.createOrg.subdomainHelp":
 			"This will be your organization's unique subdomain",
+		"settings.createOrg.checkingSlug": "Checking availability...",
 		"settings.createOrg.slugAvailable": "is available!",
 		"settings.createOrg.slugTaken":
 			"This slug is already taken. Please choose another.",
@@ -1327,6 +1329,8 @@ const translations = {
 		"settings.createOrg.details": "Detalles de la Organización",
 		"settings.createOrg.detailsDesc":
 			"Ingresa la información básica para tu nueva organización",
+		"settings.createOrg.logoHelp":
+			"Opcional: Añade un logo para tu organización",
 		"settings.createOrg.name": "Nombre de la organización",
 		"settings.createOrg.namePlaceholder": "Corporación Acme",
 		"settings.createOrg.nameHelp":
@@ -1334,6 +1338,7 @@ const translations = {
 		"settings.createOrg.subdomain": "Subdominio de la organización",
 		"settings.createOrg.subdomainHelp":
 			"Este será el subdominio único de tu organización",
+		"settings.createOrg.checkingSlug": "Comprobando disponibilidad...",
 		"settings.createOrg.slugAvailable": "está disponible!",
 		"settings.createOrg.slugTaken":
 			"Este slug ya está en uso. Por favor elige otro.",

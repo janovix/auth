@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
 	Building2,
@@ -100,9 +100,18 @@ export function CreateOrganizationView() {
 	const [slug, setSlug] = useState("");
 	const [slugTouched, setSlugTouched] = useState(false);
 	const [slugError, setSlugError] = useState<string | null>(null);
+	const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
+	const [isCheckingSlug, setIsCheckingSlug] = useState(false);
 	const [orgLogo, setOrgLogo] = useState<string | null>(null);
 	const [isCreating, setIsCreating] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const slugCheckTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+		null,
+	);
+	const slugRef = useRef(slug);
+	slugRef.current = slug;
+
+	const SLUG_CHECK_DEBOUNCE_MS = 400;
 
 	// Auto-generate slug from name (only if user hasn't manually edited)
 	useEffect(() => {
@@ -111,15 +120,78 @@ export function CreateOrganizationView() {
 		}
 	}, [orgName, slugTouched]);
 
-	// Validate slug on change
+	// Validate slug format on change
 	useEffect(() => {
 		if (slug) {
 			const validation = validateSlug(slug);
-			setSlugError(validation.valid ? null : validation.error || null);
+			const formatError = validation.valid ? null : validation.error || null;
+			setSlugError(formatError);
+			if (formatError) {
+				setSlugAvailable(null);
+			}
 		} else {
 			setSlugError(null);
+			setSlugAvailable(null);
 		}
 	}, [slug]);
+
+	// Debounced checkSlug API call when slug is valid
+	useEffect(() => {
+		const formatValid = slug && validateSlug(slug).valid;
+		if (!formatValid) {
+			setSlugAvailable(null);
+			setIsCheckingSlug(false);
+			return;
+		}
+
+		// Clear previous timeout
+		if (slugCheckTimeoutRef.current) {
+			clearTimeout(slugCheckTimeoutRef.current);
+			slugCheckTimeoutRef.current = null;
+		}
+
+		slugCheckTimeoutRef.current = setTimeout(async () => {
+			slugCheckTimeoutRef.current = null;
+			const slugToCheck = slug.trim();
+			setIsCheckingSlug(true);
+			setSlugAvailable(null);
+
+			try {
+				const result = await authClient.organization.checkSlug({
+					slug: slugToCheck,
+				});
+
+				// Ignore stale: slug might have changed while request was in flight
+				if (slugToCheck !== slugRef.current.trim()) return;
+
+				if (result.error) {
+					// Slug is taken or API error
+					const takenMessage =
+						t("settings.createOrg.slugTaken") ||
+						"This slug is already taken. Please choose another.";
+					setSlugError(takenMessage);
+					setSlugAvailable(false);
+				} else {
+					setSlugError(null);
+					setSlugAvailable(true);
+				}
+			} catch {
+				if (slugToCheck !== slugRef.current.trim()) return;
+				setSlugAvailable(null);
+				// Don't set slugError on network failure - user can retry
+			} finally {
+				if (slugToCheck === slugRef.current.trim()) {
+					setIsCheckingSlug(false);
+				}
+			}
+		}, SLUG_CHECK_DEBOUNCE_MS);
+
+		return () => {
+			if (slugCheckTimeoutRef.current) {
+				clearTimeout(slugCheckTimeoutRef.current);
+			}
+		};
+	}, [slug, t]);
 
 	const handleSlugChange = useCallback((value: string) => {
 		// Only allow valid slug characters as user types
@@ -242,7 +314,11 @@ export function CreateOrganizationView() {
 		}
 	};
 
-	const isFormValid = orgName.trim() && slug.trim() && !slugError;
+	const isFormValid =
+		orgName.trim() &&
+		slug.trim() &&
+		!slugError &&
+		(slugAvailable === true || !validateSlug(slug.trim()).valid);
 
 	const backAction = (
 		<Button
@@ -362,11 +438,21 @@ export function CreateOrganizationView() {
 									<AlertCircle className="h-3 w-3" />
 									{slugError}
 								</p>
-							) : slug ? (
+							) : isCheckingSlug ? (
+								<p className="text-xs text-muted-foreground flex items-center gap-1">
+									<Loader2 className="h-3 w-3 animate-spin" />
+									{t("settings.createOrg.checkingSlug") ||
+										"Checking availability..."}
+								</p>
+							) : slugAvailable === true ? (
 								<p className="text-xs text-success flex items-center gap-1">
 									<Check className="h-3 w-3" />
 									{slug}.janovix.com{" "}
 									{t("settings.createOrg.slugAvailable") || "is available!"}
+								</p>
+							) : slug ? (
+								<p className="text-xs text-muted-foreground">
+									{slug}.janovix.com
 								</p>
 							) : (
 								<p className="text-xs text-muted-foreground">

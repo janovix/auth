@@ -35,6 +35,7 @@ const translations = {
 		// Common
 		"common.accept": "Accept",
 		"common.cancel": "Cancel",
+		"common.back": "Back",
 
 		// Login page
 		"login.title": "Welcome",
@@ -996,6 +997,7 @@ const translations = {
 		// Common
 		"common.accept": "Aceptar",
 		"common.cancel": "Cancelar",
+		"common.back": "Volver",
 
 		// Login page
 		"login.title": "Bienvenido",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
 	Building2,
@@ -19,6 +19,12 @@ import { useLanguage } from "@/contexts/language-context";
 import { authClient } from "@/lib/auth/authClient";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 import { cn } from "@/lib/utils";
+import {
+	generateSlug,
+	sanitizeSlugInput,
+	useSlugAvailability,
+	validateSlug,
+} from "@/lib/organization";
 import {
 	SettingsCard,
 	SettingsSection,
@@ -41,57 +47,6 @@ function dataURLtoBlob(dataUrl: string): Blob {
 	return new Blob([u8arr], { type: mime });
 }
 
-/**
- * Generate a URL-friendly slug from a string
- */
-function generateSlug(name: string): string {
-	return name
-		.toLowerCase()
-		.trim()
-		.replace(/[áàäâã]/g, "a")
-		.replace(/[éèëê]/g, "e")
-		.replace(/[íìïî]/g, "i")
-		.replace(/[óòöôõ]/g, "o")
-		.replace(/[úùüû]/g, "u")
-		.replace(/[ñ]/g, "n")
-		.replace(/[ç]/g, "c")
-		.replace(/[^a-z0-9\s-]/g, "") // Remove special chars
-		.replace(/\s+/g, "-") // Replace spaces with hyphens
-		.replace(/-+/g, "-") // Replace multiple hyphens with single
-		.replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
-}
-
-/**
- * Validate slug format
- */
-function validateSlug(slug: string): { valid: boolean; error?: string } {
-	if (!slug) {
-		return { valid: false, error: "Slug is required" };
-	}
-	if (slug.length < 3) {
-		return { valid: false, error: "Slug must be at least 3 characters" };
-	}
-	if (slug.length > 50) {
-		return { valid: false, error: "Slug must be 50 characters or less" };
-	}
-	if (!/^[a-z0-9]/.test(slug)) {
-		return { valid: false, error: "Slug must start with a letter or number" };
-	}
-	if (!/[a-z0-9]$/.test(slug)) {
-		return { valid: false, error: "Slug must end with a letter or number" };
-	}
-	if (!/^[a-z0-9-]+$/.test(slug)) {
-		return {
-			valid: false,
-			error: "Slug can only contain lowercase letters, numbers, and hyphens",
-		};
-	}
-	if (/--/.test(slug)) {
-		return { valid: false, error: "Slug cannot contain consecutive hyphens" };
-	}
-	return { valid: true };
-}
-
 export function CreateOrganizationView() {
 	const { t } = useLanguage();
 	const router = useRouter();
@@ -99,19 +54,17 @@ export function CreateOrganizationView() {
 	const [orgName, setOrgName] = useState("");
 	const [slug, setSlug] = useState("");
 	const [slugTouched, setSlugTouched] = useState(false);
-	const [slugError, setSlugError] = useState<string | null>(null);
-	const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
-	const [isCheckingSlug, setIsCheckingSlug] = useState(false);
 	const [orgLogo, setOrgLogo] = useState<string | null>(null);
 	const [isCreating, setIsCreating] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const slugCheckTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-		null,
-	);
-	const slugRef = useRef(slug);
-	slugRef.current = slug;
+	const [apiSlugError, setApiSlugError] = useState<string | null>(null);
 
-	const SLUG_CHECK_DEBOUNCE_MS = 400;
+	const { slugError, slugAvailable, isCheckingSlug } = useSlugAvailability({
+		slug,
+		slugTakenMessage:
+			t("settings.createOrg.slugTaken") ||
+			"This slug is already taken. Please choose another.",
+	});
 
 	// Auto-generate slug from name (only if user hasn't manually edited)
 	useEffect(() => {
@@ -120,85 +73,13 @@ export function CreateOrganizationView() {
 		}
 	}, [orgName, slugTouched]);
 
-	// Validate slug format on change
-	useEffect(() => {
-		if (slug) {
-			const validation = validateSlug(slug);
-			const formatError = validation.valid ? null : validation.error || null;
-			setSlugError(formatError);
-			if (formatError) {
-				setSlugAvailable(null);
-			}
-		} else {
-			setSlugError(null);
-			setSlugAvailable(null);
-		}
-	}, [slug]);
-
-	// Debounced checkSlug API call when slug is valid
-	useEffect(() => {
-		const formatValid = slug && validateSlug(slug).valid;
-		if (!formatValid) {
-			setSlugAvailable(null);
-			setIsCheckingSlug(false);
-			return;
-		}
-
-		// Clear previous timeout
-		if (slugCheckTimeoutRef.current) {
-			clearTimeout(slugCheckTimeoutRef.current);
-			slugCheckTimeoutRef.current = null;
-		}
-
-		slugCheckTimeoutRef.current = setTimeout(async () => {
-			slugCheckTimeoutRef.current = null;
-			const slugToCheck = slug.trim();
-			setIsCheckingSlug(true);
-			setSlugAvailable(null);
-
-			try {
-				const result = await authClient.organization.checkSlug({
-					slug: slugToCheck,
-				});
-
-				// Ignore stale: slug might have changed while request was in flight
-				if (slugToCheck !== slugRef.current.trim()) return;
-
-				if (result.error) {
-					// Slug is taken or API error
-					const takenMessage =
-						t("settings.createOrg.slugTaken") ||
-						"This slug is already taken. Please choose another.";
-					setSlugError(takenMessage);
-					setSlugAvailable(false);
-				} else {
-					setSlugError(null);
-					setSlugAvailable(true);
-				}
-			} catch {
-				if (slugToCheck !== slugRef.current.trim()) return;
-				setSlugAvailable(null);
-				// Don't set slugError on network failure - user can retry
-			} finally {
-				if (slugToCheck === slugRef.current.trim()) {
-					setIsCheckingSlug(false);
-				}
-			}
-		}, SLUG_CHECK_DEBOUNCE_MS);
-
-		return () => {
-			if (slugCheckTimeoutRef.current) {
-				clearTimeout(slugCheckTimeoutRef.current);
-			}
-		};
-	}, [slug, t]);
-
 	const handleSlugChange = useCallback((value: string) => {
-		// Only allow valid slug characters as user types
-		const sanitized = value.toLowerCase().replace(/[^a-z0-9-]/g, "");
-		setSlug(sanitized);
+		setSlug(sanitizeSlugInput(value));
 		setSlugTouched(true);
+		setApiSlugError(null);
 	}, []);
+
+	const displaySlugError = slugError || apiSlugError;
 
 	// Handle logo save via the AvatarEditorDialog
 	const handleLogoSave = useCallback(
@@ -255,12 +136,13 @@ export function CreateOrganizationView() {
 		// Validate slug before submitting
 		const validation = validateSlug(slug);
 		if (!validation.valid) {
-			setSlugError(validation.error || "Invalid slug");
+			setApiSlugError(validation.error || "Invalid slug");
 			return;
 		}
 
 		setIsCreating(true);
 		setError(null);
+		setApiSlugError(null);
 
 		try {
 			const result = await authClient.organization.create({
@@ -277,7 +159,7 @@ export function CreateOrganizationView() {
 					errorMsg.toLowerCase().includes("slug") ||
 					errorMsg.toLowerCase().includes("unique")
 				) {
-					setSlugError(
+					setApiSlugError(
 						t("settings.createOrg.slugTaken") ||
 							"This slug is already taken. Please choose another.",
 					);
@@ -317,7 +199,7 @@ export function CreateOrganizationView() {
 	const isFormValid =
 		orgName.trim() &&
 		slug.trim() &&
-		!slugError &&
+		!displaySlugError &&
 		(slugAvailable === true || !validateSlug(slug.trim()).valid);
 
 	const backAction = (
@@ -424,7 +306,7 @@ export function CreateOrganizationView() {
 									onChange={(e) => handleSlugChange(e.target.value)}
 									className={cn(
 										"rounded-r-none font-mono text-sm",
-										slugError &&
+										displaySlugError &&
 											"border-destructive focus-visible:ring-destructive",
 									)}
 									disabled={isCreating}
@@ -433,10 +315,10 @@ export function CreateOrganizationView() {
 									.janovix.com
 								</span>
 							</div>
-							{slugError ? (
+							{displaySlugError ? (
 								<p className="text-xs text-destructive flex items-center gap-1">
 									<AlertCircle className="h-3 w-3" />
-									{slugError}
+									{displaySlugError}
 								</p>
 							) : isCheckingSlug ? (
 								<p className="text-xs text-muted-foreground flex items-center gap-1">

@@ -2,7 +2,15 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Copy, Check, Loader2, Plus } from "lucide-react";
+import {
+	Building2,
+	Copy,
+	Check,
+	Loader2,
+	Plus,
+	AlertCircle,
+	Link2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button, Label } from "@/components/ui";
 import { Input } from "@/components/ui/input";
@@ -27,6 +35,7 @@ import {
 } from "@/lib/settings";
 import { authClient } from "@/lib/auth/authClient";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
+import { sanitizeSlugInput, useSlugAvailability } from "@/lib/organization";
 import {
 	SettingsCard,
 	SettingsSection,
@@ -36,6 +45,7 @@ import {
 } from "@/components/settings";
 import { AvatarEditorDialog } from "@algenium/blocks";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
+import { cn } from "@/lib/utils";
 
 const DATE_FORMATS: { value: DateFormat; label: string }[] = [
 	{ value: "DD/MM/YYYY", label: "DD/MM/YYYY" },
@@ -95,6 +105,14 @@ export function OrganizationSettingsView() {
 	)?.activeOrganizationId;
 
 	const isOwner = membership?.role === "owner";
+
+	const { slugError, slugAvailable, isCheckingSlug } = useSlugAvailability({
+		slug: orgSlug,
+		excludeWhenSlugEquals: orgData?.slug ?? undefined,
+		slugTakenMessage:
+			t("settings.createOrg.slugTaken") ||
+			"This slug is already taken. Please choose another.",
+	});
 
 	// Get org initials for avatar placeholder
 	const orgInitials = orgData?.name?.substring(0, 2).toUpperCase() || "ORG";
@@ -250,16 +268,19 @@ export function OrganizationSettingsView() {
 
 	const handleOrgUpdate = useCallback(async () => {
 		if (!activeOrgId || !isOwner) return;
+		if (slugError || (orgSlug && slugAvailable !== true)) return;
 		try {
 			setSaving(true);
 			await authClient.organization.update({
 				organizationId: activeOrgId,
 				data: {
 					name: orgName,
-					slug: orgSlug,
+					slug: orgSlug.trim(),
 				},
 			});
 			showSuccess(t("settings.organization.savedSuccess"));
+			// Update orgData slug so excludeWhenSlugEquals stays in sync
+			setOrgData((prev) => (prev ? { ...prev, slug: orgSlug.trim() } : null));
 		} catch (err) {
 			toast.error(
 				err instanceof Error
@@ -269,7 +290,16 @@ export function OrganizationSettingsView() {
 		} finally {
 			setSaving(false);
 		}
-	}, [activeOrgId, isOwner, orgName, orgSlug, showSuccess, t]);
+	}, [
+		activeOrgId,
+		isOwner,
+		orgName,
+		orgSlug,
+		slugError,
+		slugAvailable,
+		showSuccess,
+		t,
+	]);
 
 	const handleThemeChange = useCallback(
 		async (newTheme: Theme) => {
@@ -444,7 +474,12 @@ export function OrganizationSettingsView() {
 										<Button
 											variant="outline"
 											onClick={handleOrgUpdate}
-											disabled={!isOwner || saving}
+											disabled={
+												!isOwner ||
+												saving ||
+												!!slugError ||
+												(!!orgSlug && slugAvailable !== true)
+											}
 										>
 											{saving ? (
 												<Loader2 className="h-4 w-4 animate-spin" />
@@ -456,7 +491,13 @@ export function OrganizationSettingsView() {
 								</div>
 
 								<div className="space-y-2">
-									<Label htmlFor="urlSlug">{t("settings.org.slug")}</Label>
+									<Label
+										htmlFor="urlSlug"
+										className="flex items-center gap-1.5"
+									>
+										<Link2 className="h-3.5 w-3.5" />
+										{t("settings.org.slug")}
+									</Label>
 									<div className="flex items-center">
 										<span className="text-sm text-muted-foreground px-3 py-2 bg-muted rounded-l-md border border-r-0 border-input">
 											janovix.com/
@@ -464,11 +505,39 @@ export function OrganizationSettingsView() {
 										<Input
 											id="urlSlug"
 											value={orgSlug}
-											onChange={(e) => setOrgSlug(e.target.value)}
+											onChange={(e) =>
+												setOrgSlug(sanitizeSlugInput(e.target.value))
+											}
 											disabled={!isOwner || saving}
-											className="rounded-l-none flex-1"
+											className={cn(
+												"rounded-l-none flex-1 font-mono",
+												slugError &&
+													"border-destructive focus-visible:ring-destructive",
+											)}
 										/>
 									</div>
+									{slugError ? (
+										<p className="text-xs text-destructive flex items-center gap-1">
+											<AlertCircle className="h-3 w-3" />
+											{slugError}
+										</p>
+									) : isCheckingSlug ? (
+										<p className="text-xs text-muted-foreground flex items-center gap-1">
+											<Loader2 className="h-3 w-3 animate-spin" />
+											{t("settings.createOrg.checkingSlug") ||
+												"Checking availability..."}
+										</p>
+									) : slugAvailable === true ? (
+										<p className="text-xs text-success flex items-center gap-1">
+											<Check className="h-3 w-3" />
+											janovix.com/{orgSlug}{" "}
+											{t("settings.createOrg.slugAvailable") || "is available!"}
+										</p>
+									) : orgSlug ? (
+										<p className="text-xs text-muted-foreground">
+											janovix.com/{orgSlug}
+										</p>
+									) : null}
 								</div>
 							</div>
 						</div>

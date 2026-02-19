@@ -68,23 +68,9 @@ describe("Logo", () => {
 		}
 	});
 
-	it("applies forceTheme when specified", () => {
-		renderWithTheme(<Logo variant="logo" forceTheme="light" />);
-		const svgs = document.querySelectorAll("svg[viewBox='0 0 102 16']");
-		expect(svgs.length).toBeGreaterThan(0);
-		const svg = svgs[svgs.length - 1];
-		// Light theme should use dark text color (#1E2938)
-		const path = svg?.querySelector("path");
-		expect(path?.getAttribute("fill")).toBe("#1E2938");
-	});
-
-	it("applies dark forceTheme when specified", () => {
-		renderWithTheme(<Logo variant="logo" forceTheme="dark" />);
-		const svgs = document.querySelectorAll("svg[viewBox='0 0 102 16']");
-		expect(svgs.length).toBeGreaterThan(0);
-		const svg = svgs[svgs.length - 1];
-		// Dark theme should use white text color (#FFFFFF)
-		const path = svg?.querySelector("path");
-		expect(path?.getAttribute("fill")).toBe("#FFFFFF");
+	it("uses CSS custom properties for colors", () => {
+		const { container } = renderWithTheme(<Logo variant="logo" />);
+		const svg = container.querySelector("svg");
+		expect(svg?.innerHTML).toContain("var(--logo-text-primary)");
 	});
 });

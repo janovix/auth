@@ -1,3 +1,10 @@
+# [2.0.0-rc.37](https://github.com/janovix/auth/compare/v2.0.0-rc.36...v2.0.0-rc.37) (2026-02-19)
+
+
+### Features
+
+* **settings:** enhance slug validation and availability checking in organization creation ([facf2d5](https://github.com/janovix/auth/commit/facf2d50f2c45be40ff53832826fa7ca7ec99147))
+
 # [2.0.0-rc.36](https://github.com/janovix/auth/compare/v2.0.0-rc.35...v2.0.0-rc.36) (2026-02-18)
 
 

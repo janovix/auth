@@ -1,3 +1,10 @@
+# [2.0.0-rc.39](https://github.com/janovix/auth/compare/v2.0.0-rc.38...v2.0.0-rc.39) (2026-02-19)
+
+
+### Features
+
+* **logo:** refactor logo component to use CSS custom properties for colors ([9abf81d](https://github.com/janovix/auth/commit/9abf81d5d222d55225b5f0cf2368ab9151f49528))
+
 # [2.0.0-rc.38](https://github.com/janovix/auth/compare/v2.0.0-rc.37...v2.0.0-rc.38) (2026-02-19)
 
 

@@ -87,35 +87,19 @@ describe("middleware", () => {
 	describe("users with valid session, name set, and organization", () => {
 		beforeEach(() => {
 			mockGetSessionCookie.mockReturnValue("valid-session-token");
-			// Mock both fetch calls: first for get-session, then for onboarding-status
-			mockFetch
-				.mockResolvedValueOnce({
-					ok: true,
-					json: () =>
-						Promise.resolve({
-							session: { id: "123" },
-							user: { id: "u1", name: "John Doe", email: "john@example.com" },
-						}),
-					headers: {
-						getSetCookie: () => [],
-					},
-				})
-				.mockResolvedValueOnce({
-					ok: true,
-					json: () =>
-						Promise.resolve({
-							success: true,
-							data: {
-								profileComplete: true,
-								hasOrganization: true,
-								hasSubscription: true,
-								subscriptionStatus: "active",
-								plan: "business",
-								pendingInvitation: null,
-								canCreateOrganization: true,
-							},
-						}),
-				});
+			// Only one fetch call needed: get-session already contains name +
+			// activeOrganizationId, so the middleware skips the onboarding-status call.
+			mockFetch.mockResolvedValueOnce({
+				ok: true,
+				json: () =>
+					Promise.resolve({
+						session: { id: "123", activeOrganizationId: "org123" },
+						user: { id: "u1", name: "John Doe", email: "john@example.com" },
+					}),
+				headers: {
+					getSetCookie: () => [],
+				},
+			});
 		});
 
 		it("should allow access to account routes", async () => {
@@ -174,6 +158,73 @@ describe("middleware", () => {
 			expect(response.headers.get("location")).toBe(
 				"https://custom.example.com/dashboard",
 			);
+		});
+
+		it("should skip onboarding-status fetch when session has name and activeOrganizationId", async () => {
+			const request = new NextRequest("https://auth.example.com/account");
+			await middleware(request);
+
+			// Only one fetch (get-session) — no onboarding-status call
+			expect(mockFetch).toHaveBeenCalledTimes(1);
+			expect(mockFetch).toHaveBeenCalledWith(
+				expect.stringContaining("/api/auth/get-session"),
+				expect.any(Object),
+			);
+		});
+
+		it("should always fetch onboarding-status for the /invite route even when session is complete", async () => {
+			// Re-mock because beforeEach only sets one mock response (fast path).
+			// For /invite we need two: get-session + onboarding-status.
+			mockFetch
+				.mockReset()
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							session: { id: "123", activeOrganizationId: "org123" },
+							user: { id: "u1", name: "John Doe", email: "john@example.com" },
+						}),
+					headers: { getSetCookie: () => [] },
+				})
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							success: true,
+							data: {
+								profileComplete: true,
+								hasOrganization: true,
+								hasSubscription: true,
+								subscriptionStatus: "active",
+								plan: "business",
+								pendingInvitation: {
+									id: "inv1",
+									organizationId: "org2",
+									organizationName: "Other Org",
+									organizationLogo: null,
+									role: "member",
+									inviterName: "Alice",
+									inviterEmail: "alice@example.com",
+									expiresAt: null,
+								},
+								canCreateOrganization: true,
+							},
+						}),
+				});
+
+			const request = new NextRequest("https://auth.example.com/invite");
+			const response = await middleware(request);
+
+			// Both fetches must be called — fast path is bypassed for /invite
+			expect(mockFetch).toHaveBeenCalledTimes(2);
+			expect(mockFetch).toHaveBeenNthCalledWith(
+				2,
+				expect.stringContaining("/api/subscription/onboarding-status"),
+				expect.any(Object),
+			);
+			// User has pending invitation → allowed through (200, no redirect)
+			expect(response.status).toBe(200);
+			expect(response.headers.get("location")).toBeNull();
 		});
 	});
 
@@ -412,40 +463,99 @@ describe("middleware", () => {
 		});
 	});
 
-	describe("fallback auth service URL", () => {
-		it("should use fallback URL when env var is not set", async () => {
-			delete process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;
-			delete process.env.NEXT_PUBLIC_AUTH_APP_URL;
-			mockGetSessionCookie.mockReturnValue("session-token");
-			// Mock both fetch calls: first for get-session, then for onboarding-status
+	describe("fetch timeout behavior", () => {
+		beforeEach(() => {
+			vi.useFakeTimers();
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		/**
+		 * Returns a mock fetch implementation that honours the AbortSignal passed
+		 * via `options.signal`. The returned promise rejects with an AbortError
+		 * as soon as `controller.abort()` is called, which is what the real
+		 * fetch() does. Without this the fake-timer tests would hang because
+		 * the plain `new Promise(() => {})` mock ignores the signal entirely.
+		 */
+		function hangingFetch(
+			_url: string,
+			options?: RequestInit,
+		): Promise<Response> {
+			return new Promise<Response>((_resolve, reject) => {
+				options?.signal?.addEventListener("abort", () => {
+					reject(new DOMException("The operation was aborted.", "AbortError"));
+				});
+			});
+		}
+
+		it("should redirect to login when get-session fetch hangs past 8s timeout", async () => {
+			mockGetSessionCookie.mockReturnValue("valid-session-token");
+			mockFetch.mockImplementation(hangingFetch);
+
+			const request = new NextRequest("https://auth.example.com/account");
+			const responsePromise = middleware(request);
+
+			// Advance past the 8s timeout so AbortController fires → signal aborts
+			await vi.advanceTimersByTimeAsync(8001);
+
+			const response = await responsePromise;
+
+			expect(response.status).toBe(307);
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/login",
+			);
+		});
+
+		it("should redirect to login when onboarding-status fetch hangs past 8s timeout", async () => {
+			mockGetSessionCookie.mockReturnValue("valid-session-token");
+			// get-session resolves immediately with a user who has no name → triggers slow path
 			mockFetch
 				.mockResolvedValueOnce({
 					ok: true,
 					json: () =>
 						Promise.resolve({
 							session: { id: "123" },
-							user: { id: "u1", name: "John", email: "john@example.com" },
+							user: { id: "u1", name: null, email: "john@example.com" },
 						}),
-					headers: {
-						getSetCookie: () => [],
-					},
+					headers: { getSetCookie: () => [] },
 				})
-				.mockResolvedValueOnce({
-					ok: true,
-					json: () =>
-						Promise.resolve({
-							success: true,
-							data: {
-								profileComplete: true,
-								hasOrganization: true,
-								hasSubscription: true,
-								subscriptionStatus: "active",
-								plan: "business",
-								pendingInvitation: null,
-								canCreateOrganization: true,
-							},
-						}),
-				});
+				// onboarding-status hangs indefinitely
+				.mockImplementationOnce(hangingFetch);
+
+			const request = new NextRequest("https://auth.example.com/account");
+			const responsePromise = middleware(request);
+
+			await vi.advanceTimersByTimeAsync(8001);
+
+			const response = await responsePromise;
+
+			expect(response.status).toBe(307);
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/login",
+			);
+		});
+	});
+
+	describe("fallback auth service URL", () => {
+		it("should use fallback URL when env var is not set", async () => {
+			delete process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;
+			delete process.env.NEXT_PUBLIC_AUTH_APP_URL;
+			mockGetSessionCookie.mockReturnValue("session-token");
+			// One fetch only: session has name + activeOrganizationId so
+			// onboarding-status is skipped.
+			mockFetch.mockResolvedValueOnce({
+				ok: true,
+				json: () =>
+					Promise.resolve({
+						session: { id: "123", activeOrganizationId: "org123" },
+						user: { id: "u1", name: "John", email: "john@example.com" },
+					}),
+				headers: {
+					getSetCookie: () => [],
+				},
+			});
 
 			const request = new NextRequest("https://auth.example.com/account");
 			await middleware(request);

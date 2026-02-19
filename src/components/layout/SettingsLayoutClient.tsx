@@ -184,18 +184,18 @@ function SettingsLayoutInner({
 			try {
 				setOrgsLoading(true);
 				const authServiceUrl = getAuthCoreBaseUrl();
-				const response = await fetch(
+				const userId = session?.user?.id;
+
+				const listResponse = await fetch(
 					`${authServiceUrl}/api/auth/organization/list`,
 					{
 						credentials: "include",
-						headers: {
-							"Content-Type": "application/json",
-						},
+						headers: { "Content-Type": "application/json" },
 					},
 				);
 
-				if (response.ok) {
-					const data = (await response.json()) as
+				if (listResponse.ok) {
+					const data = (await listResponse.json()) as
 						| Array<{
 								id: string;
 								name: string;
@@ -211,6 +211,40 @@ function SettingsLayoutInner({
 								}>;
 						  };
 					const orgs = Array.isArray(data) ? data : data.organizations || [];
+
+					// Fetch members for all orgs in parallel to get the current user's role
+					const memberResponses = await Promise.all(
+						orgs.map((org) =>
+							fetch(
+								`${authServiceUrl}/api/auth/organization/list-members?organizationId=${org.id}`,
+								{ credentials: "include" },
+							),
+						),
+					);
+
+					// Build orgId → role map by finding the current user in each org's members
+					const rolesMap: Record<string, "owner" | "admin" | "member"> = {};
+					if (userId) {
+						await Promise.all(
+							memberResponses.map(async (res, i) => {
+								if (!res.ok) return;
+								const membersData = (await res.json()) as
+									| Array<{ userId: string; role: string }>
+									| { members?: Array<{ userId: string; role: string }> };
+								const membersArr = Array.isArray(membersData)
+									? membersData
+									: (membersData.members ?? []);
+								const myMember = membersArr.find((m) => m.userId === userId);
+								if (myMember) {
+									rolesMap[orgs[i].id] = myMember.role as
+										| "owner"
+										| "admin"
+										| "member";
+								}
+							}),
+						);
+					}
+
 					const formattedOrgs = orgs.map(
 						(org: {
 							id: string;
@@ -222,6 +256,7 @@ function SettingsLayoutInner({
 							name: org.name,
 							slug: org.slug,
 							logo: org.logo || null,
+							role: rolesMap[org.id] ?? "member",
 						}),
 					);
 					setOrganizations(formattedOrgs);
@@ -257,7 +292,7 @@ function SettingsLayoutInner({
 			}
 		}
 		loadOrganizations();
-	}, [activeOrgId]);
+	}, [activeOrgId, session?.user?.id]);
 
 	// Switch org based on query param
 	useEffect(() => {
@@ -343,10 +378,11 @@ function SettingsLayoutInner({
 					setOrganizationsLimit(subscriptionStatus.organizationsLimit);
 				}
 
-				// Check for pending invitations
+				// Check for pending invitations — use the lightweight fast path to avoid
+				// the expensive subscription/Stripe checks in the full endpoint
 				const authServiceUrl = getAuthCoreBaseUrl();
 				const onboardingResponse = await fetch(
-					`${authServiceUrl}/api/subscription/onboarding-status`,
+					`${authServiceUrl}/api/subscription/onboarding-status?pendingInvitationsOnly=true`,
 					{
 						credentials: "include",
 					},

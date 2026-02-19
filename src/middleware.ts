@@ -3,6 +3,28 @@ import { getSessionCookie } from "better-auth/cookies";
 
 import { getDefaultRedirectUrl } from "@/lib/auth/redirectConfig";
 
+const AUTH_SVC_TIMEOUT_MS = 8000;
+
+/**
+ * Wraps fetch() with an AbortController timeout. If auth-svc does not respond
+ * within timeoutMs, the request is aborted and the caller's catch block handles
+ * the resulting AbortError. This prevents unbounded hangs that cause Cloudflare
+ * to kill the middleware Worker with "Network connection lost."
+ */
+async function fetchWithTimeout(
+	url: string,
+	options: RequestInit,
+	timeoutMs = AUTH_SVC_TIMEOUT_MS,
+): Promise<Response> {
+	const controller = new AbortController();
+	const timeout = setTimeout(() => controller.abort(), timeoutMs);
+	try {
+		return await fetch(url, { ...options, signal: controller.signal });
+	} finally {
+		clearTimeout(timeout);
+	}
+}
+
 /**
  * Helper to add Set-Cookie headers from auth-svc to a Next.js response.
  * This is CRITICAL for cookie cache refresh - without forwarding these headers,
@@ -96,20 +118,48 @@ type SessionResult =
 			};
 			onboardingStatus: OnboardingStatus;
 			setCookieHeaders: string[];
+			/** Serialized full session JSON to pass to Server Components via request header. */
+			sessionJson?: string;
 	  };
 
 /**
+ * Build a NextResponse.next() that forwards the validated session data to Server Components
+ * via the x-middleware-session request header. This lets getServerSession() skip a redundant
+ * get-session HTTP call since the middleware has already validated the session.
+ *
+ * The incoming x-middleware-session header is always stripped to prevent client injection.
+ */
+function nextWithSession(
+	request: NextRequest,
+	sessionJson: string | null,
+): NextResponse {
+	const requestHeaders = new Headers(request.headers);
+	requestHeaders.delete("x-middleware-session");
+	if (sessionJson) {
+		requestHeaders.set("x-middleware-session", sessionJson);
+	}
+	return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
+/**
  * Validates the session with the auth service and returns user data + onboarding status.
+ *
+ * @param cookieHeader - Forwarded cookie header for auth-svc requests
+ * @param options.requireFullOnboardingStatus - When true (e.g. for the /invite route) the fast
+ *   path is bypassed so we always fetch onboarding-status and get accurate pendingInvitation data.
+ *   Without this, an already-onboarded user visiting /invite would see pendingInvitation=null and
+ *   get incorrectly redirected even though they have a real pending org invitation.
  * @returns Session result with validity, user info, and onboarding status
  */
 async function getSessionWithOnboardingStatus(
 	cookieHeader: string,
+	options?: { requireFullOnboardingStatus?: boolean },
 ): Promise<SessionResult> {
 	try {
 		const authServiceUrl = getAuthServiceUrl();
 
 		// First, validate the session
-		const sessionResponse = await fetch(
+		const sessionResponse = await fetchWithTimeout(
 			`${authServiceUrl}/api/auth/get-session`,
 			{
 				headers: {
@@ -135,11 +185,26 @@ async function getSessionWithOnboardingStatus(
 		}
 
 		const sessionData = (await sessionResponse.json()) as {
-			session?: unknown;
+			session?: {
+				id?: string;
+				userId?: string;
+				token?: string;
+				expiresAt?: string;
+				createdAt?: string;
+				updatedAt?: string;
+				ipAddress?: string | null;
+				userAgent?: string | null;
+				activeOrganizationId?: string | null;
+			};
 			user?: {
 				id?: string;
 				name?: string | null;
 				email?: string;
+				emailVerified?: boolean;
+				image?: string | null;
+				createdAt?: string;
+				updatedAt?: string;
+				role?: string;
 				banned?: boolean;
 			};
 		};
@@ -158,8 +223,49 @@ async function getSessionWithOnboardingStatus(
 			};
 		}
 
-		// Then, get onboarding status
-		const onboardingResponse = await fetch(
+		const userName = sessionData.user.name ?? null;
+		const activeOrgId = sessionData.session.activeOrganizationId;
+
+		// Fast path: if the user has a name AND an active organization, they have
+		// completed onboarding. Skip the expensive onboarding-status HTTP call
+		// (which triggers 7-9 DB queries + a potential Stripe call on auth-svc) and
+		// return a synthetic "fully onboarded" status derived from the session data
+		// we already have. Visitors never reach this path because they have no name.
+		//
+		// Exception: skip the fast path when the caller requires full onboarding data
+		// (e.g. /invite route) so that pendingInvitation is always accurate — an
+		// onboarded user can still receive invitations to additional organizations.
+		if (
+			!options?.requireFullOnboardingStatus &&
+			userName &&
+			userName.trim().length > 0 &&
+			activeOrgId
+		) {
+			return {
+				isValid: true,
+				user: {
+					id: sessionData.user.id,
+					name: userName,
+					email: sessionData.user.email,
+					banned: sessionData.user.banned,
+				},
+				onboardingStatus: {
+					profileComplete: true,
+					hasOrganization: true,
+					hasSubscription: true,
+					subscriptionStatus: null,
+					plan: null,
+					pendingInvitation: null,
+					canCreateOrganization: false,
+				},
+				setCookieHeaders,
+				sessionJson: JSON.stringify(sessionData),
+			};
+		}
+
+		// Slow path: user may need onboarding (no name, or no active org).
+		// Fetch onboarding-status to get accurate state including pending invitations.
+		const onboardingResponse = await fetchWithTimeout(
 			`${authServiceUrl}/api/subscription/onboarding-status`,
 			{
 				headers: {
@@ -170,7 +276,6 @@ async function getSessionWithOnboardingStatus(
 			},
 		);
 
-		const userName = sessionData.user.name ?? null;
 		let onboardingStatus: OnboardingStatus = {
 			profileComplete: userName !== null && userName.trim().length > 0,
 			hasOrganization: false,
@@ -201,6 +306,7 @@ async function getSessionWithOnboardingStatus(
 			},
 			onboardingStatus,
 			setCookieHeaders,
+			sessionJson: JSON.stringify(sessionData),
 		};
 	} catch {
 		return {
@@ -279,8 +385,12 @@ export async function middleware(request: NextRequest) {
 		return NextResponse.next();
 	}
 
-	// Session cookie exists - validate it with auth service and get onboarding status
-	const sessionResult = await getSessionWithOnboardingStatus(cookieHeader);
+	// Session cookie exists - validate it with auth service and get onboarding status.
+	// For the /invite route we always need accurate pendingInvitation data even if the
+	// user has already completed onboarding (name + activeOrg), so bypass the fast path.
+	const sessionResult = await getSessionWithOnboardingStatus(cookieHeader, {
+		requireFullOnboardingStatus: isInviteRoute,
+	});
 	const { setCookieHeaders } = sessionResult;
 
 	if (!sessionResult.isValid) {
@@ -302,6 +412,7 @@ export async function middleware(request: NextRequest) {
 
 	// Valid session - check onboarding status
 	const { onboardingStatus } = sessionResult;
+	const sessionJson = sessionResult.sessionJson ?? null;
 
 	// Check if user is banned
 	if (sessionResult.user && (sessionResult.user as any).banned) {
@@ -318,7 +429,7 @@ export async function middleware(request: NextRequest) {
 	if (isVisitor) {
 		// Already on beta-access page - allow access
 		if (isBetaAccessRoute) {
-			const nextResponse = NextResponse.next();
+			const nextResponse = nextWithSession(request, sessionJson);
 			return addAuthCookies(nextResponse, setCookieHeaders);
 		}
 		// On any other route - redirect to beta-access
@@ -350,7 +461,7 @@ export async function middleware(request: NextRequest) {
 	if (isInviteRoute) {
 		// If user has a pending invitation, allow access to invite page
 		if (onboardingStatus.pendingInvitation) {
-			const nextResponse = NextResponse.next();
+			const nextResponse = nextWithSession(request, sessionJson);
 			return addAuthCookies(nextResponse, setCookieHeaders);
 		}
 		// No pending invitation - redirect to onboarding or settings
@@ -370,7 +481,7 @@ export async function middleware(request: NextRequest) {
 	if (userNeedsOnboarding) {
 		// Already on onboarding page - allow access
 		if (isOnboardingRoute) {
-			const nextResponse = NextResponse.next();
+			const nextResponse = nextWithSession(request, sessionJson);
 			return addAuthCookies(nextResponse, setCookieHeaders);
 		}
 
@@ -426,7 +537,7 @@ export async function middleware(request: NextRequest) {
 	}
 
 	// Allow access to protected routes
-	const nextResponse = NextResponse.next();
+	const nextResponse = nextWithSession(request, sessionJson);
 	return addAuthCookies(nextResponse, setCookieHeaders);
 }
 

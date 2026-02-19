@@ -20,6 +20,12 @@ import { authClient } from "@/lib/auth/authClient";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 import { cn } from "@/lib/utils";
 import {
+	generateSlug,
+	sanitizeSlugInput,
+	useSlugAvailability,
+	validateSlug,
+} from "@/lib/organization";
+import {
 	SettingsCard,
 	SettingsSection,
 	SettingsPageHeader,
@@ -41,57 +47,6 @@ function dataURLtoBlob(dataUrl: string): Blob {
 	return new Blob([u8arr], { type: mime });
 }
 
-/**
- * Generate a URL-friendly slug from a string
- */
-function generateSlug(name: string): string {
-	return name
-		.toLowerCase()
-		.trim()
-		.replace(/[áàäâã]/g, "a")
-		.replace(/[éèëê]/g, "e")
-		.replace(/[íìïî]/g, "i")
-		.replace(/[óòöôõ]/g, "o")
-		.replace(/[úùüû]/g, "u")
-		.replace(/[ñ]/g, "n")
-		.replace(/[ç]/g, "c")
-		.replace(/[^a-z0-9\s-]/g, "") // Remove special chars
-		.replace(/\s+/g, "-") // Replace spaces with hyphens
-		.replace(/-+/g, "-") // Replace multiple hyphens with single
-		.replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
-}
-
-/**
- * Validate slug format
- */
-function validateSlug(slug: string): { valid: boolean; error?: string } {
-	if (!slug) {
-		return { valid: false, error: "Slug is required" };
-	}
-	if (slug.length < 3) {
-		return { valid: false, error: "Slug must be at least 3 characters" };
-	}
-	if (slug.length > 50) {
-		return { valid: false, error: "Slug must be 50 characters or less" };
-	}
-	if (!/^[a-z0-9]/.test(slug)) {
-		return { valid: false, error: "Slug must start with a letter or number" };
-	}
-	if (!/[a-z0-9]$/.test(slug)) {
-		return { valid: false, error: "Slug must end with a letter or number" };
-	}
-	if (!/^[a-z0-9-]+$/.test(slug)) {
-		return {
-			valid: false,
-			error: "Slug can only contain lowercase letters, numbers, and hyphens",
-		};
-	}
-	if (/--/.test(slug)) {
-		return { valid: false, error: "Slug cannot contain consecutive hyphens" };
-	}
-	return { valid: true };
-}
-
 export function CreateOrganizationView() {
 	const { t } = useLanguage();
 	const router = useRouter();
@@ -99,10 +54,17 @@ export function CreateOrganizationView() {
 	const [orgName, setOrgName] = useState("");
 	const [slug, setSlug] = useState("");
 	const [slugTouched, setSlugTouched] = useState(false);
-	const [slugError, setSlugError] = useState<string | null>(null);
 	const [orgLogo, setOrgLogo] = useState<string | null>(null);
 	const [isCreating, setIsCreating] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [apiSlugError, setApiSlugError] = useState<string | null>(null);
+
+	const { slugError, slugAvailable, isCheckingSlug } = useSlugAvailability({
+		slug,
+		slugTakenMessage:
+			t("settings.createOrg.slugTaken") ||
+			"This slug is already taken. Please choose another.",
+	});
 
 	// Auto-generate slug from name (only if user hasn't manually edited)
 	useEffect(() => {
@@ -111,22 +73,13 @@ export function CreateOrganizationView() {
 		}
 	}, [orgName, slugTouched]);
 
-	// Validate slug on change
-	useEffect(() => {
-		if (slug) {
-			const validation = validateSlug(slug);
-			setSlugError(validation.valid ? null : validation.error || null);
-		} else {
-			setSlugError(null);
-		}
-	}, [slug]);
-
 	const handleSlugChange = useCallback((value: string) => {
-		// Only allow valid slug characters as user types
-		const sanitized = value.toLowerCase().replace(/[^a-z0-9-]/g, "");
-		setSlug(sanitized);
+		setSlug(sanitizeSlugInput(value));
 		setSlugTouched(true);
+		setApiSlugError(null);
 	}, []);
+
+	const displaySlugError = slugError || apiSlugError;
 
 	// Handle logo save via the AvatarEditorDialog
 	const handleLogoSave = useCallback(
@@ -183,12 +136,13 @@ export function CreateOrganizationView() {
 		// Validate slug before submitting
 		const validation = validateSlug(slug);
 		if (!validation.valid) {
-			setSlugError(validation.error || "Invalid slug");
+			setApiSlugError(validation.error || "Invalid slug");
 			return;
 		}
 
 		setIsCreating(true);
 		setError(null);
+		setApiSlugError(null);
 
 		try {
 			const result = await authClient.organization.create({
@@ -205,7 +159,7 @@ export function CreateOrganizationView() {
 					errorMsg.toLowerCase().includes("slug") ||
 					errorMsg.toLowerCase().includes("unique")
 				) {
-					setSlugError(
+					setApiSlugError(
 						t("settings.createOrg.slugTaken") ||
 							"This slug is already taken. Please choose another.",
 					);
@@ -242,7 +196,11 @@ export function CreateOrganizationView() {
 		}
 	};
 
-	const isFormValid = orgName.trim() && slug.trim() && !slugError;
+	const isFormValid =
+		orgName.trim() &&
+		slug.trim() &&
+		!displaySlugError &&
+		(slugAvailable === true || !validateSlug(slug.trim()).valid);
 
 	const backAction = (
 		<Button
@@ -348,7 +306,7 @@ export function CreateOrganizationView() {
 									onChange={(e) => handleSlugChange(e.target.value)}
 									className={cn(
 										"rounded-r-none font-mono text-sm",
-										slugError &&
+										displaySlugError &&
 											"border-destructive focus-visible:ring-destructive",
 									)}
 									disabled={isCreating}
@@ -357,16 +315,26 @@ export function CreateOrganizationView() {
 									.janovix.com
 								</span>
 							</div>
-							{slugError ? (
+							{displaySlugError ? (
 								<p className="text-xs text-destructive flex items-center gap-1">
 									<AlertCircle className="h-3 w-3" />
-									{slugError}
+									{displaySlugError}
 								</p>
-							) : slug ? (
+							) : isCheckingSlug ? (
+								<p className="text-xs text-muted-foreground flex items-center gap-1">
+									<Loader2 className="h-3 w-3 animate-spin" />
+									{t("settings.createOrg.checkingSlug") ||
+										"Checking availability..."}
+								</p>
+							) : slugAvailable === true ? (
 								<p className="text-xs text-success flex items-center gap-1">
 									<Check className="h-3 w-3" />
 									{slug}.janovix.com{" "}
 									{t("settings.createOrg.slugAvailable") || "is available!"}
+								</p>
+							) : slug ? (
+								<p className="text-xs text-muted-foreground">
+									{slug}.janovix.com
 								</p>
 							) : (
 								<p className="text-xs text-muted-foreground">

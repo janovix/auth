@@ -1,3 +1,38 @@
+# [2.0.0-rc.38](https://github.com/janovix/auth/compare/v2.0.0-rc.37...v2.0.0-rc.38) (2026-02-19)
+
+
+### Features
+
+* **middleware:** implement fetch timeout handling for session and onboarding status requests ([fc64651](https://github.com/janovix/auth/commit/fc64651976203e749bdec8d3565ce650c4afcb0b))
+
+# [2.0.0-rc.37](https://github.com/janovix/auth/compare/v2.0.0-rc.36...v2.0.0-rc.37) (2026-02-19)
+
+
+### Features
+
+* **settings:** enhance slug validation and availability checking in organization creation ([facf2d5](https://github.com/janovix/auth/commit/facf2d50f2c45be40ff53832826fa7ca7ec99147))
+
+# [2.0.0-rc.36](https://github.com/janovix/auth/compare/v2.0.0-rc.35...v2.0.0-rc.36) (2026-02-18)
+
+
+### Features
+
+* **settings:** enhance organization loading with user role mapping ([2376e43](https://github.com/janovix/auth/commit/2376e4365e498aeb0cbf987c5deaebd36bf617b3))
+
+# [2.0.0-rc.35](https://github.com/janovix/auth/compare/v2.0.0-rc.34...v2.0.0-rc.35) (2026-02-18)
+
+
+### Features
+
+* **organization-switcher:** enhance organization management with role-based grouping and creation options ([7b9583a](https://github.com/janovix/auth/commit/7b9583abc9d7cffa5cb262e76f9c7e87dc56f85c))
+
+# [2.0.0-rc.34](https://github.com/janovix/auth/compare/v2.0.0-rc.33...v2.0.0-rc.34) (2026-02-18)
+
+
+### Features
+
+* **middleware:** optimize session handling and onboarding status fetch logic ([c49afe1](https://github.com/janovix/auth/commit/c49afe12497c0ecb26ab3a90449ae162093dabb1))
+
 # [2.0.0-rc.33](https://github.com/janovix/auth/compare/v2.0.0-rc.32...v2.0.0-rc.33) (2026-02-18)
 
 

@@ -35,6 +35,7 @@ const translations = {
 		// Common
 		"common.accept": "Accept",
 		"common.cancel": "Cancel",
+		"common.back": "Back",
 
 		// Login page
 		"login.title": "Welcome",
@@ -298,6 +299,10 @@ const translations = {
 		"settings.nav.orgSettings": "Organization Settings",
 		"settings.nav.orgSettingsLink": "Settings",
 		"settings.nav.createOrganization": "Create organization",
+		"settings.nav.myOrganizations": "My organizations",
+		"settings.nav.memberOf": "Member of",
+		"settings.nav.orgLimitReached":
+			"You've reached your organization limit. Upgrade your plan to create more.",
 		"settings.userProgress": "User Progress",
 		"settings.orgProgress": "Org Progress",
 		"settings.saving": "Saving...",
@@ -353,6 +358,7 @@ const translations = {
 		"settings.createOrg.details": "Organization Details",
 		"settings.createOrg.detailsDesc":
 			"Enter the basic information for your new organization",
+		"settings.createOrg.logoHelp": "Optional: Add a logo for your organization",
 		"settings.createOrg.name": "Organization name",
 		"settings.createOrg.namePlaceholder": "Acme Corporation",
 		"settings.createOrg.nameHelp":
@@ -360,6 +366,7 @@ const translations = {
 		"settings.createOrg.subdomain": "Organization subdomain",
 		"settings.createOrg.subdomainHelp":
 			"This will be your organization's unique subdomain",
+		"settings.createOrg.checkingSlug": "Checking availability...",
 		"settings.createOrg.slugAvailable": "is available!",
 		"settings.createOrg.slugTaken":
 			"This slug is already taken. Please choose another.",
@@ -990,6 +997,7 @@ const translations = {
 		// Common
 		"common.accept": "Aceptar",
 		"common.cancel": "Cancelar",
+		"common.back": "Volver",
 
 		// Login page
 		"login.title": "Bienvenido",
@@ -1263,6 +1271,10 @@ const translations = {
 		"settings.nav.orgSettings": "Configuración de Organización",
 		"settings.nav.orgSettingsLink": "Configuración",
 		"settings.nav.createOrganization": "Crear organización",
+		"settings.nav.myOrganizations": "Mis organizaciones",
+		"settings.nav.memberOf": "Miembro de",
+		"settings.nav.orgLimitReached":
+			"Has alcanzado el límite de organizaciones. Actualiza tu plan para crear más.",
 		"settings.userProgress": "Progreso Usuario",
 		"settings.orgProgress": "Progreso Org",
 		"settings.saving": "Guardando...",
@@ -1319,6 +1331,8 @@ const translations = {
 		"settings.createOrg.details": "Detalles de la Organización",
 		"settings.createOrg.detailsDesc":
 			"Ingresa la información básica para tu nueva organización",
+		"settings.createOrg.logoHelp":
+			"Opcional: Añade un logo para tu organización",
 		"settings.createOrg.name": "Nombre de la organización",
 		"settings.createOrg.namePlaceholder": "Corporación Acme",
 		"settings.createOrg.nameHelp":
@@ -1326,6 +1340,7 @@ const translations = {
 		"settings.createOrg.subdomain": "Subdominio de la organización",
 		"settings.createOrg.subdomainHelp":
 			"Este será el subdominio único de tu organización",
+		"settings.createOrg.checkingSlug": "Comprobando disponibilidad...",
 		"settings.createOrg.slugAvailable": "está disponible!",
 		"settings.createOrg.slugTaken":
 			"Este slug ya está en uso. Por favor elige otro.",

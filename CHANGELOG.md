@@ -1,3 +1,10 @@
+# [2.0.0-rc.40](https://github.com/janovix/auth/compare/v2.0.0-rc.39...v2.0.0-rc.40) (2026-02-20)
+
+
+### Features
+
+* **settings:** implement organization update notifications in settings views ([bf6ac62](https://github.com/janovix/auth/commit/bf6ac622a759115d803b935e250ac476fac15647))
+
 # [2.0.0-rc.39](https://github.com/janovix/auth/compare/v2.0.0-rc.38...v2.0.0-rc.39) (2026-02-19)
 
 

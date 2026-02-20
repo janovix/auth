@@ -185,9 +185,8 @@ export function CreateOrganizationView() {
 				t("settings.createOrg.success") || "Organization created successfully!",
 			);
 
-			// Redirect to the organization settings page
-			router.push("/settings/organization");
-			router.refresh();
+			// Full navigation to ensure session cookie (with new activeOrganizationId) is re-read
+			window.location.href = "/settings/organization";
 		} catch (err) {
 			setError(
 				t("settings.createOrg.error") || "Failed to create organization",

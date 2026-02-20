@@ -250,6 +250,18 @@ export function OrganizationSettingsView() {
 					avatarUrl: uploadedUrl,
 				});
 
+				// Notify the sidebar so it reflects the updated logo immediately
+				window.dispatchEvent(
+					new CustomEvent("organization-updated", {
+						detail: {
+							id: activeOrgId,
+							name: orgData?.name ?? orgName,
+							slug: orgData?.slug ?? orgSlug,
+							logo: uploadedUrl,
+						},
+					}),
+				);
+
 				showSuccess(t("settings.organization.savedSuccess"));
 				return true;
 			} catch (err) {
@@ -263,7 +275,16 @@ export function OrganizationSettingsView() {
 				setSaving(false);
 			}
 		},
-		[activeOrgId, isOwner, dataURLtoBlob, showSuccess, t],
+		[
+			activeOrgId,
+			isOwner,
+			orgData,
+			orgName,
+			orgSlug,
+			dataURLtoBlob,
+			showSuccess,
+			t,
+		],
 	);
 
 	const handleOrgUpdate = useCallback(async () => {
@@ -271,16 +292,30 @@ export function OrganizationSettingsView() {
 		if (slugError || (orgSlug && slugAvailable !== true)) return;
 		try {
 			setSaving(true);
+			const trimmedSlug = orgSlug.trim();
 			await authClient.organization.update({
 				organizationId: activeOrgId,
 				data: {
 					name: orgName,
-					slug: orgSlug.trim(),
+					slug: trimmedSlug,
 				},
 			});
 			showSuccess(t("settings.organization.savedSuccess"));
-			// Update orgData slug so excludeWhenSlugEquals stays in sync
-			setOrgData((prev) => (prev ? { ...prev, slug: orgSlug.trim() } : null));
+			// Update local orgData so excludeWhenSlugEquals stays in sync
+			setOrgData((prev) =>
+				prev ? { ...prev, name: orgName, slug: trimmedSlug } : null,
+			);
+			// Notify the sidebar so it reflects the updated name and slug immediately
+			window.dispatchEvent(
+				new CustomEvent("organization-updated", {
+					detail: {
+						id: activeOrgId,
+						name: orgName,
+						slug: trimmedSlug,
+						logo: orgLogo,
+					},
+				}),
+			);
 		} catch (err) {
 			toast.error(
 				err instanceof Error
@@ -295,6 +330,7 @@ export function OrganizationSettingsView() {
 		isOwner,
 		orgName,
 		orgSlug,
+		orgLogo,
 		slugError,
 		slugAvailable,
 		showSuccess,

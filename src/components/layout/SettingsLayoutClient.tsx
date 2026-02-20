@@ -424,6 +424,32 @@ function SettingsLayoutInner({
 		loadEffectiveTimezone();
 	}, [activeOrgId]);
 
+	// Listen for organization name/slug/logo updates from settings views
+	useEffect(() => {
+		const handleOrgUpdated = (event: Event) => {
+			const { id, name, slug, logo } = (
+				event as CustomEvent<{
+					id: string;
+					name: string;
+					slug: string;
+					logo: string | null;
+				}>
+			).detail;
+
+			setOrganizations((prev) =>
+				prev.map((org) => (org.id === id ? { ...org, name, slug, logo } : org)),
+			);
+			setActiveOrganization((prev) =>
+				prev?.id === id ? { ...prev, name, slug, logo } : prev,
+			);
+		};
+
+		window.addEventListener("organization-updated", handleOrgUpdated);
+		return () => {
+			window.removeEventListener("organization-updated", handleOrgUpdated);
+		};
+	}, []);
+
 	// Listen for timezone changes from settings UI
 	useEffect(() => {
 		const handleTimezoneChange = (event: Event) => {

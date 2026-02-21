@@ -53,7 +53,13 @@ function dataURLtoBlob(dataUrl: string): Blob {
 	return new Blob([u8arr], { type: mime });
 }
 
-export function ProfileCompletionStep() {
+interface ProfileCompletionStepProps {
+	onComplete?: () => void;
+}
+
+export function ProfileCompletionStep({
+	onComplete,
+}: ProfileCompletionStepProps = {}) {
 	const { language, setLanguage, t } = useLanguage();
 	const { state, updateUserProfile, refreshOnboardingStatus } = useOnboarding();
 	const router = useRouter();
@@ -159,12 +165,16 @@ export function ProfileCompletionStep() {
 		// Refresh onboarding status to get updated state
 		await refreshOnboardingStatus();
 
-		// If coming from edit mode, remove the edit_profile flag
+		// If coming from edit mode, remove the edit_profile flag and skip passkey step
 		if (searchParams.get("edit_profile") === "true") {
 			const url = new URL(window.location.href);
 			url.searchParams.delete("edit_profile");
 			router.replace(url.toString());
+			return;
 		}
+
+		// Notify parent to advance to the passkey setup step
+		onComplete?.();
 	};
 
 	const isSubmitting = form.formState.isSubmitting || isUploadingAvatar;

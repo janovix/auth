@@ -1,3 +1,32 @@
+# [2.0.0-rc.43](https://github.com/janovix/auth/compare/v2.0.0-rc.42...v2.0.0-rc.43) (2026-02-21)
+
+
+### Features
+
+* **auth:** add passkey setup step to onboarding process ([2d7b640](https://github.com/janovix/auth/commit/2d7b640785aee026fee13ad943522994aaa5cdd0))
+* **auth:** enhance login view with animated send button and new icons ([81a1473](https://github.com/janovix/auth/commit/81a1473b62029f3ad2b4ecc8da6a0beb11c19c9d))
+
+# [2.0.0-rc.42](https://github.com/janovix/auth/compare/v2.0.0-rc.41...v2.0.0-rc.42) (2026-02-21)
+
+
+### Features
+
+* **auth:** implement passkey sign-in and management features ([0d206cd](https://github.com/janovix/auth/commit/0d206cdfc4d386025de764a5d11ff306f3925f1f))
+
+# [2.0.0-rc.41](https://github.com/janovix/auth/compare/v2.0.0-rc.40...v2.0.0-rc.41) (2026-02-21)
+
+
+### Bug Fixes
+
+* **settings:** update organization creation redirection method ([01e9676](https://github.com/janovix/auth/commit/01e967666d15dd042ab372151c467e4593272df0))
+
+# [2.0.0-rc.40](https://github.com/janovix/auth/compare/v2.0.0-rc.39...v2.0.0-rc.40) (2026-02-20)
+
+
+### Features
+
+* **settings:** implement organization update notifications in settings views ([bf6ac62](https://github.com/janovix/auth/commit/bf6ac622a759115d803b935e250ac476fac15647))
+
 # [2.0.0-rc.39](https://github.com/janovix/auth/compare/v2.0.0-rc.38...v2.0.0-rc.39) (2026-02-19)
 
 

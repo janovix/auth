@@ -1,3 +1,10 @@
+# [2.0.0-rc.44](https://github.com/janovix/auth/compare/v2.0.0-rc.43...v2.0.0-rc.44) (2026-02-21)
+
+
+### Features
+
+* **translations:** add KYC self-service settings translations for compliance module ([41bad60](https://github.com/janovix/auth/commit/41bad60d3a6087a3dd4bd533e50858644d811ecc))
+
 # [2.0.0-rc.43](https://github.com/janovix/auth/compare/v2.0.0-rc.42...v2.0.0-rc.43) (2026-02-21)
 
 

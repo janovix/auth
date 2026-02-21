@@ -1,3 +1,10 @@
+# [2.0.0-rc.42](https://github.com/janovix/auth/compare/v2.0.0-rc.41...v2.0.0-rc.42) (2026-02-21)
+
+
+### Features
+
+* **auth:** implement passkey sign-in and management features ([0d206cd](https://github.com/janovix/auth/commit/0d206cdfc4d386025de764a5d11ff306f3925f1f))
+
 # [2.0.0-rc.41](https://github.com/janovix/auth/compare/v2.0.0-rc.40...v2.0.0-rc.41) (2026-02-21)
 
 

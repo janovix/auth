@@ -1,3 +1,10 @@
+# [2.0.0-rc.41](https://github.com/janovix/auth/compare/v2.0.0-rc.40...v2.0.0-rc.41) (2026-02-21)
+
+
+### Bug Fixes
+
+* **settings:** update organization creation redirection method ([01e9676](https://github.com/janovix/auth/commit/01e967666d15dd042ab372151c467e4593272df0))
+
 # [2.0.0-rc.40](https://github.com/janovix/auth/compare/v2.0.0-rc.39...v2.0.0-rc.40) (2026-02-20)
 
 

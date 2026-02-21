@@ -48,7 +48,7 @@ const translations = {
 		"login.email.description": "Enter your email address",
 		"login.button.send": "Send access code",
 		"login.button.sending": "Sending code...",
-		"login.button.google": "Sign in with Google",
+		"login.button.google": "Connect with Google",
 		"login.or": "Or continue with",
 		"login.error.google": "Failed to sign in with Google",
 		"login.captcha.required": "Please complete the captcha verification",
@@ -94,7 +94,7 @@ const translations = {
 		"login.captcha.error": "Please complete the security verification",
 
 		// Passkey sign-in
-		"login.passkey.button": "Sign in with Passkey",
+		"login.passkey.button": "Passkey",
 		"login.passkey.error":
 			"Passkey sign-in failed. Please try again or use another method.",
 		"login.passkey.notSupported": "Your browser does not support passkeys.",
@@ -1069,7 +1069,7 @@ const translations = {
 		"login.email.description": "Ingresa tu dirección de correo",
 		"login.button.send": "Enviar código de acceso",
 		"login.button.sending": "Enviando código...",
-		"login.button.google": "Iniciar sesión con Google",
+		"login.button.google": "Conectar con Google",
 		"login.or": "O continúa con",
 		"login.error.google": "Error al iniciar sesión con Google",
 		"login.captcha.required": "Por favor completa la verificación de captcha",
@@ -1115,7 +1115,7 @@ const translations = {
 		"login.captcha.error": "Por favor completa la verificación de seguridad",
 
 		// Passkey sign-in
-		"login.passkey.button": "Iniciar sesión con llave de acceso",
+		"login.passkey.button": "Passkey",
 		"login.passkey.error":
 			"Error al iniciar sesión con llave de acceso. Intenta de nuevo o usa otro método.",
 		"login.passkey.notSupported":

@@ -313,14 +313,21 @@ vi.mock("@marsidev/react-turnstile", () => ({
 
 // Mock ResizeObserver for tests
 global.ResizeObserver = class ResizeObserver {
-	observe() {
-		// Mock implementation
-	}
-	unobserve() {
-		// Mock implementation
-	}
-	disconnect() {
-		// Mock implementation
+	observe() {}
+	unobserve() {}
+	disconnect() {}
+};
+
+// Mock IntersectionObserver for tests (required by motion/react useInView used in animate-ui icons)
+global.IntersectionObserver = class IntersectionObserver {
+	readonly root: Element | Document | null = null;
+	readonly rootMargin: string = "";
+	readonly thresholds: ReadonlyArray<number> = [];
+	observe() {}
+	unobserve() {}
+	disconnect() {}
+	takeRecords(): IntersectionObserverEntry[] {
+		return [];
 	}
 };
 

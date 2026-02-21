@@ -1,3 +1,11 @@
+# [2.0.0-rc.43](https://github.com/janovix/auth/compare/v2.0.0-rc.42...v2.0.0-rc.43) (2026-02-21)
+
+
+### Features
+
+* **auth:** add passkey setup step to onboarding process ([2d7b640](https://github.com/janovix/auth/commit/2d7b640785aee026fee13ad943522994aaa5cdd0))
+* **auth:** enhance login view with animated send button and new icons ([81a1473](https://github.com/janovix/auth/commit/81a1473b62029f3ad2b4ecc8da6a0beb11c19c9d))
+
 # [2.0.0-rc.42](https://github.com/janovix/auth/compare/v2.0.0-rc.41...v2.0.0-rc.42) (2026-02-21)
 
 

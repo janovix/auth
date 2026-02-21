@@ -446,6 +446,22 @@ const translations = {
 		"settings.compliance.thresholdMXN": "Threshold (MXN)",
 		"settings.compliance.umaNote": "UMA value",
 		"settings.compliance.viewAllThresholds": "View all thresholds by activity",
+		"settings.compliance.kycSelfService": "KYC Self-Service",
+		"settings.compliance.kycSelfServiceDesc":
+			"Configure self-service KYC verification settings for your clients",
+		"settings.compliance.selfServiceMode": "Self-Service Mode",
+		"settings.compliance.selfServiceModeHelp":
+			"Choose how self-service KYC verification operates for your organization",
+		"settings.compliance.selfServiceDisabled": "Disabled",
+		"settings.compliance.selfServiceManual": "Manual Review",
+		"settings.compliance.selfServiceAutomatic": "Automatic",
+		"settings.compliance.selfServiceExpiryHours": "Expiry Hours",
+		"settings.compliance.selfServiceExpiryHoursHelp":
+			"Number of hours before a self-service KYC verification link expires",
+		"settings.compliance.kycComplianceNotice":
+			"Self-service KYC verification links allow clients to submit their own identity documents. Ensure your compliance policies permit this before enabling.",
+		"settings.compliance.selfServiceSavedSuccess":
+			"Self-service settings saved successfully",
 
 		// Team settings
 		"settings.team.title": "Team Settings",
@@ -1422,6 +1438,22 @@ const translations = {
 		"settings.compliance.umaNote": "Valor UMA",
 		"settings.compliance.viewAllThresholds":
 			"Ver todos los umbrales por actividad",
+		"settings.compliance.kycSelfService": "KYC Autoservicio",
+		"settings.compliance.kycSelfServiceDesc":
+			"Configura las opciones de verificación KYC de autoservicio para tus clientes",
+		"settings.compliance.selfServiceMode": "Modo de Autoservicio",
+		"settings.compliance.selfServiceModeHelp":
+			"Elige cómo funciona la verificación KYC de autoservicio en tu organización",
+		"settings.compliance.selfServiceDisabled": "Deshabilitado",
+		"settings.compliance.selfServiceManual": "Revisión Manual",
+		"settings.compliance.selfServiceAutomatic": "Automático",
+		"settings.compliance.selfServiceExpiryHours": "Horas de Expiración",
+		"settings.compliance.selfServiceExpiryHoursHelp":
+			"Número de horas antes de que expire el enlace de verificación KYC de autoservicio",
+		"settings.compliance.kycComplianceNotice":
+			"Los enlaces de verificación KYC de autoservicio permiten a los clientes enviar sus propios documentos de identidad. Asegúrate de que tus políticas de cumplimiento lo permitan antes de habilitarlo.",
+		"settings.compliance.selfServiceSavedSuccess":
+			"Configuración de autoservicio guardada exitosamente",
 
 		// Team settings
 		"settings.team.title": "Configuración de Equipo",

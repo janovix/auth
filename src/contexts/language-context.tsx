@@ -93,6 +93,12 @@ const translations = {
 		"login.banned.tryDifferentEmail": "Try a different email",
 		"login.captcha.error": "Please complete the security verification",
 
+		// Passkey sign-in
+		"login.passkey.button": "Sign in with Passkey",
+		"login.passkey.error":
+			"Passkey sign-in failed. Please try again or use another method.",
+		"login.passkey.notSupported": "Your browser does not support passkeys.",
+
 		// Verify email page
 		"verify.title": "Email verification",
 		"verify.success.description": "Your email has been verified successfully",
@@ -340,6 +346,47 @@ const translations = {
 		"settings.personal.sidebarCollapsedDesc":
 			"Start with the sidebar collapsed on all applications",
 		"settings.personal.changeAvatar": "Change avatar",
+
+		// Passkeys section
+		"settings.personal.passkeys.title": "Passkeys",
+		"settings.personal.passkeys.description":
+			"Use biometrics or security keys to sign in without a password",
+		"settings.personal.passkeys.add": "Add passkey",
+		"settings.personal.passkeys.addDesc":
+			"Register a new passkey on this device",
+		"settings.personal.passkeys.name": "Passkey name",
+		"settings.personal.passkeys.namePlaceholder":
+			"e.g. MacBook Touch ID, iPhone Face ID",
+		"settings.personal.passkeys.authenticatorType": "Authenticator type",
+		"settings.personal.passkeys.platform": "Platform (biometrics)",
+		"settings.personal.passkeys.crossPlatform": "Cross-platform (security key)",
+		"settings.personal.passkeys.any": "Any (recommended)",
+		"settings.personal.passkeys.delete": "Delete passkey",
+		"settings.personal.passkeys.deleteConfirm": "Delete passkey?",
+		"settings.personal.passkeys.deleteConfirmDesc":
+			"This passkey will be permanently removed. You won't be able to use it to sign in anymore.",
+		"settings.personal.passkeys.rename": "Rename",
+		"settings.personal.passkeys.renameTitle": "Rename passkey",
+		"settings.personal.passkeys.newName": "New name",
+		"settings.personal.passkeys.deviceType": "Device type",
+		"settings.personal.passkeys.backedUp": "Backed up",
+		"settings.personal.passkeys.notBackedUp": "Not backed up",
+		"settings.personal.passkeys.createdAt": "Registered",
+		"settings.personal.passkeys.noPasskeys": "No passkeys registered",
+		"settings.personal.passkeys.noPasskeysDesc":
+			"Add a passkey to sign in faster using biometrics or a security key",
+		"settings.personal.passkeys.maxReached": "Maximum passkeys reached",
+		"settings.personal.passkeys.maxReachedDesc":
+			"You can have at most 5 passkeys. Delete one to add another.",
+		"settings.personal.passkeys.addSuccess": "Passkey added successfully",
+		"settings.personal.passkeys.deleteSuccess": "Passkey deleted",
+		"settings.personal.passkeys.renameSuccess": "Passkey renamed",
+		"settings.personal.passkeys.addError":
+			"Failed to add passkey. Please try again.",
+		"settings.personal.passkeys.deleteError":
+			"Failed to delete passkey. Please try again.",
+		"settings.personal.passkeys.renameError":
+			"Failed to rename passkey. Please try again.",
 
 		// Avatar editor
 		"settings.avatar.title": "Edit Avatar",
@@ -1056,6 +1103,13 @@ const translations = {
 		"login.banned.tryDifferentEmail": "Probar con otro correo",
 		"login.captcha.error": "Por favor completa la verificación de seguridad",
 
+		// Passkey sign-in
+		"login.passkey.button": "Iniciar sesión con llave de acceso",
+		"login.passkey.error":
+			"Error al iniciar sesión con llave de acceso. Intenta de nuevo o usa otro método.",
+		"login.passkey.notSupported":
+			"Tu navegador no es compatible con llaves de acceso.",
+
 		// Verify email page
 		"verify.title": "Verificación de correo",
 		"verify.success.description":
@@ -1312,6 +1366,51 @@ const translations = {
 		"settings.personal.sidebarCollapsedDesc":
 			"Iniciar con la barra lateral colapsada en todas las aplicaciones",
 		"settings.personal.changeAvatar": "Cambiar avatar",
+
+		// Passkeys section
+		"settings.personal.passkeys.title": "Llaves de acceso",
+		"settings.personal.passkeys.description":
+			"Usa biometría o llaves de seguridad para iniciar sesión sin contraseña",
+		"settings.personal.passkeys.add": "Agregar llave de acceso",
+		"settings.personal.passkeys.addDesc":
+			"Registra una nueva llave de acceso en este dispositivo",
+		"settings.personal.passkeys.name": "Nombre de la llave",
+		"settings.personal.passkeys.namePlaceholder":
+			"p. ej. Touch ID del Mac, Face ID del iPhone",
+		"settings.personal.passkeys.authenticatorType": "Tipo de autenticador",
+		"settings.personal.passkeys.platform": "Plataforma (biometría)",
+		"settings.personal.passkeys.crossPlatform":
+			"Multiplataforma (llave de seguridad)",
+		"settings.personal.passkeys.any": "Cualquiera (recomendado)",
+		"settings.personal.passkeys.delete": "Eliminar llave de acceso",
+		"settings.personal.passkeys.deleteConfirm": "¿Eliminar llave de acceso?",
+		"settings.personal.passkeys.deleteConfirmDesc":
+			"Esta llave de acceso se eliminará permanentemente. Ya no podrás usarla para iniciar sesión.",
+		"settings.personal.passkeys.rename": "Renombrar",
+		"settings.personal.passkeys.renameTitle": "Renombrar llave de acceso",
+		"settings.personal.passkeys.newName": "Nuevo nombre",
+		"settings.personal.passkeys.deviceType": "Tipo de dispositivo",
+		"settings.personal.passkeys.backedUp": "Con respaldo",
+		"settings.personal.passkeys.notBackedUp": "Sin respaldo",
+		"settings.personal.passkeys.createdAt": "Registrada",
+		"settings.personal.passkeys.noPasskeys":
+			"No tienes llaves de acceso registradas",
+		"settings.personal.passkeys.noPasskeysDesc":
+			"Agrega una llave de acceso para iniciar sesión más rápido con biometría o una llave de seguridad",
+		"settings.personal.passkeys.maxReached":
+			"Límite de llaves de acceso alcanzado",
+		"settings.personal.passkeys.maxReachedDesc":
+			"Puedes tener como máximo 5 llaves de acceso. Elimina una para agregar otra.",
+		"settings.personal.passkeys.addSuccess":
+			"Llave de acceso agregada exitosamente",
+		"settings.personal.passkeys.deleteSuccess": "Llave de acceso eliminada",
+		"settings.personal.passkeys.renameSuccess": "Llave de acceso renombrada",
+		"settings.personal.passkeys.addError":
+			"Error al agregar la llave de acceso. Intenta de nuevo.",
+		"settings.personal.passkeys.deleteError":
+			"Error al eliminar la llave de acceso. Intenta de nuevo.",
+		"settings.personal.passkeys.renameError":
+			"Error al renombrar la llave de acceso. Intenta de nuevo.",
 
 		// Avatar editor
 		"settings.avatar.title": "Editar Avatar",

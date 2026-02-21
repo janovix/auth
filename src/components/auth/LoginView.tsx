@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	AlertTriangle,
 	CheckCircle2,
+	Fingerprint,
 	Loader2,
 	Mail,
 	RefreshCw,
@@ -155,6 +156,22 @@ export const LoginView = ({
 	useEffect(() => {
 		setPageProfile("login");
 	}, [setPageProfile]);
+
+	// Conditional UI (passkey autofill) — silently activates if browser has matching credentials
+	useEffect(() => {
+		if (
+			typeof PublicKeyCredential === "undefined" ||
+			!PublicKeyCredential.isConditionalMediationAvailable
+		) {
+			return;
+		}
+		void PublicKeyCredential.isConditionalMediationAvailable().then(
+			(available) => {
+				if (!available) return;
+				void authClient.signIn.passkey({ autoFill: true });
+			},
+		);
+	}, []);
 
 	// Listen for rate limit events from authClient to set cooldown dynamically
 	// The cooldown duration comes from the server's X-Retry-After header
@@ -459,6 +476,45 @@ export const LoginView = ({
 		}
 	};
 
+	const handlePasskeySignIn = async () => {
+		try {
+			setServerError(null);
+			setStateModifier("loading");
+
+			const finalRedirectUrl = redirectTo
+				? redirectTo
+				: `${window.location.origin}`;
+
+			const { data, error } = await authClient.signIn.passkey();
+			if (error) {
+				Sentry.captureException(new Error(error.message), {
+					tags: { context: "passkey-signin-error" },
+				});
+				setServerError(
+					t("login.passkey.error") ||
+						"Passkey sign-in failed. Please try again.",
+				);
+				setStateModifier("error");
+				return;
+			}
+			if (data) {
+				setStateModifier("success");
+				setShowSuccessAnimation(true);
+				setTimeout(() => {
+					window.location.href = finalRedirectUrl;
+				}, 2000);
+			}
+		} catch (error) {
+			Sentry.captureException(error, {
+				tags: { context: "passkey-signin-error" },
+			});
+			setServerError(
+				t("login.passkey.error") || "Passkey sign-in failed. Please try again.",
+			);
+			setStateModifier("error");
+		}
+	};
+
 	const isSubmitting = form.formState.isSubmitting;
 
 	// Show success animation when login is successful
@@ -532,7 +588,7 @@ export const LoginView = ({
 															id="email"
 															type="email"
 															placeholder={t("login.email.placeholder")}
-															autoComplete="email"
+															autoComplete="username webauthn"
 															aria-describedby="email-description"
 															required
 															{...field}
@@ -652,6 +708,20 @@ export const LoginView = ({
 												/>
 											</svg>
 											{t("login.button.google") || "Sign in with Google"}
+										</Button>
+									</Field>
+
+									{/* Passkey Sign In Button */}
+									<Field>
+										<Button
+											type="button"
+											variant="outline"
+											className="w-full"
+											onClick={handlePasskeySignIn}
+											disabled={isSubmitting}
+										>
+											<Fingerprint className="mr-2 h-4 w-4" />
+											{t("login.passkey.button") || "Sign in with Passkey"}
 										</Button>
 									</Field>
 								</FieldGroup>

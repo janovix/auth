@@ -8,6 +8,7 @@ import {
 	jwtClient,
 } from "better-auth/client/plugins";
 import { stripeClient } from "@better-auth/stripe/client";
+import { passkeyClient } from "@better-auth/passkey/client";
 
 import { getAuthCoreBaseUrl } from "./authCoreConfig";
 
@@ -93,6 +94,7 @@ export const authClient = createAuthClient({
 			subscription: true, // Enable subscription management
 		}),
 		jwtClient(),
+		passkeyClient(),
 	],
 });
 

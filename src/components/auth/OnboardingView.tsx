@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 
@@ -13,6 +13,7 @@ import {
 	SubscriptionSelectionStep,
 	CreateOrganizationStep,
 	LicenseModal,
+	PasskeySetupStep,
 } from "./onboarding";
 
 interface OnboardingViewProps {
@@ -27,6 +28,16 @@ export const OnboardingView = ({ redirectTo }: OnboardingViewProps) => {
 
 	// License modal state
 	const [isLicenseModalOpen, setLicenseModalOpen] = useState(false);
+	// Show passkey setup step after profile completion (only once per session)
+	const [showPasskeyStep, setShowPasskeyStep] = useState(false);
+
+	const handleProfileComplete = useCallback(() => {
+		setShowPasskeyStep(true);
+	}, []);
+
+	const handlePasskeyContinue = useCallback(() => {
+		setShowPasskeyStep(false);
+	}, []);
 
 	// Set aurora page profile on mount
 	useEffect(() => {
@@ -87,13 +98,18 @@ export const OnboardingView = ({ redirectTo }: OnboardingViewProps) => {
 	if (editProfile || !state.userProfile.isComplete) {
 		return (
 			<>
-				<ProfileCompletionStep />
+				<ProfileCompletionStep onComplete={handleProfileComplete} />
 				<LicenseModal
 					open={isLicenseModalOpen}
 					onOpenChange={setLicenseModalOpen}
 				/>
 			</>
 		);
+	}
+
+	// Step 1b: Optional passkey setup (shown once after profile completion)
+	if (showPasskeyStep) {
+		return <PasskeySetupStep onContinue={handlePasskeyContinue} />;
 	}
 
 	// Step 2: If user has subscription but no organization, show org creation

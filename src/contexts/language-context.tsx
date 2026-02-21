@@ -837,6 +837,17 @@ const translations = {
 		"onboarding.redirecting": "Redirecting...",
 		"onboarding.profile.footerNote":
 			"You can update your profile anytime from settings",
+
+		// Onboarding passkey step
+		"onboarding.passkey.title": "Secure your account",
+		"onboarding.passkey.description":
+			"Add a passkey to sign in instantly with your fingerprint, face, or security key — no password needed.",
+		"onboarding.passkey.skip": "Skip for now",
+		"onboarding.passkey.continue": "Continue",
+		"onboarding.passkey.added": "Passkey added — you're all set!",
+		"onboarding.passkey.footerNote":
+			"You can manage your passkeys anytime from settings",
+
 		"onboarding.plans.title": "Choose how to get started",
 		"onboarding.plans.description":
 			"Subscribe monthly for flexible pay-as-you-go billing, or activate an annual license for fixed capacity.",
@@ -1873,6 +1884,17 @@ const translations = {
 		"onboarding.redirecting": "Redirigiendo...",
 		"onboarding.profile.footerNote":
 			"Puedes actualizar tu perfil en configuración cuando quieras",
+
+		// Onboarding passkey step
+		"onboarding.passkey.title": "Protege tu cuenta",
+		"onboarding.passkey.description":
+			"Agrega una llave de acceso para iniciar sesión al instante con tu huella, rostro o llave de seguridad — sin contraseña.",
+		"onboarding.passkey.skip": "Omitir por ahora",
+		"onboarding.passkey.continue": "Continuar",
+		"onboarding.passkey.added": "¡Llave de acceso agregada — todo listo!",
+		"onboarding.passkey.footerNote":
+			"Puedes administrar tus llaves de acceso en configuración cuando quieras",
+
 		"onboarding.plans.title": "Elige cómo empezar",
 		"onboarding.plans.description":
 			"Suscríbete mensualmente con facturación flexible, o activa una licencia anual con capacidad fija.",

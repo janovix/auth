@@ -11,7 +11,7 @@ import {
 } from "react";
 
 // Page profiles define the base aurora appearance for each page
-export type PageProfile = "login" | "signup";
+export type PageProfile = "login" | "onboarding";
 
 // State modifiers change colors but not blob positions
 export type StateModifier = "default" | "error" | "loading" | "success";
@@ -69,14 +69,14 @@ export const pageColorPalettes: Record<PageProfile, ColorPalette> = {
 		blob3Start: { r: 217, g: 70, b: 239 }, // fuchsia-500
 		blob3End: { r: 168, g: 85, b: 247 }, // purple-500
 	},
-	// Signup: Pink + Purple mix
-	signup: {
-		blob1Start: { r: 236, g: 72, b: 153 }, // pink-500
-		blob1End: { r: 168, g: 85, b: 247 }, // purple-500
-		blob2Start: { r: 244, g: 114, b: 182 }, // pink-400
-		blob2End: { r: 192, g: 132, b: 252 }, // purple-400
-		blob3Start: { r: 219, g: 39, b: 119 }, // pink-600
-		blob3End: { r: 168, g: 85, b: 247 }, // purple-500
+	// Onboarding: Blue + Purple - welcoming and professional
+	onboarding: {
+		blob1Start: { r: 99, g: 102, b: 241 }, // indigo-500
+		blob1End: { r: 79, g: 70, b: 229 }, // indigo-600
+		blob2Start: { r: 139, g: 92, b: 246 }, // violet-500
+		blob2End: { r: 147, g: 51, b: 234 }, // purple-600
+		blob3Start: { r: 59, g: 130, b: 246 }, // blue-500
+		blob3End: { r: 99, g: 102, b: 241 }, // indigo-500
 	},
 };
 
@@ -88,11 +88,11 @@ export const pageBlobPositions: Record<PageProfile, BlobPositions> = {
 		blob2: { top: "-100px", right: "-200px", width: "500px", height: "500px" },
 		blob3: { bottom: "-300px", left: "33%", width: "700px", height: "700px" },
 	},
-	// Signup: Shifted layout for visual distinction
-	signup: {
-		blob1: { top: "-150px", left: "-200px", width: "700px", height: "700px" },
-		blob2: { top: "-250px", right: "-100px", width: "550px", height: "550px" },
-		blob3: { bottom: "-200px", left: "20%", width: "600px", height: "600px" },
+	// Onboarding: Diagonal flow - suggests progress/completion
+	onboarding: {
+		blob1: { top: "-100px", left: "-150px", width: "550px", height: "550px" },
+		blob2: { top: "-200px", right: "-150px", width: "650px", height: "650px" },
+		blob3: { bottom: "-250px", left: "40%", width: "580px", height: "580px" },
 	},
 };
 
@@ -313,7 +313,7 @@ export function useAurora() {
 // Legacy compatibility: map old mode names to new API
 export type AuroraMode =
 	| "login"
-	| "signup"
+	| "onboarding"
 	| "error"
 	| "loading"
 	| "success"

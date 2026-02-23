@@ -58,10 +58,10 @@ function TestComponent() {
 				Set Default
 			</button>
 			<button
-				onClick={() => setPageProfile("signup")}
-				data-testid="set-signup-page"
+				onClick={() => setPageProfile("onboarding")}
+				data-testid="set-onboarding-page"
 			>
-				Set Signup Page
+				Set Onboarding Page
 			</button>
 			<button
 				onClick={() => setPageProfile("login")}
@@ -136,10 +136,12 @@ describe("aurora-context", () => {
 			);
 
 			act(() => {
-				screen.getByTestId("set-signup-page").click();
+				screen.getByTestId("set-onboarding-page").click();
 			});
 
-			expect(screen.getByTestId("page-profile")).toHaveTextContent("signup");
+			expect(screen.getByTestId("page-profile")).toHaveTextContent(
+				"onboarding",
+			);
 		});
 
 		it("changes animation speed for loading state", () => {
@@ -170,12 +172,12 @@ describe("aurora-context", () => {
 			);
 
 			act(() => {
-				screen.getByTestId("set-signup-page").click();
+				screen.getByTestId("set-onboarding-page").click();
 			});
 
-			// After changing to signup, blob width should change
+			// After changing to onboarding, blob width should change
 			expect(screen.getByTestId("blob1-width")).toHaveTextContent(
-				pageBlobPositions.signup.blob1.width,
+				pageBlobPositions.onboarding.blob1.width,
 			);
 		});
 
@@ -213,7 +215,7 @@ describe("aurora-context", () => {
 
 	describe("pageColorPalettes", () => {
 		it("has palettes for all page profiles", () => {
-			const profiles: PageProfile[] = ["login", "signup"];
+			const profiles: PageProfile[] = ["login", "onboarding"];
 
 			profiles.forEach((profile) => {
 				expect(pageColorPalettes[profile]).toBeDefined();
@@ -232,10 +234,10 @@ describe("aurora-context", () => {
 			expect(palette.blob1Start).toEqual({ r: 168, g: 85, b: 247 });
 		});
 
-		it("has correct pink/purple colors for signup page", () => {
-			const palette = pageColorPalettes.signup;
-			// Pink-500
-			expect(palette.blob1Start).toEqual({ r: 236, g: 72, b: 153 });
+		it("has correct blue/purple colors for onboarding page", () => {
+			const palette = pageColorPalettes.onboarding;
+			// Indigo-500
+			expect(palette.blob1Start).toEqual({ r: 99, g: 102, b: 241 });
 		});
 	});
 
@@ -260,13 +262,17 @@ describe("aurora-context", () => {
 	});
 
 	describe("pageBlobPositions", () => {
-		it("has different positions for login and signup", () => {
+		it("has different positions for login and onboarding", () => {
 			const loginPositions = pageBlobPositions.login;
-			const signupPositions = pageBlobPositions.signup;
+			const onboardingPositions = pageBlobPositions.onboarding;
 
-			// Login and signup should have different blob1 positions
-			expect(loginPositions.blob1.width).not.toBe(signupPositions.blob1.width);
-			expect(loginPositions.blob1.left).not.toBe(signupPositions.blob1.left);
+			// Login and onboarding should have different blob1 positions
+			expect(loginPositions.blob1.width).not.toBe(
+				onboardingPositions.blob1.width,
+			);
+			expect(loginPositions.blob1.left).not.toBe(
+				onboardingPositions.blob1.left,
+			);
 		});
 	});
 

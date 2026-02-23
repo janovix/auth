@@ -5,6 +5,8 @@ import { useEffect } from "react";
 import "./setup";
 
 import "../src/app/globals.css";
+import { ThemeProvider } from "../src/components/ThemeProvider";
+import { LanguageProvider } from "../src/contexts/language-context";
 import { mockRouter } from "../src/stories/mocks/router";
 
 const preview: Preview = {
@@ -34,9 +36,18 @@ const preview: Preview = {
 			}, [theme]);
 
 			return (
-				<div className="min-h-screen bg-background text-foreground p-6">
-					<Story />
-				</div>
+				<ThemeProvider
+					attribute="class"
+					defaultTheme="system"
+					enableSystem
+					disableTransitionOnChange
+				>
+					<LanguageProvider>
+						<div className="min-h-screen bg-background text-foreground p-6">
+							<Story />
+						</div>
+					</LanguageProvider>
+				</ThemeProvider>
 			);
 		},
 	],

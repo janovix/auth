@@ -19,11 +19,11 @@ export const IconVariant: Story = {
 };
 
 export const LightTheme: Story = {
-	render: () => <Logo variant="logo" forceTheme="light" />,
+	render: () => <Logo variant="logo" />,
 };
 
 export const DarkTheme: Story = {
-	render: () => <Logo variant="logo" forceTheme="dark" />,
+	render: () => <Logo variant="logo" />,
 };
 
 export const CustomSize: Story = {

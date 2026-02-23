@@ -1,3 +1,652 @@
+# [2.0.0-rc.44](https://github.com/janovix/auth/compare/v2.0.0-rc.43...v2.0.0-rc.44) (2026-02-21)
+
+
+### Features
+
+* **translations:** add KYC self-service settings translations for compliance module ([41bad60](https://github.com/janovix/auth/commit/41bad60d3a6087a3dd4bd533e50858644d811ecc))
+
+# [2.0.0-rc.43](https://github.com/janovix/auth/compare/v2.0.0-rc.42...v2.0.0-rc.43) (2026-02-21)
+
+
+### Features
+
+* **auth:** add passkey setup step to onboarding process ([2d7b640](https://github.com/janovix/auth/commit/2d7b640785aee026fee13ad943522994aaa5cdd0))
+* **auth:** enhance login view with animated send button and new icons ([81a1473](https://github.com/janovix/auth/commit/81a1473b62029f3ad2b4ecc8da6a0beb11c19c9d))
+
+# [2.0.0-rc.42](https://github.com/janovix/auth/compare/v2.0.0-rc.41...v2.0.0-rc.42) (2026-02-21)
+
+
+### Features
+
+* **auth:** implement passkey sign-in and management features ([0d206cd](https://github.com/janovix/auth/commit/0d206cdfc4d386025de764a5d11ff306f3925f1f))
+
+# [2.0.0-rc.41](https://github.com/janovix/auth/compare/v2.0.0-rc.40...v2.0.0-rc.41) (2026-02-21)
+
+
+### Bug Fixes
+
+* **settings:** update organization creation redirection method ([01e9676](https://github.com/janovix/auth/commit/01e967666d15dd042ab372151c467e4593272df0))
+
+# [2.0.0-rc.40](https://github.com/janovix/auth/compare/v2.0.0-rc.39...v2.0.0-rc.40) (2026-02-20)
+
+
+### Features
+
+* **settings:** implement organization update notifications in settings views ([bf6ac62](https://github.com/janovix/auth/commit/bf6ac622a759115d803b935e250ac476fac15647))
+
+# [2.0.0-rc.39](https://github.com/janovix/auth/compare/v2.0.0-rc.38...v2.0.0-rc.39) (2026-02-19)
+
+
+### Features
+
+* **logo:** refactor logo component to use CSS custom properties for colors ([9abf81d](https://github.com/janovix/auth/commit/9abf81d5d222d55225b5f0cf2368ab9151f49528))
+
+# [2.0.0-rc.38](https://github.com/janovix/auth/compare/v2.0.0-rc.37...v2.0.0-rc.38) (2026-02-19)
+
+
+### Features
+
+* **middleware:** implement fetch timeout handling for session and onboarding status requests ([fc64651](https://github.com/janovix/auth/commit/fc64651976203e749bdec8d3565ce650c4afcb0b))
+
+# [2.0.0-rc.37](https://github.com/janovix/auth/compare/v2.0.0-rc.36...v2.0.0-rc.37) (2026-02-19)
+
+
+### Features
+
+* **settings:** enhance slug validation and availability checking in organization creation ([facf2d5](https://github.com/janovix/auth/commit/facf2d50f2c45be40ff53832826fa7ca7ec99147))
+
+# [2.0.0-rc.36](https://github.com/janovix/auth/compare/v2.0.0-rc.35...v2.0.0-rc.36) (2026-02-18)
+
+
+### Features
+
+* **settings:** enhance organization loading with user role mapping ([2376e43](https://github.com/janovix/auth/commit/2376e4365e498aeb0cbf987c5deaebd36bf617b3))
+
+# [2.0.0-rc.35](https://github.com/janovix/auth/compare/v2.0.0-rc.34...v2.0.0-rc.35) (2026-02-18)
+
+
+### Features
+
+* **organization-switcher:** enhance organization management with role-based grouping and creation options ([7b9583a](https://github.com/janovix/auth/commit/7b9583abc9d7cffa5cb262e76f9c7e87dc56f85c))
+
+# [2.0.0-rc.34](https://github.com/janovix/auth/compare/v2.0.0-rc.33...v2.0.0-rc.34) (2026-02-18)
+
+
+### Features
+
+* **middleware:** optimize session handling and onboarding status fetch logic ([c49afe1](https://github.com/janovix/auth/commit/c49afe12497c0ecb26ab3a90449ae162093dabb1))
+
+# [2.0.0-rc.33](https://github.com/janovix/auth/compare/v2.0.0-rc.32...v2.0.0-rc.33) (2026-02-18)
+
+
+### Features
+
+* **settings:** add KYC self-service settings management ([bffc123](https://github.com/janovix/auth/commit/bffc123d10a3054ea68609c8b887dff96ac58c6e))
+
+# [2.0.0-rc.32](https://github.com/janovix/auth/compare/v2.0.0-rc.31...v2.0.0-rc.32) (2026-02-17)
+
+
+### Features
+
+* **auth:** add activeOrganizationId to session management ([d74e82b](https://github.com/janovix/auth/commit/d74e82b09e5ed925c475675307a54fcd9fe68773))
+
+# [2.0.0-rc.31](https://github.com/janovix/auth/compare/v2.0.0-rc.30...v2.0.0-rc.31) (2026-02-17)
+
+
+### Features
+
+* **auth:** add banned user handling in session management ([448b6bb](https://github.com/janovix/auth/commit/448b6bb68498397d6c0b6a0b04f4964feb6f21cf))
+
+# [2.0.0-rc.30](https://github.com/janovix/auth/compare/v2.0.0-rc.29...v2.0.0-rc.30) (2026-02-16)
+
+
+### Bug Fixes
+
+* **auth:** wait for server response before transitioning to OTP input in LoginView ([feae340](https://github.com/janovix/auth/commit/feae340d9c6107050ca81348df11619c4e830367))
+
+# [2.0.0-rc.29](https://github.com/janovix/auth/compare/v2.0.0-rc.28...v2.0.0-rc.29) (2026-02-13)
+
+
+### Features
+
+* **auth:** add Set-Cookie header management in middleware for session validation ([325f7ad](https://github.com/janovix/auth/commit/325f7ad6d0d0ea1497306fe8ab9e566f3750ab02))
+
+# [2.0.0-rc.28](https://github.com/janovix/auth/compare/v2.0.0-rc.27...v2.0.0-rc.28) (2026-02-13)
+
+
+### Features
+
+* **auth:** integrate Sentry for enhanced error tracking across components ([ca00036](https://github.com/janovix/auth/commit/ca0003662e3593976c8396791066215cd6c89ce7))
+
+# [2.0.0-rc.27](https://github.com/janovix/auth/compare/v2.0.0-rc.26...v2.0.0-rc.27) (2026-02-13)
+
+
+### Bug Fixes
+
+* **auth:** enhance error handling for rate limit events in authClient and authActions ([63665f6](https://github.com/janovix/auth/commit/63665f6f90e6c571b428b2b93f6f850b2c08a23a))
+* **auth:** improve error handling for rate limit events and enhance cooldown logic ([df0f4fd](https://github.com/janovix/auth/commit/df0f4fd247748b4e94d51285b7432acd1b295b89))
+* **auth:** refine logging and error handling for rate limit events in LoginView and authClient ([08e60e9](https://github.com/janovix/auth/commit/08e60e97d1bb4077c9efaecf8b6c937a8d1b8775))
+
+
+### Features
+
+* **auth:** enhance LoginView to handle dynamic resend cooldown based on rate limit events ([016021b](https://github.com/janovix/auth/commit/016021b53d11dfa34fffba8bf7f8db08f0e2ed20))
+
+# [2.0.0-rc.26](https://github.com/janovix/auth/compare/v2.0.0-rc.25...v2.0.0-rc.26) (2026-02-12)
+
+
+### Features
+
+* **billing:** enhance BillingSettingsView for enterprise license management ([f642a73](https://github.com/janovix/auth/commit/f642a737c5d286d2ee76b6b8fcb36259ee9ff2bb))
+
+# [2.0.0-rc.25](https://github.com/janovix/auth/compare/v2.0.0-rc.24...v2.0.0-rc.25) (2026-02-12)
+
+
+### Features
+
+* **onboarding:** enhance LicenseModal with improved date and limit formatting ([3597ec2](https://github.com/janovix/auth/commit/3597ec2ae4d48a96e3936284c7d815fc0187a257))
+
+# [2.0.0-rc.24](https://github.com/janovix/auth/compare/v2.0.0-rc.23...v2.0.0-rc.24) (2026-02-12)
+
+
+### Features
+
+* **billing:** add license activation functionality with confirmation dialog ([6673bd7](https://github.com/janovix/auth/commit/6673bd7c36d93631ad85fd798a003b9f26c7ef25))
+
+# [2.0.0-rc.23](https://github.com/janovix/auth/compare/v2.0.0-rc.22...v2.0.0-rc.23) (2026-02-12)
+
+
+### Features
+
+* **team-settings:** add ownership transfer functionality with confirmation dialog ([c7fd76e](https://github.com/janovix/auth/commit/c7fd76ea118e1a610d8ea94591ac36b3745cf270))
+
+# [2.0.0-rc.22](https://github.com/janovix/auth/compare/v2.0.0-rc.21...v2.0.0-rc.22) (2026-02-11)
+
+
+### Features
+
+* **auth:** refactor sign-out functionality to use centralized signOut action ([534ad11](https://github.com/janovix/auth/commit/534ad11a47efe1639d1689ac923bc0be1fdd6d7d))
+* **session-sync:** add focus listener for enhanced session revalidation ([0032031](https://github.com/janovix/auth/commit/0032031e56b4bb8ab28576136b2d6a291b820ee7))
+* **session-sync:** enhance logging for session revalidation process ([6411545](https://github.com/janovix/auth/commit/6411545edad1ca02a1e68e16bcf64c16849a64c2))
+* **session-sync:** enhance logging for session synchronization events ([094728d](https://github.com/janovix/auth/commit/094728dddc2d455ecfbc1a79a8fd6f5c3746eb3e))
+* **session-sync:** enhance session validation and redirection logic in useSessionSync hook ([8edac32](https://github.com/janovix/auth/commit/8edac325362f0a1d6a92c84e9b1cdc73d763d459))
+* **session-sync:** implement cross-tab session synchronization and add related tests ([bfe2950](https://github.com/janovix/auth/commit/bfe295097afb7809e922a23fdc342955667bbbbb))
+* **session-sync:** update redirection logic to use dynamic redirect URL in useSessionSync hook ([b748da4](https://github.com/janovix/auth/commit/b748da435e1547e9ca4a9cb84e7a4c55698798a5))
+
+# [2.0.0-rc.21](https://github.com/janovix/auth/compare/v2.0.0-rc.20...v2.0.0-rc.21) (2026-02-11)
+
+
+### Features
+
+* **sidebar:** add pending invitations indicator to AppSidebar and update SettingsLayoutClient ([17db9cf](https://github.com/janovix/auth/commit/17db9cfd2019a5a0a074bd8e2ed9e9e2dced74f4))
+
+# [2.0.0-rc.20](https://github.com/janovix/auth/compare/v2.0.0-rc.19...v2.0.0-rc.20) (2026-02-10)
+
+
+### Features
+
+* **translations:** add API keys navigation translations in English and Spanish ([6db91d3](https://github.com/janovix/auth/commit/6db91d39550ab52ed392e0d5f990c725b5b9d4e2))
+
+# [2.0.0-rc.19](https://github.com/janovix/auth/compare/v2.0.0-rc.18...v2.0.0-rc.19) (2026-02-08)
+
+
+### Bug Fixes
+
+* **ThemeProvider:** prevent rendering in SSR/test environments ([d4250ab](https://github.com/janovix/auth/commit/d4250ab2bd2680642c41a9cff4f9f188dc0b7deb))
+
+# [2.0.0-rc.18](https://github.com/janovix/auth/compare/v2.0.0-rc.17...v2.0.0-rc.18) (2026-02-08)
+
+
+### Features
+
+* **translations:** add API keys management translations in English and Spanish ([3b632b5](https://github.com/janovix/auth/commit/3b632b58b0f40032f3aac9dc6b0190729bc32732))
+
+# [2.0.0-rc.17](https://github.com/janovix/auth/compare/v2.0.0-rc.16...v2.0.0-rc.17) (2026-02-07)
+
+
+### Features
+
+* **api-keys:** implement API keys management interface ([6b0eeab](https://github.com/janovix/auth/commit/6b0eeabe6a568cb4c933f74f55f6b91222e983a5))
+
+# [2.0.0-rc.16](https://github.com/janovix/auth/compare/v2.0.0-rc.15...v2.0.0-rc.16) (2026-02-06)
+
+
+### Features
+
+* **translations:** add rate limit messaging for OTP requests in English and Spanish ([22b3860](https://github.com/janovix/auth/commit/22b3860a76af48721e4610400c43247aab2a1e08))
+
+# [2.0.0-rc.15](https://github.com/janovix/auth/compare/v2.0.0-rc.14...v2.0.0-rc.15) (2026-02-06)
+
+
+### Features
+
+* **auth:** implement rate limit handling for OTP requests ([d60a034](https://github.com/janovix/auth/commit/d60a034be70b0bb75939344944c8ca6b12669397))
+
+# [2.0.0-rc.14](https://github.com/janovix/auth/compare/v2.0.0-rc.13...v2.0.0-rc.14) (2026-02-05)
+
+
+### Features
+
+* **error:** enhance SigninErrorPage with language and theme switchers ([a88998a](https://github.com/janovix/auth/commit/a88998a970de78deb9f26b7c2b311d935eda2c04))
+
+# [2.0.0-rc.13](https://github.com/janovix/auth/compare/v2.0.0-rc.12...v2.0.0-rc.13) (2026-02-05)
+
+
+### Features
+
+* **error:** enhance SigninErrorPage with logo and back button ([86bf90f](https://github.com/janovix/auth/commit/86bf90fc9db84bce30792d8d41975555d76a308e))
+
+# [2.0.0-rc.12](https://github.com/janovix/auth/compare/v2.0.0-rc.11...v2.0.0-rc.12) (2026-02-05)
+
+
+### Features
+
+* **error:** add SigninErrorPage component for handling signin errors ([aa3bfa8](https://github.com/janovix/auth/commit/aa3bfa8eb4046399a6e3184a5a3030a0487d0f1d))
+
+# [2.0.0-rc.11](https://github.com/janovix/auth/compare/v2.0.0-rc.10...v2.0.0-rc.11) (2026-01-30)
+
+
+### Bug Fixes
+
+* **styles:** correct path to blocks package for Tailwind scanning ([c139d01](https://github.com/janovix/auth/commit/c139d0129b1ef0c2c713d1c5cb35c89b791fb0c3))
+
+# [2.0.0-rc.10](https://github.com/janovix/auth/compare/v2.0.0-rc.9...v2.0.0-rc.10) (2026-01-30)
+
+
+### Bug Fixes
+
+* **styles:** scan blocks package for Tailwind classes ([dd0e008](https://github.com/janovix/auth/commit/dd0e00826776fca652b2e894d81937899ec07987))
+
+# [2.0.0-rc.9](https://github.com/janovix/auth/compare/v2.0.0-rc.8...v2.0.0-rc.9) (2026-01-30)
+
+
+### Bug Fixes
+
+* **layout:** add required Tailwind classes for blocks components ([d4ff7c9](https://github.com/janovix/auth/commit/d4ff7c988f11edb94a1ef77f0c330f64b3dce58f))
+
+# [2.0.0-rc.8](https://github.com/janovix/auth/compare/v2.0.0-rc.7...v2.0.0-rc.8) (2026-01-30)
+
+
+### Bug Fixes
+
+* **layout:** add required classes for NotificationsWidget ([0a936ed](https://github.com/janovix/auth/commit/0a936edee26109e55df8f872d0709e0cc5168c0e))
+
+# [2.0.0-rc.7](https://github.com/janovix/auth/compare/v2.0.0-rc.6...v2.0.0-rc.7) (2026-01-30)
+
+
+### Bug Fixes
+
+* **deps:** switch from framer-motion to motion to match AML working config ([796ab96](https://github.com/janovix/auth/commit/796ab9668de091bd298e004010c0c6dceda49a45))
+
+# [2.0.0-rc.6](https://github.com/janovix/auth/compare/v2.0.0-rc.5...v2.0.0-rc.6) (2026-01-30)
+
+
+### Bug Fixes
+
+* **layout:** wrap NotificationsWidget in flex container for proper stacking context ([85653a6](https://github.com/janovix/auth/commit/85653a6588ff1a3dbfb457b3e9eff4cd26ab44d9))
+
+# [2.0.0-rc.5](https://github.com/janovix/auth/compare/v2.0.0-rc.4...v2.0.0-rc.5) (2026-01-30)
+
+
+### Bug Fixes
+
+* **css:** remove conflicting animations and match AML globals.css structure ([666e2db](https://github.com/janovix/auth/commit/666e2db980f434c28e6ec30da98235ed86cac4b3))
+
+# [2.0.0-rc.4](https://github.com/janovix/auth/compare/v2.0.0-rc.3...v2.0.0-rc.4) (2026-01-30)
+
+
+### Bug Fixes
+
+* **tailwind:** match AML PostCSS config format to fix class generation ([d186002](https://github.com/janovix/auth/commit/d1860027a19c2e5a58d6c9899bd75037f686def1))
+
+# [2.0.0-rc.3](https://github.com/janovix/auth/compare/v2.0.0-rc.2...v2.0.0-rc.3) (2026-01-30)
+
+
+### Bug Fixes
+
+* **deps:** remove motion package to prevent animation library conflicts with blocks ([bc74e00](https://github.com/janovix/auth/commit/bc74e0069e756dac29d0023985166571381cf9ee))
+
+# [2.0.0-rc.2](https://github.com/janovix/auth/compare/v2.0.0-rc.1...v2.0.0-rc.2) (2026-01-30)
+
+
+### Bug Fixes
+
+* **notifications:** ensure read property defaults to false for red dot visibility ([f94414b](https://github.com/janovix/auth/commit/f94414be341b0593043dc40aa896ec232d6d64c8))
+
+# [2.0.0-rc.1](https://github.com/janovix/auth/compare/v1.5.0-rc.44...v2.0.0-rc.1) (2026-01-29)
+
+
+### Bug Fixes
+
+* **avatar:** migrate to new AvatarEditor API from blocks v1.2.0-rc.23 ([ab0b607](https://github.com/janovix/auth/commit/ab0b60712736431f8bc5ef907535262e175c0f36))
+
+
+### BREAKING CHANGES
+
+* **avatar:** Requires @janovix/blocks >= 1.2.0-rc.23 with new avatar API
+
+Co-authored-by: Cursor <cursoragent@cursor.com>
+
+# [1.5.0-rc.44](https://github.com/janovix/auth/compare/v1.5.0-rc.43...v1.5.0-rc.44) (2026-01-29)
+
+
+### Bug Fixes
+
+* **auth:** adjust default redirect URL for Google sign-in to point to the root ([8a35629](https://github.com/janovix/auth/commit/8a35629d2d292f48c1283dd3a7dffe693c594593))
+
+# [1.5.0-rc.43](https://github.com/janovix/auth/compare/v1.5.0-rc.42...v1.5.0-rc.43) (2026-01-29)
+
+
+### Bug Fixes
+
+* **auth:** update Google sign-in callback URL handling for improved redirect logic ([ce9b712](https://github.com/janovix/auth/commit/ce9b712579347e2add71959e02645d53160302bf))
+
+# [1.5.0-rc.42](https://github.com/janovix/auth/compare/v1.5.0-rc.41...v1.5.0-rc.42) (2026-01-28)
+
+
+### Features
+
+* **auth:** add Google sign-in functionality and update translations ([e515e82](https://github.com/janovix/auth/commit/e515e82cf2be73371bbbc153119ff3f37a8abd98))
+
+# [1.5.0-rc.41](https://github.com/janovix/auth/compare/v1.5.0-rc.40...v1.5.0-rc.41) (2026-01-28)
+
+
+### Features
+
+* **notifications:** integrate Sentry for error tracking in NotificationsProvider ([6298fe5](https://github.com/janovix/auth/commit/6298fe51ef3585b02af2d967a6264c969112da6d))
+
+# [1.5.0-rc.40](https://github.com/janovix/auth/compare/v1.5.0-rc.39...v1.5.0-rc.40) (2026-01-27)
+
+
+### Features
+
+* **notifications:** update Tailwind class scanning and replace NotificationsWidget import path ([716a546](https://github.com/janovix/auth/commit/716a5465216431808e9423de18e4ea3471cc276d))
+
+# [1.5.0-rc.39](https://github.com/janovix/auth/compare/v1.5.0-rc.38...v1.5.0-rc.39) (2026-01-27)
+
+
+### Features
+
+* **notifications:** add NotificationsWidget component and update import path in SettingsLayoutClient ([b2b3a5c](https://github.com/janovix/auth/commit/b2b3a5c660c82f3b0ddffb614e75abf0de763ddd))
+
+# [1.5.0-rc.38](https://github.com/janovix/auth/compare/v1.5.0-rc.37...v1.5.0-rc.38) (2026-01-27)
+
+
+### Features
+
+* **notifications:** introduce NotificationsWidget component and update import path in SettingsLayoutClient ([4833927](https://github.com/janovix/auth/commit/4833927a370ceb326b36c0def762064049ae3266))
+
+# [1.5.0-rc.37](https://github.com/janovix/auth/compare/v1.5.0-rc.36...v1.5.0-rc.37) (2026-01-27)
+
+
+### Bug Fixes
+
+* **notifications:** mark older notifications as read per cursor system ([5dca528](https://github.com/janovix/auth/commit/5dca528e6e7c95a9b3dd6484b8f9d6ecfa56471f))
+
+# [1.5.0-rc.36](https://github.com/janovix/auth/compare/v1.5.0-rc.35...v1.5.0-rc.36) (2026-01-27)
+
+
+### Bug Fixes
+
+* **turnstile:** restrict captcha to auth routes only ([1680300](https://github.com/janovix/auth/commit/16803008dfb468633c6710b6bc6c4b496e541ce8))
+
+# [1.5.0-rc.35](https://github.com/janovix/auth/compare/v1.5.0-rc.34...v1.5.0-rc.35) (2026-01-26)
+
+
+### Bug Fixes
+
+* **notifications:** use server read status instead of hardcoding false ([24e5ceb](https://github.com/janovix/auth/commit/24e5ceb6d95f0cdc6be28f051e2abd14ac8d3173))
+
+# [1.5.0-rc.34](https://github.com/janovix/auth/compare/v1.5.0-rc.33...v1.5.0-rc.34) (2026-01-26)
+
+
+### Features
+
+* **notifications:** use async mark-as-read with optimistic updates ([666ff26](https://github.com/janovix/auth/commit/666ff26fc77c727bf514dd77a7468e31c0421a0d))
+
+# [1.5.0-rc.33](https://github.com/janovix/auth/compare/v1.5.0-rc.32...v1.5.0-rc.33) (2026-01-24)
+
+
+### Features
+
+* update notifications context and SettingsLayoutClient to support local read state and new markAsRead functionality ([3a6f035](https://github.com/janovix/auth/commit/3a6f035ea4461910d0ff69347b1653fe35e2f390))
+
+# [1.5.0-rc.32](https://github.com/janovix/auth/compare/v1.5.0-rc.31...v1.5.0-rc.32) (2026-01-24)
+
+
+### Features
+
+* enhance SettingsLayoutClient with sound and pulse effects for notifications ([e789444](https://github.com/janovix/auth/commit/e7894448b1884dd702714d17d5374914dcb8387f))
+
+# [1.5.0-rc.31](https://github.com/janovix/auth/compare/v1.5.0-rc.30...v1.5.0-rc.31) (2026-01-23)
+
+
+### Bug Fixes
+
+* **ui:** add debug logging for semantic-release and improve commit analyzer config ([f8f2440](https://github.com/janovix/auth/commit/f8f2440c2c0a1167b005547475171a082bd7e964))
+
+# [1.5.0-rc.30](https://github.com/janovix/auth/compare/v1.5.0-rc.29...v1.5.0-rc.30) (2026-01-23)
+
+
+### Bug Fixes
+
+* **ui:** export LanguageSwitcher from package index ([8a932e6](https://github.com/janovix/auth/commit/8a932e6421d1418d2ec2ba568764affda7fd5016))
+
+# [1.5.0-rc.29](https://github.com/janovix/auth/compare/v1.5.0-rc.28...v1.5.0-rc.29) (2026-01-23)
+
+
+### Bug Fixes
+
+* **ci:** only publish npm package when version changes ([7bc61e7](https://github.com/janovix/auth/commit/7bc61e7b0089d5d0ad2b14a1062bd959a3b98af4))
+
+# [1.5.0-rc.28](https://github.com/janovix/auth/compare/v1.5.0-rc.27...v1.5.0-rc.28) (2026-01-23)
+
+
+### Features
+
+* add LanguageSwitcher component to @janovix/auth-ui and update README with usage instructions ([cfb4624](https://github.com/janovix/auth/commit/cfb46246d494fb1cf3886e13c9f94f71995222cb))
+
+# [1.5.0-rc.27](https://github.com/janovix/auth/compare/v1.5.0-rc.26...v1.5.0-rc.27) (2026-01-23)
+
+
+### Bug Fixes
+
+* update @janovix/auth-ui dependency version in package.json and pnpm-lock.yaml to remove caret (^) for consistent versioning ([d6ffd7f](https://github.com/janovix/auth/commit/d6ffd7f2c6fe648f5d34d05c608c4652709f2056))
+
+
+### Features
+
+* integrate @janovix/auth-ui ThemeSwitcher across components and update dependencies ([b6a126a](https://github.com/janovix/auth/commit/b6a126af4d9a4257107314e088a30e5bd0f4023c))
+
+# [1.5.0-rc.26](https://github.com/janovix/auth/compare/v1.5.0-rc.25...v1.5.0-rc.26) (2026-01-22)
+
+
+### Features
+
+* add @janovix/auth-ui package with shared UI components ([434f73f](https://github.com/janovix/auth/commit/434f73f851e55a746b4931338926cf35212a1c1e))
+
+# [1.5.0-rc.25](https://github.com/janovix/auth/compare/v1.5.0-rc.24...v1.5.0-rc.25) (2026-01-22)
+
+
+### Features
+
+* integrate ThemeProvider and LanguageProvider in Storybook preview; enhance BetaAccessView with logo and footer note ([ed7d7fc](https://github.com/janovix/auth/commit/ed7d7fce719af34f05d80ab524d63e1bc434fa97))
+
+# [1.5.0-rc.24](https://github.com/janovix/auth/compare/v1.5.0-rc.23...v1.5.0-rc.24) (2026-01-22)
+
+
+### Features
+
+* add beta access handling and user role management ([7dcc030](https://github.com/janovix/auth/commit/7dcc0306ae3f07ce67db0929ed3774e73e589921))
+
+# [1.5.0-rc.23](https://github.com/janovix/auth/compare/v1.5.0-rc.22...v1.5.0-rc.23) (2026-01-21)
+
+
+### Bug Fixes
+
+* add LanguageProvider to LoginView stories and tests ([775e2f2](https://github.com/janovix/auth/commit/775e2f2d7d3e5c83dbddf5cb815860ee64c45d27))
+
+# [1.5.0-rc.22](https://github.com/janovix/auth/compare/v1.5.0-rc.21...v1.5.0-rc.22) (2026-01-20)
+
+
+### Features
+
+* update scrollbar styles and improve sidebar trigger icon handling ([01f0332](https://github.com/janovix/auth/commit/01f03328ea4e9f37b93385633146641ba9ff6e13))
+
+# [1.5.0-rc.21](https://github.com/janovix/auth/compare/v1.5.0-rc.20...v1.5.0-rc.21) (2026-01-19)
+
+
+### Features
+
+* enhance OTP resend functionality by introducing pending state for captcha resolution ([43a0162](https://github.com/janovix/auth/commit/43a01625e45e7c517a4ea2e90bf5f6d566b4514e))
+
+# [1.5.0-rc.20](https://github.com/janovix/auth/compare/v1.5.0-rc.19...v1.5.0-rc.20) (2026-01-19)
+
+
+### Bug Fixes
+
+* improve OTP error messaging by using a consistent translated message for invalid OTP attempts ([0dbedeb](https://github.com/janovix/auth/commit/0dbedeb544299b60e1956f7e4ff2a0da6d3e02c2))
+
+# [1.5.0-rc.19](https://github.com/janovix/auth/compare/v1.5.0-rc.18...v1.5.0-rc.19) (2026-01-19)
+
+
+### Features
+
+* enhance OTP handling by implementing resend button visibility for TOO_MANY_ATTEMPTS error and removing failed attempts tracking ([de3f167](https://github.com/janovix/auth/commit/de3f167099c95b63561c8e1118f99dfb981ca3fe))
+
+# [1.5.0-rc.18](https://github.com/janovix/auth/compare/v1.5.0-rc.17...v1.5.0-rc.18) (2026-01-19)
+
+
+### Features
+
+* implement OTP error handling to prevent infinite submission loops and suggest new code after multiple failed attempts ([14849d9](https://github.com/janovix/auth/commit/14849d928f1ce31a3ff393562028d1a487a265e2))
+
+# [1.5.0-rc.17](https://github.com/janovix/auth/compare/v1.5.0-rc.16...v1.5.0-rc.17) (2026-01-17)
+
+
+### Features
+
+* add email help text to PersonalSettingsView for user guidance ([bb23e12](https://github.com/janovix/auth/commit/bb23e12d7741512d47b88141604441d8c687a831))
+
+# [1.5.0-rc.16](https://github.com/janovix/auth/compare/v1.5.0-rc.15...v1.5.0-rc.16) (2026-01-17)
+
+
+### Features
+
+* refactor compliance settings retrieval in SettingsLayoutClient to use getAmlComplianceSettings function ([894d04a](https://github.com/janovix/auth/commit/894d04acd72e975baff7bf1e518ef5eaac3a8639))
+
+# [1.5.0-rc.15](https://github.com/janovix/auth/compare/v1.5.0-rc.14...v1.5.0-rc.15) (2026-01-17)
+
+
+### Features
+
+* refactor subscription status handling in SettingsLayoutClient to use getSubscriptionStatus function ([e49f77d](https://github.com/janovix/auth/commit/e49f77d26c5f104992ef316118ba477b7cbd9288))
+
+# [1.5.0-rc.14](https://github.com/janovix/auth/compare/v1.5.0-rc.13...v1.5.0-rc.14) (2026-01-17)
+
+
+### Features
+
+* enhance avatar URL handling in PersonalSettingsView to prioritize user.image over settings.avatarUrl ([6a3bf02](https://github.com/janovix/auth/commit/6a3bf02234703827925f661c0d5eebe65c12f56f))
+
+# [1.5.0-rc.13](https://github.com/janovix/auth/compare/v1.5.0-rc.12...v1.5.0-rc.13) (2026-01-17)
+
+
+### Bug Fixes
+
+* update middleware configuration to exclude monitoring routes from middleware application ([39981de](https://github.com/janovix/auth/commit/39981de7c42aa49ac522777077d29eb46c36b2ec))
+
+# [1.5.0-rc.12](https://github.com/janovix/auth/compare/v1.5.0-rc.11...v1.5.0-rc.12) (2026-01-17)
+
+
+### Features
+
+* add DeleteOrganizationDialog component with tests and integration into OrganizationSettingsView ([fb5026e](https://github.com/janovix/auth/commit/fb5026e7b1df7bd26f2f5fd34ff1c73c5bd605a4))
+
+# [1.5.0-rc.11](https://github.com/janovix/auth/compare/v1.5.0-rc.10...v1.5.0-rc.11) (2026-01-17)
+
+
+### Features
+
+* update organization logo handling in OrganizationSettingsView ([f6034ae](https://github.com/janovix/auth/commit/f6034aec1c08a754b7deafb9fc5a4408ec597e03))
+
+# [1.5.0-rc.10](https://github.com/janovix/auth/compare/v1.5.0-rc.9...v1.5.0-rc.10) (2026-01-17)
+
+
+### Bug Fixes
+
+* clarify onChange behavior in AvatarEditorDialog when using onSave handler ([afc508e](https://github.com/janovix/auth/commit/afc508eeb01764c8dcc26a4ad4d3d5bd8298a1ab))
+
+# [1.5.0-rc.9](https://github.com/janovix/auth/compare/v1.5.0-rc.8...v1.5.0-rc.9) (2026-01-17)
+
+
+### Features
+
+* update user profile image handling in PersonalSettingsView ([faf6859](https://github.com/janovix/auth/commit/faf68597bea0b1df77b96d8978da8dd769a01f15))
+
+# [1.5.0-rc.8](https://github.com/janovix/auth/compare/v1.5.0-rc.7...v1.5.0-rc.8) (2026-01-17)
+
+
+### Features
+
+* enhance AvatarEditor with high-quality image smoothing and retina display support ([7caf547](https://github.com/janovix/auth/commit/7caf547359d8a63095006f54c9c6be348307892a)), closes [hi#quality](https://github.com/hi/issues/quality)
+
+# [1.5.0-rc.7](https://github.com/janovix/auth/compare/v1.5.0-rc.6...v1.5.0-rc.7) (2026-01-17)
+
+
+### Bug Fixes
+
+* adjust layout of AvatarEditor in AvatarEditorDialog for better responsiveness ([567f94c](https://github.com/janovix/auth/commit/567f94c8e9f5d7ae105983d2a01b16293ff6c85e))
+
+# [1.5.0-rc.6](https://github.com/janovix/auth/compare/v1.5.0-rc.5...v1.5.0-rc.6) (2026-01-17)
+
+
+### Features
+
+* add common and avatar-related translations for onboarding and settings in English and Spanish ([edc6c3a](https://github.com/janovix/auth/commit/edc6c3a0fd4e778bb31498152a55c90da178bceb))
+
+# [1.5.0-rc.5](https://github.com/janovix/auth/compare/v1.5.0-rc.4...v1.5.0-rc.5) (2026-01-16)
+
+
+### Features
+
+* add new UI components for organization management, including CreateOrganizationView and associated settings, and implement timezone picker functionality ([b04b6b7](https://github.com/janovix/auth/commit/b04b6b7a6730ac5f4ca1cfb62ade2be572bc64a7))
+
+# [1.5.0-rc.4](https://github.com/janovix/auth/compare/v1.5.0-rc.3...v1.5.0-rc.4) (2026-01-15)
+
+
+### Bug Fixes
+
+* update success message display logic in LoginView to ensure correct rendering based on OTP state ([9bbc027](https://github.com/janovix/auth/commit/9bbc027f8c3313024a7610aee8d70059fafe9976))
+
+# [1.5.0-rc.3](https://github.com/janovix/auth/compare/v1.5.0-rc.2...v1.5.0-rc.3) (2026-01-14)
+
+
+### Features
+
+* add banned user handling in LoginView with corresponding tests and translations ([dd15d98](https://github.com/janovix/auth/commit/dd15d981bb43f12c66f101103a41ef66a7a239c6))
+
+# [1.5.0-rc.2](https://github.com/janovix/auth/compare/v1.5.0-rc.1...v1.5.0-rc.2) (2026-01-14)
+
+
+### Features
+
+* add onboarding steps and UI components for organization management, including avatar upload and subscription selection ([1d83d7d](https://github.com/janovix/auth/commit/1d83d7d5ff04847717ca5bc70b6b80e3855ed109))
+* implement theme synchronization and upgrade prompts in billing components ([83c001c](https://github.com/janovix/auth/commit/83c001c97c995e70faad837dc25cb5a1eb43fcc4))
+* integrate Turnstile Captcha for enhanced OTP resend functionality in LoginView ([9e64176](https://github.com/janovix/auth/commit/9e6417694f11b17e30ca653b92b9d1ab0637d9df))
+
+# [1.5.0-rc.1](https://github.com/janovix/auth/compare/v1.4.0...v1.5.0-rc.1) (2026-01-12)
+
+
+### Features
+
+* add audit and settings components with associated tests ([3ceaae6](https://github.com/janovix/auth/commit/3ceaae62226d83dd90e4c86d096462a6475dd584))
+* add settings management components and integrate Radix UI for improved UI elements ([e800447](https://github.com/janovix/auth/commit/e800447b7e4ddf0d1730e9aee0b1e6299e4ca9b0))
+* add storybook components for UI elements ([75320a1](https://github.com/janovix/auth/commit/75320a1f6ef2be163eb539551ee5fde740071b85))
+* enhance settings management with new middleware for route protection and organization selection ([2648d23](https://github.com/janovix/auth/commit/2648d2366c91aa81ae0de9ff1f4f81b99e25094d))
+* implement billing settings management with new components for subscription, invoices, and license activation ([5d31229](https://github.com/janovix/auth/commit/5d3122950061cf8fa5e611f7a02f195ae4704914))
+* implement organization settings management in SettingsView component ([0c01349](https://github.com/janovix/auth/commit/0c01349d52f071be8f6f5b31fedf9fdd257ca8a4))
+
 # [1.4.0](https://github.com/janovix/auth/compare/v1.3.0...v1.4.0) (2026-01-09)
 
 

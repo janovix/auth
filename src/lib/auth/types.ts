@@ -9,6 +9,8 @@ export type SessionUser = {
 	emailVerified: boolean;
 	createdAt: Date;
 	updatedAt: Date;
+	/** User role: 'visitor' (beta waiting), 'user' (active), or 'admin' */
+	role?: string;
 };
 
 /**
@@ -23,6 +25,7 @@ export type SessionData = {
 	updatedAt: Date;
 	ipAddress?: string;
 	userAgent?: string;
+	activeOrganizationId?: string | null;
 };
 
 /**
@@ -40,19 +43,6 @@ export type SessionSnapshot = {
 	data: Session;
 	error: Error | null;
 	isPending: boolean;
-};
-
-/**
- * Credentials for passwordless sign up.
- * Password is auto-generated internally - users never see or use it.
- */
-export type SignUpCredentials = {
-	email: string;
-	name: string;
-	/**
-	 * Optional profile image URL.
-	 */
-	image?: string;
 };
 
 /**

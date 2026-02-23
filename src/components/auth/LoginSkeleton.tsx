@@ -59,12 +59,9 @@ export function LoginSkeleton() {
 							</div>
 						</Field>
 
-						{/* Button and signup link skeleton */}
+						{/* Button skeleton */}
 						<Field>
 							<div className="h-10 w-full animate-pulse rounded-md bg-muted" />
-							<FieldDescription className="text-center">
-								<span className="inline-block h-4 w-56 animate-pulse rounded-md bg-muted" />
-							</FieldDescription>
 						</Field>
 					</FieldGroup>
 

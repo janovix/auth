@@ -1,0 +1,165 @@
+/**
+ * Settings types for the auth frontend
+ */
+
+export type Theme = "light" | "dark" | "system";
+export type DateFormat =
+	| "MM/DD/YYYY"
+	| "DD/MM/YYYY"
+	| "YYYY-MM-DD"
+	| "DD.MM.YYYY";
+export type LanguageCode = "en" | "es";
+export type ClockFormat = "12h" | "24h";
+
+export interface PaymentMethod {
+	id: string;
+	type: "card" | "bank_account" | "paypal";
+	label: string;
+	last4?: string;
+	isDefault?: boolean;
+}
+
+/**
+ * UI preferences stored in metadata
+ */
+export interface UIPreferences {
+	sidebarCollapsed?: boolean;
+}
+
+/**
+ * Type-safe metadata for user settings
+ */
+export interface UserSettingsMetadata extends UIPreferences {
+	[key: string]: unknown;
+}
+
+export interface UserSettings {
+	id: string;
+	userId: string;
+	theme: Theme | null;
+	timezone: string | null;
+	language: LanguageCode | null;
+	dateFormat: DateFormat | null;
+	clockFormat: ClockFormat | null;
+	avatarUrl: string | null;
+	paymentMethods: PaymentMethod[];
+	metadata: UserSettingsMetadata | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface ResolvedSettings {
+	theme: Theme;
+	timezone: string;
+	language: LanguageCode;
+	dateFormat: DateFormat;
+	clockFormat: ClockFormat;
+	avatarUrl: string | null;
+	paymentMethods: PaymentMethod[];
+	sources: {
+		theme: "user" | "organization" | "browser" | "default";
+		timezone: "user" | "organization" | "browser" | "default";
+		language: "user" | "organization" | "browser" | "default";
+		dateFormat: "user" | "organization" | "default";
+		clockFormat: "user" | "organization" | "default";
+	};
+}
+
+export interface UpdateUserSettingsInput {
+	theme?: Theme | null;
+	timezone?: string | null;
+	language?: LanguageCode | null;
+	dateFormat?: DateFormat | null;
+	clockFormat?: ClockFormat | null;
+	avatarUrl?: string | null;
+	paymentMethods?: PaymentMethod[];
+	metadata?: UserSettingsMetadata;
+}
+
+export interface OrganizationSettings {
+	id: string;
+	organizationId: string;
+	theme: Theme | null;
+	timezone: string | null;
+	language: LanguageCode | null;
+	dateFormat: DateFormat | null;
+	clockFormat: ClockFormat | null;
+	avatarUrl: string | null;
+	metadata: Record<string, unknown> | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface UpdateOrganizationSettingsInput {
+	theme?: Theme | null;
+	timezone?: string | null;
+	language?: LanguageCode | null;
+	dateFormat?: DateFormat | null;
+	clockFormat?: ClockFormat | null;
+	avatarUrl?: string | null;
+}
+
+export interface OrganizationMembership {
+	role: "owner" | "admin" | "member";
+	organizationId: string;
+}
+
+export interface SettingsApiResponse<T> {
+	success: boolean;
+	data: T;
+	error?: string;
+}
+
+/**
+ * AML Compliance Settings (stored in aml-svc)
+ */
+export interface AmlComplianceSettings {
+	id: string;
+	organizationId: string;
+	obligatedSubjectKey: string; // RFC (clave_sujeto_obligado) - 12 characters
+	activityKey: string; // Vulnerable activity code (e.g., "VEH")
+	// KYC Self-Service settings
+	selfServiceMode?: "disabled" | "manual" | "automatic";
+	selfServiceExpiryHours?: number;
+	selfServiceRequiredSections?: string[] | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface UpdateAmlComplianceSettingsInput {
+	obligatedSubjectKey?: string;
+	activityKey?: string;
+}
+
+export interface UpdateSelfServiceSettingsInput {
+	selfServiceMode?: "disabled" | "manual" | "automatic";
+	selfServiceExpiryHours?: number;
+	selfServiceRequiredSections?: string[] | null;
+}
+
+export interface CreateAmlComplianceSettingsInput {
+	obligatedSubjectKey: string;
+	activityKey: string;
+}
+
+// ============================================================================
+// API Keys (organization-scoped, for third-party programmatic access)
+// ============================================================================
+
+export interface ApiKey {
+	id: string;
+	name: string;
+	keyPrefix: string;
+	organizationId: string;
+	createdById: string;
+	lastUsedAt: string | null;
+	expiresAt: string | null;
+	revokedAt: string | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface ApiKeyCreateResponse {
+	apiKey: ApiKey;
+	plainKey: string;
+}

@@ -1,9 +1,33 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { createAuthClient } from "better-auth/client";
-import { emailOTPClient, organizationClient } from "better-auth/client/plugins";
+import {
+	emailOTPClient,
+	organizationClient,
+	jwtClient,
+} from "better-auth/client/plugins";
+import { stripeClient } from "@better-auth/stripe/client";
+import { passkeyClient } from "@better-auth/passkey/client";
 
 import { getAuthCoreBaseUrl } from "./authCoreConfig";
+
+/**
+ * Custom event detail for rate limit events.
+ * Dispatched when the server returns HTTP 429 (Too Many Requests).
+ */
+export interface RateLimitEventDetail {
+	/** Number of seconds until the user can retry, from X-Retry-After header (defaults to 60) */
+	retryAfter: number;
+	/** The URL that was rate limited */
+	url?: string;
+}
+
+/**
+ * Custom event name for rate limit notifications.
+ * Components can listen for this event to show appropriate UI feedback.
+ */
+export const AUTH_RATE_LIMIT_EVENT = "auth:rate-limited";
 
 /**
  * Better Auth client instance.
@@ -16,15 +40,112 @@ import { getAuthCoreBaseUrl } from "./authCoreConfig";
  *
  * Plugins:
  * - emailOTPClient: Enables OTP-based email verification instead of link-based,
- *   preserving the user's flow and redirectTo parameters during signup.
+ *   preserving the user's flow and redirectTo parameters during authentication.
  * - organizationClient: Enables organization management (required by aml-janovix).
+ * - stripeClient: Enables subscription management via Better Auth Stripe plugin.
+ * - jwtClient: Enables JWT token exchange for service-to-service authentication.
+ *
+ * Rate Limiting:
+ * - Global onError handler detects HTTP 429 responses and dispatches AUTH_RATE_LIMIT_EVENT
+ * - Components can listen for this event to show user-friendly rate limit messages
+ * - The X-Retry-After header is parsed and included in the event detail
+ *
+ * Note: Cloudflare Turnstile captcha protection is handled via x-captcha-response
+ * header in fetchOptions. Use useTurnstile() hook to get the token.
  */
 export const authClient = createAuthClient({
 	baseURL: getAuthCoreBaseUrl(),
 	fetchOptions: {
 		credentials: "include",
+		onError: async (context) => {
+			const { response } = context;
+
+			// Handle rate limit errors (HTTP 429)
+			if (response.status === 429) {
+				const retryAfterHeader = response.headers.get("X-Retry-After");
+
+				if (!retryAfterHeader) {
+					return;
+				}
+
+				const retryAfter = parseInt(retryAfterHeader, 10);
+
+				if (isNaN(retryAfter) || retryAfter <= 0) {
+					return;
+				}
+
+				// Dispatch custom event for UI components to handle
+				if (typeof window !== "undefined") {
+					const detail: RateLimitEventDetail = {
+						retryAfter,
+						url: response.url,
+					};
+					window.dispatchEvent(
+						new CustomEvent(AUTH_RATE_LIMIT_EVENT, { detail }),
+					);
+				}
+			}
+		},
 	},
-	plugins: [emailOTPClient(), organizationClient()],
+	plugins: [
+		emailOTPClient(),
+		organizationClient(),
+		stripeClient({
+			subscription: true, // Enable subscription management
+		}),
+		jwtClient(),
+		passkeyClient(),
+	],
 });
 
 export type AuthClient = typeof authClient;
+
+/**
+ * Helper to create fetch options with captcha headers
+ *
+ * @example
+ * ```tsx
+ * const { getCaptchaHeaders } = useTurnstile();
+ *
+ * await authClient.signIn.email({
+ *   email,
+ *   password,
+ *   fetchOptions: withCaptcha(getCaptchaHeaders()),
+ * });
+ * ```
+ */
+export function withCaptcha(captchaHeaders: Record<string, string>): {
+	credentials: "include";
+	headers: Record<string, string>;
+} {
+	return {
+		credentials: "include",
+		headers: captchaHeaders,
+	};
+}
+
+/**
+ * Get a JWT token for API authentication (client-side).
+ * Uses the better-auth JWT plugin to exchange session for a JWT.
+ *
+ * @returns The JWT token string if successful, null otherwise
+ */
+export async function getClientJwt(): Promise<string | null> {
+	try {
+		const result = await authClient.token();
+		if (result.error || !result.data?.token) {
+			Sentry.captureMessage("Failed to get JWT", {
+				level: "error",
+				tags: { context: "get-jwt-failed" },
+				extra: { error: result.error },
+			});
+			return null;
+		}
+		return result.data.token;
+	} catch (error) {
+		Sentry.captureException(error, {
+			tags: { context: "get-jwt-exception" },
+		});
+		return null;
+	}
+}

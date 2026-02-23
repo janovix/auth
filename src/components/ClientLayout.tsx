@@ -2,18 +2,46 @@
 
 import { usePathname } from "next/navigation";
 
+import { ThemeSwitcher, LanguageSwitcher } from "@algenium/blocks";
 import { GlobalAuroraBackground } from "@/components/aurora";
-import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
+import { Toaster } from "@/components/ui/sonner";
+import { useLanguage } from "@/contexts/language-context";
+import { useSessionSync } from "@/lib/auth/useSessionSync";
+
+const languages = [
+	{ key: "en", label: "EN", nativeName: "English" },
+	{ key: "es", label: "ES", nativeName: "Español" },
+];
 import { AuroraProvider } from "@/contexts/aurora-context";
 import { LanguageProvider } from "@/contexts/language-context";
+import { OnboardingProvider } from "@/contexts/onboarding-context";
+import { PageStatusProvider } from "@/contexts/page-status-context";
+import { TurnstileProvider } from "@/contexts/turnstile-context";
+
+// Turnstile site key from environment variable
+// In production, this comes from Cloudflare Dashboard
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
 
 function SettingsBar() {
+	const { language, setLanguage, t } = useLanguage();
 	return (
 		<div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
-			<LanguageSwitcher />
-			<ThemeSwitcher />
+			<LanguageSwitcher
+				languages={languages}
+				currentLanguage={language}
+				onLanguageChange={(key) => setLanguage(key as "en" | "es")}
+				labels={{ language: t("language.label") }}
+				showIcon
+			/>
+			<ThemeSwitcher
+				labels={{
+					theme: t("theme.label"),
+					system: t("theme.system"),
+					light: t("theme.light"),
+					dark: t("theme.dark"),
+				}}
+			/>
 		</div>
 	);
 }
@@ -28,9 +56,9 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
 				{/* Language and Theme pickers - bottom right */}
 				<SettingsBar />
 
-				{/* Main content area - scrollable, centered */}
-				<div className="flex-1 w-full flex flex-col items-center justify-center px-4 md:px-10 py-8 relative z-10 overflow-y-auto min-h-0">
-					<div className="flex w-full max-w-sm flex-col gap-4 lg:gap-6 animate-form-fade-in">
+				{/* Main content area - scrollable, vertically centered when content fits */}
+				<div className="flex-1 w-full flex flex-col items-center px-4 md:px-10 py-6 sm:py-8 relative z-10 overflow-y-auto min-h-0">
+					<div className="flex w-full max-w-md flex-col gap-4 lg:gap-6 animate-form-fade-in my-auto">
 						{children}
 					</div>
 				</div>
@@ -45,25 +73,57 @@ export default function ClientLayout({
 	children: React.ReactNode;
 }) {
 	const pathname = usePathname();
-	// Show centered layout with backdrop blur for auth routes
+
+	// Enable cross-tab session synchronization
+	useSessionSync();
+
+	// Show centered layout with backdrop blur for auth routes (excluding onboarding which has its own layout)
 	const isAuthRoute =
 		pathname === "/" ||
 		pathname.startsWith("/login") ||
-		pathname.startsWith("/signup") ||
 		pathname.startsWith("/recover") ||
 		pathname.startsWith("/verify");
+
+	// Error pages should also use the auth layout (centered with aurora background)
+	const isErrorPageRoute =
+		pathname.startsWith("/forbidden") || pathname.startsWith("/unauthorized");
+
+	// Onboarding and invite routes have their own full-screen layout but need OnboardingProvider
+	const isOnboardingRoute =
+		pathname.startsWith("/onboarding") || pathname.startsWith("/invite");
+
+	// Only enable Turnstile on auth routes (login, recover, verify)
+	// Don't enable on authenticated pages (settings, account, etc.)
+	const shouldEnableTurnstile = isAuthRoute && TURNSTILE_SITE_KEY;
+
+	const authContent = shouldEnableTurnstile ? (
+		<TurnstileProvider siteKey={TURNSTILE_SITE_KEY}>
+			<AuthLayout>{children}</AuthLayout>
+		</TurnstileProvider>
+	) : (
+		<AuthLayout>{children}</AuthLayout>
+	);
+
+	const content = (
+		<>
+			{isAuthRoute || isErrorPageRoute ? (
+				authContent
+			) : isOnboardingRoute ? (
+				<OnboardingProvider>
+					<AuroraProvider>{children}</AuroraProvider>
+				</OnboardingProvider>
+			) : (
+				// Settings and other routes - no SettingsBar (they have their own controls in the header)
+				children
+			)}
+			<Toaster position="top-right" richColors closeButton />
+		</>
+	);
 
 	return (
 		<ThemeProvider>
 			<LanguageProvider>
-				{isAuthRoute ? (
-					<AuthLayout>{children}</AuthLayout>
-				) : (
-					<>
-						<SettingsBar />
-						{children}
-					</>
-				)}
+				<PageStatusProvider>{content}</PageStatusProvider>
 			</LanguageProvider>
 		</ThemeProvider>
 	);

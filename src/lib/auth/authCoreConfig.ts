@@ -39,3 +39,54 @@ export const getAuthEnvironment = (): "dev" | "prod" => {
 	}
 	return "dev";
 };
+
+/**
+ * Gets the AML app URL from environment variables.
+ * @returns The base URL for the AML app (e.g., https://aml.janovix.workers.dev)
+ */
+export const getAmlAppUrl = (): string => {
+	return (
+		process.env.NEXT_PUBLIC_AML_APP_URL || "https://aml.janovix.workers.dev"
+	);
+};
+
+/**
+ * Gets the Watchlist app URL from environment variables.
+ * @returns The base URL for the Watchlist app (e.g., https://watchlist.janovix.workers.dev)
+ */
+export const getWatchlistAppUrl = (): string => {
+	return (
+		process.env.NEXT_PUBLIC_WATCHLIST_APP_URL ||
+		"https://watchlist.janovix.workers.dev"
+	);
+};
+
+/**
+ * Gets the Homepage URL for the marketing site.
+ * @returns The base URL for the Janovix homepage (e.g., https://www.janovix.com)
+ */
+export const getHomepageUrl = (): string => {
+	return process.env.NEXT_PUBLIC_HOMEPAGE_URL || "https://www.janovix.com";
+};
+
+/**
+ * Gets the Settings app URL from environment variables.
+ * @returns The base URL for the Settings app (e.g., https://settings.janovix.workers.dev)
+ */
+export const getSettingsAppUrl = (): string => {
+	return (
+		process.env.NEXT_PUBLIC_SETTINGS_APP_URL ||
+		"https://settings.janovix.workers.dev"
+	);
+};
+
+/**
+ * Gets the Notifications service URL from environment variables.
+ * @returns The base URL for the Notifications service (e.g., https://notifications-svc.janovix.workers.dev)
+ */
+export const getNotificationsServiceUrl = (): string => {
+	return (
+		process.env.NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL ||
+		"https://notifications-svc.janovix.workers.dev"
+	);
+};

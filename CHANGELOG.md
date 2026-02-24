@@ -1,3 +1,10 @@
+# [2.0.0-rc.45](https://github.com/janovix/auth/compare/v2.0.0-rc.44...v2.0.0-rc.45) (2026-02-24)
+
+
+### Features
+
+* **icons:** add new icons and web manifest for improved branding ([ce2944c](https://github.com/janovix/auth/commit/ce2944c28ec738674c65731459d653e88015ea89))
+
 # [2.0.0-rc.44](https://github.com/janovix/auth/compare/v2.0.0-rc.43...v2.0.0-rc.44) (2026-02-21)
 
 

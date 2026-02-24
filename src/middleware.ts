@@ -319,12 +319,28 @@ async function getSessionWithOnboardingStatus(
 }
 
 /**
+ * Check if the user has an admin role.
+ * Handles comma-separated multi-role strings (e.g. "user,admin").
+ */
+function isAdminRole(role?: string | null): boolean {
+	if (!role) return false;
+	return role.split(",").some((r) => r.trim().toLowerCase() === "admin");
+}
+
+/**
  * Check if the user needs onboarding.
  * User needs onboarding if:
  * 1. Profile is incomplete (no name), OR
- * 2. Has no organization membership
+ * 2. Has no organization membership (skipped for admin users)
+ *
+ * Admins bypass the org/subscription requirement — they only need a complete
+ * profile. This prevents admins from being stonewalled by the subscription
+ * onboarding flow when they have no organization.
  */
 function needsOnboarding(status: OnboardingStatus): boolean {
+	if (isAdminRole(status.role)) {
+		return !status.profileComplete;
+	}
 	return !status.profileComplete || !status.hasOrganization;
 }
 

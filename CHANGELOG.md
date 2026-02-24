@@ -1,3 +1,11 @@
+# [2.1.0](https://github.com/janovix/auth/compare/v2.0.0...v2.1.0) (2026-02-24)
+
+
+### Features
+
+* **icons:** add new icons and web manifest for improved branding ([ce2944c](https://github.com/janovix/auth/commit/ce2944c28ec738674c65731459d653e88015ea89))
+* **middleware:** implement role-based onboarding bypass for admin users ([a7a349f](https://github.com/janovix/auth/commit/a7a349f14a369f087b4cd39914bec7fd03132329))
+
 # [2.1.0-rc.1](https://github.com/janovix/auth/compare/v2.0.0...v2.1.0-rc.1) (2026-02-24)
 
 

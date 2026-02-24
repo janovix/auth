@@ -1,3 +1,10 @@
+# [2.0.0-rc.46](https://github.com/janovix/auth/compare/v2.0.0-rc.45...v2.0.0-rc.46) (2026-02-24)
+
+
+### Features
+
+* **middleware:** implement role-based onboarding bypass for admin users ([a7a349f](https://github.com/janovix/auth/commit/a7a349f14a369f087b4cd39914bec7fd03132329))
+
 # [2.0.0-rc.45](https://github.com/janovix/auth/compare/v2.0.0-rc.44...v2.0.0-rc.45) (2026-02-24)
 
 

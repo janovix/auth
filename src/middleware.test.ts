@@ -538,6 +538,118 @@ describe("middleware", () => {
 		});
 	});
 
+	describe("admin users (role-based onboarding bypass)", () => {
+		function mockAdminSession(opts: {
+			name: string | null;
+			role: string;
+			profileComplete: boolean;
+		}) {
+			mockGetSessionCookie.mockReturnValue("valid-session-token");
+			mockFetch
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							// No activeOrganizationId → triggers slow path
+							session: { id: "123" },
+							user: {
+								id: "u1",
+								name: opts.name,
+								email: "admin@example.com",
+							},
+						}),
+					headers: { getSetCookie: () => [] },
+				})
+				.mockResolvedValueOnce({
+					ok: true,
+					json: () =>
+						Promise.resolve({
+							success: true,
+							data: {
+								profileComplete: opts.profileComplete,
+								hasOrganization: false,
+								hasSubscription: false,
+								subscriptionStatus: null,
+								plan: null,
+								pendingInvitation: null,
+								canCreateOrganization: false,
+								role: opts.role,
+								isVisitor: false,
+							},
+						}),
+					headers: { getSetCookie: () => [] },
+				});
+		}
+
+		it("should allow access to account routes when admin has no organization", async () => {
+			mockAdminSession({
+				name: "Admin User",
+				role: "admin",
+				profileComplete: true,
+			});
+
+			const request = new NextRequest("https://auth.example.com/account");
+			const response = await middleware(request);
+
+			expect(response.status).toBe(200);
+			expect(response.headers.get("location")).toBeNull();
+		});
+
+		it("should allow access to settings routes when admin has no organization", async () => {
+			mockAdminSession({
+				name: "Admin User",
+				role: "admin",
+				profileComplete: true,
+			});
+
+			const request = new NextRequest("https://auth.example.com/settings");
+			const response = await middleware(request);
+
+			expect(response.status).toBe(200);
+			expect(response.headers.get("location")).toBeNull();
+		});
+
+		it("should redirect admin away from onboarding page when profile is complete", async () => {
+			mockAdminSession({
+				name: "Admin User",
+				role: "admin",
+				profileComplete: true,
+			});
+
+			const request = new NextRequest("https://auth.example.com/onboarding");
+			const response = await middleware(request);
+
+			expect(response.status).toBe(307);
+			expect(response.headers.get("location")).toContain(
+				"https://app.example.workers.dev",
+			);
+		});
+
+		it("should still redirect admin to onboarding when profile is incomplete", async () => {
+			mockAdminSession({ name: null, role: "admin", profileComplete: false });
+
+			const request = new NextRequest("https://auth.example.com/account");
+			const response = await middleware(request);
+
+			expect(response.status).toBe(307);
+			expect(response.headers.get("location")).toContain("/onboarding");
+		});
+
+		it("should bypass onboarding for comma-separated role containing admin", async () => {
+			mockAdminSession({
+				name: "Admin User",
+				role: "user,admin",
+				profileComplete: true,
+			});
+
+			const request = new NextRequest("https://auth.example.com/account");
+			const response = await middleware(request);
+
+			expect(response.status).toBe(200);
+			expect(response.headers.get("location")).toBeNull();
+		});
+	});
+
 	describe("fallback auth service URL", () => {
 		it("should use fallback URL when env var is not set", async () => {
 			delete process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;

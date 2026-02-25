@@ -144,6 +144,10 @@ export const LoginView = ({
 	const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
 	const redirectUrlRef = useRef<string>("");
 
+	// Holds the AbortController for any in-flight conditional UI passkey request
+	// so we can cancel it when the user explicitly chooses a different auth method.
+	const conditionalUiAbortRef = useRef<AbortController | null>(null);
+
 	// Turnstile captcha state
 	const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 	const [captchaError, setCaptchaError] = useState(false);
@@ -161,7 +165,9 @@ export const LoginView = ({
 		setPageProfile("login");
 	}, [setPageProfile]);
 
-	// Conditional UI (passkey autofill) — silently activates if browser has matching credentials
+	// Conditional UI (passkey autofill) — silently activates if browser has matching credentials.
+	// When the user taps the passkey suggestion in the email input autofill, the WebAuthn
+	// ceremony completes here and we redirect exactly like a manual passkey sign-in.
 	useEffect(() => {
 		if (
 			typeof PublicKeyCredential === "undefined" ||
@@ -169,13 +175,47 @@ export const LoginView = ({
 		) {
 			return;
 		}
+
+		const controller = new AbortController();
+		conditionalUiAbortRef.current = controller;
+
 		void PublicKeyCredential.isConditionalMediationAvailable().then(
-			(available) => {
-				if (!available) return;
-				void authClient.signIn.passkey({ autoFill: true });
+			async (available) => {
+				if (!available || controller.signal.aborted) return;
+
+				const finalRedirectUrl = redirectTo ?? `${window.location.origin}`;
+
+				try {
+					const { data, error } = await authClient.signIn.passkey({
+						autoFill: true,
+					});
+
+					if (controller.signal.aborted) return;
+
+					if (error) {
+						// Silent failure is intentional for conditional UI —
+						// the user may simply not have chosen a passkey.
+						return;
+					}
+
+					if (data) {
+						setStateModifier("success");
+						setShowSuccessAnimation(true);
+						setTimeout(() => {
+							window.location.href = finalRedirectUrl;
+						}, 2000);
+					}
+				} catch {
+					// Aborted or unsupported — ignore silently.
+				}
 			},
 		);
-	}, []);
+
+		return () => {
+			controller.abort();
+			conditionalUiAbortRef.current = null;
+		};
+	}, [redirectTo, setStateModifier]);
 
 	// Listen for rate limit events from authClient to set cooldown dynamically
 	// The cooldown duration comes from the server's X-Retry-After header
@@ -453,6 +493,9 @@ export const LoginView = ({
 
 	const handleGoogleSignIn = async () => {
 		if (anyAuthLoading) return;
+		// Cancel any pending conditional UI passkey request before starting a new auth flow.
+		conditionalUiAbortRef.current?.abort();
+		conditionalUiAbortRef.current = null;
 		try {
 			setServerError(null);
 			setIsGoogleLoading(true);
@@ -486,6 +529,10 @@ export const LoginView = ({
 
 	const handlePasskeySignIn = async () => {
 		if (anyAuthLoading) return;
+		// Cancel any pending conditional UI passkey request before opening a new one.
+		// Only one navigator.credentials.get() can be active at a time.
+		conditionalUiAbortRef.current?.abort();
+		conditionalUiAbortRef.current = null;
 		try {
 			setServerError(null);
 			setIsPasskeyLoading(true);

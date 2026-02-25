@@ -152,6 +152,10 @@ export const LoginView = ({
 	const [pendingSend, setPendingSend] = useState(false);
 	const [pendingResend, setPendingResend] = useState(false);
 
+	// Loading states for social/passkey sign-in methods
+	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+	const [isPasskeyLoading, setIsPasskeyLoading] = useState(false);
+
 	// Set aurora page profile to login on mount
 	useEffect(() => {
 		setPageProfile("login");
@@ -448,8 +452,10 @@ export const LoginView = ({
 	};
 
 	const handleGoogleSignIn = async () => {
+		if (anyAuthLoading) return;
 		try {
 			setServerError(null);
+			setIsGoogleLoading(true);
 			setStateModifier("loading"); // Blue aurora while loading
 
 			// Sign in with Google - this will redirect to Google OAuth flow
@@ -463,6 +469,7 @@ export const LoginView = ({
 				provider: "google",
 				callbackURL: finalRedirectUrl,
 			});
+			// Page redirects on success — no cleanup needed
 		} catch (error) {
 			Sentry.captureException(error, {
 				tags: { context: "google-signin-error" },
@@ -473,12 +480,15 @@ export const LoginView = ({
 					: t("login.error.google") || "Failed to sign in with Google",
 			);
 			setStateModifier("error");
+			setIsGoogleLoading(false);
 		}
 	};
 
 	const handlePasskeySignIn = async () => {
+		if (anyAuthLoading) return;
 		try {
 			setServerError(null);
+			setIsPasskeyLoading(true);
 			setStateModifier("loading");
 
 			const finalRedirectUrl = redirectTo
@@ -512,10 +522,17 @@ export const LoginView = ({
 				t("login.passkey.error") || "Passkey sign-in failed. Please try again.",
 			);
 			setStateModifier("error");
+		} finally {
+			setIsPasskeyLoading(false);
 		}
 	};
 
 	const isSubmitting = form.formState.isSubmitting;
+
+	// True whenever any auth method is in progress — disables all buttons to
+	// prevent rage-clicks and accidental multi-method submissions.
+	const anyAuthLoading =
+		isSubmitting || pendingSend || isGoogleLoading || isPasskeyLoading;
 
 	// Show success animation when login is successful
 	if (showSuccessAnimation) {
@@ -641,7 +658,7 @@ export const LoginView = ({
 										<Button
 											type="submit"
 											className="w-full h-11 gap-3 px-6"
-											disabled={isSubmitting || pendingSend || isOnCooldown}
+											disabled={anyAuthLoading || isOnCooldown}
 											aria-busy={isSubmitting || pendingSend}
 										>
 											{isSubmitting || pendingSend ? (
@@ -692,16 +709,26 @@ export const LoginView = ({
 											variant="outline"
 											className="w-full h-11 gap-3 px-6"
 											onClick={handleGoogleSignIn}
-											disabled={isSubmitting}
+											disabled={anyAuthLoading}
+											aria-busy={isGoogleLoading}
 										>
-											{/* eslint-disable-next-line @next/next/no-img-element */}
-											<img
-												src="/google.svg"
-												alt=""
-												className="h-5 w-5"
-												aria-hidden="true"
-											/>
-											{t("login.button.google")}
+											{isGoogleLoading ? (
+												<Loader2
+													className="h-5 w-5 animate-spin"
+													aria-hidden="true"
+												/>
+											) : (
+												// eslint-disable-next-line @next/next/no-img-element
+												<img
+													src="/google.svg"
+													alt=""
+													className="h-5 w-5"
+													aria-hidden="true"
+												/>
+											)}
+											{isGoogleLoading
+												? t("login.button.loading")
+												: t("login.button.google")}
 										</Button>
 									</Field>
 
@@ -712,16 +739,26 @@ export const LoginView = ({
 											variant="outline"
 											className="w-full h-11 gap-3 px-6"
 											onClick={handlePasskeySignIn}
-											disabled={isSubmitting}
+											disabled={anyAuthLoading}
+											aria-busy={isPasskeyLoading}
 										>
-											{/* eslint-disable-next-line @next/next/no-img-element */}
-											<img
-												src="/passkey.svg"
-												alt=""
-												className="h-5 w-5"
-												aria-hidden="true"
-											/>
-											{t("login.passkey.button")}
+											{isPasskeyLoading ? (
+												<Loader2
+													className="h-5 w-5 animate-spin"
+													aria-hidden="true"
+												/>
+											) : (
+												// eslint-disable-next-line @next/next/no-img-element
+												<img
+													src="/passkey.svg"
+													alt=""
+													className="h-5 w-5"
+													aria-hidden="true"
+												/>
+											)}
+											{isPasskeyLoading
+												? t("login.button.loading")
+												: t("login.passkey.button")}
 										</Button>
 									</Field>
 								</FieldGroup>

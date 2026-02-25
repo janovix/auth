@@ -37,6 +37,7 @@ const mockTranslations: Record<string, string> = {
 	"login.email.description": "Ingresa tu dirección de correo",
 	"login.button.send": "Enviar código de acceso",
 	"login.button.sending": "Enviando código...",
+	"login.button.loading": "Iniciando sesión...",
 	"login.otp.sent": "Código enviado",
 	"login.otp.sentDescription":
 		"Enviamos un código de 6 dígitos a {email}. Revisa tu bandeja de entrada y spam.",

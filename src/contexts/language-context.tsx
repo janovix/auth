@@ -348,6 +348,23 @@ const translations = {
 			"Start with the sidebar collapsed on all applications",
 		"settings.personal.changeAvatar": "Change avatar",
 
+		// Notifications section
+		"settings.notifications.title": "Notifications",
+		"settings.notifications.description":
+			"Configure how you receive notification alerts",
+		"settings.notifications.sound": "Notification sounds",
+		"settings.notifications.soundDesc":
+			"Play a sound when new notifications arrive",
+		"settings.notifications.soundType": "Sound",
+		"settings.notifications.soundTypeDesc":
+			"Choose which sound plays for new notifications",
+		"settings.notifications.preview": "Preview sound",
+		"settings.notifications.sound.chime": "Chime",
+		"settings.notifications.sound.bell": "Bell",
+		"settings.notifications.sound.pop": "Pop",
+		"settings.notifications.sound.ding": "Ding",
+		"settings.notifications.sound.none": "None",
+
 		// Passkeys section
 		"settings.personal.passkeys.title": "Passkeys",
 		"settings.personal.passkeys.description":
@@ -1395,6 +1412,23 @@ const translations = {
 		"settings.personal.sidebarCollapsedDesc":
 			"Iniciar con la barra lateral colapsada en todas las aplicaciones",
 		"settings.personal.changeAvatar": "Cambiar avatar",
+
+		// Notifications section
+		"settings.notifications.title": "Notificaciones",
+		"settings.notifications.description":
+			"Configura cómo recibes alertas de notificaciones",
+		"settings.notifications.sound": "Sonidos de notificación",
+		"settings.notifications.soundDesc":
+			"Reproducir un sonido cuando lleguen nuevas notificaciones",
+		"settings.notifications.soundType": "Sonido",
+		"settings.notifications.soundTypeDesc":
+			"Elige qué sonido suena para las nuevas notificaciones",
+		"settings.notifications.preview": "Previsualizar sonido",
+		"settings.notifications.sound.chime": "Campana",
+		"settings.notifications.sound.bell": "Timbre",
+		"settings.notifications.sound.pop": "Pop",
+		"settings.notifications.sound.ding": "Ding",
+		"settings.notifications.sound.none": "Sin sonido",
 
 		// Passkeys section
 		"settings.personal.passkeys.title": "Llaves de acceso",

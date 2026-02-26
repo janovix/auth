@@ -20,7 +20,9 @@ import {
 	setSidebarCollapsed as saveSidebarCollapsed,
 	getResolvedSettings,
 	getAmlComplianceSettings,
+	getUIPreferences,
 } from "@/lib/settings/settingsClient";
+import type { NotificationSoundType } from "@/lib/settings/types";
 import { getSubscriptionStatus } from "@/lib/billing";
 import { NotificationsProvider } from "@/contexts/notifications-context";
 import { NotificationsWidget } from "@algenium/blocks";
@@ -91,6 +93,11 @@ function SettingsLayoutInner({
 	const [effectiveClockFormat, setEffectiveClockFormat] = useState<
 		"12h" | "24h"
 	>("12h");
+
+	// Notification sound preferences
+	const [notificationSound, setNotificationSound] = useState<boolean>(true);
+	const [notificationSoundType, setNotificationSoundType] =
+		useState<NotificationSoundType>("chime");
 
 	// Handle org query param to switch organization
 	const orgSlugParam = searchParams.get("org");
@@ -380,6 +387,20 @@ function SettingsLayoutInner({
 		loadEffectiveTimezone();
 	}, [activeOrgId]);
 
+	// Load notification sound preferences
+	useEffect(() => {
+		async function loadNotificationPrefs() {
+			try {
+				const prefs = await getUIPreferences();
+				setNotificationSound(prefs.notificationSound ?? true);
+				setNotificationSoundType(prefs.notificationSoundType ?? "chime");
+			} catch {
+				// Silently fail — defaults remain
+			}
+		}
+		loadNotificationPrefs();
+	}, []);
+
 	// Listen for organization name/slug/logo updates from settings views
 	useEffect(() => {
 		const handleOrgUpdated = (event: Event) => {
@@ -508,9 +529,9 @@ function SettingsLayoutInner({
 							onNotificationClick={handleNotificationClick}
 							size="md"
 							maxVisible={50}
-							playSound={true}
+							playSound={notificationSound}
 							showPulse={true}
-							soundType="chime"
+							soundType={notificationSoundType}
 							pulseStyle="ring"
 						/>
 					</div>

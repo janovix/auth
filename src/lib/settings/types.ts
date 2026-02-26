@@ -20,10 +20,17 @@ export interface PaymentMethod {
 }
 
 /**
+ * Notification sound type options — mirrors SoundType in NotificationsWidget
+ */
+export type NotificationSoundType = "chime" | "bell" | "pop" | "ding" | "none";
+
+/**
  * UI preferences stored in metadata
  */
 export interface UIPreferences {
 	sidebarCollapsed?: boolean;
+	notificationSound?: boolean;
+	notificationSoundType?: NotificationSoundType;
 }
 
 /**

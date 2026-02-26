@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/janovix/auth/compare/v2.1.0...v2.2.0) (2026-02-26)
+
+
+### Features
+
+* **auth:** implement conditional UI passkey request cancellation in LoginView ([8476170](https://github.com/janovix/auth/commit/84761708f867a84e1796ede736437de6f8f70ddb))
+
 # [2.2.0-rc.3](https://github.com/janovix/auth/compare/v2.2.0-rc.2...v2.2.0-rc.3) (2026-02-26)
 
 

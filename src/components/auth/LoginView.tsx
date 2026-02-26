@@ -606,7 +606,7 @@ export const LoginView = ({
 															id="email"
 															type="email"
 															placeholder={t("login.email.placeholder")}
-															autoComplete="username webauthn"
+															autoComplete="email"
 															aria-describedby="email-description"
 															className="h-11 px-4"
 															required

@@ -1,3 +1,10 @@
+# [2.2.0-rc.3](https://github.com/janovix/auth/compare/v2.2.0-rc.2...v2.2.0-rc.3) (2026-02-26)
+
+
+### Bug Fixes
+
+* **layout:** update settings link in AppSwitcher component ([b03303a](https://github.com/janovix/auth/commit/b03303a47dc9ab09ba2c9b8c7ab8f8447dd00a90))
+
 # [2.2.0-rc.2](https://github.com/janovix/auth/compare/v2.2.0-rc.1...v2.2.0-rc.2) (2026-02-26)
 
 

@@ -184,10 +184,10 @@ function SettingsLayoutInner({
 			try {
 				setOrgsLoading(true);
 				const authServiceUrl = getAuthCoreBaseUrl();
-				const userId = session?.user?.id;
 
+				// Single request returns organizations already enriched with the user's role.
 				const listResponse = await fetch(
-					`${authServiceUrl}/api/auth/organization/list`,
+					`${authServiceUrl}/api/organization/list-with-role`,
 					{
 						credentials: "include",
 						headers: { "Content-Type": "application/json" },
@@ -195,70 +195,26 @@ function SettingsLayoutInner({
 				);
 
 				if (listResponse.ok) {
-					const data = (await listResponse.json()) as
-						| Array<{
-								id: string;
-								name: string;
-								slug: string;
-								logo?: string | null;
-						  }>
-						| {
-								organizations?: Array<{
-									id: string;
-									name: string;
-									slug: string;
-									logo?: string | null;
-								}>;
-						  };
-					const orgs = Array.isArray(data) ? data : data.organizations || [];
-
-					// Fetch members for all orgs in parallel to get the current user's role
-					const memberResponses = await Promise.all(
-						orgs.map((org) =>
-							fetch(
-								`${authServiceUrl}/api/auth/organization/list-members?organizationId=${org.id}`,
-								{ credentials: "include" },
-							),
-						),
-					);
-
-					// Build orgId → role map by finding the current user in each org's members
-					const rolesMap: Record<string, "owner" | "admin" | "member"> = {};
-					if (userId) {
-						await Promise.all(
-							memberResponses.map(async (res, i) => {
-								if (!res.ok) return;
-								const membersData = (await res.json()) as
-									| Array<{ userId: string; role: string }>
-									| { members?: Array<{ userId: string; role: string }> };
-								const membersArr = Array.isArray(membersData)
-									? membersData
-									: (membersData.members ?? []);
-								const myMember = membersArr.find((m) => m.userId === userId);
-								if (myMember) {
-									rolesMap[orgs[i].id] = myMember.role as
-										| "owner"
-										| "admin"
-										| "member";
-								}
-							}),
-						);
-					}
-
-					const formattedOrgs = orgs.map(
-						(org: {
+					const payload = (await listResponse.json()) as {
+						success: boolean;
+						data: Array<{
 							id: string;
 							name: string;
 							slug: string;
 							logo?: string | null;
-						}) => ({
-							id: org.id,
-							name: org.name,
-							slug: org.slug,
-							logo: org.logo || null,
-							role: rolesMap[org.id] ?? "member",
-						}),
-					);
+							role?: string;
+						}>;
+					} | null;
+
+					const orgs = payload?.data ?? [];
+
+					const formattedOrgs = orgs.map((org) => ({
+						id: org.id,
+						name: org.name,
+						slug: org.slug,
+						logo: org.logo ?? null,
+						role: (org.role ?? "member") as "owner" | "admin" | "member",
+					}));
 					setOrganizations(formattedOrgs);
 
 					// Set active org

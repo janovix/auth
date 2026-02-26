@@ -169,6 +169,7 @@ export const LoginView = ({
 		) {
 			return;
 		}
+
 		void PublicKeyCredential.isConditionalMediationAvailable().then(
 			(available) => {
 				if (!available) return;

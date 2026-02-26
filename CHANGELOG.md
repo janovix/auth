@@ -1,3 +1,10 @@
+# [2.3.0-rc.1](https://github.com/janovix/auth/compare/v2.2.1-rc.1...v2.3.0-rc.1) (2026-02-26)
+
+
+### Features
+
+* **notifications:** add notification sound preferences to settings ([339534d](https://github.com/janovix/auth/commit/339534d2b384cf34741096f6c19dd42b00c3d492))
+
 ## [2.2.1-rc.1](https://github.com/janovix/auth/compare/v2.2.0...v2.2.1-rc.1) (2026-02-26)
 
 

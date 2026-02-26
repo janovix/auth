@@ -1,3 +1,11 @@
+## [2.2.1](https://github.com/janovix/auth/compare/v2.2.0...v2.2.1) (2026-02-26)
+
+
+### Bug Fixes
+
+* **auth:** update autoComplete attribute in LoginView for email input ([33608e8](https://github.com/janovix/auth/commit/33608e8e2cdf59c8c9811c34eec7e4b81c9f8443))
+* **layout:** update settings link in AppSwitcher component ([b03303a](https://github.com/janovix/auth/commit/b03303a47dc9ab09ba2c9b8c7ab8f8447dd00a90))
+
 ## [2.2.1-rc.1](https://github.com/janovix/auth/compare/v2.2.0...v2.2.1-rc.1) (2026-02-26)
 
 

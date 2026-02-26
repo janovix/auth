@@ -12,7 +12,7 @@ import {
 	type SendOtpOptions,
 } from "@/lib/auth/authActions";
 import { useResendCooldown } from "@/hooks/useResendCooldown";
-import { getAuthRedirectUrl } from "@/lib/auth/redirectConfig";
+import { getAmlAppUrl } from "@/lib/auth/authCoreConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	AlertTriangle,
@@ -370,11 +370,11 @@ export const LoginView = ({
 		if (needsOnboarding) {
 			// Redirect to onboarding, preserving the original redirect destination
 			const onboardingUrl = new URL("/onboarding", window.location.origin);
-			const finalRedirect = getAuthRedirectUrl(redirectTo);
+			const finalRedirect = redirectTo || getAmlAppUrl();
 			onboardingUrl.searchParams.set("redirect_to", finalRedirect);
 			redirectUrlRef.current = onboardingUrl.toString();
 		} else {
-			redirectUrlRef.current = getAuthRedirectUrl(redirectTo);
+			redirectUrlRef.current = redirectTo || getAmlAppUrl();
 		}
 		setShowSuccessAnimation(true);
 	}, [userEmail, otpValue, signInWithOtp, redirectTo, setStateModifier, t]);
@@ -606,7 +606,7 @@ export const LoginView = ({
 															id="email"
 															type="email"
 															placeholder={t("login.email.placeholder")}
-															autoComplete="username webauthn"
+															autoComplete="email"
 															aria-describedby="email-description"
 															className="h-11 px-4"
 															required

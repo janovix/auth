@@ -8,15 +8,15 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // Set default environment variables for Storybook builds (must include https://)
 const defaultAuthCoreBaseUrl = "https://auth-svc.example.workers.dev";
 const defaultAuthAppUrl = "https://auth.example.workers.dev";
-const defaultAuthRedirectUrl = "https://app.example.workers.dev";
+const defaultAmlAppUrl = "https://aml.example.workers.dev";
 if (!process.env.NEXT_PUBLIC_AUTH_SERVICE_URL) {
 	process.env.NEXT_PUBLIC_AUTH_SERVICE_URL = defaultAuthCoreBaseUrl;
 }
 if (!process.env.NEXT_PUBLIC_AUTH_APP_URL) {
 	process.env.NEXT_PUBLIC_AUTH_APP_URL = defaultAuthAppUrl;
 }
-if (!process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL) {
-	process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL = defaultAuthRedirectUrl;
+if (!process.env.NEXT_PUBLIC_AML_APP_URL) {
+	process.env.NEXT_PUBLIC_AML_APP_URL = defaultAmlAppUrl;
 }
 
 const config: StorybookConfig = {
@@ -42,8 +42,8 @@ const config: StorybookConfig = {
 				"process.env.NEXT_PUBLIC_AUTH_APP_URL": JSON.stringify(
 					process.env.NEXT_PUBLIC_AUTH_APP_URL || defaultAuthAppUrl,
 				),
-				"process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL": JSON.stringify(
-					process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL || defaultAuthRedirectUrl,
+				"process.env.NEXT_PUBLIC_AML_APP_URL": JSON.stringify(
+					process.env.NEXT_PUBLIC_AML_APP_URL || defaultAmlAppUrl,
 				),
 			}),
 		);

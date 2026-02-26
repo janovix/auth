@@ -1,4 +1,33 @@
+## [2.2.1-rc.1](https://github.com/janovix/auth/compare/v2.2.0...v2.2.1-rc.1) (2026-02-26)
+
+
+### Bug Fixes
+
+* **auth:** update autoComplete attribute in LoginView for email input ([33608e8](https://github.com/janovix/auth/commit/33608e8e2cdf59c8c9811c34eec7e4b81c9f8443))
+* **layout:** update settings link in AppSwitcher component ([b03303a](https://github.com/janovix/auth/commit/b03303a47dc9ab09ba2c9b8c7ab8f8447dd00a90))
+
 # [2.2.0](https://github.com/janovix/auth/compare/v2.1.0...v2.2.0) (2026-02-26)
+
+
+### Features
+
+* **auth:** implement conditional UI passkey request cancellation in LoginView ([8476170](https://github.com/janovix/auth/commit/84761708f867a84e1796ede736437de6f8f70ddb))
+
+# [2.2.0-rc.3](https://github.com/janovix/auth/compare/v2.2.0-rc.2...v2.2.0-rc.3) (2026-02-26)
+
+
+### Bug Fixes
+
+* **layout:** update settings link in AppSwitcher component ([b03303a](https://github.com/janovix/auth/commit/b03303a47dc9ab09ba2c9b8c7ab8f8447dd00a90))
+
+# [2.2.0-rc.2](https://github.com/janovix/auth/compare/v2.2.0-rc.1...v2.2.0-rc.2) (2026-02-26)
+
+
+### Bug Fixes
+
+* **auth:** update autoComplete attribute in LoginView for email input ([33608e8](https://github.com/janovix/auth/commit/33608e8e2cdf59c8c9811c34eec7e4b81c9f8443))
+
+# [2.2.0-rc.1](https://github.com/janovix/auth/compare/v2.1.0...v2.2.0-rc.1) (2026-02-26)
 
 
 ### Features

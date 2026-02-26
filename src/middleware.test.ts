@@ -8,11 +8,6 @@ vi.mock("better-auth/cookies", () => ({
 	getSessionCookie: (request: NextRequest) => mockGetSessionCookie(request),
 }));
 
-// Mock redirect config
-vi.mock("@/lib/auth/redirectConfig", () => ({
-	getDefaultRedirectUrl: () => "https://app.example.workers.dev",
-}));
-
 // Mock global fetch
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
@@ -26,6 +21,7 @@ describe("middleware", () => {
 		process.env.NEXT_PUBLIC_AUTH_SERVICE_URL =
 			"https://auth-svc.example.workers.dev";
 		process.env.NEXT_PUBLIC_AUTH_APP_URL = "https://auth.example.workers.dev";
+		process.env.NEXT_PUBLIC_AML_APP_URL = "https://app.example.workers.dev";
 	});
 
 	afterEach(() => {
@@ -538,13 +534,9 @@ describe("middleware", () => {
 		});
 	});
 
-	describe("fallback auth service URL", () => {
-		it("should use fallback URL when env var is not set", async () => {
-			delete process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;
-			delete process.env.NEXT_PUBLIC_AUTH_APP_URL;
+	describe("auth service URL configuration", () => {
+		it("should use configured URL from environment variable", async () => {
 			mockGetSessionCookie.mockReturnValue("session-token");
-			// One fetch only: session has name + activeOrganizationId so
-			// onboarding-status is skipped.
 			mockFetch.mockResolvedValueOnce({
 				ok: true,
 				json: () =>
@@ -561,10 +553,10 @@ describe("middleware", () => {
 			await middleware(request);
 
 			expect(mockFetch).toHaveBeenCalledWith(
-				"https://auth-svc.janovix.workers.dev/api/auth/get-session",
+				"https://auth-svc.example.workers.dev/api/auth/get-session",
 				expect.objectContaining({
 					headers: expect.objectContaining({
-						Origin: "https://auth.janovix.workers.dev",
+						Origin: "https://auth.example.workers.dev",
 					}),
 				}),
 			);

@@ -35,7 +35,7 @@ describe("authCoreConfig", () => {
 			delete process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;
 			global.window = { location: {} } as unknown as Window & typeof globalThis;
 			expect(() => getAuthCoreBaseUrl()).toThrow(
-				"NEXT_PUBLIC_AUTH_SERVICE_URL environment variable is not set",
+				"Missing required environment variable: NEXT_PUBLIC_AUTH_SERVICE_URL",
 			);
 		});
 	});

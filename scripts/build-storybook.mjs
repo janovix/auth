@@ -67,9 +67,8 @@ const env = {
 		"https://auth-svc.example.workers.dev",
 	NEXT_PUBLIC_AUTH_APP_URL:
 		process.env.NEXT_PUBLIC_AUTH_APP_URL ?? "https://auth.example.workers.dev",
-	NEXT_PUBLIC_AUTH_REDIRECT_URL:
-		process.env.NEXT_PUBLIC_AUTH_REDIRECT_URL ??
-		"https://app.example.workers.dev",
+	NEXT_PUBLIC_AML_APP_URL:
+		process.env.NEXT_PUBLIC_AML_APP_URL ?? "https://aml.example.workers.dev",
 };
 
 const pnpmArgs = [

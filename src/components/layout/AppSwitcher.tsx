@@ -91,7 +91,7 @@ export function AppSwitcher({
 				id: "settings",
 				name: t("appSwitcher.settings"),
 				description: t("appSwitcher.settingsDescription"),
-				href: "#",
+				href: "/settings",
 				icon: Settings,
 				external: false,
 				current: true,

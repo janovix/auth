@@ -1,3 +1,10 @@
+# [2.2.0-rc.2](https://github.com/janovix/auth/compare/v2.2.0-rc.1...v2.2.0-rc.2) (2026-02-26)
+
+
+### Bug Fixes
+
+* **auth:** update autoComplete attribute in LoginView for email input ([33608e8](https://github.com/janovix/auth/commit/33608e8e2cdf59c8c9811c34eec7e4b81c9f8443))
+
 # [2.2.0-rc.1](https://github.com/janovix/auth/compare/v2.1.0...v2.2.0-rc.1) (2026-02-26)
 
 

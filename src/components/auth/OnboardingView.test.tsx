@@ -31,12 +31,7 @@ vi.mock("@/lib/auth/authActions", () => ({
 // Mock auth config
 vi.mock("@/lib/auth/authCoreConfig", () => ({
 	getAuthCoreBaseUrl: () => "https://auth-svc.example.workers.dev",
-}));
-
-// Mock redirect config
-vi.mock("@/lib/auth/redirectConfig", () => ({
-	getAuthRedirectUrl: (redirectTo?: string) =>
-		redirectTo || "https://app.example.workers.dev",
+	getAmlAppUrl: () => "https://app.example.workers.dev",
 }));
 
 // Mock billing

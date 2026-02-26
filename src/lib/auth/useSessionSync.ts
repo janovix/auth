@@ -20,7 +20,7 @@ import {
 	type SessionSyncMessage,
 } from "./sessionSync";
 import { clearSession } from "./sessionStore";
-import { getDefaultRedirectUrl } from "./redirectConfig";
+import { getAmlAppUrl } from "./authCoreConfig";
 
 /**
  * Minimum interval (ms) between revalidations triggered by visibilitychange.
@@ -82,7 +82,7 @@ export function useSessionSync(): void {
 							// Check for redirect_to query parameter (same as middleware logic)
 							const urlParams = new URLSearchParams(window.location.search);
 							const redirectTo = urlParams.get("redirect_to");
-							const redirectUrl = redirectTo || getDefaultRedirectUrl();
+							const redirectUrl = redirectTo || getAmlAppUrl();
 							window.location.href = redirectUrl;
 						}
 					}

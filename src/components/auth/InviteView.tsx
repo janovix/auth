@@ -26,7 +26,7 @@ import {
 } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
 import { signOut } from "@/lib/auth/authActions";
-import { getAuthRedirectUrl } from "@/lib/auth/redirectConfig";
+import { getAmlAppUrl } from "@/lib/auth/authCoreConfig";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 
 // Skeleton for loading state
@@ -305,7 +305,7 @@ export function InviteView() {
 
 		// Redirect after a short delay
 		setTimeout(() => {
-			const targetUrl = getAuthRedirectUrl(redirectTo);
+			const targetUrl = redirectTo || getAmlAppUrl();
 			window.location.href = targetUrl;
 		}, 1500);
 	};

@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
-import { getDefaultRedirectUrl } from "@/lib/auth/redirectConfig";
-
 const AUTH_SVC_TIMEOUT_MS = 8000;
 
 /**
@@ -48,18 +46,16 @@ function addAuthCookies(
 
 /**
  * Gets the auth service URL from environment variables.
- * For middleware (Edge Runtime), prefer internal URL that doesn't need DNS resolution.
- * This allows local development where hosts file entries aren't available in Edge Runtime.
  */
 function getAuthServiceUrl(): string {
-	const internalUrl = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL_INTERNAL;
-	if (internalUrl) {
-		return internalUrl;
+	const url = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;
+	if (!url || url.trim().length === 0) {
+		throw new Error(
+			"Missing required environment variable: NEXT_PUBLIC_AUTH_SERVICE_URL. " +
+				"Check your .env.local file or Cloudflare build environment variables.",
+		);
 	}
-	return (
-		process.env.NEXT_PUBLIC_AUTH_SERVICE_URL ||
-		"https://auth-svc.janovix.workers.dev"
-	);
+	return url.trim().replace(/\/$/, "");
 }
 
 /**
@@ -67,9 +63,28 @@ function getAuthServiceUrl(): string {
  * Used for Origin header in cross-origin requests to auth service.
  */
 function getAuthAppUrl(): string {
-	return (
-		process.env.NEXT_PUBLIC_AUTH_APP_URL || "https://auth.janovix.workers.dev"
-	);
+	const url = process.env.NEXT_PUBLIC_AUTH_APP_URL;
+	if (!url || url.trim().length === 0) {
+		throw new Error(
+			"Missing required environment variable: NEXT_PUBLIC_AUTH_APP_URL. " +
+				"Check your .env.local file or Cloudflare build environment variables.",
+		);
+	}
+	return url.trim().replace(/\/$/, "");
+}
+
+/**
+ * Gets the AML app URL used as the default redirect target after authentication.
+ */
+function getAmlAppUrl(): string {
+	const url = process.env.NEXT_PUBLIC_AML_APP_URL;
+	if (!url || url.trim().length === 0) {
+		throw new Error(
+			"Missing required environment variable: NEXT_PUBLIC_AML_APP_URL. " +
+				"Check your .env.local file or Cloudflare build environment variables.",
+		);
+	}
+	return url.trim().replace(/\/$/, "");
 }
 
 /**
@@ -449,7 +464,7 @@ export async function middleware(request: NextRequest) {
 			return addAuthCookies(redirectResponse, setCookieHeaders);
 		}
 		const redirectResponse = NextResponse.redirect(
-			new URL(getDefaultRedirectUrl(), request.url),
+			new URL(getAmlAppUrl(), request.url),
 		);
 		return addAuthCookies(redirectResponse, setCookieHeaders);
 	}
@@ -472,7 +487,7 @@ export async function middleware(request: NextRequest) {
 			return addAuthCookies(redirectResponse, setCookieHeaders);
 		}
 		const redirectResponse = NextResponse.redirect(
-			new URL(getDefaultRedirectUrl(), request.url),
+			new URL(getAmlAppUrl(), request.url),
 		);
 		return addAuthCookies(redirectResponse, setCookieHeaders);
 	}
@@ -499,7 +514,7 @@ export async function middleware(request: NextRequest) {
 			onboardingUrl.searchParams.set("redirect_to", request.url);
 		} else {
 			// For public routes, redirect to default after onboarding
-			onboardingUrl.searchParams.set("redirect_to", getDefaultRedirectUrl());
+			onboardingUrl.searchParams.set("redirect_to", getAmlAppUrl());
 		}
 
 		const redirectResponse = NextResponse.redirect(onboardingUrl);
@@ -510,12 +525,12 @@ export async function middleware(request: NextRequest) {
 	// If on onboarding page but doesn't need it, redirect away
 	if (isOnboardingRoute) {
 		const redirectTo = request.nextUrl.searchParams.get("redirect_to");
-		const targetUrl = redirectTo || getDefaultRedirectUrl();
+		const targetUrl = redirectTo || getAmlAppUrl();
 
 		// Ensure we're not redirecting back to onboarding
 		if (targetUrl.includes("/onboarding")) {
 			const redirectResponse = NextResponse.redirect(
-				new URL(getDefaultRedirectUrl(), request.url),
+				new URL(getAmlAppUrl(), request.url),
 			);
 			return addAuthCookies(redirectResponse, setCookieHeaders);
 		}
@@ -529,7 +544,7 @@ export async function middleware(request: NextRequest) {
 	// Redirect authenticated users away from public auth routes
 	if (isPublicAuthRoute) {
 		const redirectTo = request.nextUrl.searchParams.get("redirect_to");
-		const targetUrl = redirectTo || getDefaultRedirectUrl();
+		const targetUrl = redirectTo || getAmlAppUrl();
 		const redirectResponse = NextResponse.redirect(
 			new URL(targetUrl, request.url),
 		);

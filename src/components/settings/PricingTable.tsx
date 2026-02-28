@@ -121,7 +121,7 @@ const limitConfig: Record<string, { labelKey: string; icon: typeof Users }> = {
 		labelKey: "settings.billing.limits.clientsPerMonth",
 		icon: Users,
 	},
-	watchlistQueriesPerDay: {
+	watchlistQueriesPerMonth: {
 		labelKey: "settings.billing.limits.watchlistQueries",
 		icon: Users,
 	},

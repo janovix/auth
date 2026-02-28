@@ -547,6 +547,10 @@ const translations = {
 		"settings.team.cancel": "Cancel",
 		"settings.team.inviteSent": "Invitation sent successfully",
 		"settings.team.inviteError": "Failed to send invitation",
+		"settings.team.memberLimitReached":
+			"You have reached the member limit for your plan. Upgrade to invite more members.",
+		"settings.team.memberLimitBanner":
+			"Member limit reached ({used}/{limit}). Upgrade your plan to add more members.",
 		"settings.team.you": "You",
 		"settings.team.invitedBy": "Invited by",
 		"settings.team.makeAdmin": "Make admin",
@@ -663,7 +667,7 @@ const translations = {
 		"settings.billing.pro": "Pro",
 		"settings.billing.ultra": "Ultra",
 		"settings.billing.enterprisePlan": "Enterprise",
-		"settings.billing.watchlistQueriesPerDay": "Watchlist queries/day/user",
+		"settings.billing.watchlistQueriesPerMonth": "Watchlist queries/month",
 		"settings.billing.noAmlAccess": "No AML Access",
 		"settings.billing.watchlistOnly": "Watchlist Only",
 		"settings.billing.watchlistOnlyDesc":
@@ -1621,6 +1625,10 @@ const translations = {
 		"settings.team.cancel": "Cancelar",
 		"settings.team.inviteSent": "Invitación enviada exitosamente",
 		"settings.team.inviteError": "Error al enviar la invitación",
+		"settings.team.memberLimitReached":
+			"Has alcanzado el límite de miembros de tu plan. Actualiza tu plan para invitar más miembros.",
+		"settings.team.memberLimitBanner":
+			"Límite de miembros alcanzado ({used}/{limit}). Actualiza tu plan para agregar más miembros.",
 		"settings.team.you": "Tú",
 		"settings.team.invitedBy": "Invitado por",
 		"settings.team.makeAdmin": "Hacer administrador",
@@ -1738,8 +1746,7 @@ const translations = {
 		"settings.billing.pro": "Pro",
 		"settings.billing.ultra": "Ultra",
 		"settings.billing.enterprisePlan": "Enterprise",
-		"settings.billing.watchlistQueriesPerDay":
-			"Consultas watchlist/día/usuario",
+		"settings.billing.watchlistQueriesPerMonth": "Consultas watchlist/mes",
 		"settings.billing.noAmlAccess": "Sin acceso a AML",
 		"settings.billing.watchlistOnly": "Solo Watchlist",
 		"settings.billing.watchlistOnlyDesc":

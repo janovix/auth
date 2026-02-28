@@ -62,6 +62,10 @@ import { authClient } from "@/lib/auth/authClient";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import {
+	getSubscriptionStatus,
+	type UserSubscriptionStatus,
+} from "@/lib/billing";
+import {
 	SettingsCard,
 	SettingsSection,
 	SettingsPageHeader,
@@ -131,6 +135,8 @@ export function TeamSettingsView() {
 	const [membership, setMembership] = useState<OrganizationMembership | null>(
 		null,
 	);
+	const [subscriptionStatus, setSubscriptionStatus] =
+		useState<UserSubscriptionStatus | null>(null);
 
 	// Invite form state
 	const [inviteEmail, setInviteEmail] = useState("");
@@ -146,6 +152,10 @@ export function TeamSettingsView() {
 	const isAdmin = membership?.role === "admin";
 	const canManageTeam = isOwner || isAdmin;
 
+	const usersPerOrg = subscriptionStatus?.limits?.usersPerOrg ?? 0;
+	const atMemberLimit =
+		usersPerOrg > 0 && members.length + invitations.length >= usersPerOrg;
+
 	const loadData = useCallback(async () => {
 		if (!activeOrgId) {
 			setLoading(false);
@@ -155,12 +165,15 @@ export function TeamSettingsView() {
 		try {
 			setLoading(true);
 
-			const [orgResult, membershipData] = await Promise.all([
+			const [orgResult, membershipData, statusData] = await Promise.all([
 				authClient.organization.getFullOrganization({
 					query: { organizationId: activeOrgId },
 				}),
 				getOrganizationMembership(activeOrgId),
+				getSubscriptionStatus().catch(() => null),
 			]);
+
+			setSubscriptionStatus(statusData);
 
 			setMembership(membershipData);
 
@@ -215,6 +228,11 @@ export function TeamSettingsView() {
 
 	const handleInvite = async () => {
 		if (!activeOrgId || !canManageTeam || !inviteEmail) return;
+
+		if (atMemberLimit) {
+			toast.error(t("settings.team.memberLimitReached"));
+			return;
+		}
 
 		try {
 			setInviting(true);
@@ -366,7 +384,15 @@ export function TeamSettingsView() {
 					canManageTeam && (
 						<Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
 							<DialogTrigger asChild>
-								<Button className="gap-2">
+								<Button
+									className="gap-2"
+									disabled={atMemberLimit}
+									title={
+										atMemberLimit
+											? t("settings.team.memberLimitReached")
+											: undefined
+									}
+								>
 									<UserPlus className="h-4 w-4" />
 									{t("settings.team.inviteMember")}
 								</Button>
@@ -440,6 +466,17 @@ export function TeamSettingsView() {
 					)
 				}
 			/>
+
+			{/* Member limit banner */}
+			{canManageTeam && atMemberLimit && (
+				<div className="rounded-lg border border-warning/50 bg-warning/10 px-4 py-3 text-sm text-warning-foreground flex items-center justify-between gap-4">
+					<span>
+						{t("settings.team.memberLimitBanner")
+							.replace("{used}", String(members.length + invitations.length))
+							.replace("{limit}", String(usersPerOrg))}
+					</span>
+				</div>
+			)}
 
 			{/* Team Members */}
 			<SettingsSection

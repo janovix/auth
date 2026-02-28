@@ -43,7 +43,7 @@ export type LicenseLimits = {
 	alertsPerMonth: number;
 	operationsPerMonth: number;
 	clientsPerMonth: number;
-	watchlistQueriesPerDay: number;
+	watchlistQueriesPerMonth: number;
 };
 
 export type License = {

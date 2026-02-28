@@ -24,7 +24,7 @@ export interface PlanLimits {
 	alertsPerMonth: number; // Metered: overage billed via Stripe
 	operationsPerMonth: number; // Metered: overage billed via Stripe
 	clientsPerMonth: number; // Metered: overage billed via Stripe
-	watchlistQueriesPerDay: number; // Per user per day limit
+	watchlistQueriesPerMonth: number; // Per-organization monthly limit
 }
 
 export interface UserSubscriptionStatus {
@@ -71,6 +71,7 @@ export interface UsageResponse {
 		operations: number;
 		clients: number;
 		users: number;
+		watchlistQueriesPerMonth: number;
 	} | null;
 	period: {
 		start: string;
@@ -351,7 +352,10 @@ export async function cancelSubscription(): Promise<void> {
 
 /**
  * List available plans
- * Returns static plan info (pricing fetched from Stripe at runtime)
+ *
+ * @deprecated Use getPublicPlans() instead.
+ * This function now fetches live plan data from the database via the API
+ * instead of returning hardcoded values.
  */
 export async function getPlans(): Promise<
 	Array<{
@@ -360,68 +364,14 @@ export async function getPlans(): Promise<
 		limits: PlanLimits;
 	}>
 > {
-	// Static plan definitions - pricing managed in Stripe
-	// - All per-month metrics: Metered billing via Stripe Usage Records
-	// - usersPerOrg: Seat-based billing via Stripe subscription quantity
-	// - watchlistQueriesPerDay: Per user per day limit
-	return [
-		{
-			name: "watchlist",
-			priceId: "price_watchlist",
-			limits: {
-				maxOrganizations: 1,
-				usersPerOrg: 3,
-				reportsPerMonth: 0,
-				noticesPerMonth: 0,
-				alertsPerMonth: 0,
-				operationsPerMonth: 0,
-				clientsPerMonth: 0,
-				watchlistQueriesPerDay: 50,
-			},
-		},
-		{
-			name: "business",
-			priceId: "price_aml_business",
-			limits: {
-				maxOrganizations: 1,
-				usersPerOrg: 2,
-				reportsPerMonth: 1,
-				noticesPerMonth: 2,
-				alertsPerMonth: 20,
-				operationsPerMonth: 50,
-				clientsPerMonth: 25,
-				watchlistQueriesPerDay: 50,
-			},
-		},
-		{
-			name: "pro",
-			priceId: "price_aml_pro",
-			limits: {
-				maxOrganizations: 3,
-				usersPerOrg: 10,
-				reportsPerMonth: 15,
-				noticesPerMonth: 20,
-				alertsPerMonth: 100,
-				operationsPerMonth: 500,
-				clientsPerMonth: 250,
-				watchlistQueriesPerDay: 200,
-			},
-		},
-		{
-			name: "ultra",
-			priceId: "price_aml_ultra",
-			limits: {
-				maxOrganizations: 10,
-				usersPerOrg: 20,
-				reportsPerMonth: 100,
-				noticesPerMonth: 100,
-				alertsPerMonth: 500,
-				operationsPerMonth: 2000,
-				clientsPerMonth: 1000,
-				watchlistQueriesPerDay: 500,
-			},
-		},
-	];
+	const plans = await getPublicPlans();
+	return plans
+		.filter((p) => p.limits !== null)
+		.map((p) => ({
+			name: p.name,
+			priceId: "",
+			limits: p.limits as PlanLimits,
+		}));
 }
 
 // ============================================================================

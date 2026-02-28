@@ -348,6 +348,23 @@ const translations = {
 			"Start with the sidebar collapsed on all applications",
 		"settings.personal.changeAvatar": "Change avatar",
 
+		// Notifications section
+		"settings.notifications.title": "Notifications",
+		"settings.notifications.description":
+			"Configure how you receive notification alerts",
+		"settings.notifications.sound": "Notification sounds",
+		"settings.notifications.soundDesc":
+			"Play a sound when new notifications arrive",
+		"settings.notifications.soundType": "Sound",
+		"settings.notifications.soundTypeDesc":
+			"Choose which sound plays for new notifications",
+		"settings.notifications.preview": "Preview sound",
+		"settings.notifications.sound.chime": "Chime",
+		"settings.notifications.sound.bell": "Bell",
+		"settings.notifications.sound.pop": "Pop",
+		"settings.notifications.sound.ding": "Ding",
+		"settings.notifications.sound.none": "None",
+
 		// Passkeys section
 		"settings.personal.passkeys.title": "Passkeys",
 		"settings.personal.passkeys.description":
@@ -530,6 +547,10 @@ const translations = {
 		"settings.team.cancel": "Cancel",
 		"settings.team.inviteSent": "Invitation sent successfully",
 		"settings.team.inviteError": "Failed to send invitation",
+		"settings.team.memberLimitReached":
+			"You have reached the member limit for your plan. Upgrade to invite more members.",
+		"settings.team.memberLimitBanner":
+			"Member limit reached ({used}/{limit}). Upgrade your plan to add more members.",
 		"settings.team.you": "You",
 		"settings.team.invitedBy": "Invited by",
 		"settings.team.makeAdmin": "Make admin",
@@ -642,11 +663,11 @@ const translations = {
 		"settings.billing.selectPlanDesc":
 			"Choose the plan that best fits your needs",
 		"settings.billing.watchlist": "Watchlist",
-		"settings.billing.business": "Business",
-		"settings.billing.pro": "Pro",
-		"settings.billing.ultra": "Ultra",
+		"settings.billing.business": "AML Business",
+		"settings.billing.pro": "AML Pro",
+		"settings.billing.ultra": "AML Ultra",
 		"settings.billing.enterprisePlan": "Enterprise",
-		"settings.billing.watchlistQueriesPerDay": "Watchlist queries/day/user",
+		"settings.billing.watchlistQueriesPerMonth": "Watchlist queries/month",
 		"settings.billing.noAmlAccess": "No AML Access",
 		"settings.billing.watchlistOnly": "Watchlist Only",
 		"settings.billing.watchlistOnlyDesc":
@@ -912,19 +933,20 @@ const translations = {
 		"onboarding.plans.features.business.2": "2 users per org",
 		"onboarding.plans.features.business.3": "1 report/month",
 		"onboarding.plans.features.business.4": "2 notices/month",
-		"onboarding.plans.features.business.5": "50 queries/day/user",
+		"onboarding.plans.features.business.5":
+			"100 Watchlist queries/organization",
 		"onboarding.plans.features.business.6": "AML + Watchlist access",
 		"onboarding.plans.features.pro.1": "3 organizations",
 		"onboarding.plans.features.pro.2": "10 users per org",
 		"onboarding.plans.features.pro.3": "15 reports/month",
 		"onboarding.plans.features.pro.4": "20 notices/month",
-		"onboarding.plans.features.pro.5": "200 queries/day/user",
+		"onboarding.plans.features.pro.5": "600 Watchlist queries/organization",
 		"onboarding.plans.features.pro.6": "Priority support",
 		"onboarding.plans.features.ultra.1": "10 organizations",
 		"onboarding.plans.features.ultra.2": "20 users per org",
 		"onboarding.plans.features.ultra.3": "100 reports/month",
 		"onboarding.plans.features.ultra.4": "100 notices/month",
-		"onboarding.plans.features.ultra.5": "500 queries/day/user",
+		"onboarding.plans.features.ultra.5": "1000 Watchlist queries/organization",
 		"onboarding.plans.features.ultra.6": "Dedicated support",
 		"onboarding.org.title": "Create your organization",
 		"onboarding.org.description":
@@ -990,27 +1012,6 @@ const translations = {
 		"onboarding.invite.error.load": "Failed to load invitation details.",
 		"onboarding.invite.error.accept": "Failed to accept invitation",
 		"onboarding.invite.error.decline": "Failed to decline invitation",
-		"onboarding.license.title": "Activate License Key",
-		"onboarding.license.description":
-			"Enter your enterprise license key to activate your subscription.",
-		"onboarding.license.invalid": "Invalid license key",
-		"onboarding.license.activateFailed": "Failed to activate license",
-		"onboarding.license.label": "License Key",
-		"onboarding.license.validate": "Validate",
-		"onboarding.license.contactAdmin":
-			"Contact your administrator if you need a license key.",
-		"onboarding.license.valid": "License Valid",
-		"onboarding.license.organization": "Organization",
-		"onboarding.license.plan": "Plan",
-		"onboarding.license.validUntil": "Valid until",
-		"onboarding.license.users": "Users",
-		"onboarding.license.notices": "Notices included",
-		"onboarding.license.useDifferent": "Use different key",
-		"onboarding.license.cancel": "Cancel",
-		"onboarding.license.activating": "Activating...",
-		"onboarding.license.activate": "Activate License",
-		"onboarding.license.noExpiration": "No expiration",
-		"onboarding.license.unlimited": "Unlimited",
 		// Breadcrumb error labels
 		"breadcrumb.notFound": "Not Found",
 		"breadcrumb.error": "Error",
@@ -1396,6 +1397,23 @@ const translations = {
 			"Iniciar con la barra lateral colapsada en todas las aplicaciones",
 		"settings.personal.changeAvatar": "Cambiar avatar",
 
+		// Notifications section
+		"settings.notifications.title": "Notificaciones",
+		"settings.notifications.description":
+			"Configura cómo recibes alertas de notificaciones",
+		"settings.notifications.sound": "Sonidos de notificación",
+		"settings.notifications.soundDesc":
+			"Reproducir un sonido cuando lleguen nuevas notificaciones",
+		"settings.notifications.soundType": "Sonido",
+		"settings.notifications.soundTypeDesc":
+			"Elige qué sonido suena para las nuevas notificaciones",
+		"settings.notifications.preview": "Previsualizar sonido",
+		"settings.notifications.sound.chime": "Campana",
+		"settings.notifications.sound.bell": "Timbre",
+		"settings.notifications.sound.pop": "Pop",
+		"settings.notifications.sound.ding": "Ding",
+		"settings.notifications.sound.none": "Sin sonido",
+
 		// Passkeys section
 		"settings.personal.passkeys.title": "Llaves de acceso",
 		"settings.personal.passkeys.description":
@@ -1587,6 +1605,10 @@ const translations = {
 		"settings.team.cancel": "Cancelar",
 		"settings.team.inviteSent": "Invitación enviada exitosamente",
 		"settings.team.inviteError": "Error al enviar la invitación",
+		"settings.team.memberLimitReached":
+			"Has alcanzado el límite de miembros de tu plan. Actualiza tu plan para invitar más miembros.",
+		"settings.team.memberLimitBanner":
+			"Límite de miembros alcanzado ({used}/{limit}). Actualiza tu plan para agregar más miembros.",
 		"settings.team.you": "Tú",
 		"settings.team.invitedBy": "Invitado por",
 		"settings.team.makeAdmin": "Hacer administrador",
@@ -1700,12 +1722,11 @@ const translations = {
 		"settings.billing.selectPlanDesc":
 			"Elige el plan que mejor se adapte a tus necesidades",
 		"settings.billing.watchlist": "Watchlist",
-		"settings.billing.business": "Business",
-		"settings.billing.pro": "Pro",
-		"settings.billing.ultra": "Ultra",
+		"settings.billing.business": "AML Business",
+		"settings.billing.pro": "AML Pro",
+		"settings.billing.ultra": "AML Ultra",
 		"settings.billing.enterprisePlan": "Enterprise",
-		"settings.billing.watchlistQueriesPerDay":
-			"Consultas watchlist/día/usuario",
+		"settings.billing.watchlistQueriesPerMonth": "Consultas watchlist/mes",
 		"settings.billing.noAmlAccess": "Sin acceso a AML",
 		"settings.billing.watchlistOnly": "Solo Watchlist",
 		"settings.billing.watchlistOnlyDesc":
@@ -1969,25 +1990,27 @@ const translations = {
 		"onboarding.plans.features.watchlist.1": "1 organización",
 		"onboarding.plans.features.watchlist.2": "3 usuarios por organización",
 		"onboarding.plans.features.watchlist.3": "Solo consultas de watchlist",
-		"onboarding.plans.features.watchlist.4": "50 consultas/día/usuario",
+		"onboarding.plans.features.watchlist.4": "10 consultas/mes/organizacion",
 		"onboarding.plans.features.watchlist.5": "Sin acceso AML",
 		"onboarding.plans.features.business.1": "1 organización",
 		"onboarding.plans.features.business.2": "2 usuarios por organización",
 		"onboarding.plans.features.business.3": "1 reporte/mes",
 		"onboarding.plans.features.business.4": "2 avisos/mes",
-		"onboarding.plans.features.business.5": "50 consultas/día/usuario",
+		"onboarding.plans.features.business.5":
+			"100 Consultas watchlist/organizacion",
 		"onboarding.plans.features.business.6": "Acceso AML + Watchlist",
 		"onboarding.plans.features.pro.1": "3 organizaciones",
 		"onboarding.plans.features.pro.2": "10 usuarios por organización",
 		"onboarding.plans.features.pro.3": "15 reportes/mes",
 		"onboarding.plans.features.pro.4": "20 avisos/mes",
-		"onboarding.plans.features.pro.5": "200 consultas/día/usuario",
+		"onboarding.plans.features.pro.5": "600 Consultas watchlist/organizacion",
 		"onboarding.plans.features.pro.6": "Soporte prioritario",
 		"onboarding.plans.features.ultra.1": "10 organizaciones",
 		"onboarding.plans.features.ultra.2": "20 usuarios por organización",
 		"onboarding.plans.features.ultra.3": "100 reportes/mes",
 		"onboarding.plans.features.ultra.4": "100 avisos/mes",
-		"onboarding.plans.features.ultra.5": "500 consultas/día/usuario",
+		"onboarding.plans.features.ultra.5":
+			"1000 Consultas watchlist/organizacion",
 		"onboarding.plans.features.ultra.6": "Soporte dedicado",
 		"onboarding.org.title": "Crea tu organización",
 		"onboarding.org.description":
@@ -2056,27 +2079,6 @@ const translations = {
 			"No se pudieron cargar los detalles de la invitación.",
 		"onboarding.invite.error.accept": "No se pudo aceptar la invitación",
 		"onboarding.invite.error.decline": "No se pudo rechazar la invitación",
-		"onboarding.license.title": "Activar clave de licencia",
-		"onboarding.license.description":
-			"Ingresa tu clave de licencia empresarial para activar tu suscripción.",
-		"onboarding.license.invalid": "Clave de licencia inválida",
-		"onboarding.license.activateFailed": "No se pudo activar la licencia",
-		"onboarding.license.label": "Clave de licencia",
-		"onboarding.license.validate": "Validar",
-		"onboarding.license.contactAdmin":
-			"Contacta a tu administrador si necesitas una clave de licencia.",
-		"onboarding.license.valid": "Licencia válida",
-		"onboarding.license.organization": "Organización",
-		"onboarding.license.plan": "Plan",
-		"onboarding.license.validUntil": "Válida hasta",
-		"onboarding.license.users": "Usuarios",
-		"onboarding.license.notices": "Avisos incluidos",
-		"onboarding.license.useDifferent": "Usar otra clave",
-		"onboarding.license.cancel": "Cancelar",
-		"onboarding.license.activating": "Activando...",
-		"onboarding.license.activate": "Activar licencia",
-		"onboarding.license.noExpiration": "Sin expiración",
-		"onboarding.license.unlimited": "Ilimitado",
 		// Breadcrumb error labels
 		"breadcrumb.notFound": "No encontrado",
 		"breadcrumb.error": "Error",

@@ -19,6 +19,10 @@ import {
 	Plus,
 	ShieldCheck,
 	ShieldOff,
+	Bell,
+	Play,
+	Volume2,
+	VolumeX,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button, Label, Badge } from "@/components/ui";
@@ -64,6 +68,7 @@ import {
 	type LanguageCode,
 	type DateFormat,
 	type ClockFormat,
+	type NotificationSoundType,
 } from "@/lib/settings";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { authClient } from "@/lib/auth/authClient";
@@ -102,6 +107,64 @@ const CLOCK_FORMATS: { value: ClockFormat; label: string }[] = [
 	{ value: "24h", label: "24-hour" },
 ];
 
+const NOTIFICATION_SOUNDS: {
+	value: NotificationSoundType;
+	labelKey: string;
+}[] = [
+	{ value: "chime", labelKey: "settings.notifications.sound.chime" },
+	{ value: "bell", labelKey: "settings.notifications.sound.bell" },
+	{ value: "pop", labelKey: "settings.notifications.sound.pop" },
+	{ value: "ding", labelKey: "settings.notifications.sound.ding" },
+	{ value: "none", labelKey: "settings.notifications.sound.none" },
+];
+
+const SOUND_CONFIG: Record<
+	Exclude<NotificationSoundType, "none">,
+	{ frequencies: number[]; durations: number[]; gain: number }
+> = {
+	chime: { frequencies: [880, 1100], durations: [0.1, 0.2], gain: 0.3 },
+	bell: {
+		frequencies: [523, 659, 784],
+		durations: [0.15, 0.15, 0.2],
+		gain: 0.25,
+	},
+	pop: { frequencies: [400, 600], durations: [0.05, 0.08], gain: 0.4 },
+	ding: { frequencies: [1200], durations: [0.15], gain: 0.2 },
+};
+
+function playNotificationSound(soundType: NotificationSoundType) {
+	if (soundType === "none") return;
+	const config = SOUND_CONFIG[soundType];
+	if (!config) return;
+	try {
+		const AudioCtx =
+			window.AudioContext ||
+			(window as unknown as { webkitAudioContext: typeof AudioContext })
+				.webkitAudioContext;
+		if (!AudioCtx) return;
+		const audioCtx = new AudioCtx();
+		let time = audioCtx.currentTime;
+		config.frequencies.forEach((freq, i) => {
+			const osc = audioCtx.createOscillator();
+			const gainNode = audioCtx.createGain();
+			osc.connect(gainNode);
+			gainNode.connect(audioCtx.destination);
+			osc.frequency.value = freq;
+			osc.type = "sine";
+			gainNode.gain.setValueAtTime(config.gain, time);
+			gainNode.gain.exponentialRampToValueAtTime(
+				0.001,
+				time + config.durations[i],
+			);
+			osc.start(time);
+			osc.stop(time + config.durations[i]);
+			time += config.durations[i];
+		});
+	} catch {
+		// Ignore errors if Web Audio API is unavailable
+	}
+}
+
 export function PersonalSettingsView() {
 	const { t, language, setLanguage } = useLanguage();
 	const { theme, setTheme } = useTheme();
@@ -137,6 +200,9 @@ export function PersonalSettingsView() {
 		user?.image || null,
 	);
 	const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+	const [notificationSound, setNotificationSound] = useState<boolean>(true);
+	const [notificationSoundType, setNotificationSoundType] =
+		useState<NotificationSoundType>("chime");
 
 	// Passkey state
 	const MAX_PASSKEYS = 5;
@@ -201,6 +267,11 @@ export function PersonalSettingsView() {
 					// Prefer user.image (Better Auth) over settings.avatarUrl
 					setAvatarUrl(user?.image || data.avatarUrl || null);
 					setSidebarCollapsed(data.metadata?.sidebarCollapsed ?? false);
+					setNotificationSound(data.metadata?.notificationSound ?? true);
+					setNotificationSoundType(
+						(data.metadata?.notificationSoundType as NotificationSoundType) ??
+							"chime",
+					);
 				}
 
 				// Load org settings if we have an active org
@@ -634,6 +705,46 @@ export function PersonalSettingsView() {
 		[showSuccess, t],
 	);
 
+	const handleNotificationSoundChange = useCallback(
+		async (enabled: boolean) => {
+			setNotificationSound(enabled);
+			try {
+				setSaving(true);
+				await updateUIPreferences({ notificationSound: enabled });
+				showSuccess(t("settings.saved"));
+			} catch (err) {
+				toast.error(
+					err instanceof Error
+						? err.message
+						: "Failed to save notification setting",
+				);
+			} finally {
+				setSaving(false);
+			}
+		},
+		[showSuccess, t],
+	);
+
+	const handleNotificationSoundTypeChange = useCallback(
+		async (soundType: NotificationSoundType) => {
+			setNotificationSoundType(soundType);
+			try {
+				setSaving(true);
+				await updateUIPreferences({ notificationSoundType: soundType });
+				showSuccess(t("settings.saved"));
+			} catch (err) {
+				toast.error(
+					err instanceof Error
+						? err.message
+						: "Failed to save notification sound",
+				);
+			} finally {
+				setSaving(false);
+			}
+		},
+		[showSuccess, t],
+	);
+
 	const getEffectiveValue = <T,>(
 		key: keyof typeof useOrgDefaults,
 		userValue: T | null,
@@ -1014,6 +1125,93 @@ export function PersonalSettingsView() {
 						</div>
 					</div>
 				</SettingsCard>
+			</SettingsSection>
+
+			{/* Notifications Section */}
+			<SettingsSection
+				title={t("settings.notifications.title")}
+				description={t("settings.notifications.description")}
+			>
+				{/* Notification sound toggle */}
+				<SettingsCard className="mb-4">
+					<div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+						<div className="flex items-start gap-3">
+							{notificationSound ? (
+								<Volume2 className="h-5 w-5 text-muted-foreground mt-0.5" />
+							) : (
+								<VolumeX className="h-5 w-5 text-muted-foreground mt-0.5" />
+							)}
+							<div>
+								<h4 className="text-sm font-medium text-foreground">
+									{t("settings.notifications.sound")}
+								</h4>
+								<p className="text-sm text-muted-foreground">
+									{t("settings.notifications.soundDesc")}
+								</p>
+							</div>
+						</div>
+						<div className="flex items-center gap-2">
+							<Switch
+								id="notificationSound"
+								checked={notificationSound}
+								onCheckedChange={handleNotificationSoundChange}
+								disabled={saving}
+							/>
+						</div>
+					</div>
+				</SettingsCard>
+
+				{/* Sound type selector — visible only when sound is enabled */}
+				{notificationSound && (
+					<SettingsCard>
+						<div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+							<div className="flex items-start gap-3">
+								<Bell className="h-5 w-5 text-muted-foreground mt-0.5" />
+								<div>
+									<h4 className="text-sm font-medium text-foreground">
+										{t("settings.notifications.soundType")}
+									</h4>
+									<p className="text-sm text-muted-foreground">
+										{t("settings.notifications.soundTypeDesc")}
+									</p>
+								</div>
+							</div>
+							<div className="flex items-center gap-2">
+								<Select
+									value={notificationSoundType}
+									onValueChange={(v) =>
+										handleNotificationSoundTypeChange(
+											v as NotificationSoundType,
+										)
+									}
+									disabled={saving}
+								>
+									<SelectTrigger className="w-[180px]">
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										{NOTIFICATION_SOUNDS.map((s) => (
+											<SelectItem key={s.value} value={s.value}>
+												{t(s.labelKey)}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								<Button
+									type="button"
+									variant="outline"
+									size="icon"
+									className="shrink-0"
+									disabled={notificationSoundType === "none" || saving}
+									onClick={() => playNotificationSound(notificationSoundType)}
+									title={t("settings.notifications.preview")}
+								>
+									<Play className="h-4 w-4" />
+								</Button>
+							</div>
+						</div>
+					</SettingsCard>
+				)}
 			</SettingsSection>
 
 			{/* Interface Section */}

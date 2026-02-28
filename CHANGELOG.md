@@ -1,3 +1,10 @@
+# [2.3.0-rc.2](https://github.com/janovix/auth/compare/v2.3.0-rc.1...v2.3.0-rc.2) (2026-02-28)
+
+
+### Features
+
+* **billing:** update watchlist query limits and add subscription status handling ([1be8f7d](https://github.com/janovix/auth/commit/1be8f7d0b572b0a4f7d3c78169cb2f18f4b999ec))
+
 # [2.3.0-rc.1](https://github.com/janovix/auth/compare/v2.2.1-rc.1...v2.3.0-rc.1) (2026-02-26)
 
 

@@ -1,3 +1,10 @@
+# [2.3.0-rc.3](https://github.com/janovix/auth/compare/v2.3.0-rc.2...v2.3.0-rc.3) (2026-02-28)
+
+
+### Features
+
+* add Radix UI components and new Tax & Compliance features ([6a9979c](https://github.com/janovix/auth/commit/6a9979ca7709f59ab7de4ab48ecfb761aa1bfd22))
+
 # [2.3.0-rc.2](https://github.com/janovix/auth/compare/v2.3.0-rc.1...v2.3.0-rc.2) (2026-02-28)
 
 

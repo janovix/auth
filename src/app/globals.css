@@ -311,3 +311,209 @@ main {
 .mobile-sidebar-open [data-slot="dropdown-menu-separator"] {
 	@apply my-2 bg-white/10;
 }
+
+/* Tax & Compliance banner + modal animations */
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
+}
+
+@keyframes float {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-6px);
+	}
+}
+
+@keyframes pulse-glow {
+	0%,
+	100% {
+		opacity: 0.4;
+	}
+	50% {
+		opacity: 0.8;
+	}
+}
+
+@keyframes slide-in {
+	0% {
+		opacity: 0;
+		transform: translateY(16px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes scale-in {
+	0% {
+		opacity: 0;
+		transform: scale(0.95);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes expand-down {
+	0% {
+		opacity: 0;
+		max-height: 0;
+	}
+	100% {
+		opacity: 1;
+		max-height: 500px;
+	}
+}
+
+@keyframes border-glow {
+	0%,
+	100% {
+		background: linear-gradient(
+			135deg,
+			rgba(147, 130, 220, 0.15) 0%,
+			rgba(30, 40, 120, 0.05) 30%,
+			rgba(147, 130, 220, 0.12) 60%,
+			rgba(30, 40, 120, 0.05) 100%
+		);
+	}
+	25% {
+		background: linear-gradient(
+			135deg,
+			rgba(30, 40, 120, 0.05) 0%,
+			rgba(147, 130, 220, 0.15) 30%,
+			rgba(30, 40, 120, 0.05) 60%,
+			rgba(147, 130, 220, 0.12) 100%
+		);
+	}
+	50% {
+		background: linear-gradient(
+			135deg,
+			rgba(147, 130, 220, 0.12) 0%,
+			rgba(30, 40, 120, 0.05) 30%,
+			rgba(147, 130, 220, 0.15) 60%,
+			rgba(30, 40, 120, 0.05) 100%
+		);
+	}
+	75% {
+		background: linear-gradient(
+			135deg,
+			rgba(30, 40, 120, 0.05) 0%,
+			rgba(147, 130, 220, 0.12) 30%,
+			rgba(30, 40, 120, 0.05) 60%,
+			rgba(147, 130, 220, 0.15) 100%
+		);
+	}
+}
+
+@keyframes border-glow-dark {
+	0%,
+	100% {
+		background: linear-gradient(
+			135deg,
+			rgba(147, 130, 220, 0.4) 0%,
+			rgba(80, 70, 160, 0.1) 30%,
+			rgba(147, 130, 220, 0.35) 60%,
+			rgba(80, 70, 160, 0.1) 100%
+		);
+	}
+	25% {
+		background: linear-gradient(
+			135deg,
+			rgba(80, 70, 160, 0.1) 0%,
+			rgba(147, 130, 220, 0.4) 30%,
+			rgba(80, 70, 160, 0.1) 60%,
+			rgba(147, 130, 220, 0.35) 100%
+		);
+	}
+	50% {
+		background: linear-gradient(
+			135deg,
+			rgba(147, 130, 220, 0.35) 0%,
+			rgba(80, 70, 160, 0.1) 30%,
+			rgba(147, 130, 220, 0.4) 60%,
+			rgba(80, 70, 160, 0.1) 100%
+		);
+	}
+	75% {
+		background: linear-gradient(
+			135deg,
+			rgba(80, 70, 160, 0.1) 0%,
+			rgba(147, 130, 220, 0.35) 30%,
+			rgba(80, 70, 160, 0.1) 60%,
+			rgba(147, 130, 220, 0.4) 100%
+		);
+	}
+}
+
+.animate-shimmer {
+	animation: shimmer 3s ease-in-out infinite;
+}
+
+.animate-float {
+	animation: float 4s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+	animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-slide-in {
+	animation: slide-in 0.5s ease-out both;
+}
+
+.animate-slide-in-d1 {
+	animation: slide-in 0.5s ease-out 0.1s both;
+}
+
+.animate-slide-in-d2 {
+	animation: slide-in 0.5s ease-out 0.2s both;
+}
+
+.animate-slide-in-d3 {
+	animation: slide-in 0.5s ease-out 0.3s both;
+}
+
+.animate-slide-in-d4 {
+	animation: slide-in 0.5s ease-out 0.4s both;
+}
+
+.animate-scale-in {
+	animation: scale-in 0.4s ease-out both;
+}
+
+.animate-expand-down {
+	animation: expand-down 0.3s ease-out both;
+	overflow: hidden;
+}
+
+.animate-border-glow {
+	animation: border-glow 4s ease-in-out infinite;
+}
+
+:is(.dark) .animate-border-glow {
+	animation: border-glow-dark 4s ease-in-out infinite;
+}
+
+.hover-lift {
+	transition:
+		transform 0.2s ease,
+		box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+	transform: translateY(-1px);
+}
+
+.press-scale:active {
+	transform: scale(0.98);
+}

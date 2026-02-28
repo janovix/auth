@@ -1,27 +1,12 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-	Check,
-	Zap,
-	Crown,
-	Building2,
-	ExternalLink,
-	Lock,
-	Sparkles,
-	Mail,
-	Key,
-	LogOut,
-	Loader2,
-	Rocket,
-	Search,
-	Pencil,
-} from "lucide-react";
+import { Sparkles, Mail, LogOut, Loader2, Pencil } from "lucide-react";
 
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	Accordion,
@@ -43,7 +28,7 @@ import { signOut } from "@/lib/auth/authActions";
 import {
 	getPublicPlans,
 	getSubscriptionPrice,
-	formatPriceMXN,
+	activateLicenseKey,
 	type PublicPlanInfo,
 } from "@/lib/billing";
 import {
@@ -51,27 +36,22 @@ import {
 	SettingsPageHeader,
 	SettingsSection,
 } from "@/components/settings";
-import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { PlanSelectionGrid } from "@/components/PlanSelectionGrid";
+import { EnterpriseCard } from "@/components/EnterpriseCard";
+import { WatchlistCard } from "@/components/WatchlistCard";
 
-// Icons for each plan
-const planIcons: Record<string, typeof Zap> = {
-	watchlist: Search,
-	business: Zap,
-	pro: Crown,
-	ultra: Rocket,
-};
-
-interface SubscriptionSelectionStepProps {
-	onOpenLicenseModal: () => void;
-}
-
-export function SubscriptionSelectionStep({
-	onOpenLicenseModal,
-}: SubscriptionSelectionStepProps) {
+export function SubscriptionSelectionStep() {
 	const { language, setLanguage, t } = useLanguage();
+	const { toast } = useToast();
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const { state, setSelectedPlan, startSubscriptionFlow } = useOnboarding();
+	const {
+		state,
+		setSelectedPlan,
+		startSubscriptionFlow,
+		refreshOnboardingStatus,
+	} = useOnboarding();
 	const [isRedirecting, setIsRedirecting] = useState(false);
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 	const [plans, setPlans] = useState<PublicPlanInfo[]>([]);
@@ -149,41 +129,25 @@ export function SubscriptionSelectionStep({
 		router.push(editUrl.toString());
 	};
 
+	const handleRedeemLicense = async (key: string) => {
+		try {
+			await activateLicenseKey(key);
+			await refreshOnboardingStatus();
+		} catch (error) {
+			Sentry.captureException(error, {
+				tags: { context: "license-activation-error" },
+			});
+			toast({
+				title: t("settings.billing.error"),
+				description: error instanceof Error ? error.message : undefined,
+				variant: "destructive",
+			});
+			throw error;
+		}
+	};
+
 	const firstName =
 		state.userProfile.firstName || t("onboarding.plans.welcomeFallback");
-	const planFeatures: Record<string, string[]> = {
-		watchlist: [
-			t("onboarding.plans.features.watchlist.1"),
-			t("onboarding.plans.features.watchlist.2"),
-			t("onboarding.plans.features.watchlist.3"),
-			t("onboarding.plans.features.watchlist.4"),
-			t("onboarding.plans.features.watchlist.5"),
-		],
-		business: [
-			t("onboarding.plans.features.business.1"),
-			t("onboarding.plans.features.business.2"),
-			t("onboarding.plans.features.business.3"),
-			t("onboarding.plans.features.business.4"),
-			t("onboarding.plans.features.business.5"),
-			t("onboarding.plans.features.business.6"),
-		],
-		pro: [
-			t("onboarding.plans.features.pro.1"),
-			t("onboarding.plans.features.pro.2"),
-			t("onboarding.plans.features.pro.3"),
-			t("onboarding.plans.features.pro.4"),
-			t("onboarding.plans.features.pro.5"),
-			t("onboarding.plans.features.pro.6"),
-		],
-		ultra: [
-			t("onboarding.plans.features.ultra.1"),
-			t("onboarding.plans.features.ultra.2"),
-			t("onboarding.plans.features.ultra.3"),
-			t("onboarding.plans.features.ultra.4"),
-			t("onboarding.plans.features.ultra.5"),
-			t("onboarding.plans.features.ultra.6"),
-		],
-	};
 
 	// Determine which plan is recommended (middle tier - pro)
 	const recommendedPlan = "pro";
@@ -304,218 +268,30 @@ export function SubscriptionSelectionStep({
 					</div>
 				) : (
 					<div className="space-y-6">
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-							{plans.map((plan) => {
-								if (plan.name === "watchlist") {
-									return null;
-								}
-								const Icon = planIcons[plan.name] ?? Zap;
-								const features = planFeatures[plan.name] ?? [];
-								const subscriptionPrice = getSubscriptionPrice(plan);
-								const isRecommended = plan.name === recommendedPlan;
+						<PlanSelectionGrid
+							plans={plans}
+							onSelectPlan={handleSelectPlan}
+							isActionLoading={isRedirecting}
+							recommendedPlan={recommendedPlan}
+						/>
 
-								return (
-									<Card
-										key={plan.id}
-										className={cn(
-											"relative border-2 transition-all flex flex-col",
-											isRecommended
-												? "border-primary shadow-lg shadow-primary/10"
-												: "border-border hover:border-muted-foreground/30",
-										)}
-									>
-										{isRecommended && (
-											<Badge className="absolute -top-3 right-4 bg-primary text-primary-foreground">
-												{t("onboarding.plans.recommended")}
-											</Badge>
-										)}
-										<CardContent className="p-6 flex flex-col h-full">
-											<div className="text-center mb-6">
-												<div
-													className={cn(
-														"h-12 w-12 rounded-xl flex items-center justify-center mx-auto mb-3",
-														isRecommended ? "bg-primary/10" : "bg-muted",
-													)}
-												>
-													<Icon
-														className={cn(
-															"h-6 w-6",
-															isRecommended
-																? "text-primary"
-																: "text-muted-foreground",
-														)}
-													/>
-												</div>
-												<h3 className="text-xl font-semibold text-foreground">
-													{plan.displayName}
-												</h3>
-												<p className="text-xs text-muted-foreground mt-1">
-													{t(`settings.billing.plans.${plan.name}.description`)}
-												</p>
-												<div className="mt-3">
-													{subscriptionPrice ? (
-														<>
-															<span className="text-3xl lg:text-4xl font-bold text-foreground">
-																{formatPriceMXN(subscriptionPrice.amount)}
-															</span>
-															<span className="text-muted-foreground">
-																/
-																{t(
-																	`settings.billing.interval.${subscriptionPrice.interval || "month"}`,
-																)}
-															</span>
-														</>
-													) : (
-														<span className="text-2xl font-bold text-foreground">
-															{t("onboarding.plans.watchlist.contact")}
-														</span>
-													)}
-												</div>
-												{subscriptionPrice && (
-													<p className="text-xs text-muted-foreground mt-1">
-														{t("onboarding.plans.meteredNote")}
-													</p>
-												)}
-											</div>
+						<EnterpriseCard onRedeem={handleRedeemLicense} />
 
-											<div className="space-y-3 mb-6 grow">
-												{features.slice(0, 6).map((feature, index) => (
-													<div
-														key={index}
-														className="flex items-center gap-2 text-sm"
-													>
-														<Check className="h-4 w-4 text-success shrink-0" />
-														<span className="text-muted-foreground">
-															{feature}
-														</span>
-													</div>
-												))}
-												{features.length > 6 && (
-													<p className="text-xs text-primary pl-6 font-medium">
-														+{features.length - 6} more features
-													</p>
-												)}
-											</div>
-
-											<Button
-												className="w-full mt-auto"
-												size="lg"
-												variant={isRecommended ? "default" : "outline"}
-												onClick={() => handleSelectPlan(plan)}
-												disabled={isRedirecting || !subscriptionPrice}
-											>
-												{isRedirecting ? (
-													<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-												) : (
-													<Lock className="h-4 w-4 mr-2" />
-												)}
-												{t("onboarding.plans.subscribe").replace(
-													"{plan}",
-													plan.displayName,
-												)}
-											</Button>
-										</CardContent>
-									</Card>
-								);
-							})}
-						</div>
-
-						<Card className="border-border bg-card">
-							<CardContent className="p-6">
-								<div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
-									<div className="flex items-center gap-4">
-										<div className="h-12 w-12 rounded-xl bg-secondary flex items-center justify-center">
-											<Building2 className="h-6 w-6 text-foreground" />
-										</div>
-										<div>
-											<h3 className="text-lg font-semibold text-foreground">
-												{t("onboarding.plans.enterprise.title")}
-											</h3>
-											<p className="text-sm text-muted-foreground">
-												{t("onboarding.plans.enterprise.description")}
-											</p>
-										</div>
-									</div>
-									<div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
-										<Button
-											variant="outline"
-											className="gap-2 bg-transparent w-full lg:w-auto"
-											asChild
-										>
-											<a
-												href="https://www.janovix.com/contact"
-												target="_blank"
-												rel="noopener noreferrer"
-											>
-												{t("onboarding.plans.enterprise.contact")}
-												<ExternalLink className="h-4 w-4" />
-											</a>
-										</Button>
-										<Button
-											variant="default"
-											className="gap-2 w-full lg:w-auto"
-											onClick={onOpenLicenseModal}
-										>
-											<Key className="h-4 w-4" />
-											{t("onboarding.plans.enterprise.license")}
-										</Button>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-
-						{/* Watchlist Only Plan - At the bottom */}
 						{(() => {
-							const watchlistPlan = plans.find(
-								(plan) => plan.name === "watchlist",
-							);
+							const watchlistPlan = plans.find((p) => p.name === "watchlist");
 							const subscriptionPrice = watchlistPlan
 								? getSubscriptionPrice(watchlistPlan)
 								: null;
-							const displayPrice = subscriptionPrice?.amount ?? 49900;
-							const canSubscribe = Boolean(watchlistPlan && subscriptionPrice);
 							return (
-								<Card className="border-border bg-card">
-									<CardContent className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-										<div className="flex items-center gap-4">
-											<div className="h-10 w-10 rounded-lg bg-secondary flex items-center justify-center">
-												<Search className="h-5 w-5 text-foreground" />
-											</div>
-											<div>
-												<h3 className="text-base font-semibold text-foreground">
-													{t("onboarding.plans.watchlist.title")}
-												</h3>
-												<p className="text-sm text-muted-foreground">
-													{t("onboarding.plans.watchlist.description")}
-												</p>
-											</div>
-										</div>
-										<div className="flex items-center gap-4">
-											<div className="text-right">
-												<div className="text-xl font-bold">
-													{formatPriceMXN(displayPrice)}
-												</div>
-												<span className="text-xs text-muted-foreground">
-													/
-													{t(
-														`settings.billing.interval.${subscriptionPrice?.interval || "month"}`,
-													)}
-												</span>
-											</div>
-											<Button
-												variant="outline"
-												onClick={() =>
-													watchlistPlan ? handleSelectPlan(watchlistPlan) : null
-												}
-												disabled={isRedirecting || !canSubscribe}
-											>
-												{canSubscribe
-													? t("onboarding.plans.watchlist.cta")
-													: t("onboarding.plans.watchlist.contact")}
-											</Button>
-										</div>
-									</CardContent>
-								</Card>
+								<WatchlistCard
+									displayPrice={subscriptionPrice?.amount ?? 49900}
+									interval={subscriptionPrice?.interval ?? "month"}
+									onSelect={() =>
+										watchlistPlan ? handleSelectPlan(watchlistPlan) : undefined
+									}
+									isLoading={isRedirecting}
+									canSubscribe={Boolean(watchlistPlan && subscriptionPrice)}
+								/>
 							);
 						})()}
 					</div>

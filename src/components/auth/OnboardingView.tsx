@@ -12,7 +12,6 @@ import {
 	ProfileCompletionStep,
 	SubscriptionSelectionStep,
 	CreateOrganizationStep,
-	LicenseModal,
 	PasskeySetupStep,
 } from "./onboarding";
 
@@ -26,8 +25,6 @@ export const OnboardingView = ({ redirectTo }: OnboardingViewProps) => {
 	const { t } = useLanguage();
 	const searchParams = useSearchParams();
 
-	// License modal state
-	const [isLicenseModalOpen, setLicenseModalOpen] = useState(false);
 	// Show passkey setup step after profile completion (only once per session)
 	const [showPasskeyStep, setShowPasskeyStep] = useState(false);
 
@@ -96,15 +93,7 @@ export const OnboardingView = ({ redirectTo }: OnboardingViewProps) => {
 	const editProfile = searchParams.get("edit_profile") === "true";
 
 	if (editProfile || !state.userProfile.isComplete) {
-		return (
-			<>
-				<ProfileCompletionStep onComplete={handleProfileComplete} />
-				<LicenseModal
-					open={isLicenseModalOpen}
-					onOpenChange={setLicenseModalOpen}
-				/>
-			</>
-		);
+		return <ProfileCompletionStep onComplete={handleProfileComplete} />;
 	}
 
 	// Step 1b: Optional passkey setup (shown once after profile completion)
@@ -114,28 +103,10 @@ export const OnboardingView = ({ redirectTo }: OnboardingViewProps) => {
 
 	// Step 2: If user has subscription but no organization, show org creation
 	if (state.canCreateOrganization && !state.hasOrganization) {
-		return (
-			<>
-				<CreateOrganizationStep redirectTo={redirectTo} />
-				<LicenseModal
-					open={isLicenseModalOpen}
-					onOpenChange={setLicenseModalOpen}
-				/>
-			</>
-		);
+		return <CreateOrganizationStep redirectTo={redirectTo} />;
 	}
 
 	// Step 3: Subscription selection (or invitation handling)
 	// User has completed profile but needs subscription/organization
-	return (
-		<>
-			<SubscriptionSelectionStep
-				onOpenLicenseModal={() => setLicenseModalOpen(true)}
-			/>
-			<LicenseModal
-				open={isLicenseModalOpen}
-				onOpenChange={setLicenseModalOpen}
-			/>
-		</>
-	);
+	return <SubscriptionSelectionStep />;
 };

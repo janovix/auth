@@ -111,9 +111,9 @@ export function TaxComplianceBanner() {
 				/>
 
 				{/* Inner content with navy bg */}
-				<div className="relative rounded-[11px] overflow-hidden">
-					<div className="absolute inset-0 bg-[#0a0e2a]" aria-hidden="true">
-						<div className="absolute inset-0 flex items-center justify-center overflow-hidden select-none pointer-events-none">
+				<div className="relative isolate rounded-[11px] overflow-hidden">
+					<div className="absolute inset-0 z-0 bg-[#0a0e2a]" aria-hidden="true">
+						<div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden select-none pointer-events-none">
 							<span
 								className="animate-float text-[14rem] font-serif font-bold leading-none text-[#111b5e] opacity-50"
 								style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
@@ -214,9 +214,9 @@ export function TaxComplianceBanner() {
 							</button>
 
 							{/* Hero */}
-							<div className="relative overflow-hidden px-8 pb-8 pt-12 sm:px-10">
+							<div className="relative isolate overflow-hidden px-8 pb-8 pt-12 sm:px-10">
 								<div
-									className="absolute inset-0 pointer-events-none select-none"
+									className="absolute inset-0 z-0 pointer-events-none select-none"
 									aria-hidden="true"
 								>
 									<div className="absolute inset-0 flex items-center justify-center overflow-hidden">

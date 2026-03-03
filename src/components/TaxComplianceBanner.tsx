@@ -112,8 +112,11 @@ export function TaxComplianceBanner() {
 
 				{/* Inner content with navy bg */}
 				<div className="relative isolate rounded-[11px] overflow-hidden">
-					<div className="absolute inset-0 z-0 bg-[#0a0e2a]" aria-hidden="true">
-						<div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden select-none pointer-events-none">
+					<div
+						className="absolute inset-0 z-0 bg-[#0a0e2a] [transform:translateZ(-1px)]"
+						aria-hidden="true"
+					>
+						<div className="absolute inset-0 flex items-center justify-center overflow-hidden select-none pointer-events-none">
 							<span
 								className="animate-float text-[14rem] font-serif font-bold leading-none text-[#111b5e] opacity-50"
 								style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
@@ -131,7 +134,7 @@ export function TaxComplianceBanner() {
 						/>
 					</div>
 
-					<div className="relative z-10 flex flex-col items-center gap-4 px-5 py-8 text-center sm:flex-row sm:text-left sm:gap-5 sm:px-8 sm:py-8">
+					<div className="relative z-10 flex flex-col items-center gap-4 px-5 py-8 text-center sm:flex-row sm:text-left sm:gap-5 sm:px-8 sm:py-8 [transform:translateZ(0)]">
 						{/* Logos */}
 						<div className="flex shrink-0 items-center gap-3">
 							<Image
@@ -216,7 +219,7 @@ export function TaxComplianceBanner() {
 							{/* Hero */}
 							<div className="relative isolate overflow-hidden px-8 pb-8 pt-12 sm:px-10">
 								<div
-									className="absolute inset-0 z-0 pointer-events-none select-none"
+									className="absolute inset-0 z-0 pointer-events-none select-none [transform:translateZ(-1px)]"
 									aria-hidden="true"
 								>
 									<div className="absolute inset-0 flex items-center justify-center overflow-hidden">
@@ -235,7 +238,7 @@ export function TaxComplianceBanner() {
 									</div>
 								</div>
 
-								<div className="relative z-10 flex flex-col items-center text-center">
+								<div className="relative z-10 flex flex-col items-center text-center [transform:translateZ(0)]">
 									<div className="animate-scale-in mb-6 flex items-center gap-4">
 										<Image
 											src="/janovix-logo.svg"

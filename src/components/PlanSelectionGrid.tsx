@@ -19,6 +19,11 @@ const planIcons: Record<string, typeof Zap> = {
 	ultra: Rocket,
 };
 
+/** Plans with launch promo: show strikethrough regular price when current price is lower */
+const PLAN_PROMO_CONFIG: Record<string, { regularAmount: number }> = {
+	business: { regularAmount: 500000 }, // $5,000/mes regular, $3,000/mes promo
+};
+
 interface PlanSelectionGridProps {
 	plans: PublicPlanInfo[];
 	onSelectPlan: (plan: PublicPlanInfo) => void;
@@ -139,15 +144,36 @@ export function PlanSelectionGrid({
 									<div className="mt-3">
 										{subscriptionPrice ? (
 											<>
-												<span className="text-3xl lg:text-4xl font-bold text-foreground">
-													{formatPriceMXN(subscriptionPrice.amount)}
-												</span>
-												<span className="text-muted-foreground">
-													/
-													{t(
-														`settings.billing.interval.${subscriptionPrice.interval || "month"}`,
-													)}
-												</span>
+												{(() => {
+													const promoConfig = PLAN_PROMO_CONFIG[plan.name];
+													const hasPromo =
+														promoConfig &&
+														subscriptionPrice.amount <
+															promoConfig.regularAmount;
+													const intervalKey =
+														subscriptionPrice.interval || "month";
+													const intervalLabel = t(
+														`settings.billing.interval.${intervalKey}`,
+													);
+													return (
+														<>
+															{hasPromo && (
+																<div className="text-sm text-muted-foreground line-through">
+																	{formatPriceMXN(promoConfig.regularAmount)}/
+																	{intervalLabel}
+																</div>
+															)}
+															<div>
+																<span className="text-3xl lg:text-4xl font-bold text-foreground">
+																	{formatPriceMXN(subscriptionPrice.amount)}
+																</span>
+																<span className="text-muted-foreground">
+																	/{intervalLabel}
+																</span>
+															</div>
+														</>
+													);
+												})()}
 											</>
 										) : (
 											<span className="text-2xl font-bold text-foreground">
@@ -156,9 +182,18 @@ export function PlanSelectionGrid({
 										)}
 									</div>
 									{subscriptionPrice && (
-										<p className="text-xs text-muted-foreground mt-1">
-											{t("onboarding.plans.meteredNote")}
-										</p>
+										<>
+											{PLAN_PROMO_CONFIG[plan.name] &&
+												subscriptionPrice.amount <
+													PLAN_PROMO_CONFIG[plan.name].regularAmount && (
+													<p className="text-xs text-green-600 dark:text-green-400 mt-1 font-medium">
+														{t("onboarding.plans.launchPromo")}
+													</p>
+												)}
+											<p className="text-xs text-muted-foreground mt-1">
+												{t("onboarding.plans.meteredNote")}
+											</p>
+										</>
 									)}
 								</div>
 

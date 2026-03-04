@@ -913,7 +913,8 @@ const translations = {
 		"onboarding.plans.watchlist.contact": "Contact Sales",
 		"onboarding.plans.recommended": "Recommended",
 		"onboarding.plans.subscribe": "Subscribe to {plan}",
-		"onboarding.plans.meteredNote": "+ metered usage at cycle end",
+		"onboarding.plans.meteredNote": "+ metered usage at the end of the cycle",
+		"onboarding.plans.launchPromo": "First 6 months for launch",
 		"onboarding.plans.enterprise.title": "Enterprise",
 		"onboarding.plans.enterprise.description":
 			"Custom pricing for large organizations with dedicated support",
@@ -1977,6 +1978,7 @@ const translations = {
 		"onboarding.plans.recommended": "Recomendado",
 		"onboarding.plans.subscribe": "Suscribirse a {plan}",
 		"onboarding.plans.meteredNote": "+ uso medido al cierre del ciclo",
+		"onboarding.plans.launchPromo": "Primeros 6 meses por lanzamiento",
 		"onboarding.plans.enterprise.title": "Enterprise",
 		"onboarding.plans.enterprise.description":
 			"Precios personalizados para grandes organizaciones con soporte dedicado",

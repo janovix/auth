@@ -1,3 +1,10 @@
+# [2.4.0](https://github.com/janovix/auth/compare/v2.3.0...v2.4.0) (2026-03-04)
+
+
+### Features
+
+* **PlanSelectionGrid:** implement launch promo display and update translations ([15419fd](https://github.com/janovix/auth/commit/15419fdae3ad4f288fa7c0deffbdaf5fd33ef2df))
+
 # [2.3.0](https://github.com/janovix/auth/compare/v2.2.1...v2.3.0) (2026-02-28)
 
 

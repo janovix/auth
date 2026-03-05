@@ -290,20 +290,11 @@ function SettingsLayoutInner({
 		// Switch to the target org
 		async function switchOrg() {
 			try {
-				const authServiceUrl = getAuthCoreBaseUrl();
-				const response = await fetch(
-					`${authServiceUrl}/api/auth/organization/set-active`,
-					{
-						method: "POST",
-						credentials: "include",
-						headers: {
-							"Content-Type": "application/json",
-						},
-						body: JSON.stringify({ organizationId: targetOrg!.id }),
-					},
-				);
+				const result = await authClient.organization.setActive({
+					organizationId: targetOrg!.id,
+				});
 
-				if (response.ok) {
+				if (!result.error) {
 					// Clear the query param and reload to reflect new org
 					const url = new URL(window.location.href);
 					url.searchParams.delete("org");
@@ -460,20 +451,11 @@ function SettingsLayoutInner({
 		if (org.id === activeOrgId) return;
 
 		try {
-			const authServiceUrl = getAuthCoreBaseUrl();
-			const response = await fetch(
-				`${authServiceUrl}/api/auth/organization/set-active`,
-				{
-					method: "POST",
-					credentials: "include",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({ organizationId: org.id }),
-				},
-			);
+			const result = await authClient.organization.setActive({
+				organizationId: org.id,
+			});
 
-			if (!response.ok) {
+			if (result.error) {
 				console.error("Failed to switch organization");
 				return;
 			}

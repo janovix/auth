@@ -5,15 +5,6 @@
 
 * **PlanSelectionGrid:** implement launch promo display and update translations ([15419fd](https://github.com/janovix/auth/commit/15419fdae3ad4f288fa7c0deffbdaf5fd33ef2df))
 
-# [2.3.0](https://github.com/janovix/auth/compare/v2.2.1...v2.3.0) (2026-02-28)
-
-
-### Features
-
-* add Radix UI components and new Tax & Compliance features ([6a9979c](https://github.com/janovix/auth/commit/6a9979ca7709f59ab7de4ab48ecfb761aa1bfd22))
-* **billing:** update watchlist query limits and add subscription status handling ([1be8f7d](https://github.com/janovix/auth/commit/1be8f7d0b572b0a4f7d3c78169cb2f18f4b999ec))
-* **notifications:** add notification sound preferences to settings ([339534d](https://github.com/janovix/auth/commit/339534d2b384cf34741096f6c19dd42b00c3d492))
-
 # [2.3.0-rc.3](https://github.com/janovix/auth/compare/v2.3.0-rc.2...v2.3.0-rc.3) (2026-02-28)
 
 

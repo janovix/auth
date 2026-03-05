@@ -1,32 +1,32 @@
+import type { serverAuthClient } from "./serverAuthClient";
+
+/**
+ * The raw inferred session type from the Better Auth client.
+ * This captures all plugin augmentations (organization, stripe, etc.)
+ * automatically, so it stays in sync as plugins evolve.
+ */
+type InferredSession = NonNullable<typeof serverAuthClient.$Infer.Session>;
+
 /**
  * Session user data from the auth service.
+ *
+ * Derived from the Better Auth client's inferred session type so that
+ * plugin-augmented fields (e.g. activeOrganizationId from organizationClient)
+ * are included automatically.
+ *
+ * `role` is added here because the admin plugin operates server-side only
+ * and is not reflected in the client-side type inference.
  */
-export type SessionUser = {
-	id: string;
-	name: string;
-	email: string;
-	image: string | null;
-	emailVerified: boolean;
-	createdAt: Date;
-	updatedAt: Date;
+export type SessionUser = InferredSession["user"] & {
 	/** User role: 'visitor' (beta waiting), 'user' (active), or 'admin' */
 	role?: string;
 };
 
 /**
  * Session data from the auth service.
+ * Includes organizationClient augmentations such as activeOrganizationId.
  */
-export type SessionData = {
-	id: string;
-	userId: string;
-	token: string;
-	expiresAt: Date;
-	createdAt: Date;
-	updatedAt: Date;
-	ipAddress?: string;
-	userAgent?: string;
-	activeOrganizationId?: string | null;
-};
+export type SessionData = InferredSession["session"];
 
 /**
  * Complete session object returned from the auth service.

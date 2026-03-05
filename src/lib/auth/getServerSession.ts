@@ -1,6 +1,6 @@
 import { cookies, headers } from "next/headers";
 
-import { getAuthCoreBaseUrl } from "./authCoreConfig";
+import { serverAuthClient } from "./serverAuthClient";
 import type { Session } from "./types";
 
 // Re-export types
@@ -18,8 +18,10 @@ export type ServerSession = Session;
  * to pre-fetch the session before rendering. This eliminates the "blink" effect
  * where the UI briefly shows a loading or unauthenticated state.
  *
- * The session cookie is forwarded from the incoming request to the auth service,
- * allowing cross-subdomain cookie authentication to work properly.
+ * Fast path: if the middleware already validated the session it forwards the raw
+ * JSON via the x-middleware-session header, avoiding a redundant HTTP round-trip.
+ * Fallback: uses serverAuthClient.getSession() which automatically forwards
+ * cookies and the required Origin header.
  *
  * @returns The session data if authenticated, or null if not authenticated
  *
@@ -102,79 +104,27 @@ export async function getServerSession(): Promise<Session> {
 			}
 		}
 
-		const cookieStore = await cookies();
-		const cookieHeader = cookieStore.toString();
+		// Fallback: use the server-side Better Auth client which automatically
+		// forwards cookies and the Origin header via its onRequest hook.
+		const result = await serverAuthClient.getSession();
 
-		// If no cookies, definitely no session
-		if (!cookieHeader) {
+		if (!result.data) {
 			return null;
 		}
 
-		const baseUrl = getAuthCoreBaseUrl();
+		const { user, session } = result.data;
 
-		// For server-to-server requests, we need to include Origin header
-		// to pass Better Auth's origin check. Use the auth-svc URL as origin
-		// since it's a trusted origin for itself.
-		const response = await fetch(`${baseUrl}/api/auth/get-session`, {
-			method: "GET",
-			headers: {
-				cookie: cookieHeader,
-				// Add Origin header to pass Better Auth's origin check
-				origin: baseUrl,
-			},
-			// Don't cache session requests
-			cache: "no-store",
-		});
-
-		if (!response.ok) {
-			// Non-2xx response means no valid session
-			return null;
-		}
-
-		// Type the response data from Better Auth
-		type SessionResponse = {
-			user?: {
-				id: string;
-				name: string;
-				email: string;
-				image: string | null;
-				emailVerified: boolean;
-				createdAt: string;
-				updatedAt: string;
-				role?: string;
-			};
-			session?: {
-				id: string;
-				userId: string;
-				token: string;
-				expiresAt: string;
-				createdAt: string;
-				updatedAt: string;
-				ipAddress?: string;
-				userAgent?: string;
-				activeOrganizationId?: string | null;
-			};
-		} | null;
-
-		const data: SessionResponse = await response.json();
-
-		// Better Auth returns { user, session } or null
-		if (!data || !data.user || !data.session) {
-			return null;
-		}
-
-		// Parse date strings into Date objects
 		return {
 			user: {
-				...data.user,
-				createdAt: new Date(data.user.createdAt),
-				updatedAt: new Date(data.user.updatedAt),
+				...user,
+				createdAt: new Date(user.createdAt),
+				updatedAt: new Date(user.updatedAt),
 			},
 			session: {
-				...data.session,
-				expiresAt: new Date(data.session.expiresAt),
-				createdAt: new Date(data.session.createdAt),
-				updatedAt: new Date(data.session.updatedAt),
+				...session,
+				expiresAt: new Date(session.expiresAt),
+				createdAt: new Date(session.createdAt),
+				updatedAt: new Date(session.updatedAt),
 			},
 		};
 	} catch (error) {

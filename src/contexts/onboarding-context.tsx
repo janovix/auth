@@ -218,25 +218,18 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 			const data = result.data;
 
 			// Also fetch current user session for profile info
-			const sessionResponse = await fetch(`${baseUrl}/api/auth/get-session`, {
-				credentials: "include",
-			});
+			const sessionResult = await authClient.getSession();
 
 			let firstName = "";
 			let lastName = "";
 			let avatarUrl: string | null = null;
 
-			if (sessionResponse.ok) {
-				const sessionData = (await sessionResponse.json()) as {
-					user?: { name?: string | null; image?: string | null };
-				};
-				if (sessionData.user?.name) {
-					const nameParts = sessionData.user.name.split(" ");
-					firstName = nameParts[0] || "";
-					lastName = nameParts.slice(1).join(" ") || "";
-				}
-				avatarUrl = sessionData.user?.image ?? null;
+			if (sessionResult.data?.user?.name) {
+				const nameParts = sessionResult.data.user.name.split(" ");
+				firstName = nameParts[0] || "";
+				lastName = nameParts.slice(1).join(" ") || "";
 			}
+			avatarUrl = sessionResult.data?.user?.image ?? null;
 
 			// Map all pending invitations
 			const allInvitations: PendingInvitation[] = (

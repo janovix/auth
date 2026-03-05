@@ -1,4 +1,4 @@
-# [2.3.0-rc.4](https://github.com/janovix/auth/compare/v2.3.0-rc.3...v2.3.0-rc.4) (2026-03-04)
+# [2.4.0](https://github.com/janovix/auth/compare/v2.3.0...v2.4.0) (2026-03-04)
 
 
 ### Features

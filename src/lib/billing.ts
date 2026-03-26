@@ -230,14 +230,14 @@ export function getSubscriptionPrice(
 }
 
 /**
- * Helper to format price in MXN
+ * Helper to format price in MXN (amount is centavos; always two fraction digits)
  */
 export function formatPriceMXN(amountInCentavos: number): string {
 	return new Intl.NumberFormat("es-MX", {
 		style: "currency",
 		currency: "MXN",
-		minimumFractionDigits: 0,
-		maximumFractionDigits: 0,
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
 	}).format(amountInCentavos / 100);
 }
 
@@ -573,7 +573,7 @@ export async function activateLicenseKey(
 // ============================================================================
 
 /**
- * Format currency amount
+ * Format currency amount (amount is minor units / centavos; always two fraction digits)
  */
 export function formatCurrency(
 	amount: number,
@@ -582,8 +582,8 @@ export function formatCurrency(
 	return new Intl.NumberFormat("es-MX", {
 		style: "currency",
 		currency: currency.toUpperCase(),
-		minimumFractionDigits: 0,
-		maximumFractionDigits: 0,
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
 	}).format(amount / 100);
 }
 

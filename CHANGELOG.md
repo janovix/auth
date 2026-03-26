@@ -1,3 +1,15 @@
+# [2.5.0](https://github.com/janovix/auth/compare/v2.4.1...v2.5.0) (2026-03-26)
+
+
+### Bug Fixes
+
+* **translations:** correct formatting of logo help text in onboarding translations ([8bd31bb](https://github.com/janovix/auth/commit/8bd31bbe66afab3365958cdeeb3d8f63926d2383))
+
+
+### Features
+
+* **translations:** add logo-related onboarding translations for organization setup ([7f0d1d9](https://github.com/janovix/auth/commit/7f0d1d95882b37bfdab263a9ecdde22d13bc9155))
+
 # [2.5.0-rc.2](https://github.com/janovix/auth/compare/v2.5.0-rc.1...v2.5.0-rc.2) (2026-03-26)
 
 

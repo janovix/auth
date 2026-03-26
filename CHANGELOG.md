@@ -3,6 +3,10 @@
 
 ### Bug Fixes
 
+* **pricing:** correct regular amount for business plan in promo config ([f7d1c87](https://github.com/janovix/auth/commit/f7d1c878485b814f970fafebef144aafa12b46ad))
+
+# [2.5.0-rc.3](https://github.com/janovix/auth/compare/v2.5.0-rc.2...v2.5.0-rc.3) (2026-03-26)
+
 * **translations:** correct formatting of logo help text in onboarding translations ([8bd31bb](https://github.com/janovix/auth/commit/8bd31bbe66afab3365958cdeeb3d8f63926d2383))
 
 

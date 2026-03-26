@@ -21,7 +21,7 @@ const planIcons: Record<string, typeof Zap> = {
 
 /** Plans with launch promo: show strikethrough regular price when current price is lower */
 const PLAN_PROMO_CONFIG: Record<string, { regularAmount: number }> = {
-	business: { regularAmount: 500000 }, // $5,000.00/mes regular vs promo from API (e.g. $2,999.99)
+	business: { regularAmount: 499999 }, // $5,000.00/mes regular vs promo from API (e.g. $2,999.99)
 };
 
 interface PlanSelectionGridProps {

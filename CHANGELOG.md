@@ -1,3 +1,10 @@
+## [2.5.1](https://github.com/janovix/auth/compare/v2.5.0...v2.5.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* **pricing:** correct regular amount for business plan in promo config ([f7d1c87](https://github.com/janovix/auth/commit/f7d1c878485b814f970fafebef144aafa12b46ad))
+
 # [2.5.0](https://github.com/janovix/auth/compare/v2.4.1...v2.5.0) (2026-03-26)
 
 

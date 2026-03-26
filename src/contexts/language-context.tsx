@@ -958,8 +958,7 @@ const translations = {
 		"onboarding.org.logo.title": "Organization Logo",
 		"onboarding.org.logo.success": "Logo saved!",
 		"onboarding.org.logo.error": "Failed to save logo.",
-		"onboarding.org.logo.help":
-			"Optional: Add a logo for your organization",
+		"onboarding.org.logo.help": "Optional: Add a logo for your organization",
 		"onboarding.org.name.label": "Organization name",
 		"onboarding.org.name.placeholder": "Acme Corporation",
 		"onboarding.org.name.help":
@@ -2029,8 +2028,7 @@ const translations = {
 		"onboarding.org.logo.title": "Logo de la organización",
 		"onboarding.org.logo.success": "¡Logo guardado!",
 		"onboarding.org.logo.error": "No se pudo guardar el logo.",
-		"onboarding.org.logo.help":
-			"Opcional: añade un logo para tu organización",
+		"onboarding.org.logo.help": "Opcional: añade un logo para tu organización",
 		"onboarding.org.name.label": "Nombre de la organización",
 		"onboarding.org.name.placeholder": "Corporación Acme",
 		"onboarding.org.name.help": "Así aparecerá tu organización en Janovix",

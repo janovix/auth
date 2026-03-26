@@ -1,3 +1,10 @@
+# [2.5.0-rc.2](https://github.com/janovix/auth/compare/v2.5.0-rc.1...v2.5.0-rc.2) (2026-03-26)
+
+
+### Bug Fixes
+
+* **translations:** correct formatting of logo help text in onboarding translations ([8bd31bb](https://github.com/janovix/auth/commit/8bd31bbe66afab3365958cdeeb3d8f63926d2383))
+
 # [2.5.0-rc.1](https://github.com/janovix/auth/compare/v2.4.1-rc.1...v2.5.0-rc.1) (2026-03-26)
 
 

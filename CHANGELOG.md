@@ -1,3 +1,10 @@
+# [2.5.0-rc.1](https://github.com/janovix/auth/compare/v2.4.1-rc.1...v2.5.0-rc.1) (2026-03-26)
+
+
+### Features
+
+* **translations:** add logo-related onboarding translations for organization setup ([7f0d1d9](https://github.com/janovix/auth/commit/7f0d1d95882b37bfdab263a9ecdde22d13bc9155))
+
 ## [2.4.1-rc.1](https://github.com/janovix/auth/compare/v2.4.0...v2.4.1-rc.1) (2026-03-05)
 
 

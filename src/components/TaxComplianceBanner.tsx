@@ -103,7 +103,7 @@ export function TaxComplianceBanner() {
 	return (
 		<>
 			{/* Banner */}
-			<div className="group relative overflow-hidden rounded-xl">
+			<div className="group relative min-w-0 overflow-hidden rounded-xl @container/tax-banner">
 				{/* Animated border glow */}
 				<div
 					className="absolute -inset-px rounded-xl animate-border-glow"
@@ -134,7 +134,7 @@ export function TaxComplianceBanner() {
 						/>
 					</div>
 
-					<div className="relative z-10 flex flex-col items-center gap-4 px-5 py-8 text-center sm:flex-row sm:text-left sm:gap-5 sm:px-8 sm:py-8 [transform:translateZ(0)]">
+					<div className="relative z-10 flex flex-col items-center gap-4 px-5 py-8 text-center sm:px-8 sm:py-8 @2xl/tax-banner:flex-row @2xl/tax-banner:items-center @2xl/tax-banner:gap-5 @2xl/tax-banner:text-left [transform:translateZ(0)]">
 						{/* Logos */}
 						<div className="flex shrink-0 items-center gap-3">
 							<Image
@@ -155,7 +155,7 @@ export function TaxComplianceBanner() {
 						</div>
 
 						{/* Text */}
-						<div className="flex-1 min-w-0">
+						<div className="w-full min-w-0 flex-1">
 							<p className="text-sm font-semibold text-white">
 								Incluye soporte legal de Tax &amp; Compliance
 							</p>
@@ -166,7 +166,7 @@ export function TaxComplianceBanner() {
 						</div>
 
 						{/* CTAs */}
-						<div className="flex shrink-0 gap-2">
+						<div className="flex w-full flex-wrap justify-center gap-2 @2xl/tax-banner:w-auto @2xl/tax-banner:shrink-0 @2xl/tax-banner:justify-start">
 							<Button
 								onClick={() => setModalOpen(true)}
 								size="sm"

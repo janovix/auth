@@ -53,6 +53,16 @@ describe("middleware", () => {
 			);
 		});
 
+		it("should redirect to login when accessing products route", async () => {
+			const request = new NextRequest("https://auth.example.com/products");
+			const response = await middleware(request);
+
+			expect(response.status).toBe(307);
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/login",
+			);
+		});
+
 		it("should redirect to login when accessing onboarding route", async () => {
 			const request = new NextRequest("https://auth.example.com/onboarding");
 			const response = await middleware(request);
@@ -114,13 +124,21 @@ describe("middleware", () => {
 			expect(response.headers.get("location")).toBeNull();
 		});
 
+		it("should allow access to products route", async () => {
+			const request = new NextRequest("https://auth.example.com/products");
+			const response = await middleware(request);
+
+			expect(response.status).toBe(200);
+			expect(response.headers.get("location")).toBeNull();
+		});
+
 		it("should redirect away from login page", async () => {
 			const request = new NextRequest("https://auth.example.com/login");
 			const response = await middleware(request);
 
 			expect(response.status).toBe(307);
-			expect(response.headers.get("location")).toContain(
-				"https://app.example.workers.dev",
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/products",
 			);
 		});
 
@@ -129,8 +147,8 @@ describe("middleware", () => {
 			const response = await middleware(request);
 
 			expect(response.status).toBe(307);
-			expect(response.headers.get("location")).toContain(
-				"https://app.example.workers.dev",
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/products",
 			);
 		});
 
@@ -139,8 +157,8 @@ describe("middleware", () => {
 			const response = await middleware(request);
 
 			expect(response.status).toBe(307);
-			expect(response.headers.get("location")).toContain(
-				"https://app.example.workers.dev",
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/products",
 			);
 		});
 
@@ -290,7 +308,7 @@ describe("middleware", () => {
 			const location = response.headers.get("location");
 			expect(location).toContain("/onboarding");
 			expect(location).toContain(
-				"redirect_to=https%3A%2F%2Fapp.example.workers.dev",
+				"redirect_to=https%3A%2F%2Fauth.example.com%2Fproducts",
 			);
 		});
 

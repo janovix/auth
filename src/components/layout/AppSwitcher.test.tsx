@@ -1,7 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AppSwitcher } from "./AppSwitcher";
+
+const mockUsePathname = vi.fn(() => "/settings");
+
+vi.mock("next/navigation", () => ({
+	usePathname: () => mockUsePathname(),
+}));
 
 // Mock the useSidebar hook
 vi.mock("@/components/ui/sidebar", () => ({
@@ -58,6 +64,8 @@ vi.mock("@/contexts/language-context", () => ({
 				"appSwitcher.title": "Janovix Apps",
 				"appSwitcher.homepage": "Homepage",
 				"appSwitcher.homepageDescription": "Main website",
+				"appSwitcher.products": "Products",
+				"appSwitcher.productsDescription": "Your apps",
 				"appSwitcher.aml": "AML Platform",
 				"appSwitcher.amlDescription": "Anti-money laundering",
 				"appSwitcher.watchlist": "Watchlist",
@@ -81,6 +89,7 @@ vi.mock("@/lib/auth/authCoreConfig", () => ({
 describe("AppSwitcher", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockUsePathname.mockReturnValue("/settings");
 	});
 
 	it("renders the logo in expanded sidebar mode", () => {
@@ -111,6 +120,7 @@ describe("AppSwitcher", () => {
 		// Check that app options are displayed
 		expect(await screen.findByText("Janovix Apps")).toBeInTheDocument();
 		expect(await screen.findByText("Homepage")).toBeInTheDocument();
+		expect(await screen.findByText("Products")).toBeInTheDocument();
 		expect(await screen.findByText("AML Platform")).toBeInTheDocument();
 		expect(await screen.findByText("Watchlist")).toBeInTheDocument();
 		expect(await screen.findByText("Settings")).toBeInTheDocument();

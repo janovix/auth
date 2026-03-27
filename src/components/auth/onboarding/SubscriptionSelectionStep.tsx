@@ -40,6 +40,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PlanSelectionGrid } from "@/components/PlanSelectionGrid";
 import { EnterpriseCard } from "@/components/EnterpriseCard";
 import { WatchlistCard } from "@/components/WatchlistCard";
+import { getDefaultAppUrlForPlan } from "@/lib/auth/authCoreConfig";
 
 export function SubscriptionSelectionStep() {
 	const { language, setLanguage, t } = useLanguage();
@@ -95,10 +96,11 @@ export function SubscriptionSelectionStep() {
 			};
 			setSelectedPlan(selectedPlan);
 
-			// Get current URL for success/cancel redirects
+			// Preserve plan-based redirect through Stripe so watchlist-only users land on Watchlist
 			const baseUrl = window.location.origin;
-			const successUrl = `${baseUrl}/onboarding?subscription_success=true`;
-			const cancelUrl = `${baseUrl}/onboarding?subscription_canceled=true`;
+			const planTargetUrl = getDefaultAppUrlForPlan(plan.name);
+			const successUrl = `${baseUrl}/onboarding?subscription_success=true&redirect_to=${encodeURIComponent(planTargetUrl)}`;
+			const cancelUrl = `${baseUrl}/onboarding?subscription_canceled=true&redirect_to=${encodeURIComponent(planTargetUrl)}`;
 
 			const result = await startSubscriptionFlow(
 				selectedPlan,

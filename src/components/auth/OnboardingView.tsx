@@ -7,7 +7,6 @@ import { Loader2 } from "lucide-react";
 import { useAurora } from "@/contexts/aurora-context";
 import { useLanguage } from "@/contexts/language-context";
 import { useOnboarding } from "@/contexts/onboarding-context";
-import { getAmlAppUrl } from "@/lib/auth/authCoreConfig";
 import {
 	ProfileCompletionStep,
 	SubscriptionSelectionStep,
@@ -77,7 +76,7 @@ export const OnboardingView = ({ redirectTo }: OnboardingViewProps) => {
 
 	// Redirect if fully onboarded (has profile, organization)
 	if (state.userProfile.isComplete && state.hasOrganization) {
-		const targetUrl = redirectTo || getAmlAppUrl();
+		const targetUrl = redirectTo || "/products";
 		window.location.href = targetUrl;
 		return (
 			<div className="w-full flex items-center justify-center py-12">

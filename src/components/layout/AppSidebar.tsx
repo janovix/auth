@@ -13,6 +13,7 @@ import {
 	Circle,
 	Search,
 	LayoutDashboard,
+	LayoutGrid,
 	KeyRound,
 	Mail,
 } from "lucide-react";
@@ -129,8 +130,19 @@ export function AppSidebar({
 		},
 	];
 
-	// Products navigation items (external links)
-	const productsNavItems = [
+	// Products: hub in-app + external product apps
+	const productsNavItems: {
+		name: string;
+		href: string;
+		icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+		external: boolean;
+	}[] = [
+		{
+			name: t("settings.nav.productsHub"),
+			href: "/products",
+			icon: LayoutGrid,
+			external: false,
+		},
 		{
 			name: t("settings.nav.aml"),
 			href: getAmlAppUrl(),
@@ -378,19 +390,35 @@ export function AppSidebar({
 						<SidebarMenu>
 							{productsNavItems.map((item) => {
 								const Icon = item.icon;
+								const isActive = !item.external && isNavActive(item.href);
 
 								return (
-									<SidebarMenuItem key={item.name}>
-										<SidebarMenuButton asChild tooltip={item.name}>
-											<a
-												href={item.href}
-												onClick={handleLinkClick}
-												target="_blank"
-												rel="noopener noreferrer"
-											>
-												<Icon />
-												<span>{item.name}</span>
-											</a>
+									<SidebarMenuItem key={item.href}>
+										<SidebarMenuButton
+											asChild
+											tooltip={item.name}
+											isActive={isActive}
+										>
+											{item.external ? (
+												<a
+													href={item.href}
+													onClick={handleLinkClick}
+													target="_blank"
+													rel="noopener noreferrer"
+												>
+													<Icon />
+													<span>{item.name}</span>
+												</a>
+											) : (
+												<Link
+													href={item.href}
+													prefetch={false}
+													onClick={handleLinkClick}
+												>
+													<Icon />
+													<span>{item.name}</span>
+												</Link>
+											)}
 										</SidebarMenuButton>
 									</SidebarMenuItem>
 								);

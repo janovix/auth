@@ -61,6 +61,17 @@ export const getWatchlistAppUrl = (): string => {
 };
 
 /**
+ * Default product app URL after subscribing to a plan (Stripe onboarding).
+ * Watchlist-only plan maps to the Watchlist app; all other plans map to AML.
+ */
+export function getDefaultAppUrlForPlan(planName: string): string {
+	if (planName === "watchlist") {
+		return getWatchlistAppUrl();
+	}
+	return getAmlAppUrl();
+}
+
+/**
  * Gets the Homepage URL for the marketing site.
  * @returns The base URL for the Janovix homepage (e.g., https://www.janovix.com)
  */

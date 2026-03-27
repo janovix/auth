@@ -12,7 +12,6 @@ import {
 	type SendOtpOptions,
 } from "@/lib/auth/authActions";
 import { useResendCooldown } from "@/hooks/useResendCooldown";
-import { getAmlAppUrl } from "@/lib/auth/authCoreConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	AlertTriangle,
@@ -370,11 +369,11 @@ export const LoginView = ({
 		if (needsOnboarding) {
 			// Redirect to onboarding, preserving the original redirect destination
 			const onboardingUrl = new URL("/onboarding", window.location.origin);
-			const finalRedirect = redirectTo || getAmlAppUrl();
+			const finalRedirect = redirectTo || "/products";
 			onboardingUrl.searchParams.set("redirect_to", finalRedirect);
 			redirectUrlRef.current = onboardingUrl.toString();
 		} else {
-			redirectUrlRef.current = redirectTo || getAmlAppUrl();
+			redirectUrlRef.current = redirectTo || "/products";
 		}
 		setShowSuccessAnimation(true);
 	}, [userEmail, otpValue, signInWithOtp, redirectTo, setStateModifier, t]);

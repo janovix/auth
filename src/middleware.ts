@@ -74,20 +74,6 @@ function getAuthAppUrl(): string {
 }
 
 /**
- * Gets the AML app URL used as the default redirect target after authentication.
- */
-function getAmlAppUrl(): string {
-	const url = process.env.NEXT_PUBLIC_AML_APP_URL;
-	if (!url || url.trim().length === 0) {
-		throw new Error(
-			"Missing required environment variable: NEXT_PUBLIC_AML_APP_URL. " +
-				"Check your .env.local file or Cloudflare build environment variables.",
-		);
-	}
-	return url.trim().replace(/\/$/, "");
-}
-
-/**
  * Onboarding status from auth service.
  */
 type OnboardingStatus = {
@@ -371,10 +357,11 @@ export async function middleware(request: NextRequest) {
 	// Define route types
 	const isAccountRoute = pathname.startsWith("/account");
 	const isSettingsRoute = pathname.startsWith("/settings");
+	const isProductsRoute = pathname.startsWith("/products");
 	const isOnboardingRoute = pathname.startsWith("/onboarding");
 	const isInviteRoute = pathname.startsWith("/invite");
 	const isBetaAccessRoute = pathname.startsWith("/beta-access");
-	const isProtectedRoute = isAccountRoute || isSettingsRoute;
+	const isProtectedRoute = isAccountRoute || isSettingsRoute || isProductsRoute;
 
 	// Public routes that authenticated users should be redirected away from
 	// (unless they need onboarding or are visitors)
@@ -464,7 +451,7 @@ export async function middleware(request: NextRequest) {
 			return addAuthCookies(redirectResponse, setCookieHeaders);
 		}
 		const redirectResponse = NextResponse.redirect(
-			new URL(getAmlAppUrl(), request.url),
+			new URL("/products", request.url),
 		);
 		return addAuthCookies(redirectResponse, setCookieHeaders);
 	}
@@ -487,7 +474,7 @@ export async function middleware(request: NextRequest) {
 			return addAuthCookies(redirectResponse, setCookieHeaders);
 		}
 		const redirectResponse = NextResponse.redirect(
-			new URL(getAmlAppUrl(), request.url),
+			new URL("/products", request.url),
 		);
 		return addAuthCookies(redirectResponse, setCookieHeaders);
 	}
@@ -514,7 +501,10 @@ export async function middleware(request: NextRequest) {
 			onboardingUrl.searchParams.set("redirect_to", request.url);
 		} else {
 			// For public routes, redirect to default after onboarding
-			onboardingUrl.searchParams.set("redirect_to", getAmlAppUrl());
+			onboardingUrl.searchParams.set(
+				"redirect_to",
+				new URL("/products", request.url).toString(),
+			);
 		}
 
 		const redirectResponse = NextResponse.redirect(onboardingUrl);
@@ -525,12 +515,13 @@ export async function middleware(request: NextRequest) {
 	// If on onboarding page but doesn't need it, redirect away
 	if (isOnboardingRoute) {
 		const redirectTo = request.nextUrl.searchParams.get("redirect_to");
-		const targetUrl = redirectTo || getAmlAppUrl();
+		const defaultProducts = new URL("/products", request.url).toString();
+		const targetUrl = redirectTo || defaultProducts;
 
 		// Ensure we're not redirecting back to onboarding
 		if (targetUrl.includes("/onboarding")) {
 			const redirectResponse = NextResponse.redirect(
-				new URL(getAmlAppUrl(), request.url),
+				new URL("/products", request.url),
 			);
 			return addAuthCookies(redirectResponse, setCookieHeaders);
 		}
@@ -544,7 +535,8 @@ export async function middleware(request: NextRequest) {
 	// Redirect authenticated users away from public auth routes
 	if (isPublicAuthRoute) {
 		const redirectTo = request.nextUrl.searchParams.get("redirect_to");
-		const targetUrl = redirectTo || getAmlAppUrl();
+		const defaultProducts = new URL("/products", request.url).toString();
+		const targetUrl = redirectTo || defaultProducts;
 		const redirectResponse = NextResponse.redirect(
 			new URL(targetUrl, request.url),
 		);

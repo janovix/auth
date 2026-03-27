@@ -1,8 +1,10 @@
 "use client";
 
 import * as React from "react";
+import { usePathname } from "next/navigation";
 import {
 	Home,
+	LayoutGrid,
 	LayoutDashboard,
 	Search,
 	Settings,
@@ -54,12 +56,15 @@ export function AppSwitcher({
 	variant = "sidebar",
 	className,
 }: AppSwitcherProps) {
+	const pathname = usePathname();
 	const { isMobile, state } = useSidebar();
 	const isCollapsed = state === "collapsed";
 	const { t } = useLanguage();
 
-	const apps: AppItem[] = React.useMemo(
-		() => [
+	const apps: AppItem[] = React.useMemo(() => {
+		const onProducts = pathname?.startsWith("/products") ?? false;
+		const onSettings = pathname?.startsWith("/settings") ?? false;
+		return [
 			{
 				id: "homepage",
 				name: t("appSwitcher.homepage"),
@@ -68,6 +73,15 @@ export function AppSwitcher({
 				icon: Home,
 				external: true,
 				current: false,
+			},
+			{
+				id: "products",
+				name: t("appSwitcher.products"),
+				description: t("appSwitcher.productsDescription"),
+				href: "/products",
+				icon: LayoutGrid,
+				external: false,
+				current: onProducts,
 			},
 			{
 				id: "aml",
@@ -94,13 +108,15 @@ export function AppSwitcher({
 				href: "/settings",
 				icon: Settings,
 				external: false,
-				current: true,
+				current: onSettings && !onProducts,
 			},
-		],
-		[t],
-	);
+		];
+	}, [t, pathname]);
 
-	const currentApp = apps.find((app) => app.current) ?? apps[3];
+	const currentApp =
+		apps.find((app) => app.current) ??
+		apps.find((a) => a.id === "products") ??
+		apps[1];
 
 	// Mobile fullscreen variant - larger, more prominent with full logo
 	if (variant === "mobile-fullscreen") {

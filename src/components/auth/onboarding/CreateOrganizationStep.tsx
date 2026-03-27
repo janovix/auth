@@ -21,7 +21,6 @@ import { useLanguage } from "@/contexts/language-context";
 import { useOnboarding } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
 import { signOut } from "@/lib/auth/authActions";
-import { getAmlAppUrl } from "@/lib/auth/authCoreConfig";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 import { cn } from "@/lib/utils";
 
@@ -233,7 +232,7 @@ export function CreateOrganizationStep({
 		}
 
 		// Success! Redirect to the target URL
-		const targetUrl = redirectTo || getAmlAppUrl();
+		const targetUrl = redirectTo || "/products";
 		window.location.href = targetUrl;
 	};
 

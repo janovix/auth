@@ -1,3 +1,15 @@
+# [2.6.0-rc.1](https://github.com/janovix/auth/compare/v2.5.1-rc.1...v2.6.0-rc.1) (2026-03-27)
+
+
+### Bug Fixes
+
+* **TaxComplianceBanner:** update styles for improved layout and responsiveness ([a06c1fd](https://github.com/janovix/auth/commit/a06c1fd2a479a600069958b192e0db40e6f377d8))
+
+
+### Features
+
+* **products:** implement products page and update middleware for product access ([dc20e41](https://github.com/janovix/auth/commit/dc20e415585dab88e9db6bfbf8cb74581eaae7ee))
+
 ## [2.5.1-rc.1](https://github.com/janovix/auth/compare/v2.5.0...v2.5.1-rc.1) (2026-03-26)
 
 

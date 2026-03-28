@@ -51,7 +51,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { ThemeSwitcher, LanguageSwitcher } from "@algenium/blocks";
 import { useLanguage } from "@/contexts/language-context";
 import { authClient } from "@/lib/auth/authClient";
 import { signOut } from "@/lib/auth/authActions";
@@ -59,17 +58,12 @@ import type { Passkey } from "@better-auth/passkey/client";
 
 const MAX_PASSKEYS = 5;
 
-const languages = [
-	{ key: "en", label: "EN", nativeName: "English" },
-	{ key: "es", label: "ES", nativeName: "Español" },
-];
-
 interface PasskeySetupStepProps {
 	onContinue: () => void;
 }
 
 export function PasskeySetupStep({ onContinue }: PasskeySetupStepProps) {
-	const { language, setLanguage, t } = useLanguage();
+	const { t } = useLanguage();
 
 	const [passkeys, setPasskeys] = useState<Passkey[]>([]);
 	const [passkeysLoading, setPasskeysLoading] = useState(true);
@@ -449,24 +443,7 @@ export function PasskeySetupStep({ onContinue }: PasskeySetupStepProps) {
 				</Card>
 
 				{/* Footer */}
-				<div className="border-t border-border pt-6 mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-					<div className="flex items-center gap-2">
-						<LanguageSwitcher
-							languages={languages}
-							currentLanguage={language}
-							onLanguageChange={(key) => setLanguage(key as "en" | "es")}
-							labels={{ language: t("language.label") }}
-							showIcon
-						/>
-						<ThemeSwitcher
-							labels={{
-								theme: t("theme.label"),
-								system: t("theme.system"),
-								light: t("theme.light"),
-								dark: t("theme.dark"),
-							}}
-						/>
-					</div>
+				<div className="border-t border-border pt-6 mt-6 flex flex-col sm:flex-row sm:items-center justify-end gap-4">
 					<Button
 						variant="outline"
 						size="sm"

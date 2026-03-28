@@ -14,14 +14,8 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ThemeSwitcher, LanguageSwitcher } from "@algenium/blocks";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
-
-const languages = [
-	{ key: "en", label: "EN", nativeName: "English" },
-	{ key: "es", label: "ES", nativeName: "Español" },
-];
 import { useOnboarding, type Plan } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
 import { signOut } from "@/lib/auth/authActions";
@@ -43,7 +37,7 @@ import { WatchlistCard } from "@/components/WatchlistCard";
 import { getDefaultAppUrlForPlan } from "@/lib/auth/authCoreConfig";
 
 export function SubscriptionSelectionStep() {
-	const { language, setLanguage, t } = useLanguage();
+	const { t } = useLanguage();
 	const { toast } = useToast();
 	const router = useRouter();
 	const searchParams = useSearchParams();
@@ -316,24 +310,7 @@ export function SubscriptionSelectionStep() {
 				</Accordion>
 			</SettingsSection>
 
-			<div className="border-t border-border pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-				<div className="flex items-center gap-2">
-					<LanguageSwitcher
-						languages={languages}
-						currentLanguage={language}
-						onLanguageChange={(key) => setLanguage(key as "en" | "es")}
-						labels={{ language: t("language.label") }}
-						showIcon
-					/>
-					<ThemeSwitcher
-						labels={{
-							theme: t("theme.label"),
-							system: t("theme.system"),
-							light: t("theme.light"),
-							dark: t("theme.dark"),
-						}}
-					/>
-				</div>
+			<div className="border-t border-border pt-6 flex flex-col sm:flex-row sm:items-center justify-end gap-4">
 				<Button
 					variant="outline"
 					size="sm"

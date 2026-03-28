@@ -13,7 +13,7 @@
 		"publish": true
 	},
 	"dependencies": {
-		"@algenium/blocks": "^1.0.1",
+		"@algenium/blocks": "^1.1.0",
 		"@better-auth/passkey": "^1.4.18",
 		"@better-auth/stripe": "^1.4.18",
 		"@hookform/resolvers": "^5.2.2",

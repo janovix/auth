@@ -41,15 +41,9 @@ import {
 	type Organization,
 } from "./OrganizationSwitcher";
 import { NavUser } from "./NavUser";
-import { ThemeSwitcher, LanguageSwitcher } from "@algenium/blocks";
 import { AppSwitcher } from "./AppSwitcher";
 import { getAmlAppUrl, getWatchlistAppUrl } from "@/lib/auth/authCoreConfig";
 import { useLanguage } from "@/contexts/language-context";
-
-const languages = [
-	{ key: "en", label: "EN", nativeName: "English" },
-	{ key: "es", label: "ES", nativeName: "Español" },
-];
 
 type NavItem = {
 	name: string;
@@ -80,7 +74,7 @@ export function AppSidebar({
 	pendingInvitationsCount = 0,
 	...props
 }: AppSidebarProps) {
-	const { language, setLanguage, t } = useLanguage();
+	const { t } = useLanguage();
 	const pathname = usePathname();
 	const router = useRouter();
 	const { isMobile, setOpenMobile } = useSidebar();
@@ -429,62 +423,6 @@ export function AppSidebar({
 			</SidebarContent>
 
 			<SidebarFooter className="border-t border-sidebar-border">
-				{/* Language and Theme Switchers */}
-				<div className="flex items-center justify-between px-2 py-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-1">
-					<LanguageSwitcher
-						languages={languages}
-						currentLanguage={language}
-						onLanguageChange={(key) => setLanguage(key as "en" | "es")}
-						labels={{ language: t("language.label") }}
-						variant="default"
-						size="sm"
-						shape="rounded"
-						showIcon
-						side="right"
-						align="start"
-						className="group-data-[collapsible=icon]:hidden"
-					/>
-					<LanguageSwitcher
-						languages={languages}
-						currentLanguage={language}
-						onLanguageChange={(key) => setLanguage(key as "en" | "es")}
-						labels={{ language: t("language.label") }}
-						variant="mini"
-						size="sm"
-						shape="rounded"
-						side="right"
-						align="center"
-						className="hidden group-data-[collapsible=icon]:flex"
-					/>
-					<ThemeSwitcher
-						variant="default"
-						size="sm"
-						shape="rounded"
-						side="right"
-						align="start"
-						className="group-data-[collapsible=icon]:hidden"
-						labels={{
-							theme: t("theme.label"),
-							system: t("theme.system"),
-							light: t("theme.light"),
-							dark: t("theme.dark"),
-						}}
-					/>
-					<ThemeSwitcher
-						variant="mini"
-						size="sm"
-						shape="rounded"
-						side="right"
-						align="center"
-						className="hidden group-data-[collapsible=icon]:flex"
-						labels={{
-							theme: t("theme.label"),
-							system: t("theme.system"),
-							light: t("theme.light"),
-							dark: t("theme.dark"),
-						}}
-					/>
-				</div>
 				<NavUser user={user} isLoading={isPending} onLogout={handleLogout} />
 			</SidebarFooter>
 

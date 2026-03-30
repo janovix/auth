@@ -1,3 +1,10 @@
+# [2.6.0-rc.2](https://github.com/janovix/auth/compare/v2.6.0-rc.1...v2.6.0-rc.2) (2026-03-30)
+
+
+### Features
+
+* enhance redirect handling and UI components ([6e9043b](https://github.com/janovix/auth/commit/6e9043b48995aab8b95589fea463abd1029186bc))
+
 # [2.6.0-rc.1](https://github.com/janovix/auth/compare/v2.5.1-rc.1...v2.6.0-rc.1) (2026-03-27)
 
 

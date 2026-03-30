@@ -102,85 +102,92 @@ describe("LoginView", () => {
 	});
 
 	it("verifies OTP and redirects on success", async () => {
-		const sendOtp = createSendOtp();
-		const signInWithOtp = createSignInWithOtp();
+		const prevAml = process.env.NEXT_PUBLIC_AML_APP_URL;
+		process.env.NEXT_PUBLIC_AML_APP_URL = "https://app.example.com";
 
-		vi.mocked(sendOtp).mockResolvedValue({
-			success: true,
-			data: { message: "OTP sent" },
-			error: null,
-		});
+		try {
+			const sendOtp = createSendOtp();
+			const signInWithOtp = createSignInWithOtp();
 
-		vi.mocked(signInWithOtp).mockResolvedValue({
-			success: true,
-			data: {
-				user: {
-					id: "user-123",
-					name: "Ana García",
-					email: "ana@example.com",
-					image: null,
-					createdAt: new Date(),
-					updatedAt: new Date(),
-					emailVerified: true,
+			vi.mocked(sendOtp).mockResolvedValue({
+				success: true,
+				data: { message: "OTP sent" },
+				error: null,
+			});
+
+			vi.mocked(signInWithOtp).mockResolvedValue({
+				success: true,
+				data: {
+					user: {
+						id: "user-123",
+						name: "Ana García",
+						email: "ana@example.com",
+						image: null,
+						createdAt: new Date(),
+						updatedAt: new Date(),
+						emailVerified: true,
+					},
+					session: {
+						id: "session-123",
+						userId: "user-123",
+						token: "token-123",
+						expiresAt: new Date(Date.now() + 3600 * 1000),
+						createdAt: new Date(),
+						updatedAt: new Date(),
+					},
 				},
-				session: {
-					id: "session-123",
-					userId: "user-123",
-					token: "token-123",
-					expiresAt: new Date(Date.now() + 3600 * 1000),
-					createdAt: new Date(),
-					updatedAt: new Date(),
-				},
-			},
-			error: null,
-		});
+				error: null,
+			});
 
-		renderWithProviders(
-			<LoginView
-				redirectTo="https://app.example.com"
-				sendOtp={sendOtp}
-				signInWithOtp={signInWithOtp}
-			/>,
-		);
-		const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+			renderWithProviders(
+				<LoginView
+					redirectTo="https://app.example.com"
+					sendOtp={sendOtp}
+					signInWithOtp={signInWithOtp}
+				/>,
+			);
+			const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
 
-		// Step 1: Enter email
-		const emailInputs = screen.getAllByPlaceholderText("tu@empresa.com");
-		const emailInput = emailInputs[emailInputs.length - 1];
-		await user.type(emailInput, "ana@example.com");
+			// Step 1: Enter email
+			const emailInputs = screen.getAllByPlaceholderText("tu@empresa.com");
+			const emailInput = emailInputs[emailInputs.length - 1];
+			await user.type(emailInput, "ana@example.com");
 
-		const submitButtons = screen.getAllByRole("button", {
-			name: /enviar código/i,
-		});
-		const submitButton = submitButtons[submitButtons.length - 1];
-		fireEvent.click(submitButton);
+			const submitButtons = screen.getAllByRole("button", {
+				name: /enviar código/i,
+			});
+			const submitButton = submitButtons[submitButtons.length - 1];
+			fireEvent.click(submitButton);
 
-		// Wait for OTP input to appear
-		await waitFor(() => {
-			expect(
-				screen.getByLabelText(/código de verificación/i),
-			).toBeInTheDocument();
-		});
+			// Wait for OTP input to appear
+			await waitFor(() => {
+				expect(
+					screen.getByLabelText(/código de verificación/i),
+				).toBeInTheDocument();
+			});
 
-		// Step 2: Enter OTP (6 digits)
-		const otpInput = screen.getByLabelText(/código de verificación/i);
-		await user.type(otpInput, "123456");
+			// Step 2: Enter OTP (6 digits)
+			const otpInput = screen.getByLabelText(/código de verificación/i);
+			await user.type(otpInput, "123456");
 
-		// Verify OTP was submitted
-		await waitFor(() => {
-			expect(signInWithOtp).toHaveBeenCalledWith("ana@example.com", "123456");
-		});
+			// Verify OTP was submitted
+			await waitFor(() => {
+				expect(signInWithOtp).toHaveBeenCalledWith("ana@example.com", "123456");
+			});
 
-		// Should show success animation with redirecting message
-		await waitFor(() => {
-			expect(screen.getByText(/redirigiendo/i)).toBeInTheDocument();
-		});
+			// Should show success animation with redirecting message
+			await waitFor(() => {
+				expect(screen.getByText(/redirigiendo/i)).toBeInTheDocument();
+			});
 
-		// Advance timers to trigger redirect after success animation
-		await vi.advanceTimersByTimeAsync(3000);
+			// Advance timers to trigger redirect after success animation
+			await vi.advanceTimersByTimeAsync(3000);
 
-		// Check redirect happened
-		expect(window.location.href).toBe("https://app.example.com");
+			// Check redirect happened
+			expect(window.location.href).toBe("https://app.example.com");
+		} finally {
+			process.env.NEXT_PUBLIC_AML_APP_URL = prevAml;
+		}
 	});
 
 	it("shows error when OTP sending fails", async () => {

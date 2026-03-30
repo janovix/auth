@@ -2,49 +2,20 @@
 
 import { usePathname } from "next/navigation";
 
-import { ThemeSwitcher, LanguageSwitcher } from "@algenium/blocks";
 import { GlobalAuroraBackground } from "@/components/aurora";
+import { NavSettingsBar } from "@/components/layout/NavSettingsBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
-import { useLanguage } from "@/contexts/language-context";
-import { useSessionSync } from "@/lib/auth/useSessionSync";
-
-const languages = [
-	{ key: "en", label: "EN", nativeName: "English" },
-	{ key: "es", label: "ES", nativeName: "Español" },
-];
 import { AuroraProvider } from "@/contexts/aurora-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { OnboardingProvider } from "@/contexts/onboarding-context";
 import { PageStatusProvider } from "@/contexts/page-status-context";
 import { TurnstileProvider } from "@/contexts/turnstile-context";
+import { useSessionSync } from "@/lib/auth/useSessionSync";
 
 // Turnstile site key from environment variable
 // In production, this comes from Cloudflare Dashboard
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
-
-function SettingsBar() {
-	const { language, setLanguage, t } = useLanguage();
-	return (
-		<div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
-			<LanguageSwitcher
-				languages={languages}
-				currentLanguage={language}
-				onLanguageChange={(key) => setLanguage(key as "en" | "es")}
-				labels={{ language: t("language.label") }}
-				showIcon
-			/>
-			<ThemeSwitcher
-				labels={{
-					theme: t("theme.label"),
-					system: t("theme.system"),
-					light: t("theme.light"),
-					dark: t("theme.dark"),
-				}}
-			/>
-		</div>
-	);
-}
 
 function AuthLayout({ children }: { children: React.ReactNode }) {
 	return (
@@ -53,8 +24,8 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
 				{/* Aurora background - always shown on auth pages */}
 				<GlobalAuroraBackground />
 
-				{/* Language and Theme pickers - bottom right */}
-				<SettingsBar />
+				{/* Language and Theme pickers - top right */}
+				<NavSettingsBar />
 
 				{/* Main content area - scrollable, vertically centered when content fits */}
 				<div className="flex-1 w-full flex flex-col items-center px-4 md:px-10 py-6 sm:py-8 relative z-10 overflow-y-auto min-h-0">
@@ -110,7 +81,10 @@ export default function ClientLayout({
 				authContent
 			) : isOnboardingRoute ? (
 				<OnboardingProvider>
-					<AuroraProvider>{children}</AuroraProvider>
+					<AuroraProvider>
+						<NavSettingsBar />
+						{children}
+					</AuroraProvider>
 				</OnboardingProvider>
 			) : (
 				// Settings and other routes - no SettingsBar (they have their own controls in the header)

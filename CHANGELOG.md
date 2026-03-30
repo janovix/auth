@@ -1,3 +1,29 @@
+# [2.6.0-rc.2](https://github.com/janovix/auth/compare/v2.6.0-rc.1...v2.6.0-rc.2) (2026-03-30)
+
+
+### Features
+
+* enhance redirect handling and UI components ([6e9043b](https://github.com/janovix/auth/commit/6e9043b48995aab8b95589fea463abd1029186bc))
+
+# [2.6.0-rc.1](https://github.com/janovix/auth/compare/v2.5.1-rc.1...v2.6.0-rc.1) (2026-03-27)
+
+
+### Bug Fixes
+
+* **TaxComplianceBanner:** update styles for improved layout and responsiveness ([a06c1fd](https://github.com/janovix/auth/commit/a06c1fd2a479a600069958b192e0db40e6f377d8))
+
+
+### Features
+
+* **products:** implement products page and update middleware for product access ([dc20e41](https://github.com/janovix/auth/commit/dc20e415585dab88e9db6bfbf8cb74581eaae7ee))
+
+## [2.5.1-rc.1](https://github.com/janovix/auth/compare/v2.5.0...v2.5.1-rc.1) (2026-03-26)
+
+
+### Bug Fixes
+
+* **pricing:** correct regular amount for business plan in promo config ([f7d1c87](https://github.com/janovix/auth/commit/f7d1c878485b814f970fafebef144aafa12b46ad))
+
 ## [2.5.1](https://github.com/janovix/auth/compare/v2.5.0...v2.5.1) (2026-03-26)
 
 

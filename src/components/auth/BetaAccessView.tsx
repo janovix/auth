@@ -5,15 +5,10 @@ import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { Clock, LogIn, Mail } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import { ThemeSwitcher, LanguageSwitcher } from "@algenium/blocks";
+import { NavSettingsBar } from "@/components/layout/NavSettingsBar";
 import { Logo } from "@/components/Logo";
 import { Button, Card, CardContent } from "@/components/ui";
 import { useLanguage } from "@/contexts/language-context";
-
-const languages = [
-	{ key: "en", label: "EN", nativeName: "English" },
-	{ key: "es", label: "ES", nativeName: "Español" },
-];
 
 /**
  * BetaAccessView displays a waiting page for users with "visitor" role.
@@ -29,7 +24,7 @@ const languages = [
  * to the login page.
  */
 export const BetaAccessView = () => {
-	const { language, setLanguage, t } = useLanguage();
+	const { t } = useLanguage();
 	const session = useAuthSession();
 	const data = session.data;
 	const signOutAttempted = useRef(false);
@@ -51,7 +46,8 @@ export const BetaAccessView = () => {
 	const userName = data?.user?.name || data?.user?.email?.split("@")[0] || "";
 
 	return (
-		<div className="w-full flex justify-center my-auto pt-6 px-3">
+		<div className="relative w-full flex justify-center my-auto pt-6 px-3">
+			<NavSettingsBar />
 			<div className="w-full max-w-lg">
 				{/* Header with Logo and Icon */}
 				<div className="text-center mb-8">
@@ -112,25 +108,6 @@ export const BetaAccessView = () => {
 						</div>
 					</CardContent>
 				</Card>
-
-				{/* Footer with Language/Theme Switchers */}
-				<div className="border-t border-border pt-6 mt-6 flex items-center justify-between">
-					<LanguageSwitcher
-						languages={languages}
-						currentLanguage={language}
-						onLanguageChange={(key) => setLanguage(key as "en" | "es")}
-						labels={{ language: t("language.label") }}
-						showIcon
-					/>
-					<ThemeSwitcher
-						labels={{
-							theme: t("theme.label"),
-							system: t("theme.system"),
-							light: t("theme.light"),
-							dark: t("theme.dark"),
-						}}
-					/>
-				</div>
 			</div>
 		</div>
 	);

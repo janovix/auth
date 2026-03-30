@@ -281,6 +281,7 @@ const translations = {
 		"settings.nav.organizations": "Organizations",
 		"settings.nav.signOut": "Sign out",
 		"settings.nav.products": "Products",
+		"settings.nav.productsHub": "Product hub",
 		"settings.nav.aml": "AML",
 		"settings.nav.watchlist": "Watchlist",
 		"settings.nav.active": "Active",
@@ -292,6 +293,8 @@ const translations = {
 		"appSwitcher.title": "Janovix Apps",
 		"appSwitcher.homepage": "Homepage",
 		"appSwitcher.homepageDescription": "Main website",
+		"appSwitcher.products": "Products",
+		"appSwitcher.productsDescription": "Your apps and subscriptions",
 		"appSwitcher.aml": "AML Platform",
 		"appSwitcher.amlDescription": "Anti-money laundering",
 		"appSwitcher.watchlist": "Watchlist",
@@ -299,6 +302,22 @@ const translations = {
 		"appSwitcher.settings": "Settings",
 		"appSwitcher.settingsDescription": "Account & organization",
 		"appSwitcher.currentApp": "Current",
+		// Products hub (/products)
+		"products.loading": "Loading your products…",
+		"products.retry": "Retry",
+		"products.title": "Your products",
+		"products.description":
+			"Open the Janovix apps included in your plan for the active organization.",
+		"products.activeOrg": "Active organization: {name}",
+		"products.aml.name": "AML compliance",
+		"products.aml.description":
+			"Client onboarding, notices, alerts, reports, and compliance workflows.",
+		"products.watchlist.name": "Watchlist screening",
+		"products.watchlist.description":
+			"Search sanctions and watchlists for names and entities.",
+		"products.notIncluded": "Not included in your current plan.",
+		"products.upgradeCta": "View plans",
+		"products.openProduct": "Open app",
 		// Mobile sidebar
 		"mobileSidebar.close": "Close menu",
 		"mobileSidebar.navigation": "Navigation",
@@ -1336,6 +1355,7 @@ const translations = {
 		"settings.nav.organizations": "Organizaciones",
 		"settings.nav.signOut": "Cerrar sesión",
 		"settings.nav.products": "Productos",
+		"settings.nav.productsHub": "Centro de productos",
 		"settings.nav.aml": "AML",
 		"settings.nav.watchlist": "Watchlist",
 		"settings.nav.active": "Activo",
@@ -1347,6 +1367,8 @@ const translations = {
 		"appSwitcher.title": "Apps de Janovix",
 		"appSwitcher.homepage": "Página principal",
 		"appSwitcher.homepageDescription": "Sitio web principal",
+		"appSwitcher.products": "Productos",
+		"appSwitcher.productsDescription": "Tus aplicaciones y suscripción",
 		"appSwitcher.aml": "Plataforma AML",
 		"appSwitcher.amlDescription": "Anti-lavado de dinero",
 		"appSwitcher.watchlist": "Lista de vigilancia",
@@ -1354,6 +1376,22 @@ const translations = {
 		"appSwitcher.settings": "Configuración",
 		"appSwitcher.settingsDescription": "Cuenta y organización",
 		"appSwitcher.currentApp": "Actual",
+		// Products hub (/products)
+		"products.loading": "Cargando tus productos…",
+		"products.retry": "Reintentar",
+		"products.title": "Tus productos",
+		"products.description":
+			"Abre las aplicaciones Janovix incluidas en tu plan para la organización activa.",
+		"products.activeOrg": "Organización activa: {name}",
+		"products.aml.name": "Cumplimiento AML",
+		"products.aml.description":
+			"Altas de clientes, avisos, alertas, informes y flujos de cumplimiento.",
+		"products.watchlist.name": "Watchlist",
+		"products.watchlist.description":
+			"Búsqueda en listas de sanciones y vigilancia para personas y entidades.",
+		"products.notIncluded": "No incluido en tu plan actual.",
+		"products.upgradeCta": "Ver planes",
+		"products.openProduct": "Abrir aplicación",
 		// Mobile sidebar
 		"mobileSidebar.close": "Cerrar menú",
 		"mobileSidebar.navigation": "Navegación",

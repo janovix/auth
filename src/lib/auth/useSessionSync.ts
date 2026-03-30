@@ -20,7 +20,7 @@ import {
 	type SessionSyncMessage,
 } from "./sessionSync";
 import { clearSession } from "./sessionStore";
-import { getAmlAppUrl } from "./authCoreConfig";
+import { resolveSafeRedirectUrl } from "./safeRedirect";
 
 /**
  * Minimum interval (ms) between revalidations triggered by visibilitychange.
@@ -67,6 +67,7 @@ export function useSessionSync(): void {
 				void revalidateSession().then((isValid) => {
 					if (isValid) {
 						// Session is now valid - if we're on a public auth route, redirect to app
+						const pathname = window.location.pathname;
 						const publicAuthRoutes = [
 							"/login",
 							"/",
@@ -74,16 +75,20 @@ export function useSessionSync(): void {
 							"/recover",
 							"/beta-access",
 						];
-						const isOnPublicRoute = publicAuthRoutes.some((route) =>
-							window.location.pathname.startsWith(route),
-						);
+						const isOnPublicRoute = publicAuthRoutes.some((route) => {
+							if (route === "/") {
+								return pathname === "/";
+							}
+							return pathname === route || pathname.startsWith(`${route}/`);
+						});
 
 						if (isOnPublicRoute) {
-							// Check for redirect_to query parameter (same as middleware logic)
 							const urlParams = new URLSearchParams(window.location.search);
 							const redirectTo = urlParams.get("redirect_to");
-							const redirectUrl = redirectTo || getAmlAppUrl();
-							window.location.href = redirectUrl;
+							window.location.href = resolveSafeRedirectUrl(
+								redirectTo,
+								window.location.origin,
+							);
 						}
 					}
 				});

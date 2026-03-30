@@ -25,7 +25,14 @@ import {
 import type { NotificationSoundType } from "@/lib/settings/types";
 import { getSubscriptionStatus } from "@/lib/billing";
 import { NotificationsProvider } from "@/contexts/notifications-context";
-import { NotificationsWidget } from "@algenium/blocks";
+import {
+	LanguageSwitcher,
+	NotificationsWidget,
+	ThemeSwitcher,
+} from "@algenium/blocks";
+import { useLanguage } from "@/contexts/language-context";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { SUPPORTED_LANGUAGES } from "@/lib/i18n/supportedLanguages";
 
 interface SettingsLayoutClientProps {
 	children: React.ReactNode;
@@ -52,6 +59,7 @@ function SettingsLayoutInner({
 	const searchParams = useSearchParams();
 	const router = useRouter();
 	const { data: session } = useAuthSession();
+	const { language, setLanguage, t } = useLanguage();
 
 	const activeOrgId = (
 		session?.session as { activeOrganizationId?: string } | undefined
@@ -493,31 +501,57 @@ function SettingsLayoutInner({
 			/>
 			<SidebarInset className="flex h-screen flex-col overflow-hidden">
 				{/* Header - Fixed navbar */}
-				<header className="z-50 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 shadow-xs">
-					<SidebarTrigger className="-ml-1" />
-					<Separator orientation="vertical" className="mx-2 h-6" />
-					<div className="flex-1 min-w-0">
-						<NavBreadcrumb />
-					</div>
-					<div className="flex shrink-0 items-center gap-2">
-						<NavbarClock
-							timezone={effectiveTimezone || undefined}
-							defaultFormat={effectiveClockFormat}
-							size="sm"
-							showTimezoneMismatch={Boolean(effectiveTimezone)}
-						/>
-						{/* NotificationsWidget now consumes data from BlocksNotificationsContext automatically */}
-						<NotificationsWidget
-							onNotificationClick={handleNotificationClick}
-							size="md"
-							maxVisible={50}
-							playSound={notificationSound}
-							showPulse={true}
-							soundType={notificationSoundType}
-							pulseStyle="ring"
-						/>
-					</div>
-				</header>
+				<TooltipProvider delayDuration={0}>
+					<header className="z-50 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 shadow-xs">
+						<SidebarTrigger className="-ml-1" />
+						<Separator orientation="vertical" className="mx-2 h-6" />
+						<div className="flex-1 min-w-0">
+							<NavBreadcrumb />
+						</div>
+						<div className="flex shrink-0 items-center gap-2">
+							<LanguageSwitcher
+								languages={SUPPORTED_LANGUAGES}
+								currentLanguage={language}
+								onLanguageChange={(key) => setLanguage(key as "en" | "es")}
+								labels={{ language: t("language.label") }}
+								variant="mini"
+								size="sm"
+								shape="rounded"
+								side="bottom"
+								align="end"
+							/>
+							<ThemeSwitcher
+								variant="mini"
+								size="sm"
+								shape="rounded"
+								side="bottom"
+								align="end"
+								labels={{
+									theme: t("theme.label"),
+									system: t("theme.system"),
+									light: t("theme.light"),
+									dark: t("theme.dark"),
+								}}
+							/>
+							<NavbarClock
+								timezone={effectiveTimezone || undefined}
+								defaultFormat={effectiveClockFormat}
+								size="sm"
+								showTimezoneMismatch={Boolean(effectiveTimezone)}
+							/>
+							{/* NotificationsWidget now consumes data from BlocksNotificationsContext automatically */}
+							<NotificationsWidget
+								onNotificationClick={handleNotificationClick}
+								size="md"
+								maxVisible={50}
+								playSound={notificationSound}
+								showPulse={true}
+								soundType={notificationSoundType}
+								pulseStyle="ring"
+							/>
+						</div>
+					</header>
+				</TooltipProvider>
 
 				{/* Main Content */}
 				<main className="flex min-h-0 flex-1 flex-col overflow-y-auto">

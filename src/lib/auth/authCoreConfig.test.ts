@@ -1,6 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getAuthCoreBaseUrl, getAuthEnvironment } from "./authCoreConfig";
+import {
+	getAuthCoreBaseUrl,
+	getAuthEnvironment,
+	getDefaultAppUrlForPlan,
+} from "./authCoreConfig";
 
 describe("authCoreConfig", () => {
 	const originalEnv = process.env;
@@ -54,6 +58,30 @@ describe("authCoreConfig", () => {
 			global.window = { location: {} } as unknown as Window & typeof globalThis;
 			const env = getAuthEnvironment();
 			expect(env).toBe("dev");
+		});
+	});
+
+	describe("getDefaultAppUrlForPlan", () => {
+		it("returns watchlist URL for watchlist plan", () => {
+			process.env.NEXT_PUBLIC_AUTH_SERVICE_URL =
+				"https://auth-svc.example.workers.dev";
+			process.env.NEXT_PUBLIC_AML_APP_URL = "https://aml.example.com";
+			process.env.NEXT_PUBLIC_WATCHLIST_APP_URL = "https://wl.example.com";
+			global.window = { location: {} } as unknown as Window & typeof globalThis;
+			expect(getDefaultAppUrlForPlan("watchlist")).toBe(
+				"https://wl.example.com",
+			);
+		});
+
+		it("returns AML URL for business plan", () => {
+			process.env.NEXT_PUBLIC_AUTH_SERVICE_URL =
+				"https://auth-svc.example.workers.dev";
+			process.env.NEXT_PUBLIC_AML_APP_URL = "https://aml.example.com";
+			process.env.NEXT_PUBLIC_WATCHLIST_APP_URL = "https://wl.example.com";
+			global.window = { location: {} } as unknown as Window & typeof globalThis;
+			expect(getDefaultAppUrlForPlan("business")).toBe(
+				"https://aml.example.com",
+			);
 		});
 	});
 });

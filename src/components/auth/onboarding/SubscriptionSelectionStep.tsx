@@ -14,14 +14,8 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ThemeSwitcher, LanguageSwitcher } from "@algenium/blocks";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
-
-const languages = [
-	{ key: "en", label: "EN", nativeName: "English" },
-	{ key: "es", label: "ES", nativeName: "Español" },
-];
 import { useOnboarding, type Plan } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
 import { signOut } from "@/lib/auth/authActions";
@@ -40,9 +34,10 @@ import { useToast } from "@/hooks/use-toast";
 import { PlanSelectionGrid } from "@/components/PlanSelectionGrid";
 import { EnterpriseCard } from "@/components/EnterpriseCard";
 import { WatchlistCard } from "@/components/WatchlistCard";
+import { isSafeRedirectToQueryValue } from "@/lib/auth/safeRedirect";
 
 export function SubscriptionSelectionStep() {
-	const { language, setLanguage, t } = useLanguage();
+	const { t } = useLanguage();
 	const { toast } = useToast();
 	const router = useRouter();
 	const searchParams = useSearchParams();
@@ -95,10 +90,11 @@ export function SubscriptionSelectionStep() {
 			};
 			setSelectedPlan(selectedPlan);
 
-			// Get current URL for success/cancel redirects
+			// Opaque plan slug in redirect_to — middleware resolves to AML/Watchlist URL
 			const baseUrl = window.location.origin;
-			const successUrl = `${baseUrl}/onboarding?subscription_success=true`;
-			const cancelUrl = `${baseUrl}/onboarding?subscription_canceled=true`;
+			const planToken = encodeURIComponent(plan.name);
+			const successUrl = `${baseUrl}/onboarding?subscription_success=true&redirect_to=${planToken}`;
+			const cancelUrl = `${baseUrl}/onboarding?subscription_canceled=true&redirect_to=${planToken}`;
 
 			const result = await startSubscriptionFlow(
 				selectedPlan,
@@ -123,7 +119,14 @@ export function SubscriptionSelectionStep() {
 		const redirectTo = searchParams.get("redirect_to");
 		const editUrl = new URL("/onboarding", window.location.origin);
 		editUrl.searchParams.set("edit_profile", "true");
-		if (redirectTo) {
+		if (
+			redirectTo &&
+			isSafeRedirectToQueryValue(
+				redirectTo,
+				window.location.origin,
+				process.env,
+			)
+		) {
 			editUrl.searchParams.set("redirect_to", redirectTo);
 		}
 		router.push(editUrl.toString());
@@ -314,24 +317,7 @@ export function SubscriptionSelectionStep() {
 				</Accordion>
 			</SettingsSection>
 
-			<div className="border-t border-border pt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-				<div className="flex items-center gap-2">
-					<LanguageSwitcher
-						languages={languages}
-						currentLanguage={language}
-						onLanguageChange={(key) => setLanguage(key as "en" | "es")}
-						labels={{ language: t("language.label") }}
-						showIcon
-					/>
-					<ThemeSwitcher
-						labels={{
-							theme: t("theme.label"),
-							system: t("theme.system"),
-							light: t("theme.light"),
-							dark: t("theme.dark"),
-						}}
-					/>
-				</div>
+			<div className="border-t border-border pt-6 flex flex-col sm:flex-row sm:items-center justify-end gap-4">
 				<Button
 					variant="outline"
 					size="sm"

@@ -12,7 +12,6 @@ import {
 	type SendOtpOptions,
 } from "@/lib/auth/authActions";
 import { useResendCooldown } from "@/hooks/useResendCooldown";
-import { getAmlAppUrl } from "@/lib/auth/authCoreConfig";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	AlertTriangle,
@@ -66,6 +65,11 @@ import {
 	InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
+import {
+	DEFAULT_POST_AUTH_ROUTE,
+	isSafeRedirectToQueryValue,
+	resolveSafeRedirectUrl,
+} from "@/lib/auth/safeRedirect";
 import { useAurora } from "@/contexts/aurora-context";
 import { useLanguage } from "@/contexts/language-context";
 import { LoginSuccessAnimation } from "./LoginSuccessAnimation";
@@ -368,13 +372,23 @@ export const LoginView = ({
 		const needsOnboarding = !userName;
 
 		if (needsOnboarding) {
-			// Redirect to onboarding, preserving the original redirect destination
 			const onboardingUrl = new URL("/onboarding", window.location.origin);
-			const finalRedirect = redirectTo || getAmlAppUrl();
-			onboardingUrl.searchParams.set("redirect_to", finalRedirect);
+			const safeRedirectParam =
+				redirectTo &&
+				isSafeRedirectToQueryValue(
+					redirectTo,
+					window.location.origin,
+					process.env,
+				)
+					? redirectTo
+					: DEFAULT_POST_AUTH_ROUTE;
+			onboardingUrl.searchParams.set("redirect_to", safeRedirectParam);
 			redirectUrlRef.current = onboardingUrl.toString();
 		} else {
-			redirectUrlRef.current = redirectTo || getAmlAppUrl();
+			redirectUrlRef.current = resolveSafeRedirectUrl(
+				redirectTo ?? null,
+				window.location.origin,
+			);
 		}
 		setShowSuccessAnimation(true);
 	}, [userEmail, otpValue, signInWithOtp, redirectTo, setStateModifier, t]);
@@ -462,9 +476,10 @@ export const LoginView = ({
 			// Sign in with Google - this will redirect to Google OAuth flow
 			// callbackURL is where the user should be sent AFTER successful OAuth
 			// (not the OAuth callback endpoint - that's automatic at /api/auth/callback/google)
-			const finalRedirectUrl = redirectTo
-				? redirectTo
-				: `${window.location.origin}`;
+			const finalRedirectUrl = resolveSafeRedirectUrl(
+				redirectTo ?? null,
+				window.location.origin,
+			);
 
 			await authClient.signIn.social({
 				provider: "google",
@@ -492,9 +507,10 @@ export const LoginView = ({
 			setIsPasskeyLoading(true);
 			setStateModifier("loading");
 
-			const finalRedirectUrl = redirectTo
-				? redirectTo
-				: `${window.location.origin}`;
+			const finalRedirectUrl = resolveSafeRedirectUrl(
+				redirectTo ?? null,
+				window.location.origin,
+			);
 
 			const { data, error } = await authClient.signIn.passkey();
 			if (error) {

@@ -22,6 +22,8 @@ describe("middleware", () => {
 			"https://auth-svc.example.workers.dev";
 		process.env.NEXT_PUBLIC_AUTH_APP_URL = "https://auth.example.workers.dev";
 		process.env.NEXT_PUBLIC_AML_APP_URL = "https://app.example.workers.dev";
+		process.env.NEXT_PUBLIC_WATCHLIST_APP_URL =
+			"https://watchlist.example.workers.dev";
 	});
 
 	afterEach(() => {
@@ -45,6 +47,16 @@ describe("middleware", () => {
 
 		it("should redirect to login when accessing settings routes", async () => {
 			const request = new NextRequest("https://auth.example.com/settings");
+			const response = await middleware(request);
+
+			expect(response.status).toBe(307);
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/login",
+			);
+		});
+
+		it("should redirect to login when accessing products route", async () => {
+			const request = new NextRequest("https://auth.example.com/products");
 			const response = await middleware(request);
 
 			expect(response.status).toBe(307);
@@ -114,13 +126,21 @@ describe("middleware", () => {
 			expect(response.headers.get("location")).toBeNull();
 		});
 
+		it("should allow access to products route", async () => {
+			const request = new NextRequest("https://auth.example.com/products");
+			const response = await middleware(request);
+
+			expect(response.status).toBe(200);
+			expect(response.headers.get("location")).toBeNull();
+		});
+
 		it("should redirect away from login page", async () => {
 			const request = new NextRequest("https://auth.example.com/login");
 			const response = await middleware(request);
 
 			expect(response.status).toBe(307);
-			expect(response.headers.get("location")).toContain(
-				"https://app.example.workers.dev",
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/products",
 			);
 		});
 
@@ -129,8 +149,8 @@ describe("middleware", () => {
 			const response = await middleware(request);
 
 			expect(response.status).toBe(307);
-			expect(response.headers.get("location")).toContain(
-				"https://app.example.workers.dev",
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/products",
 			);
 		});
 
@@ -139,12 +159,12 @@ describe("middleware", () => {
 			const response = await middleware(request);
 
 			expect(response.status).toBe(307);
-			expect(response.headers.get("location")).toContain(
-				"https://app.example.workers.dev",
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/products",
 			);
 		});
 
-		it("should use redirect_to parameter when redirecting from onboarding", async () => {
+		it("should reject untrusted redirect_to when redirecting from onboarding", async () => {
 			const request = new NextRequest(
 				"https://auth.example.com/onboarding?redirect_to=https://custom.example.com/dashboard",
 			);
@@ -152,7 +172,32 @@ describe("middleware", () => {
 
 			expect(response.status).toBe(307);
 			expect(response.headers.get("location")).toBe(
-				"https://custom.example.com/dashboard",
+				"https://auth.example.com/products",
+			);
+		});
+
+		it("should honor trusted redirect_to when redirecting from onboarding", async () => {
+			const request = new NextRequest(
+				"https://auth.example.com/onboarding?redirect_to=https://app.example.workers.dev/dashboard",
+			);
+			const response = await middleware(request);
+
+			expect(response.status).toBe(307);
+			expect(response.headers.get("location")).toBe(
+				"https://app.example.workers.dev/dashboard",
+			);
+		});
+
+		it("should resolve plan slug redirect_to to Watchlist app URL", async () => {
+			const request = new NextRequest(
+				"https://auth.example.com/onboarding?redirect_to=watchlist",
+			);
+			const response = await middleware(request);
+
+			expect(response.status).toBe(307);
+			const loc = response.headers.get("location");
+			expect(loc?.replace(/\/$/, "")).toBe(
+				"https://watchlist.example.workers.dev",
 			);
 		});
 
@@ -290,11 +335,11 @@ describe("middleware", () => {
 			const location = response.headers.get("location");
 			expect(location).toContain("/onboarding");
 			expect(location).toContain(
-				"redirect_to=https%3A%2F%2Fapp.example.workers.dev",
+				"redirect_to=https%3A%2F%2Fauth.example.com%2Fproducts",
 			);
 		});
 
-		it("should preserve existing redirect_to when redirecting to onboarding", async () => {
+		it("should not preserve untrusted redirect_to when redirecting to onboarding", async () => {
 			const request = new NextRequest(
 				"https://auth.example.com/login?redirect_to=https://custom.example.com/app",
 			);
@@ -304,7 +349,7 @@ describe("middleware", () => {
 			const location = response.headers.get("location");
 			expect(location).toContain("/onboarding");
 			expect(location).toContain(
-				"redirect_to=https%3A%2F%2Fcustom.example.com%2Fapp",
+				"redirect_to=https%3A%2F%2Fauth.example.com%2Fproducts",
 			);
 		});
 

@@ -13,6 +13,7 @@ import {
 	Circle,
 	Search,
 	LayoutDashboard,
+	LayoutGrid,
 	KeyRound,
 	Mail,
 } from "lucide-react";
@@ -40,15 +41,9 @@ import {
 	type Organization,
 } from "./OrganizationSwitcher";
 import { NavUser } from "./NavUser";
-import { ThemeSwitcher, LanguageSwitcher } from "@algenium/blocks";
 import { AppSwitcher } from "./AppSwitcher";
 import { getAmlAppUrl, getWatchlistAppUrl } from "@/lib/auth/authCoreConfig";
 import { useLanguage } from "@/contexts/language-context";
-
-const languages = [
-	{ key: "en", label: "EN", nativeName: "English" },
-	{ key: "es", label: "ES", nativeName: "Español" },
-];
 
 type NavItem = {
 	name: string;
@@ -79,7 +74,7 @@ export function AppSidebar({
 	pendingInvitationsCount = 0,
 	...props
 }: AppSidebarProps) {
-	const { language, setLanguage, t } = useLanguage();
+	const { t } = useLanguage();
 	const pathname = usePathname();
 	const router = useRouter();
 	const { isMobile, setOpenMobile } = useSidebar();
@@ -129,8 +124,19 @@ export function AppSidebar({
 		},
 	];
 
-	// Products navigation items (external links)
-	const productsNavItems = [
+	// Products: hub in-app + external product apps
+	const productsNavItems: {
+		name: string;
+		href: string;
+		icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+		external: boolean;
+	}[] = [
+		{
+			name: t("settings.nav.productsHub"),
+			href: "/products",
+			icon: LayoutGrid,
+			external: false,
+		},
 		{
 			name: t("settings.nav.aml"),
 			href: getAmlAppUrl(),
@@ -378,19 +384,35 @@ export function AppSidebar({
 						<SidebarMenu>
 							{productsNavItems.map((item) => {
 								const Icon = item.icon;
+								const isActive = !item.external && isNavActive(item.href);
 
 								return (
-									<SidebarMenuItem key={item.name}>
-										<SidebarMenuButton asChild tooltip={item.name}>
-											<a
-												href={item.href}
-												onClick={handleLinkClick}
-												target="_blank"
-												rel="noopener noreferrer"
-											>
-												<Icon />
-												<span>{item.name}</span>
-											</a>
+									<SidebarMenuItem key={item.href}>
+										<SidebarMenuButton
+											asChild
+											tooltip={item.name}
+											isActive={isActive}
+										>
+											{item.external ? (
+												<a
+													href={item.href}
+													onClick={handleLinkClick}
+													target="_blank"
+													rel="noopener noreferrer"
+												>
+													<Icon />
+													<span>{item.name}</span>
+												</a>
+											) : (
+												<Link
+													href={item.href}
+													prefetch={false}
+													onClick={handleLinkClick}
+												>
+													<Icon />
+													<span>{item.name}</span>
+												</Link>
+											)}
 										</SidebarMenuButton>
 									</SidebarMenuItem>
 								);
@@ -401,62 +423,6 @@ export function AppSidebar({
 			</SidebarContent>
 
 			<SidebarFooter className="border-t border-sidebar-border">
-				{/* Language and Theme Switchers */}
-				<div className="flex items-center justify-between px-2 py-2 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:gap-1">
-					<LanguageSwitcher
-						languages={languages}
-						currentLanguage={language}
-						onLanguageChange={(key) => setLanguage(key as "en" | "es")}
-						labels={{ language: t("language.label") }}
-						variant="default"
-						size="sm"
-						shape="rounded"
-						showIcon
-						side="right"
-						align="start"
-						className="group-data-[collapsible=icon]:hidden"
-					/>
-					<LanguageSwitcher
-						languages={languages}
-						currentLanguage={language}
-						onLanguageChange={(key) => setLanguage(key as "en" | "es")}
-						labels={{ language: t("language.label") }}
-						variant="mini"
-						size="sm"
-						shape="rounded"
-						side="right"
-						align="center"
-						className="hidden group-data-[collapsible=icon]:flex"
-					/>
-					<ThemeSwitcher
-						variant="default"
-						size="sm"
-						shape="rounded"
-						side="right"
-						align="start"
-						className="group-data-[collapsible=icon]:hidden"
-						labels={{
-							theme: t("theme.label"),
-							system: t("theme.system"),
-							light: t("theme.light"),
-							dark: t("theme.dark"),
-						}}
-					/>
-					<ThemeSwitcher
-						variant="mini"
-						size="sm"
-						shape="rounded"
-						side="right"
-						align="center"
-						className="hidden group-data-[collapsible=icon]:flex"
-						labels={{
-							theme: t("theme.label"),
-							system: t("theme.system"),
-							light: t("theme.light"),
-							dark: t("theme.dark"),
-						}}
-					/>
-				</div>
 				<NavUser user={user} isLoading={isPending} onLogout={handleLogout} />
 			</SidebarFooter>
 

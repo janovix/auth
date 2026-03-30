@@ -24,9 +24,9 @@ import {
 	useOnboarding,
 	type PendingInvitation,
 } from "@/contexts/onboarding-context";
-import { authClient } from "@/lib/auth/authClient";
 import { signOut } from "@/lib/auth/authActions";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
+import { resolveSafeRedirectUrl } from "@/lib/auth/safeRedirect";
 
 // Skeleton for loading state
 function InviteListSkeleton() {
@@ -304,8 +304,10 @@ export function InviteView() {
 
 		// Redirect after a short delay
 		setTimeout(() => {
-			const targetUrl = redirectTo || "/products";
-			window.location.href = targetUrl;
+			window.location.href = resolveSafeRedirectUrl(
+				redirectTo ?? null,
+				window.location.origin,
+			);
 		}, 1500);
 	};
 

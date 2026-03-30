@@ -22,6 +22,7 @@ import { useOnboarding } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
 import { signOut } from "@/lib/auth/authActions";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
+import { resolveSafeRedirectUrl } from "@/lib/auth/safeRedirect";
 import { cn } from "@/lib/utils";
 
 /**
@@ -231,9 +232,10 @@ export function CreateOrganizationStep({
 			}
 		}
 
-		// Success! Redirect to the target URL
-		const targetUrl = redirectTo || "/products";
-		window.location.href = targetUrl;
+		window.location.href = resolveSafeRedirectUrl(
+			redirectTo ?? null,
+			window.location.origin,
+		);
 	};
 
 	const isFormValid = orgName.trim() && slug.trim() && !slugError;

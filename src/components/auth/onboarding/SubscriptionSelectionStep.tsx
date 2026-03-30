@@ -34,7 +34,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PlanSelectionGrid } from "@/components/PlanSelectionGrid";
 import { EnterpriseCard } from "@/components/EnterpriseCard";
 import { WatchlistCard } from "@/components/WatchlistCard";
-import { getDefaultAppUrlForPlan } from "@/lib/auth/authCoreConfig";
+import { isSafeRedirectToQueryValue } from "@/lib/auth/safeRedirect";
 
 export function SubscriptionSelectionStep() {
 	const { t } = useLanguage();
@@ -90,11 +90,11 @@ export function SubscriptionSelectionStep() {
 			};
 			setSelectedPlan(selectedPlan);
 
-			// Preserve plan-based redirect through Stripe so watchlist-only users land on Watchlist
+			// Opaque plan slug in redirect_to — middleware resolves to AML/Watchlist URL
 			const baseUrl = window.location.origin;
-			const planTargetUrl = getDefaultAppUrlForPlan(plan.name);
-			const successUrl = `${baseUrl}/onboarding?subscription_success=true&redirect_to=${encodeURIComponent(planTargetUrl)}`;
-			const cancelUrl = `${baseUrl}/onboarding?subscription_canceled=true&redirect_to=${encodeURIComponent(planTargetUrl)}`;
+			const planToken = encodeURIComponent(plan.name);
+			const successUrl = `${baseUrl}/onboarding?subscription_success=true&redirect_to=${planToken}`;
+			const cancelUrl = `${baseUrl}/onboarding?subscription_canceled=true&redirect_to=${planToken}`;
 
 			const result = await startSubscriptionFlow(
 				selectedPlan,
@@ -119,7 +119,14 @@ export function SubscriptionSelectionStep() {
 		const redirectTo = searchParams.get("redirect_to");
 		const editUrl = new URL("/onboarding", window.location.origin);
 		editUrl.searchParams.set("edit_profile", "true");
-		if (redirectTo) {
+		if (
+			redirectTo &&
+			isSafeRedirectToQueryValue(
+				redirectTo,
+				window.location.origin,
+				process.env,
+			)
+		) {
 			editUrl.searchParams.set("redirect_to", redirectTo);
 		}
 		router.push(editUrl.toString());

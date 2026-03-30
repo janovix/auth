@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
 	Home,
@@ -145,45 +146,72 @@ export function AppSwitcher({
 					<DropdownMenuSeparator className="bg-white/10" />
 					{apps.map((app) => {
 						const Icon = app.icon;
+						const rowClass = "flex items-center gap-3";
 						return (
 							<DropdownMenuItem
 								key={app.id}
 								asChild
 								className="cursor-pointer rounded-lg p-3 mx-1 my-0.5"
 							>
-								<a
-									href={app.href}
-									target={app.external ? "_blank" : undefined}
-									rel={app.external ? "noopener noreferrer" : undefined}
-									className="flex items-center gap-3"
-								>
-									<div
-										className={cn(
-											"flex size-10 items-center justify-center rounded-lg",
-											app.current
-												? "bg-primary/20 text-primary border border-primary/30"
-												: "bg-muted text-muted-foreground",
-										)}
+								{app.external ? (
+									<a
+										href={app.href}
+										target="_blank"
+										rel="noopener noreferrer"
+										className={rowClass}
 									>
-										<Icon className="size-5" />
-									</div>
-									<div className="flex-1">
-										<div className="flex items-center gap-2">
-											<span className="font-medium">{app.name}</span>
-											{app.current && (
-												<span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-medium text-primary">
-													{t("appSwitcher.currentApp")}
-												</span>
+										<div
+											className={cn(
+												"flex size-10 items-center justify-center rounded-lg",
+												app.current
+													? "bg-primary/20 text-primary border border-primary/30"
+													: "bg-muted text-muted-foreground",
 											)}
+										>
+											<Icon className="size-5" />
 										</div>
-										<span className="text-xs text-muted-foreground">
-											{app.description}
-										</span>
-									</div>
-									{app.external && (
+										<div className="flex-1">
+											<div className="flex items-center gap-2">
+												<span className="font-medium">{app.name}</span>
+												{app.current && (
+													<span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-medium text-primary">
+														{t("appSwitcher.currentApp")}
+													</span>
+												)}
+											</div>
+											<span className="text-xs text-muted-foreground">
+												{app.description}
+											</span>
+										</div>
 										<ExternalLink className="size-4 text-muted-foreground" />
-									)}
-								</a>
+									</a>
+								) : (
+									<Link href={app.href} className={rowClass}>
+										<div
+											className={cn(
+												"flex size-10 items-center justify-center rounded-lg",
+												app.current
+													? "bg-primary/20 text-primary border border-primary/30"
+													: "bg-muted text-muted-foreground",
+											)}
+										>
+											<Icon className="size-5" />
+										</div>
+										<div className="flex-1">
+											<div className="flex items-center gap-2">
+												<span className="font-medium">{app.name}</span>
+												{app.current && (
+													<span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-medium text-primary">
+														{t("appSwitcher.currentApp")}
+													</span>
+												)}
+											</div>
+											<span className="text-xs text-muted-foreground">
+												{app.description}
+											</span>
+										</div>
+									</Link>
+								)}
 							</DropdownMenuItem>
 						);
 					})}
@@ -218,44 +246,68 @@ export function AppSwitcher({
 							<DropdownMenuSeparator />
 							{apps.map((app) => {
 								const Icon = app.icon;
+								const rowClass = "cursor-pointer gap-3 p-2 flex";
 								return (
-									<DropdownMenuItem
-										key={app.id}
-										asChild
-										className="cursor-pointer gap-3 p-2"
-									>
-										<a
-											href={app.href}
-											target={app.external ? "_blank" : undefined}
-											rel={app.external ? "noopener noreferrer" : undefined}
-										>
-											<div
-												className={cn(
-													"flex size-8 items-center justify-center rounded-md",
-													app.current
-														? "bg-primary text-primary-foreground"
-														: "bg-muted",
-												)}
+									<DropdownMenuItem key={app.id} asChild className={rowClass}>
+										{app.external ? (
+											<a
+												href={app.href}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="flex gap-3"
 											>
-												<Icon className="size-4" />
-											</div>
-											<div className="flex-1">
-												<div className="flex items-center gap-2">
-													<span className="font-medium">{app.name}</span>
-													{app.current && (
-														<span className="text-[10px] text-muted-foreground">
-															{t("appSwitcher.currentApp")}
-														</span>
+												<div
+													className={cn(
+														"flex size-8 items-center justify-center rounded-md",
+														app.current
+															? "bg-primary text-primary-foreground"
+															: "bg-muted",
 													)}
+												>
+													<Icon className="size-4" />
 												</div>
-												<span className="text-xs text-muted-foreground">
-													{app.description}
-												</span>
-											</div>
-											{app.external && (
+												<div className="flex-1">
+													<div className="flex items-center gap-2">
+														<span className="font-medium">{app.name}</span>
+														{app.current && (
+															<span className="text-[10px] text-muted-foreground">
+																{t("appSwitcher.currentApp")}
+															</span>
+														)}
+													</div>
+													<span className="text-xs text-muted-foreground">
+														{app.description}
+													</span>
+												</div>
 												<ExternalLink className="size-3.5 text-muted-foreground" />
-											)}
-										</a>
+											</a>
+										) : (
+											<Link href={app.href} className="flex gap-3">
+												<div
+													className={cn(
+														"flex size-8 items-center justify-center rounded-md",
+														app.current
+															? "bg-primary text-primary-foreground"
+															: "bg-muted",
+													)}
+												>
+													<Icon className="size-4" />
+												</div>
+												<div className="flex-1">
+													<div className="flex items-center gap-2">
+														<span className="font-medium">{app.name}</span>
+														{app.current && (
+															<span className="text-[10px] text-muted-foreground">
+																{t("appSwitcher.currentApp")}
+															</span>
+														)}
+													</div>
+													<span className="text-xs text-muted-foreground">
+														{app.description}
+													</span>
+												</div>
+											</Link>
+										)}
 									</DropdownMenuItem>
 								);
 							})}
@@ -292,44 +344,68 @@ export function AppSwitcher({
 						<DropdownMenuSeparator />
 						{apps.map((app) => {
 							const Icon = app.icon;
+							const rowClass = "cursor-pointer gap-3 p-2 flex";
 							return (
-								<DropdownMenuItem
-									key={app.id}
-									asChild
-									className="cursor-pointer gap-3 p-2"
-								>
-									<a
-										href={app.href}
-										target={app.external ? "_blank" : undefined}
-										rel={app.external ? "noopener noreferrer" : undefined}
-									>
-										<div
-											className={cn(
-												"flex size-8 items-center justify-center rounded-md",
-												app.current
-													? "bg-primary text-primary-foreground"
-													: "bg-muted",
-											)}
+								<DropdownMenuItem key={app.id} asChild className={rowClass}>
+									{app.external ? (
+										<a
+											href={app.href}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="flex gap-3"
 										>
-											<Icon className="size-4" />
-										</div>
-										<div className="flex-1">
-											<div className="flex items-center gap-2">
-												<span className="font-medium">{app.name}</span>
-												{app.current && (
-													<span className="text-[10px] text-muted-foreground">
-														{t("appSwitcher.currentApp")}
-													</span>
+											<div
+												className={cn(
+													"flex size-8 items-center justify-center rounded-md",
+													app.current
+														? "bg-primary text-primary-foreground"
+														: "bg-muted",
 												)}
+											>
+												<Icon className="size-4" />
 											</div>
-											<span className="text-xs text-muted-foreground">
-												{app.description}
-											</span>
-										</div>
-										{app.external && (
+											<div className="flex-1">
+												<div className="flex items-center gap-2">
+													<span className="font-medium">{app.name}</span>
+													{app.current && (
+														<span className="text-[10px] text-muted-foreground">
+															{t("appSwitcher.currentApp")}
+														</span>
+													)}
+												</div>
+												<span className="text-xs text-muted-foreground">
+													{app.description}
+												</span>
+											</div>
 											<ExternalLink className="size-3.5 text-muted-foreground" />
-										)}
-									</a>
+										</a>
+									) : (
+										<Link href={app.href} className="flex gap-3">
+											<div
+												className={cn(
+													"flex size-8 items-center justify-center rounded-md",
+													app.current
+														? "bg-primary text-primary-foreground"
+														: "bg-muted",
+												)}
+											>
+												<Icon className="size-4" />
+											</div>
+											<div className="flex-1">
+												<div className="flex items-center gap-2">
+													<span className="font-medium">{app.name}</span>
+													{app.current && (
+														<span className="text-[10px] text-muted-foreground">
+															{t("appSwitcher.currentApp")}
+														</span>
+													)}
+												</div>
+												<span className="text-xs text-muted-foreground">
+													{app.description}
+												</span>
+											</div>
+										</Link>
+									)}
 								</DropdownMenuItem>
 							);
 						})}

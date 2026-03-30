@@ -304,6 +304,7 @@ const translations = {
 		"appSwitcher.currentApp": "Current",
 		// Products hub (/products)
 		"products.loading": "Loading your products…",
+		"products.retry": "Retry",
 		"products.title": "Your products",
 		"products.description":
 			"Open the Janovix apps included in your plan for the active organization.",
@@ -1377,6 +1378,7 @@ const translations = {
 		"appSwitcher.currentApp": "Actual",
 		// Products hub (/products)
 		"products.loading": "Cargando tus productos…",
+		"products.retry": "Reintentar",
 		"products.title": "Tus productos",
 		"products.description":
 			"Abre las aplicaciones Janovix incluidas en tu plan para la organización activa.",

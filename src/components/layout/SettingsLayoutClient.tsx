@@ -32,6 +32,7 @@ import {
 } from "@algenium/blocks";
 import { useLanguage } from "@/contexts/language-context";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SUPPORTED_LANGUAGES } from "@/lib/i18n/supportedLanguages";
 
 interface SettingsLayoutClientProps {
 	children: React.ReactNode;
@@ -39,11 +40,6 @@ interface SettingsLayoutClientProps {
 }
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
-
-const SETTINGS_NAV_LANGUAGES = [
-	{ key: "en", label: "EN", nativeName: "English" },
-	{ key: "es", label: "ES", nativeName: "Español" },
-];
 
 /**
  * Helper to set cookie value
@@ -514,7 +510,7 @@ function SettingsLayoutInner({
 						</div>
 						<div className="flex shrink-0 items-center gap-2">
 							<LanguageSwitcher
-								languages={SETTINGS_NAV_LANGUAGES}
+								languages={SUPPORTED_LANGUAGES}
 								currentLanguage={language}
 								onLanguageChange={(key) => setLanguage(key as "en" | "es")}
 								labels={{ language: t("language.label") }}

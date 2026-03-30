@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import {
 	LayoutGrid,
@@ -8,6 +8,7 @@ import {
 	Search,
 	ArrowRight,
 	Loader2,
+	RefreshCw,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -86,10 +87,11 @@ export function ProductsView() {
 	const [features, setFeatures] = useState<Feature[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [retryKey, setRetryKey] = useState(0);
 
 	useEffect(() => {
 		let cancelled = false;
-		async function load() {
+		void (async () => {
 			setLoading(true);
 			setError(null);
 			try {
@@ -110,11 +112,14 @@ export function ProductsView() {
 					setLoading(false);
 				}
 			}
-		}
-		void load();
+		})();
 		return () => {
 			cancelled = true;
 		};
+	}, [retryKey]);
+
+	const handleRetry = useCallback(() => {
+		setRetryKey((k) => k + 1);
 	}, []);
 
 	const access = useMemo(
@@ -122,7 +127,7 @@ export function ProductsView() {
 		[subscription, features],
 	);
 
-	if (sessionPending || loading) {
+	if (sessionPending) {
 		return (
 			<div className="flex min-h-[40vh] flex-col items-center justify-center gap-4">
 				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -133,8 +138,32 @@ export function ProductsView() {
 
 	if (error) {
 		return (
-			<div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-				{error}
+			<div className="space-y-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+				<p>{error}</p>
+				<Button
+					type="button"
+					variant="outline"
+					size="sm"
+					className="border-destructive/40"
+					disabled={loading}
+					onClick={handleRetry}
+				>
+					{loading ? (
+						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+					) : (
+						<RefreshCw className="mr-2 h-4 w-4" />
+					)}
+					{t("products.retry")}
+				</Button>
+			</div>
+		);
+	}
+
+	if (loading) {
+		return (
+			<div className="flex min-h-[40vh] flex-col items-center justify-center gap-4">
+				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+				<p className="text-sm text-muted-foreground">{t("products.loading")}</p>
 			</div>
 		);
 	}

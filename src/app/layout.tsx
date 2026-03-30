@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import ClientLayout from "@/components/ClientLayout";
@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 	subsets: ["latin"],
 });
 
+// Icons, manifest, viewport: keep in sync with aml/src/app/layout.tsx
 export const metadata: Metadata = {
 	title: "Janovix",
 	description:
@@ -35,6 +36,16 @@ export const metadata: Metadata = {
 			},
 		],
 	},
+};
+
+export const viewport: Viewport = {
+	themeColor: "#0f766e",
+	width: "device-width",
+	initialScale: 1,
+	maximumScale: 5,
+	userScalable: true,
+	viewportFit: "cover",
+	interactiveWidget: "resizes-content",
 };
 
 // Force dynamic rendering since we use cookies and server-side session fetching

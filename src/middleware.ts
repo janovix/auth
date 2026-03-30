@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
+import {
+	DEFAULT_POST_AUTH_ROUTE,
+	isSafeRedirectToQueryValue,
+	resolveSafeRedirectUrl,
+} from "@/lib/auth/safeRedirect";
+
 const AUTH_SVC_TIMEOUT_MS = 8000;
 
 /**
@@ -451,7 +457,7 @@ export async function middleware(request: NextRequest) {
 			return addAuthCookies(redirectResponse, setCookieHeaders);
 		}
 		const redirectResponse = NextResponse.redirect(
-			new URL("/products", request.url),
+			new URL(DEFAULT_POST_AUTH_ROUTE, request.url),
 		);
 		return addAuthCookies(redirectResponse, setCookieHeaders);
 	}
@@ -474,7 +480,7 @@ export async function middleware(request: NextRequest) {
 			return addAuthCookies(redirectResponse, setCookieHeaders);
 		}
 		const redirectResponse = NextResponse.redirect(
-			new URL("/products", request.url),
+			new URL(DEFAULT_POST_AUTH_ROUTE, request.url),
 		);
 		return addAuthCookies(redirectResponse, setCookieHeaders);
 	}
@@ -493,8 +499,10 @@ export async function middleware(request: NextRequest) {
 
 		// Determine the redirect target after onboarding
 		const existingRedirect = request.nextUrl.searchParams.get("redirect_to");
-		if (existingRedirect) {
-			// If there's already a redirect_to param, preserve it
+		if (
+			existingRedirect &&
+			isSafeRedirectToQueryValue(existingRedirect, request.url, process.env)
+		) {
 			onboardingUrl.searchParams.set("redirect_to", existingRedirect);
 		} else if (isProtectedRoute) {
 			// If accessing a protected route, preserve that as the redirect target
@@ -503,7 +511,7 @@ export async function middleware(request: NextRequest) {
 			// For public routes, redirect to default after onboarding
 			onboardingUrl.searchParams.set(
 				"redirect_to",
-				new URL("/products", request.url).toString(),
+				new URL(DEFAULT_POST_AUTH_ROUTE, request.url).toString(),
 			);
 		}
 
@@ -515,31 +523,25 @@ export async function middleware(request: NextRequest) {
 	// If on onboarding page but doesn't need it, redirect away
 	if (isOnboardingRoute) {
 		const redirectTo = request.nextUrl.searchParams.get("redirect_to");
-		const defaultProducts = new URL("/products", request.url).toString();
-		const targetUrl = redirectTo || defaultProducts;
+		const targetUrl = resolveSafeRedirectUrl(redirectTo, request.url);
 
 		// Ensure we're not redirecting back to onboarding
 		if (targetUrl.includes("/onboarding")) {
 			const redirectResponse = NextResponse.redirect(
-				new URL("/products", request.url),
+				new URL(DEFAULT_POST_AUTH_ROUTE, request.url),
 			);
 			return addAuthCookies(redirectResponse, setCookieHeaders);
 		}
 
-		const redirectResponse = NextResponse.redirect(
-			new URL(targetUrl, request.url),
-		);
+		const redirectResponse = NextResponse.redirect(targetUrl);
 		return addAuthCookies(redirectResponse, setCookieHeaders);
 	}
 
 	// Redirect authenticated users away from public auth routes
 	if (isPublicAuthRoute) {
 		const redirectTo = request.nextUrl.searchParams.get("redirect_to");
-		const defaultProducts = new URL("/products", request.url).toString();
-		const targetUrl = redirectTo || defaultProducts;
-		const redirectResponse = NextResponse.redirect(
-			new URL(targetUrl, request.url),
-		);
+		const targetUrl = resolveSafeRedirectUrl(redirectTo, request.url);
+		const redirectResponse = NextResponse.redirect(targetUrl);
 		return addAuthCookies(redirectResponse, setCookieHeaders);
 	}
 

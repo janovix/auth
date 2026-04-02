@@ -6,7 +6,7 @@
 import { LanguageSwitcher, ThemeSwitcher } from "@algenium/blocks";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useLanguage } from "@/contexts/language-context";
-import { SUPPORTED_LANGUAGES } from "@/lib/i18n/supportedLanguages";
+import { isLanguage, SUPPORTED_LANGUAGES } from "@/lib/i18n/supportedLanguages";
 
 /**
  * Compact theme + language pickers for top-right placement (auth, onboarding, error pages).
@@ -19,7 +19,9 @@ export function NavSettingsBar() {
 				<LanguageSwitcher
 					languages={SUPPORTED_LANGUAGES}
 					currentLanguage={language}
-					onLanguageChange={(key) => setLanguage(key as "en" | "es")}
+					onLanguageChange={(key) => {
+						if (isLanguage(key)) setLanguage(key);
+					}}
 					labels={{ language: t("language.label") }}
 					variant="mini"
 					size="sm"

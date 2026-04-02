@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import {
 	Shield,
 	AlertTriangle,
@@ -42,6 +43,12 @@ import {
 	updateSelfServiceSettings,
 } from "@/lib/settings";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
+import {
+	getSubscriptionStatus,
+	getFeatures,
+	hasAmlProductAccess,
+	type Feature,
+} from "@/lib/billing";
 import {
 	SettingsCard,
 	SettingsSection,
@@ -147,11 +154,14 @@ const REPORTING_THRESHOLDS = {
 // Current UMA value (this should be fetched from the API in a real implementation)
 const CURRENT_UMA = 108.57; // Value for 2024
 
+type AmlAccessState = "unknown" | "granted" | "denied";
+
 export function ComplianceSettingsView() {
 	const { t } = useLanguage();
 	const { data: session } = useAuthSession();
 
 	const [loading, setLoading] = useState(true);
+	const [amlAccess, setAmlAccess] = useState<AmlAccessState>("unknown");
 	const [saving, setSaving] = useState(false);
 
 	const [settings, setSettings] = useState<AmlComplianceSettings | null>(null);
@@ -178,20 +188,62 @@ export function ComplianceSettingsView() {
 
 	const canEdit = membership?.role === "owner" || membership?.role === "admin";
 
+	// Gate: AML / PLD compliance settings require AML product on the subscription
 	useEffect(() => {
-		async function loadData() {
+		if (!activeOrgId) {
+			setAmlAccess("unknown");
+			return;
+		}
+
+		let cancelled = false;
+		setAmlAccess("unknown");
+
+		void (async () => {
+			try {
+				const [sub, feats] = await Promise.all([
+					getSubscriptionStatus({ resolveFromOrg: true }),
+					getFeatures({ resolveFromOrg: true }).catch(() => [] as Feature[]),
+				]);
+				if (cancelled) return;
+				if (!hasAmlProductAccess(sub, feats)) {
+					setAmlAccess("denied");
+					return;
+				}
+				setAmlAccess("granted");
+			} catch {
+				if (!cancelled) {
+					// Fail open: allow settings if billing cannot be loaded
+					setAmlAccess("granted");
+				}
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [activeOrgId]);
+
+	useEffect(() => {
+		if (!activeOrgId || amlAccess !== "granted") {
 			if (!activeOrgId) {
 				setLoading(false);
-				return;
 			}
+			return;
+		}
 
+		const orgId = activeOrgId;
+		let cancelled = false;
+
+		async function loadData() {
 			try {
 				setLoading(true);
 
 				const [complianceSettings, membershipData] = await Promise.all([
-					getAmlComplianceSettings(activeOrgId),
-					getOrganizationMembership(activeOrgId),
+					getAmlComplianceSettings(orgId),
+					getOrganizationMembership(orgId),
 				]);
+
+				if (cancelled) return;
 
 				setSettings(complianceSettings);
 				setMembership(membershipData);
@@ -206,18 +258,26 @@ export function ComplianceSettingsView() {
 					);
 				}
 			} catch (err) {
-				toast.error(
-					err instanceof Error
-						? err.message
-						: "Failed to load compliance settings",
-				);
+				if (!cancelled) {
+					toast.error(
+						err instanceof Error
+							? err.message
+							: "Failed to load compliance settings",
+					);
+				}
 			} finally {
-				setLoading(false);
+				if (!cancelled) {
+					setLoading(false);
+				}
 			}
 		}
 
-		loadData();
-	}, [activeOrgId]);
+		void loadData();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [activeOrgId, amlAccess]);
 
 	const showSuccess = useCallback((message: string) => {
 		toast.success(message);
@@ -321,10 +381,6 @@ export function ComplianceSettingsView() {
 		(a) => a.value === activityKey,
 	);
 
-	if (loading) {
-		return <ComplianceSettingsViewSkeleton />;
-	}
-
 	if (!activeOrgId) {
 		return (
 			<div className="space-y-8">
@@ -335,6 +391,36 @@ export function ComplianceSettingsView() {
 				/>
 			</div>
 		);
+	}
+
+	if (amlAccess === "unknown") {
+		return <ComplianceSettingsViewSkeleton />;
+	}
+
+	if (amlAccess === "denied") {
+		return (
+			<div className="space-y-8">
+				<SettingsPageHeader
+					icon={Shield}
+					title={t("settings.compliance.notAvailableTitle")}
+					description={t("settings.compliance.notAvailableDescription")}
+				/>
+				<Alert>
+					<AlertDescription className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+						<span>{t("settings.compliance.notAvailableDescription")}</span>
+						<Button asChild className="shrink-0 sm:w-auto w-full">
+							<Link href="/settings/billing">
+								{t("settings.compliance.viewBilling")}
+							</Link>
+						</Button>
+					</AlertDescription>
+				</Alert>
+			</div>
+		);
+	}
+
+	if (loading) {
+		return <ComplianceSettingsViewSkeleton />;
 	}
 
 	return (

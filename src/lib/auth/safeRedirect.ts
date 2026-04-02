@@ -4,16 +4,12 @@
  * and plan slugs that map to configured product URLs.
  */
 
-export const DEFAULT_POST_AUTH_ROUTE = "/products";
+import {
+	isPlanSlugForProductRedirect,
+	planSlugUsesWatchlistApp,
+} from "./planProductRedirect";
 
-/** Billing plan `name` values that may appear in `redirect_to` as opaque tokens */
-export const KNOWN_PLAN_REDIRECT_SLUGS = new Set([
-	"watchlist",
-	"business",
-	"pro",
-	"ultra",
-	"enterprise",
-]);
+export const DEFAULT_POST_AUTH_ROUTE = "/products";
 
 function trimTrailingSlash(href: string): string {
 	return href.replace(/\/$/, "");
@@ -73,11 +69,11 @@ export function resolvePlanTokenToAppUrl(
 	planSlug: string,
 	env: NodeJS.ProcessEnv,
 ): string | null {
-	if (!KNOWN_PLAN_REDIRECT_SLUGS.has(planSlug)) {
+	if (!isPlanSlugForProductRedirect(planSlug)) {
 		return null;
 	}
 	try {
-		if (planSlug === "watchlist") {
+		if (planSlugUsesWatchlistApp(planSlug)) {
 			const u = readEnvUrl(env, "NEXT_PUBLIC_WATCHLIST_APP_URL");
 			if (!u) return null;
 			return normalizeRedirectHref(trimTrailingSlash(new URL(u).href));
@@ -110,7 +106,7 @@ export function isSafeRedirectToQueryValue(
 ): boolean {
 	const trimmed = value.trim();
 	if (!trimmed) return false;
-	if (KNOWN_PLAN_REDIRECT_SLUGS.has(trimmed)) return true;
+	if (isPlanSlugForProductRedirect(trimmed)) return true;
 	if (trimmed.startsWith("/") && !trimmed.startsWith("//")) return true;
 	try {
 		const u = new URL(trimmed);

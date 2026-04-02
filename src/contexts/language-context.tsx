@@ -16,13 +16,12 @@ import {
 	updateUserSettings,
 	type LanguageCode,
 } from "@/lib/settings";
+import { type Language, isLanguage } from "@/lib/i18n/supportedLanguages";
 import {
 	LanguageContext as BlocksLanguageContext,
 	type LanguageContextValue as BlocksLanguageContextValue,
 	type BlocksLanguage,
 } from "@algenium/blocks";
-
-type Language = "en" | "es";
 
 interface LanguageContextType {
 	language: Language;
@@ -546,6 +545,11 @@ const translations = {
 			"Self-service KYC verification links allow clients to submit their own identity documents. Ensure your compliance policies permit this before enabling.",
 		"settings.compliance.selfServiceSavedSuccess":
 			"Self-service settings saved successfully",
+		"settings.compliance.notAvailableTitle":
+			"AML compliance is not included in your plan",
+		"settings.compliance.notAvailableDescription":
+			"Upgrade your subscription to access PLD compliance settings and the AML platform.",
+		"settings.compliance.viewBilling": "View billing & plans",
 
 		// Team settings
 		"settings.team.title": "Team Settings",
@@ -1628,6 +1632,11 @@ const translations = {
 			"Los enlaces de verificación KYC de autoservicio permiten a los clientes enviar sus propios documentos de identidad. Asegúrate de que tus políticas de cumplimiento lo permitan antes de habilitarlo.",
 		"settings.compliance.selfServiceSavedSuccess":
 			"Configuración de autoservicio guardada exitosamente",
+		"settings.compliance.notAvailableTitle":
+			"El cumplimiento PLD no está incluido en tu plan",
+		"settings.compliance.notAvailableDescription":
+			"Mejora tu suscripción para acceder a la configuración PLD y a la plataforma AML.",
+		"settings.compliance.viewBilling": "Ver facturación y planes",
 
 		// Team settings
 		"settings.team.title": "Configuración de Equipo",
@@ -2205,8 +2214,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 		setMounted(true);
 
 		// Step 1: Read from cookie first for instant render (no flash)
-		const stored = getCookie(COOKIE_NAMES.LANGUAGE) as Language | undefined;
-		if (stored && (stored === "en" || stored === "es")) {
+		const stored = getCookie(COOKIE_NAMES.LANGUAGE);
+		if (stored && isLanguage(stored)) {
 			setLanguageState(stored);
 		} else {
 			const browserLang = navigator.language.toLowerCase();
@@ -2218,8 +2227,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 		// Step 2: Fetch from API to verify/sync
 		getResolvedSettings()
 			.then((settings) => {
-				const apiLanguage = settings.language as Language;
-				if (apiLanguage && (apiLanguage === "en" || apiLanguage === "es")) {
+				const apiLanguage = settings.language;
+				if (apiLanguage && isLanguage(apiLanguage)) {
 					setLanguageState(apiLanguage);
 					setCookie(COOKIE_NAMES.LANGUAGE, apiLanguage);
 				}
@@ -2262,7 +2271,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 		() => ({
 			language,
 			setLanguage: (lang: string) => {
-				if (lang === "en" || lang === "es") {
+				if (isLanguage(lang)) {
 					handleSetLanguage(lang);
 				}
 			},

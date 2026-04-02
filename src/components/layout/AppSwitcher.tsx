@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/Logo";
 import { useLanguage } from "@/contexts/language-context";
+import { useSettingsSidebarProductAccess } from "@/contexts/settings-sidebar-product-context";
 import {
 	getHomepageUrl,
 	getAmlAppUrl,
@@ -61,6 +62,7 @@ export function AppSwitcher({
 	const { isMobile, state } = useSidebar();
 	const isCollapsed = state === "collapsed";
 	const { t } = useLanguage();
+	const { hasAmlAccess } = useSettingsSidebarProductAccess();
 
 	const apps: AppItem[] = React.useMemo(() => {
 		const onProducts = pathname?.startsWith("/products") ?? false;
@@ -84,15 +86,19 @@ export function AppSwitcher({
 				external: false,
 				current: onProducts,
 			},
-			{
-				id: "aml",
-				name: t("appSwitcher.aml"),
-				description: t("appSwitcher.amlDescription"),
-				href: getAmlAppUrl(),
-				icon: LayoutDashboard,
-				external: true,
-				current: false,
-			},
+			...(hasAmlAccess
+				? [
+						{
+							id: "aml",
+							name: t("appSwitcher.aml"),
+							description: t("appSwitcher.amlDescription"),
+							href: getAmlAppUrl(),
+							icon: LayoutDashboard,
+							external: true,
+							current: false,
+						},
+					]
+				: []),
 			{
 				id: "watchlist",
 				name: t("appSwitcher.watchlist"),
@@ -112,7 +118,7 @@ export function AppSwitcher({
 				current: onSettings && !onProducts,
 			},
 		];
-	}, [t, pathname]);
+	}, [t, pathname, hasAmlAccess]);
 
 	const currentApp =
 		apps.find((app) => app.current) ??

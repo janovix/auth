@@ -170,7 +170,7 @@ export function TeamSettingsView() {
 					query: { organizationId: activeOrgId },
 				}),
 				getOrganizationMembership(activeOrgId),
-				getSubscriptionStatus().catch(() => null),
+				getSubscriptionStatus({ resolveFromOrg: true }).catch(() => null),
 			]);
 
 			setSubscriptionStatus(statusData);

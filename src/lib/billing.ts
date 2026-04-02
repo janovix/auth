@@ -126,15 +126,25 @@ interface ApiResponse<T> {
 	error?: string;
 }
 
+/** Options for subscription HTTP calls that can resolve entitlements from the active org owner */
+export interface BillingFetchOptions {
+	/** When true, use the active organization's owner's plan (session must have active org). */
+	resolveFromOrg?: boolean;
+}
+
 // ============================================================================
 // Subscription Status (via custom endpoint)
 // ============================================================================
 
 /**
- * Get user's subscription status
+ * Get subscription status for the current user, or for the active org's owner when
+ * `resolveFromOrg` is true (e.g. invited members should see the org's plan).
  */
-export async function getSubscriptionStatus(): Promise<UserSubscriptionStatus | null> {
-	const response = await fetch(`${API_BASE()}/subscription/status`, {
+export async function getSubscriptionStatus(
+	options?: BillingFetchOptions,
+): Promise<UserSubscriptionStatus | null> {
+	const params = options?.resolveFromOrg ? "?resolveFromOrg=true" : "";
+	const response = await fetch(`${API_BASE()}/subscription/status${params}`, {
 		credentials: "include",
 	});
 
@@ -163,10 +173,14 @@ export async function canCreateOrganization(): Promise<OrgCreationCheck> {
 }
 
 /**
- * Get user's available features
+ * Get plan features for the current user, or for the active org's owner when
+ * `resolveFromOrg` is true (must match getSubscriptionStatus with the same flag).
  */
-export async function getFeatures(): Promise<Feature[]> {
-	const response = await fetch(`${API_BASE()}/subscription/features`, {
+export async function getFeatures(
+	options?: BillingFetchOptions,
+): Promise<Feature[]> {
+	const params = options?.resolveFromOrg ? "?resolveFromOrg=true" : "";
+	const response = await fetch(`${API_BASE()}/subscription/features${params}`, {
 		credentials: "include",
 	});
 
@@ -613,6 +627,59 @@ export function isSubscriptionActive(
 		status.hasSubscription &&
 		(status.status === "active" || status.status === "trialing")
 	);
+}
+
+/**
+ * Whether the user's subscription includes AML product access (PLD compliance
+ * settings, AML app). Plan name is authoritative for watchlist-only vs AML;
+ * falls back to `product_aml` in features for custom plans.
+ */
+export function hasAmlProductAccess(
+	subscription: UserSubscriptionStatus | null,
+	features?: Feature[],
+): boolean {
+	if (!subscription?.hasSubscription) return false;
+	const isActive =
+		subscription.status === "active" || subscription.status === "trialing";
+	if (!isActive) return false;
+	const plan = subscription.plan;
+	if (plan === "watchlist") return false;
+	if (
+		plan === "business" ||
+		plan === "pro" ||
+		plan === "ultra" ||
+		plan === "enterprise"
+	) {
+		return true;
+	}
+	if (subscription.isLicenseBased) return true;
+	return features?.includes("product_aml") ?? false;
+}
+
+/**
+ * Whether the user's subscription includes Watchlist product access.
+ * Mirrors {@link hasAmlProductAccess} for the watchlist side of plan logic.
+ */
+export function hasWatchlistProductAccess(
+	subscription: UserSubscriptionStatus | null,
+	features?: Feature[],
+): boolean {
+	if (!subscription?.hasSubscription) return false;
+	const isActive =
+		subscription.status === "active" || subscription.status === "trialing";
+	if (!isActive) return false;
+	const plan = subscription.plan;
+	if (plan === "watchlist") return true;
+	if (
+		plan === "business" ||
+		plan === "pro" ||
+		plan === "ultra" ||
+		plan === "enterprise"
+	) {
+		return true;
+	}
+	if (subscription.isLicenseBased) return true;
+	return features?.includes("product_watchlist") ?? false;
 }
 
 /**

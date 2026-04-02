@@ -26,6 +26,8 @@ import { useAuthSession } from "@/lib/auth/useAuthSession";
 import {
 	getSubscriptionStatus,
 	getFeatures,
+	hasAmlProductAccess,
+	hasWatchlistProductAccess,
 	type Feature,
 	type UserSubscriptionStatus,
 } from "@/lib/billing";
@@ -40,42 +42,9 @@ function computeProductAccess(
 	subscription: UserSubscriptionStatus | null,
 	features: Feature[],
 ): ProductAccess {
-	const isActive =
-		subscription?.status === "active" || subscription?.status === "trialing";
-	const hasPaidAccess = Boolean(subscription?.hasSubscription && isActive);
-	const plan = subscription?.plan;
-
-	// Plan name is authoritative for watchlist-only vs AML (auth-svc /features may
-	// still default watchlist to business feature lists server-side).
-	if (plan === "watchlist") {
-		return {
-			aml: false,
-			watchlist: hasPaidAccess,
-		};
-	}
-
-	if (
-		plan === "business" ||
-		plan === "pro" ||
-		plan === "ultra" ||
-		plan === "enterprise"
-	) {
-		return {
-			aml: hasPaidAccess,
-			watchlist: hasPaidAccess,
-		};
-	}
-
-	if (subscription?.isLicenseBased) {
-		return {
-			aml: hasPaidAccess,
-			watchlist: hasPaidAccess,
-		};
-	}
-
 	return {
-		aml: hasPaidAccess && features.includes("product_aml"),
-		watchlist: hasPaidAccess && features.includes("product_watchlist"),
+		aml: hasAmlProductAccess(subscription, features),
+		watchlist: hasWatchlistProductAccess(subscription, features),
 	};
 }
 

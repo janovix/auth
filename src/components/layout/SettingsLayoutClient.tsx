@@ -23,7 +23,12 @@ import {
 	getUIPreferences,
 } from "@/lib/settings/settingsClient";
 import type { NotificationSoundType } from "@/lib/settings/types";
-import { getSubscriptionStatus } from "@/lib/billing";
+import {
+	getSubscriptionStatus,
+	getFeatures,
+	hasAmlProductAccess,
+	type Feature,
+} from "@/lib/billing";
 import { NotificationsProvider } from "@/contexts/notifications-context";
 import {
 	LanguageSwitcher,
@@ -31,6 +36,7 @@ import {
 	ThemeSwitcher,
 } from "@algenium/blocks";
 import { useLanguage } from "@/contexts/language-context";
+import { SettingsSidebarProductProvider } from "@/contexts/settings-sidebar-product-context";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SUPPORTED_LANGUAGES } from "@/lib/i18n/supportedLanguages";
 
@@ -92,6 +98,9 @@ function SettingsLayoutInner({
 
 	// Pending invitations count for sidebar indicator
 	const [pendingInvitationsCount, setPendingInvitationsCount] = useState(0);
+
+	// AML product (PLD compliance settings) — hide nav when plan is watchlist-only
+	const [hasAmlAccess, setHasAmlAccess] = useState(true);
 
 	// Effective timezone for the navbar clock (resolved from user > org > browser)
 	const [effectiveTimezone, setEffectiveTimezone] = useState<string | null>(
@@ -330,7 +339,10 @@ function SettingsLayoutInner({
 				}));
 
 				// Check subscription status (billing)
-				const subscriptionStatus = await getSubscriptionStatus();
+				const [subscriptionStatus, features] = await Promise.all([
+					getSubscriptionStatus({ resolveFromOrg: true }),
+					getFeatures({ resolveFromOrg: true }).catch(() => [] as Feature[]),
+				]);
 				if (subscriptionStatus) {
 					setCompletionStatus((prev) => ({
 						...prev,
@@ -339,6 +351,7 @@ function SettingsLayoutInner({
 					setOrganizationsOwned(subscriptionStatus.organizationsOwned);
 					setOrganizationsLimit(subscriptionStatus.organizationsLimit);
 				}
+				setHasAmlAccess(hasAmlProductAccess(subscriptionStatus, features));
 
 				// Check for pending invitations — use the lightweight fast path to avoid
 				// the expensive subscription/Stripe checks in the full endpoint
@@ -488,77 +501,84 @@ function SettingsLayoutInner({
 	);
 
 	return (
-		<SidebarProvider open={!isCollapsed} onOpenChange={handleSidebarOpenChange}>
-			<AppSidebar
-				organizations={organizations}
-				activeOrganization={activeOrganization}
-				onOrganizationChange={handleOrganizationChange}
-				completionStatus={completionStatus}
-				isLoading={orgsLoading}
-				organizationsOwned={organizationsOwned}
-				organizationsLimit={organizationsLimit}
-				pendingInvitationsCount={pendingInvitationsCount}
-			/>
-			<SidebarInset className="flex h-screen flex-col overflow-hidden">
-				{/* Header - Fixed navbar */}
-				<TooltipProvider delayDuration={0}>
-					<header className="z-50 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 shadow-xs">
-						<SidebarTrigger className="-ml-1" />
-						<Separator orientation="vertical" className="mx-2 h-6" />
-						<div className="flex-1 min-w-0">
-							<NavBreadcrumb />
-						</div>
-						<div className="flex shrink-0 items-center gap-2">
-							<LanguageSwitcher
-								languages={SUPPORTED_LANGUAGES}
-								currentLanguage={language}
-								onLanguageChange={(key) => setLanguage(key as "en" | "es")}
-								labels={{ language: t("language.label") }}
-								variant="mini"
-								size="sm"
-								shape="rounded"
-								side="bottom"
-								align="end"
-							/>
-							<ThemeSwitcher
-								variant="mini"
-								size="sm"
-								shape="rounded"
-								side="bottom"
-								align="end"
-								labels={{
-									theme: t("theme.label"),
-									system: t("theme.system"),
-									light: t("theme.light"),
-									dark: t("theme.dark"),
-								}}
-							/>
-							<NavbarClock
-								timezone={effectiveTimezone || undefined}
-								defaultFormat={effectiveClockFormat}
-								size="sm"
-								showTimezoneMismatch={Boolean(effectiveTimezone)}
-							/>
-							{/* NotificationsWidget now consumes data from BlocksNotificationsContext automatically */}
-							<NotificationsWidget
-								onNotificationClick={handleNotificationClick}
-								size="md"
-								maxVisible={50}
-								playSound={notificationSound}
-								showPulse={true}
-								soundType={notificationSoundType}
-								pulseStyle="ring"
-							/>
-						</div>
-					</header>
-				</TooltipProvider>
+		<SettingsSidebarProductProvider hasAmlAccess={hasAmlAccess}>
+			<SidebarProvider
+				open={!isCollapsed}
+				onOpenChange={handleSidebarOpenChange}
+			>
+				<AppSidebar
+					organizations={organizations}
+					activeOrganization={activeOrganization}
+					onOrganizationChange={handleOrganizationChange}
+					completionStatus={completionStatus}
+					isLoading={orgsLoading}
+					organizationsOwned={organizationsOwned}
+					organizationsLimit={organizationsLimit}
+					pendingInvitationsCount={pendingInvitationsCount}
+				/>
+				<SidebarInset className="flex h-screen flex-col overflow-hidden">
+					{/* Header - Fixed navbar */}
+					<TooltipProvider delayDuration={0}>
+						<header className="z-50 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 shadow-xs">
+							<SidebarTrigger className="-ml-1" />
+							<Separator orientation="vertical" className="mx-2 h-6" />
+							<div className="flex-1 min-w-0">
+								<NavBreadcrumb />
+							</div>
+							<div className="flex shrink-0 items-center gap-2">
+								<LanguageSwitcher
+									languages={SUPPORTED_LANGUAGES}
+									currentLanguage={language}
+									onLanguageChange={(key) => setLanguage(key as "en" | "es")}
+									labels={{ language: t("language.label") }}
+									variant="mini"
+									size="sm"
+									shape="rounded"
+									side="bottom"
+									align="end"
+								/>
+								<ThemeSwitcher
+									variant="mini"
+									size="sm"
+									shape="rounded"
+									side="bottom"
+									align="end"
+									labels={{
+										theme: t("theme.label"),
+										system: t("theme.system"),
+										light: t("theme.light"),
+										dark: t("theme.dark"),
+									}}
+								/>
+								<NavbarClock
+									timezone={effectiveTimezone || undefined}
+									defaultFormat={effectiveClockFormat}
+									size="sm"
+									showTimezoneMismatch={Boolean(effectiveTimezone)}
+								/>
+								{/* NotificationsWidget now consumes data from BlocksNotificationsContext automatically */}
+								<NotificationsWidget
+									onNotificationClick={handleNotificationClick}
+									size="md"
+									maxVisible={50}
+									playSound={notificationSound}
+									showPulse={true}
+									soundType={notificationSoundType}
+									pulseStyle="ring"
+								/>
+							</div>
+						</header>
+					</TooltipProvider>
 
-				{/* Main Content */}
-				<main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-					<div className="max-w-4xl mx-auto p-6 lg:p-8 w-full">{children}</div>
-				</main>
-			</SidebarInset>
-		</SidebarProvider>
+					{/* Main Content */}
+					<main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+						<div className="max-w-4xl mx-auto p-6 lg:p-8 w-full">
+							{children}
+						</div>
+					</main>
+				</SidebarInset>
+			</SidebarProvider>
+		</SettingsSidebarProductProvider>
 	);
 }
 

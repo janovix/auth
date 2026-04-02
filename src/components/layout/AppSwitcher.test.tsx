@@ -1,6 +1,8 @@
+import type { ReactElement } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { SettingsSidebarProductProvider } from "@/contexts/settings-sidebar-product-context";
 import { AppSwitcher } from "./AppSwitcher";
 
 const mockUsePathname = vi.fn(() => "/settings");
@@ -86,6 +88,14 @@ vi.mock("@/lib/auth/authCoreConfig", () => ({
 	getWatchlistAppUrl: () => "https://watchlist.janovix.workers.dev",
 }));
 
+function renderWithProductAccess(ui: ReactElement, hasAmlAccess = true) {
+	return render(
+		<SettingsSidebarProductProvider hasAmlAccess={hasAmlAccess}>
+			{ui}
+		</SettingsSidebarProductProvider>,
+	);
+}
+
 describe("AppSwitcher", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -93,14 +103,14 @@ describe("AppSwitcher", () => {
 	});
 
 	it("renders the logo in expanded sidebar mode", () => {
-		render(<AppSwitcher />);
+		renderWithProductAccess(<AppSwitcher />);
 
 		// Should show the logo SVG
 		expect(screen.getByTestId("logo-svg-logo")).toBeInTheDocument();
 	});
 
 	it("renders mobile fullscreen variant with larger logo", () => {
-		render(<AppSwitcher variant="mobile-fullscreen" />);
+		renderWithProductAccess(<AppSwitcher variant="mobile-fullscreen" />);
 
 		// Should show the logo SVG (get all and check the last one for StrictMode)
 		const logos = screen.getAllByTestId("logo-svg-logo");
@@ -110,7 +120,7 @@ describe("AppSwitcher", () => {
 
 	it("opens dropdown menu when clicked", async () => {
 		const user = userEvent.setup();
-		render(<AppSwitcher variant="mobile-fullscreen" />);
+		renderWithProductAccess(<AppSwitcher variant="mobile-fullscreen" />);
 
 		// Find and click the dropdown trigger (get the last one for StrictMode)
 		const triggers = screen.getAllByRole("button");
@@ -128,7 +138,9 @@ describe("AppSwitcher", () => {
 
 	it("shows current app badge for Settings", async () => {
 		const user = userEvent.setup();
-		const { container } = render(<AppSwitcher variant="mobile-fullscreen" />);
+		const { container } = renderWithProductAccess(
+			<AppSwitcher variant="mobile-fullscreen" />,
+		);
 
 		// Find the dropdown trigger button - it's the button that contains the Logo
 		// Look for button with class that includes "flex items-center gap-2" (the trigger button)
@@ -148,7 +160,9 @@ describe("AppSwitcher", () => {
 
 	it("renders external links with target blank", async () => {
 		const user = userEvent.setup();
-		const { container } = render(<AppSwitcher variant="mobile-fullscreen" />);
+		const { container } = renderWithProductAccess(
+			<AppSwitcher variant="mobile-fullscreen" />,
+		);
 
 		// Find the dropdown trigger button - it's the button that contains the Logo
 		const trigger = container.querySelector(
@@ -169,5 +183,51 @@ describe("AppSwitcher", () => {
 			(link) => link.getAttribute("target") === "_blank",
 		);
 		expect(externalLinks.length).toBe(3);
+	});
+
+	it("hides AML from menu when product access is disabled", async () => {
+		cleanup();
+		const user = userEvent.setup();
+		const { container } = renderWithProductAccess(
+			<AppSwitcher variant="mobile-fullscreen" />,
+			false,
+		);
+
+		const trigger = container.querySelector(
+			"button.flex.items-center.gap-2.rounded-xl",
+		) as HTMLElement;
+		expect(trigger).not.toBeNull();
+		await user.click(trigger);
+
+		await screen.findByText("Janovix Apps");
+		expect(screen.queryByText("AML Platform")).not.toBeInTheDocument();
+		expect(await screen.findByText("Watchlist")).toBeInTheDocument();
+	});
+
+	it("does not include AML app URL when AML is hidden", async () => {
+		cleanup();
+		const user = userEvent.setup();
+		const { container } = renderWithProductAccess(
+			<AppSwitcher variant="mobile-fullscreen" />,
+			false,
+		);
+
+		const trigger = container.querySelector(
+			"button.flex.items-center.gap-2.rounded-xl",
+		) as HTMLElement;
+		await user.click(trigger);
+
+		await screen.findByText("Janovix Apps");
+		const links = await screen.findAllByRole("menuitem");
+		const externalHrefs = new Set(
+			links
+				.filter((link) => link.getAttribute("target") === "_blank")
+				.map((link) => link.getAttribute("href")),
+		);
+		expect(externalHrefs.has("https://aml.janovix.workers.dev")).toBe(false);
+		expect(externalHrefs.has("https://www.janovix.com")).toBe(true);
+		expect(externalHrefs.has("https://watchlist.janovix.workers.dev")).toBe(
+			true,
+		);
 	});
 });

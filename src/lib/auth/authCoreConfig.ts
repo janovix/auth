@@ -1,5 +1,10 @@
 import { requireEnv } from "@/lib/env";
 
+import {
+	isPlanSlugForProductRedirect,
+	planSlugUsesWatchlistApp,
+} from "./planProductRedirect";
+
 /**
  * Gets the auth service URL from environment variables.
  *
@@ -65,7 +70,10 @@ export const getWatchlistAppUrl = (): string => {
  * Watchlist-only plan maps to the Watchlist app; all other plans map to AML.
  */
 export function getDefaultAppUrlForPlan(planName: string): string {
-	if (planName === "watchlist") {
+	if (
+		isPlanSlugForProductRedirect(planName) &&
+		planSlugUsesWatchlistApp(planName)
+	) {
 		return getWatchlistAppUrl();
 	}
 	return getAmlAppUrl();

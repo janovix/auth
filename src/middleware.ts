@@ -363,7 +363,8 @@ export async function middleware(request: NextRequest) {
 	// Define route types
 	const isAccountRoute = pathname.startsWith("/account");
 	const isSettingsRoute = pathname.startsWith("/settings");
-	const isProductsRoute = pathname.startsWith("/products");
+	const isProductsRoute =
+		pathname === "/products" || pathname.startsWith("/products/");
 	const isOnboardingRoute = pathname.startsWith("/onboarding");
 	const isInviteRoute = pathname.startsWith("/invite");
 	const isBetaAccessRoute = pathname.startsWith("/beta-access");
@@ -525,8 +526,16 @@ export async function middleware(request: NextRequest) {
 		const redirectTo = request.nextUrl.searchParams.get("redirect_to");
 		const targetUrl = resolveSafeRedirectUrl(redirectTo, request.url);
 
-		// Ensure we're not redirecting back to onboarding
-		if (targetUrl.includes("/onboarding")) {
+		// Ensure we're not redirecting back to onboarding (pathname only, not query text)
+		let targetPathIsOnboarding = false;
+		try {
+			const u = new URL(targetUrl);
+			targetPathIsOnboarding =
+				u.pathname === "/onboarding" || u.pathname.startsWith("/onboarding/");
+		} catch {
+			targetPathIsOnboarding = false;
+		}
+		if (targetPathIsOnboarding) {
 			const redirectResponse = NextResponse.redirect(
 				new URL(DEFAULT_POST_AUTH_ROUTE, request.url),
 			);

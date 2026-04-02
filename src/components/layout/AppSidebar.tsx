@@ -44,6 +44,7 @@ import { NavUser } from "./NavUser";
 import { AppSwitcher } from "./AppSwitcher";
 import { getAmlAppUrl, getWatchlistAppUrl } from "@/lib/auth/authCoreConfig";
 import { useLanguage } from "@/contexts/language-context";
+import { useSettingsSidebarProductAccess } from "@/contexts/settings-sidebar-product-context";
 
 type NavItem = {
 	name: string;
@@ -74,6 +75,7 @@ export function AppSidebar({
 	pendingInvitationsCount = 0,
 	...props
 }: AppSidebarProps) {
+	const { hasAmlAccess } = useSettingsSidebarProductAccess();
 	const { t } = useLanguage();
 	const pathname = usePathname();
 	const router = useRouter();
@@ -96,60 +98,74 @@ export function AppSidebar({
 		},
 	];
 
-	// Organization settings navigation items
-	const orgNavItems: NavItem[] = [
-		{
-			name: t("settings.nav.organization"),
-			href: "/settings/organization",
-			icon: Building2,
-			complete: completionStatus.organization ?? true,
-		},
-		{
-			name: t("settings.nav.compliance"),
-			href: "/settings/compliance",
-			icon: Shield,
-			complete: completionStatus.compliance ?? false,
-		},
-		{
-			name: t("settings.nav.team"),
-			href: "/settings/team",
-			icon: Users,
-			complete: completionStatus.team ?? true,
-		},
-		{
-			name: t("settings.nav.apiKeys") || "API Keys",
-			href: "/settings/api-keys",
-			icon: KeyRound,
-			complete: true,
-		},
-	];
+	// Organization settings navigation items (compliance only if AML product enabled)
+	const orgNavItems: NavItem[] = React.useMemo(
+		() => [
+			{
+				name: t("settings.nav.organization"),
+				href: "/settings/organization",
+				icon: Building2,
+				complete: completionStatus.organization ?? true,
+			},
+			...(hasAmlAccess
+				? [
+						{
+							name: t("settings.nav.compliance"),
+							href: "/settings/compliance",
+							icon: Shield,
+							complete: completionStatus.compliance ?? false,
+						},
+					]
+				: []),
+			{
+				name: t("settings.nav.team"),
+				href: "/settings/team",
+				icon: Users,
+				complete: completionStatus.team ?? true,
+			},
+			{
+				name: t("settings.nav.apiKeys") || "API Keys",
+				href: "/settings/api-keys",
+				icon: KeyRound,
+				complete: true,
+			},
+		],
+		[t, hasAmlAccess, completionStatus],
+	);
 
-	// Products: hub in-app + external product apps
+	// Products: hub in-app + external product apps (AML only if plan includes product)
 	const productsNavItems: {
 		name: string;
 		href: string;
 		icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 		external: boolean;
-	}[] = [
-		{
-			name: t("settings.nav.productsHub"),
-			href: "/products",
-			icon: LayoutGrid,
-			external: false,
-		},
-		{
-			name: t("settings.nav.aml"),
-			href: getAmlAppUrl(),
-			icon: LayoutDashboard,
-			external: true,
-		},
-		{
-			name: t("settings.nav.watchlist"),
-			href: getWatchlistAppUrl(),
-			icon: Search,
-			external: true,
-		},
-	];
+	}[] = React.useMemo(
+		() => [
+			{
+				name: t("settings.nav.productsHub"),
+				href: "/products",
+				icon: LayoutGrid,
+				external: false,
+			},
+			...(hasAmlAccess
+				? [
+						{
+							name: t("settings.nav.aml"),
+							href: getAmlAppUrl(),
+							icon: LayoutDashboard,
+							external: true,
+						},
+					]
+				: []),
+			{
+				name: t("settings.nav.watchlist"),
+				href: getWatchlistAppUrl(),
+				icon: Search,
+				external: true,
+			},
+		],
+		[t, hasAmlAccess],
+	);
 
 	const userCompletedCount = userNavItems.filter((s) => s.complete).length;
 	const orgCompletedCount = orgNavItems.filter((s) => s.complete).length;

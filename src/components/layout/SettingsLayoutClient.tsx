@@ -22,6 +22,7 @@ import {
 	getAmlComplianceSettings,
 	getUIPreferences,
 } from "@/lib/settings/settingsClient";
+import { BILLING_ENTITLEMENTS_UPDATED_EVENT } from "@/lib/settings/billingEntitlementsEvents";
 import type { NotificationSoundType } from "@/lib/settings/types";
 import {
 	getSubscriptionStatus,
@@ -325,61 +326,72 @@ function SettingsLayoutInner({
 		switchOrg();
 	}, [orgSlugParam, organizations, activeOrgId, router]);
 
-	// Load completion status for sections
-	useEffect(() => {
-		async function loadCompletionStatus() {
-			if (!activeOrgId) return;
+	// Load completion status for sections (billing, AML access, invitations, etc.)
+	const loadCompletionStatus = useCallback(async () => {
+		if (!activeOrgId) return;
 
-			try {
-				// Check compliance settings
-				const amlSettings = await getAmlComplianceSettings(activeOrgId);
+		try {
+			// Check compliance settings
+			const amlSettings = await getAmlComplianceSettings(activeOrgId);
+			setCompletionStatus((prev) => ({
+				...prev,
+				compliance: Boolean(amlSettings?.obligatedSubjectKey),
+			}));
+
+			// Check subscription status (billing)
+			const [subscriptionStatus, features] = await Promise.all([
+				getSubscriptionStatus({ resolveFromOrg: true }),
+				getFeatures({ resolveFromOrg: true }).catch(() => [] as Feature[]),
+			]);
+			if (subscriptionStatus) {
 				setCompletionStatus((prev) => ({
 					...prev,
-					compliance: Boolean(amlSettings?.obligatedSubjectKey),
+					billing: subscriptionStatus.hasSubscription,
 				}));
-
-				// Check subscription status (billing)
-				const [subscriptionStatus, features] = await Promise.all([
-					getSubscriptionStatus({ resolveFromOrg: true }),
-					getFeatures({ resolveFromOrg: true }).catch(() => [] as Feature[]),
-				]);
-				if (subscriptionStatus) {
-					setCompletionStatus((prev) => ({
-						...prev,
-						billing: subscriptionStatus.hasSubscription,
-					}));
-					setOrganizationsOwned(subscriptionStatus.organizationsOwned);
-					setOrganizationsLimit(subscriptionStatus.organizationsLimit);
-				}
-				setHasAmlAccess(hasAmlProductAccess(subscriptionStatus, features));
-
-				// Check for pending invitations — use the lightweight fast path to avoid
-				// the expensive subscription/Stripe checks in the full endpoint
-				const authServiceUrl = getAuthCoreBaseUrl();
-				const onboardingResponse = await fetch(
-					`${authServiceUrl}/api/subscription/onboarding-status?pendingInvitationsOnly=true`,
-					{
-						credentials: "include",
-					},
-				);
-
-				if (onboardingResponse.ok) {
-					const result = (await onboardingResponse.json()) as {
-						success: boolean;
-						data?: {
-							pendingInvitations?: Array<{ id: string }>;
-						};
-					};
-					if (result.success && result.data?.pendingInvitations) {
-						setPendingInvitationsCount(result.data.pendingInvitations.length);
-					}
-				}
-			} catch {
-				// Silently fail - completion status is optional
+				setOrganizationsOwned(subscriptionStatus.organizationsOwned);
+				setOrganizationsLimit(subscriptionStatus.organizationsLimit);
 			}
+			setHasAmlAccess(hasAmlProductAccess(subscriptionStatus, features));
+
+			// Check for pending invitations — use the lightweight fast path to avoid
+			// the expensive subscription/Stripe checks in the full endpoint
+			const authServiceUrl = getAuthCoreBaseUrl();
+			const onboardingResponse = await fetch(
+				`${authServiceUrl}/api/subscription/onboarding-status?pendingInvitationsOnly=true`,
+				{
+					credentials: "include",
+				},
+			);
+
+			if (onboardingResponse.ok) {
+				const result = (await onboardingResponse.json()) as {
+					success: boolean;
+					data?: {
+						pendingInvitations?: Array<{ id: string }>;
+					};
+				};
+				if (result.success && result.data?.pendingInvitations) {
+					setPendingInvitationsCount(result.data.pendingInvitations.length);
+				}
+			}
+		} catch {
+			// Silently fail - completion status is optional
 		}
-		loadCompletionStatus();
 	}, [activeOrgId]);
+
+	useEffect(() => {
+		void loadCompletionStatus();
+	}, [loadCompletionStatus]);
+
+	useEffect(() => {
+		const handler = () => {
+			void loadCompletionStatus();
+		};
+		window.addEventListener(BILLING_ENTITLEMENTS_UPDATED_EVENT, handler);
+		return () => {
+			window.removeEventListener(BILLING_ENTITLEMENTS_UPDATED_EVENT, handler);
+		};
+	}, [loadCompletionStatus]);
 
 	// Load effective timezone for the navbar clock (resolved from user > org > browser)
 	useEffect(() => {

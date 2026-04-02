@@ -61,6 +61,7 @@ import {
 	PricingTable,
 	BillingSettingsViewSkeleton,
 } from "@/components/settings";
+import { dispatchBillingEntitlementsUpdated } from "@/lib/settings/billingEntitlementsEvents";
 import { PlanSelectionGrid } from "@/components/PlanSelectionGrid";
 import { EnterpriseCard } from "@/components/EnterpriseCard";
 import { WatchlistCard } from "@/components/WatchlistCard";
@@ -159,6 +160,7 @@ export function BillingSettingsView() {
 				title: t("settings.billing.cancelSuccess"),
 			});
 			await loadBillingData();
+			dispatchBillingEntitlementsUpdated();
 		} catch (error) {
 			Sentry.captureException(error, {
 				tags: { context: "cancel-subscription-error" },
@@ -199,6 +201,7 @@ export function BillingSettingsView() {
 				description,
 			});
 			await loadBillingData();
+			dispatchBillingEntitlementsUpdated();
 		} catch (error) {
 			Sentry.captureException(error, {
 				tags: { context: "license-activation-error" },

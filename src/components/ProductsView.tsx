@@ -150,7 +150,9 @@ export function ProductsView() {
 			<div className="grid gap-6 sm:grid-cols-2">
 				<Card
 					className={
-						access.aml ? "border-border" : "border-muted bg-muted/30 opacity-90"
+						access.aml
+							? "h-full border-border"
+							: "h-full border-muted bg-muted/30 opacity-90"
 					}
 				>
 					<CardHeader>
@@ -167,7 +169,7 @@ export function ProductsView() {
 							</p>
 						) : null}
 					</CardContent>
-					<CardFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+					<CardFooter className="mt-auto flex flex-col gap-2 sm:flex-row sm:justify-end">
 						{access.aml ? (
 							<Button asChild className="w-full sm:w-auto">
 								<a href={amlUrl} target="_blank" rel="noopener noreferrer">
@@ -189,8 +191,8 @@ export function ProductsView() {
 				<Card
 					className={
 						access.watchlist
-							? "border-border"
-							: "border-muted bg-muted/30 opacity-90"
+							? "h-full border-border"
+							: "h-full border-muted bg-muted/30 opacity-90"
 					}
 				>
 					<CardHeader>
@@ -209,7 +211,7 @@ export function ProductsView() {
 							</p>
 						) : null}
 					</CardContent>
-					<CardFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+					<CardFooter className="mt-auto flex flex-col gap-2 sm:flex-row sm:justify-end">
 						{access.watchlist ? (
 							<Button asChild className="w-full sm:w-auto">
 								<a

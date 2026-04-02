@@ -1,3 +1,10 @@
+# [2.6.0-rc.3](https://github.com/janovix/auth/compare/v2.6.0-rc.2...v2.6.0-rc.3) (2026-04-02)
+
+
+### Features
+
+* implement product access controls and enhance compliance settings ([f717dcb](https://github.com/janovix/auth/commit/f717dcbcedbc1165f5489785bf661f77dc3e2200))
+
 # [2.6.0-rc.2](https://github.com/janovix/auth/compare/v2.6.0-rc.1...v2.6.0-rc.2) (2026-03-30)
 
 

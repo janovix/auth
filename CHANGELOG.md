@@ -1,3 +1,10 @@
+# [2.6.0-rc.4](https://github.com/janovix/auth/compare/v2.6.0-rc.3...v2.6.0-rc.4) (2026-04-02)
+
+
+### Bug Fixes
+
+* **ProductsView:** update card styles for consistent height and footer alignment ([8357e73](https://github.com/janovix/auth/commit/8357e73f9dc78f1772c4c1dbc9444c597df8865e))
+
 # [2.6.0-rc.3](https://github.com/janovix/auth/compare/v2.6.0-rc.2...v2.6.0-rc.3) (2026-04-02)
 
 

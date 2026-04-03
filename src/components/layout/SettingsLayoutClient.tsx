@@ -12,10 +12,10 @@ import {
 	SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
+import { SettingsChromeFooter } from "@/components/layout/SettingsChromeFooter";
 import { NavBreadcrumb } from "@/components/layout/NavBreadcrumb";
 import type { Organization } from "@/components/layout/OrganizationSwitcher";
 import { Separator } from "@/components/ui/separator";
-import { NavbarClock } from "@/components/ui/navbar-clock";
 import {
 	setSidebarCollapsed as saveSidebarCollapsed,
 	getResolvedSettings,
@@ -528,7 +528,7 @@ function SettingsLayoutInner({
 					organizationsLimit={organizationsLimit}
 					pendingInvitationsCount={pendingInvitationsCount}
 				/>
-				<SidebarInset className="flex h-screen flex-col overflow-hidden">
+				<SidebarInset className="flex h-svh flex-col overflow-hidden">
 					{/* Header - Fixed navbar */}
 					<TooltipProvider delayDuration={0}>
 						<header className="z-50 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 shadow-xs">
@@ -562,12 +562,6 @@ function SettingsLayoutInner({
 										dark: t("theme.dark"),
 									}}
 								/>
-								<NavbarClock
-									timezone={effectiveTimezone || undefined}
-									defaultFormat={effectiveClockFormat}
-									size="sm"
-									showTimezoneMismatch={Boolean(effectiveTimezone)}
-								/>
 								{/* NotificationsWidget now consumes data from BlocksNotificationsContext automatically */}
 								<NotificationsWidget
 									onNotificationClick={handleNotificationClick}
@@ -582,11 +576,16 @@ function SettingsLayoutInner({
 						</header>
 					</TooltipProvider>
 
-					{/* Main Content */}
+					{/* Same pattern as aml DashboardLayout: one scroll container (main) wraps content + footer so
+					    the bar sits at the bottom when content is short and after content when it overflows */}
 					<main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-						<div className="max-w-4xl mx-auto p-6 lg:p-8 w-full">
-							{children}
+						<div className="flex flex-1 flex-col p-6 lg:p-8">
+							<div className="mx-auto w-full max-w-4xl">{children}</div>
 						</div>
+						<SettingsChromeFooter
+							timezone={effectiveTimezone}
+							clockFormat={effectiveClockFormat}
+						/>
 					</main>
 				</SidebarInset>
 			</SidebarProvider>

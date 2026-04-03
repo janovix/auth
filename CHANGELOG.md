@@ -1,3 +1,10 @@
+# [2.6.0-rc.8](https://github.com/janovix/auth/compare/v2.6.0-rc.7...v2.6.0-rc.8) (2026-04-03)
+
+
+### Features
+
+* **billing:** implement downgrade and usage limits management in BillingSettingsView ([f56eee1](https://github.com/janovix/auth/commit/f56eee130ac96352fd0847249e6722419af8ea4e))
+
 # [2.6.0-rc.7](https://github.com/janovix/auth/compare/v2.6.0-rc.6...v2.6.0-rc.7) (2026-04-03)
 
 

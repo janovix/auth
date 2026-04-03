@@ -529,6 +529,8 @@ const translations = {
 		"settings.compliance.thresholdMXN": "Threshold (MXN)",
 		"settings.compliance.umaNote": "UMA value",
 		"settings.compliance.viewAllThresholds": "View all thresholds by activity",
+		"settings.compliance.noticeThresholdAlways":
+			"Always (SAT notice required regardless of amount)",
 		"settings.compliance.kycSelfService": "KYC Self-Service",
 		"settings.compliance.kycSelfServiceDesc":
 			"Configure self-service KYC verification settings for your clients",
@@ -1616,6 +1618,8 @@ const translations = {
 		"settings.compliance.umaNote": "Valor UMA",
 		"settings.compliance.viewAllThresholds":
 			"Ver todos los umbrales por actividad",
+		"settings.compliance.noticeThresholdAlways":
+			"Siempre (aviso SAT sin importar el monto)",
 		"settings.compliance.kycSelfService": "KYC Autoservicio",
 		"settings.compliance.kycSelfServiceDesc":
 			"Configura las opciones de verificación KYC de autoservicio para tus clientes",

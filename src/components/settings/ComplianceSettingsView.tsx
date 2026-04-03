@@ -56,99 +56,132 @@ import {
 	ComplianceSettingsViewSkeleton,
 } from "@/components/settings";
 
-// Vulnerable activities catalog (as per Mexican AML regulations)
+// Vulnerable activities catalog — codes aligned with aml-svc ActivityCode / SAT catalog
 const VULNERABLE_ACTIVITIES = [
 	{
-		value: "VEH",
-		label: "Vehículos (VEH)",
-		description: "Venta de vehículos terrestres, aéreos y marítimos",
+		value: "JYS",
+		label: "Juego y sorteos (JYS)",
+		description: "Juegos con apuesta, concursos y sorteos",
+	},
+	{
+		value: "TSC",
+		label: "Tarjetas de servicio/crédito (TSC)",
+		description: "Tarjetas de servicio o crédito",
+	},
+	{
+		value: "TPP",
+		label: "Tarjetas prepagadas (TPP)",
+		description: "Tarjetas prepagadas, vales o cupones",
+	},
+	{
+		value: "TDR",
+		label: "Monederos y certificados (TDR)",
+		description: "Monederos y certificados de devoluciones o recompensas",
+	},
+	{
+		value: "CHV",
+		label: "Cheques de viajero (CHV)",
+		description: "Cheques de viajero",
+	},
+	{
+		value: "MPC",
+		label: "Mutuo, préstamos y créditos (MPC)",
+		description: "Servicios de mutuo, préstamos o créditos",
 	},
 	{
 		value: "INM",
 		label: "Inmuebles (INM)",
-		description: "Servicios de mediación inmobiliaria",
+		description: "Servicios relacionados con inmuebles",
 	},
 	{
-		value: "JOY",
-		label: "Joyería (JOY)",
-		description: "Compraventa de joyas, metales preciosos y relojes",
+		value: "DIN",
+		label: "Desarrollo inmobiliario (DIN)",
+		description: "Desarrollo inmobiliario",
 	},
 	{
-		value: "OAR",
-		label: "Obras de arte (OAR)",
-		description: "Compraventa de obras de arte",
+		value: "MJR",
+		label: "Joyería (MJR)",
+		description: "Metales y piedras preciosas, joyas y relojes",
+	},
+	{
+		value: "OBA",
+		label: "Arte (OBA)",
+		description: "Obras de arte",
+	},
+	{
+		value: "VEH",
+		label: "Vehículos (VEH)",
+		description: "Vehículos aéreos, marítimos o terrestres",
 	},
 	{
 		value: "BLI",
 		label: "Blindaje (BLI)",
-		description: "Blindaje de vehículos o bienes inmuebles",
+		description: "Servicios de blindaje",
 	},
 	{
-		value: "TRA",
-		label: "Traslado (TRA)",
+		value: "TCV",
+		label: "Custodia de valores (TCV)",
 		description: "Traslado o custodia de dinero o valores",
 	},
 	{
-		value: "JUE",
-		label: "Juegos (JUE)",
-		description: "Juegos con apuesta, concursos o sorteos",
+		value: "SPR",
+		label: "Servicios profesionales (SPR)",
+		description: "Prestación de servicios profesionales",
 	},
 	{
-		value: "TAR",
-		label: "Tarjetas (TAR)",
-		description: "Emisión de tarjetas de servicios o crédito",
+		value: "FEP",
+		label: "Fe pública — notarios (FEP)",
+		description: "Fé Pública: Notarios y Corredores Públicos",
 	},
 	{
-		value: "CHE",
-		label: "Cheques (CHE)",
-		description: "Emisión y venta de cheques de viajero",
+		value: "FES",
+		label: "Fe pública — servidores públicos (FES)",
+		description: "Fé Pública: Servidores Públicos",
 	},
 	{
-		value: "PRE",
-		label: "Préstamos (PRE)",
-		description: "Ofrecimiento habitual o profesional de préstamos",
+		value: "DON",
+		label: "Donativos (DON)",
+		description: "Donativos",
 	},
 	{
-		value: "ARP",
-		label: "Arrendamiento (ARP)",
-		description: "Arrendamiento de bienes inmuebles",
+		value: "ARI",
+		label: "Arrendamiento de inmuebles (ARI)",
+		description: "Derechos personales de uso y goce de inmuebles",
 	},
 	{
-		value: "FCP",
-		label: "Fe pública (FCP)",
-		description: "Prestación de servicios de fe pública",
-	},
-	{
-		value: "SAP",
-		label: "Servicios profesionales (SAP)",
-		description: "Servicios profesionales independientes",
-	},
-	{
-		value: "ACT",
-		label: "Actividades comerciales (ACT)",
-		description: "Otras actividades comerciales",
+		value: "AVI",
+		label: "Activos virtuales (AVI)",
+		description: "Operaciones con Activos Virtuales",
 	},
 ];
 
 // RFC validation regex (Mexican format)
 const RFC_REGEX = /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/;
 
-// Reporting thresholds (in UMAs)
-const REPORTING_THRESHOLDS = {
-	VEH: { threshold: 645, description: "settings.compliance.threshold645" },
-	INM: { threshold: 8025, description: "settings.compliance.threshold8025" },
-	JOY: { threshold: 805, description: "settings.compliance.threshold805" },
-	OAR: { threshold: 4815, description: "settings.compliance.threshold4815" },
-	BLI: { threshold: 2410, description: "settings.compliance.threshold2410" },
-	TRA: { threshold: 3210, description: "settings.compliance.threshold3210" },
-	JUE: { threshold: 325, description: "settings.compliance.threshold325" },
-	TAR: { threshold: 805, description: "settings.compliance.threshold805" },
-	CHE: { threshold: 645, description: "settings.compliance.threshold645" },
-	PRE: { threshold: 1605, description: "settings.compliance.threshold1605" },
-	ARP: { threshold: 1605, description: "settings.compliance.threshold1605" },
-	FCP: { threshold: 8025, description: "settings.compliance.threshold8025" },
-	SAP: { threshold: 8025, description: "settings.compliance.threshold8025" },
-	ACT: { threshold: 8025, description: "settings.compliance.threshold8025" },
+/** Notice filing thresholds (UMA) — aligned with aml-svc activity handlers */
+const REPORTING_THRESHOLDS: Record<
+	string,
+	{ thresholdUma: number | "ALWAYS" }
+> = {
+	JYS: { thresholdUma: 645 },
+	TSC: { thresholdUma: 1285 },
+	TPP: { thresholdUma: 645 },
+	TDR: { thresholdUma: 645 },
+	CHV: { thresholdUma: 645 },
+	MPC: { thresholdUma: 1605 },
+	INM: { thresholdUma: 8025 },
+	DIN: { thresholdUma: 8025 },
+	MJR: { thresholdUma: 1605 },
+	OBA: { thresholdUma: 4815 },
+	VEH: { thresholdUma: 6420 },
+	BLI: { thresholdUma: 4815 },
+	TCV: { thresholdUma: 3210 },
+	SPR: { thresholdUma: "ALWAYS" },
+	FEP: { thresholdUma: 8000 },
+	FES: { thresholdUma: "ALWAYS" },
+	DON: { thresholdUma: 3210 },
+	ARI: { thresholdUma: 3210 },
+	AVI: { thresholdUma: 210 },
 };
 
 // Current UMA value (this should be fetched from the API in a real implementation)
@@ -580,6 +613,30 @@ export function ComplianceSettingsView() {
 												const activity = VULNERABLE_ACTIVITIES.find(
 													(a) => a.value === key,
 												);
+												const thresholdUma = value.thresholdUma;
+												const rightColumn =
+													thresholdUma === "ALWAYS" ? (
+														<span className="text-sm font-semibold text-foreground">
+															{t("settings.compliance.noticeThresholdAlways")}
+														</span>
+													) : (
+														<>
+															<span className="text-sm font-semibold text-foreground">
+																{thresholdUma.toLocaleString()} UMAs
+															</span>
+															<p className="text-xs text-muted-foreground font-mono">
+																$
+																{(thresholdUma * CURRENT_UMA).toLocaleString(
+																	"es-MX",
+																	{
+																		minimumFractionDigits: 2,
+																		maximumFractionDigits: 2,
+																	},
+																)}{" "}
+																MXN
+															</p>
+														</>
+													);
 												return (
 													<div
 														key={key}
@@ -593,22 +650,7 @@ export function ComplianceSettingsView() {
 																{activity?.description}
 															</p>
 														</div>
-														<div className="text-right">
-															<span className="text-sm font-semibold text-foreground">
-																{value.threshold.toLocaleString()} UMAs
-															</span>
-															<p className="text-xs text-muted-foreground font-mono">
-																$
-																{(value.threshold * CURRENT_UMA).toLocaleString(
-																	"es-MX",
-																	{
-																		minimumFractionDigits: 2,
-																		maximumFractionDigits: 2,
-																	},
-																)}{" "}
-																MXN
-															</p>
-														</div>
+														<div className="text-right">{rightColumn}</div>
 													</div>
 												);
 											},

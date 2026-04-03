@@ -472,23 +472,24 @@ const translations = {
 		"settings.org.defaultLanguage": "Default language",
 		"settings.org.defaultDateFormat": "Default date format",
 		"settings.org.dangerZone": "Danger Zone",
-		"settings.org.dangerZoneDesc": "Irreversible and destructive actions",
-		"settings.org.delete": "Delete organization",
+		"settings.org.dangerZoneDesc":
+			"Archiving removes write access while retaining data for compliance retention",
+		"settings.org.delete": "Archive organization",
 		"settings.org.deleteDesc":
-			"Permanently delete this organization and all its data",
-		"settings.org.deleteButton": "Delete organization",
-		"settings.org.deleteConfirmTitle": "Delete organization?",
+			"Archive this organization (read-only, retained for compliance)",
+		"settings.org.deleteButton": "Archive organization",
+		"settings.org.deleteConfirmTitle": "Archive organization?",
 		"settings.org.deleteConfirmDesc":
-			"This action cannot be undone. This will permanently delete {name} and all associated data including members, operations, and alerts.",
+			"This will archive {name}. Members keep historical access; product apps become read-only until you restore the organization from billing settings if your plan allows.",
 		"settings.org.deleteWarning":
-			"This is a destructive action. All organization data, members, and settings will be permanently removed.",
+			"Archived organizations cannot create or edit data. Data is retained according to your retention policy.",
 		"settings.org.deleteSlugPrompt":
 			"To confirm, type the organization slug: {slug}",
-		"settings.org.deleting": "Deleting...",
+		"settings.org.deleting": "Archiving...",
 		"settings.org.deleteButtonConfirm":
-			"I understand, delete this organization",
-		"settings.org.deleteSuccess": "Organization deleted successfully",
-		"settings.org.deleteError": "Failed to delete organization",
+			"I understand, archive this organization",
+		"settings.org.deleteSuccess": "Organization archived successfully",
+		"settings.org.deleteError": "Failed to archive organization",
 		"settings.org.cancel": "Cancel",
 
 		// AML Compliance settings
@@ -670,6 +671,11 @@ const translations = {
 		"settings.billing.paymentMethods": "Payment Methods",
 		"settings.billing.invoices": "Invoice History",
 		"settings.billing.managePortal": "Manage subscription",
+		"settings.billing.managePortalHint":
+			"Payment methods, invoices, and billing history in Stripe",
+		"settings.billing.planUpdated": "Plan updated",
+		"settings.billing.licensePlanChangeHint":
+			"Enterprise licenses are managed outside self-service billing. Contact your administrator.",
 		"settings.billing.upgrade": "Upgrade Plan",
 		"settings.billing.downgrade": "Downgrade Plan",
 		"settings.billing.cancel": "Cancel Subscription",
@@ -1559,22 +1565,23 @@ const translations = {
 		"settings.org.defaultLanguage": "Idioma predeterminado",
 		"settings.org.defaultDateFormat": "Formato de fecha predeterminado",
 		"settings.org.dangerZone": "Zona de Peligro",
-		"settings.org.dangerZoneDesc": "Acciones irreversibles y destructivas",
-		"settings.org.delete": "Eliminar organización",
+		"settings.org.dangerZoneDesc":
+			"Archivar quita el acceso de escritura y conserva los datos para retención",
+		"settings.org.delete": "Archivar organización",
 		"settings.org.deleteDesc":
-			"Eliminar permanentemente esta organización y todos sus datos",
-		"settings.org.deleteButton": "Eliminar organización",
-		"settings.org.deleteConfirmTitle": "¿Eliminar organización?",
+			"Archivar esta organización (solo lectura, conservada para cumplimiento)",
+		"settings.org.deleteButton": "Archivar organización",
+		"settings.org.deleteConfirmTitle": "¿Archivar organización?",
 		"settings.org.deleteConfirmDesc":
-			"Esta acción no se puede deshacer. Esto eliminará permanentemente {name} y todos los datos asociados incluyendo miembros, operaciones y alertas.",
+			"Esto archivará {name}. Los miembros conservan acceso histórico; las apps de producto quedan solo lectura hasta restaurar la organización si tu plan lo permite.",
 		"settings.org.deleteWarning":
-			"Esta es una acción destructiva. Todos los datos, miembros y configuraciones de la organización serán eliminados permanentemente.",
+			"Las organizaciones archivadas no pueden crear ni editar datos. Los datos se conservan según tu política de retención.",
 		"settings.org.deleteSlugPrompt":
 			"Para confirmar, escribe el slug de la organización: {slug}",
-		"settings.org.deleting": "Eliminando...",
-		"settings.org.deleteButtonConfirm": "Entiendo, eliminar esta organización",
-		"settings.org.deleteSuccess": "Organización eliminada exitosamente",
-		"settings.org.deleteError": "Error al eliminar la organización",
+		"settings.org.deleting": "Archivando...",
+		"settings.org.deleteButtonConfirm": "Entiendo, archivar esta organización",
+		"settings.org.deleteSuccess": "Organización archivada correctamente",
+		"settings.org.deleteError": "Error al archivar la organización",
 		"settings.org.cancel": "Cancelar",
 
 		// AML Compliance settings
@@ -1761,6 +1768,11 @@ const translations = {
 		"settings.billing.paymentMethods": "Métodos de Pago",
 		"settings.billing.invoices": "Historial de Facturas",
 		"settings.billing.managePortal": "Administrar subscripción",
+		"settings.billing.managePortalHint":
+			"Métodos de pago, facturas e historial en Stripe",
+		"settings.billing.planUpdated": "Plan actualizado",
+		"settings.billing.licensePlanChangeHint":
+			"Las licencias enterprise se gestionan fuera del autoservicio. Contacta a tu administrador.",
 		"settings.billing.upgrade": "Mejorar Plan",
 		"settings.billing.downgrade": "Reducir Plan",
 		"settings.billing.cancel": "Cancelar Suscripción",

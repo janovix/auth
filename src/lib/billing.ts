@@ -583,6 +583,175 @@ export async function activateLicenseKey(
 }
 
 // ============================================================================
+// Overage, usage details, downgrade (custom auth-svc routes)
+// ============================================================================
+
+export interface OverageSettingsData {
+	overageEnabled: boolean;
+	spendLimitCents: number | null;
+	spendLimitCurrency: string;
+	periodOverageChargeCents: number;
+}
+
+export async function getOverageSettings(): Promise<OverageSettingsData> {
+	const response = await fetch(`${API_BASE()}/subscription/overage-settings`, {
+		credentials: "include",
+	});
+	const result = (await response.json()) as ApiResponse<OverageSettingsData>;
+	if (!response.ok || !result.success || !result.data) {
+		throw new Error(result.error ?? "Failed to load overage settings");
+	}
+	return result.data;
+}
+
+export async function updateOverageSettings(input: {
+	overageEnabled?: boolean;
+	spendLimitCents?: number | null;
+	spendLimitCurrency?: string;
+}): Promise<OverageSettingsData> {
+	const response = await fetch(`${API_BASE()}/subscription/overage-settings`, {
+		method: "PUT",
+		credentials: "include",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(input),
+	});
+	const result = (await response.json()) as ApiResponse<OverageSettingsData>;
+	if (!response.ok || !result.success || !result.data) {
+		throw new Error(result.error ?? "Failed to update overage settings");
+	}
+	return result.data;
+}
+
+export interface UsageDetailsApi {
+	usage: {
+		reports: number;
+		notices: number;
+		alerts: number;
+		operations: number;
+		clients: number;
+		users: number;
+		watchlistQueries: number;
+	};
+	limits: {
+		reports: number;
+		notices: number;
+		alerts: number;
+		operations: number;
+		clients: number;
+		users: number;
+		watchlistQueriesPerMonth: number;
+		maxOrganizations: number;
+	} | null;
+	period: { start: string; end: string };
+	overage: {
+		enabled: boolean;
+		spendLimitCents: number | null;
+		periodChargeCents: number;
+		currency: string;
+	};
+}
+
+export async function getUsageDetails(): Promise<UsageDetailsApi | null> {
+	const response = await fetch(`${API_BASE()}/subscription/usage-details`, {
+		credentials: "include",
+	});
+	if (!response.ok) return null;
+	const result = (await response.json()) as ApiResponse<UsageDetailsApi>;
+	return result.success ? (result.data ?? null) : null;
+}
+
+export interface PrepareDowngradeResponse {
+	targetPlan: string;
+	targetLimits: { maxOrganizations: number; usersPerOrg: number };
+	activeOrganizationCount: number;
+	excessOrganizationSlots: number;
+	organizations: Array<{
+		id: string;
+		name: string;
+		status: string;
+		memberCount: number;
+		exceedsUsersPerOrgAfterDowngrade: boolean;
+	}>;
+}
+
+export async function prepareDowngrade(
+	targetPlan: string,
+): Promise<PrepareDowngradeResponse> {
+	const response = await fetch(`${API_BASE()}/subscription/prepare-downgrade`, {
+		method: "POST",
+		credentials: "include",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({ targetPlan }),
+	});
+	const result =
+		(await response.json()) as ApiResponse<PrepareDowngradeResponse> & {
+			error?: string;
+		};
+	if (!response.ok || !result.success || !result.data) {
+		throw new Error(result.error ?? "Failed to prepare plan change");
+	}
+	return result.data;
+}
+
+export async function archiveOrganizationsForDowngrade(
+	organizationIds: string[],
+): Promise<void> {
+	const response = await fetch(
+		`${API_BASE()}/subscription/downgrade/archive-organizations`,
+		{
+			method: "POST",
+			credentials: "include",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ organizationIds }),
+		},
+	);
+	const result = (await response.json()) as {
+		success: boolean;
+		error?: string;
+	};
+	if (!response.ok || !result.success) {
+		throw new Error(result.error ?? "Failed to archive organizations");
+	}
+}
+
+/**
+ * Change Stripe subscription plan (Better Auth Stripe plugin; proration in Stripe).
+ * Returns a portal/checkout URL when the plugin requires a redirect.
+ */
+export async function changeSubscriptionPlan(
+	plan: "watchlist" | "business" | "pro" | "ultra",
+	successUrl?: string,
+	cancelUrl?: string,
+): Promise<{ redirectUrl: string | null }> {
+	try {
+		await ensureStripeCustomer();
+	} catch {
+		// continue — upgrade may still succeed
+	}
+
+	const origin = typeof window !== "undefined" ? window.location.origin : "";
+	const okSuccess = successUrl ?? `${origin}/settings/billing?success=true`;
+	const okCancel = cancelUrl ?? `${origin}/settings/billing?canceled=true`;
+
+	const result = await authClient.subscription.upgrade({
+		plan,
+		successUrl: okSuccess,
+		cancelUrl: okCancel,
+	});
+
+	if (result.error) {
+		throw new Error(
+			result.error.message || "Failed to change subscription plan",
+		);
+	}
+
+	const url = result.data?.url;
+	return {
+		redirectUrl: typeof url === "string" && url.length > 0 ? url : null,
+	};
+}
+
+// ============================================================================
 // Helpers
 // ============================================================================
 

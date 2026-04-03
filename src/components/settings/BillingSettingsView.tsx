@@ -22,8 +22,11 @@ import {
 	cancelSubscription,
 	getPortalUrl,
 	activateLicenseKey,
+	prepareDowngrade,
+	changeSubscriptionPlan,
 	type UserSubscriptionStatus,
 	type PublicPlanInfo,
+	type PrepareDowngradeResponse,
 	isSubscriptionActive,
 	getStatusBadgeInfo,
 	formatDate,
@@ -65,6 +68,8 @@ import { dispatchBillingEntitlementsUpdated } from "@/lib/settings/billingEntitl
 import { PlanSelectionGrid } from "@/components/PlanSelectionGrid";
 import { EnterpriseCard } from "@/components/EnterpriseCard";
 import { WatchlistCard } from "@/components/WatchlistCard";
+import { UsageLimitsSection } from "@/components/settings/UsageLimitsSection";
+import { DowngradeWizard } from "@/components/settings/DowngradeWizard";
 
 export function BillingSettingsView() {
 	const { t } = useLanguage();
@@ -78,6 +83,12 @@ export function BillingSettingsView() {
 	const [plans, setPlans] = useState<PublicPlanInfo[]>([]);
 	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 	const [redeemDialogOpen, setRedeemDialogOpen] = useState(false);
+	const [downgradeOpen, setDowngradeOpen] = useState(false);
+	const [downgradePlan, setDowngradePlan] = useState<
+		"watchlist" | "business" | "pro" | "ultra" | null
+	>(null);
+	const [downgradePrep, setDowngradePrep] =
+		useState<PrepareDowngradeResponse | null>(null);
 
 	// Load billing data
 	const loadBillingData = useCallback(async () => {
@@ -118,24 +129,50 @@ export function BillingSettingsView() {
 	const handleSelectPlan = async (
 		planName: "watchlist" | "business" | "pro" | "ultra",
 	) => {
+		if (subscription?.isLicenseBased) {
+			toast({
+				title: t("settings.billing.error"),
+				description:
+					t("settings.billing.licensePlanChangeHint") ||
+					"Plan changes for enterprise licenses are handled by your account executive.",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		setActionLoading(true);
 		try {
-			// If user already has a subscription, use Customer Portal for plan changes
-			if (subscription?.hasSubscription) {
-				const returnUrl = `${window.location.origin}/settings/billing?success=true`;
-				const { url } = await getPortalUrl(returnUrl);
-				window.location.href = url;
-			} else {
-				// New subscription - use checkout
-				const successUrl = `${window.location.origin}/settings/billing?success=true`;
-				const cancelUrl = `${window.location.origin}/settings/billing?canceled=true`;
-				const { url } = await startSubscription(
-					planName,
-					successUrl,
-					cancelUrl,
-				);
-				window.location.href = url;
+			if (subscription?.hasSubscription && !subscription.isLicenseBased) {
+				const prep = await prepareDowngrade(planName);
+				const needsWizard =
+					prep.excessOrganizationSlots > 0 ||
+					prep.organizations.some((o) => o.exceedsUsersPerOrgAfterDowngrade);
+				if (needsWizard) {
+					setDowngradePrep(prep);
+					setDowngradePlan(planName);
+					setDowngradeOpen(true);
+					setActionLoading(false);
+					return;
+				}
+
+				const { redirectUrl } = await changeSubscriptionPlan(planName);
+				if (redirectUrl) {
+					window.location.href = redirectUrl;
+					return;
+				}
+
+				toast({
+					title: t("settings.billing.planUpdated") || "Plan updated",
+				});
+				await loadBillingData();
+				dispatchBillingEntitlementsUpdated();
+				return;
 			}
+
+			const successUrl = `${window.location.origin}/settings/billing?success=true`;
+			const cancelUrl = `${window.location.origin}/settings/billing?canceled=true`;
+			const { url } = await startSubscription(planName, successUrl, cancelUrl);
+			window.location.href = url;
 		} catch (error) {
 			Sentry.captureException(error, {
 				tags: { context: "checkout-error" },
@@ -337,6 +374,10 @@ export function BillingSettingsView() {
 								}
 							}}
 							disabled={actionLoading}
+							title={
+								t("settings.billing.managePortalHint") ||
+								"Payment methods, invoices, and billing history"
+							}
 						>
 							{t("settings.billing.managePortal")}
 						</Button>
@@ -357,6 +398,10 @@ export function BillingSettingsView() {
 					</CardFooter>
 				)}
 			</Card>
+
+			{subscription?.hasSubscription && !subscription.isLicenseBased ? (
+				<UsageLimitsSection />
+			) : null}
 
 			{/* Plan Selection + Enterprise + Watchlist */}
 			<SettingsSection
@@ -465,6 +510,35 @@ export function BillingSettingsView() {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
+
+			{downgradePlan && downgradePrep ? (
+				<DowngradeWizard
+					open={downgradeOpen}
+					onOpenChange={(open) => {
+						setDowngradeOpen(open);
+						if (!open) {
+							setDowngradePlan(null);
+							setDowngradePrep(null);
+						}
+					}}
+					targetPlan={downgradePlan}
+					prep={downgradePrep}
+					onFinished={async () => {
+						await loadBillingData();
+						dispatchBillingEntitlementsUpdated();
+						toast({
+							title: t("settings.billing.planUpdated") || "Plan updated",
+						});
+					}}
+					onError={(message) => {
+						toast({
+							title: t("settings.billing.error"),
+							description: message,
+							variant: "destructive",
+						});
+					}}
+				/>
+			) : null}
 		</div>
 	);
 }

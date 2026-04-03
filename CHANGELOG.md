@@ -1,3 +1,10 @@
+# [2.6.0-rc.6](https://github.com/janovix/auth/compare/v2.6.0-rc.5...v2.6.0-rc.6) (2026-04-03)
+
+
+### Features
+
+* **compliance:** update vulnerable activities and reporting thresholds for alignment with aml-svc ([e4eb893](https://github.com/janovix/auth/commit/e4eb893c0860e691c8b9910b818bcb8033d883d0))
+
 # [2.6.0-rc.5](https://github.com/janovix/auth/compare/v2.6.0-rc.4...v2.6.0-rc.5) (2026-04-02)
 
 

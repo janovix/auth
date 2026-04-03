@@ -1,3 +1,10 @@
+# [2.6.0-rc.7](https://github.com/janovix/auth/compare/v2.6.0-rc.6...v2.6.0-rc.7) (2026-04-03)
+
+
+### Features
+
+* **layout:** add SettingsChromeFooter component for improved footer layout in settings ([fd019f1](https://github.com/janovix/auth/commit/fd019f167d605ef4dace16304d538aceef798820))
+
 # [2.6.0-rc.6](https://github.com/janovix/auth/compare/v2.6.0-rc.5...v2.6.0-rc.6) (2026-04-03)
 
 

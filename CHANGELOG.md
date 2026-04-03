@@ -1,3 +1,10 @@
+# [2.6.0-rc.5](https://github.com/janovix/auth/compare/v2.6.0-rc.4...v2.6.0-rc.5) (2026-04-02)
+
+
+### Features
+
+* **billing:** add billing entitlements event handling and update completion status logic ([6fc7b82](https://github.com/janovix/auth/commit/6fc7b82b1d9a24ae50d053a60114e5192bc75e48))
+
 # [2.6.0-rc.4](https://github.com/janovix/auth/compare/v2.6.0-rc.3...v2.6.0-rc.4) (2026-04-02)
 
 

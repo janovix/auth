@@ -380,6 +380,13 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 					};
 				}
 
+				// Set the joined organization as active (mirrors createOrganization)
+				if (organizationId) {
+					await authClient.organization.setActive({
+						organizationId,
+					});
+				}
+
 				// Update seat count in Stripe after accepting invitation
 				// This is done asynchronously and doesn't block the user flow
 				if (organizationId) {

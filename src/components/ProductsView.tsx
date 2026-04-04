@@ -163,7 +163,7 @@ export function ProductsView() {
 					<CardFooter className="mt-auto flex flex-col gap-2 sm:flex-row sm:justify-end">
 						{access.aml ? (
 							<Button asChild className="w-full sm:w-auto">
-								<a href={amlUrl} target="_blank" rel="noopener noreferrer">
+								<a href={amlUrl}>
 									{t("products.openProduct")}
 									<ArrowRight className="ml-2 h-4 w-4" />
 								</a>
@@ -205,11 +205,7 @@ export function ProductsView() {
 					<CardFooter className="mt-auto flex flex-col gap-2 sm:flex-row sm:justify-end">
 						{access.watchlist ? (
 							<Button asChild className="w-full sm:w-auto">
-								<a
-									href={watchlistUrl}
-									target="_blank"
-									rel="noopener noreferrer"
-								>
+								<a href={watchlistUrl}>
 									{t("products.openProduct")}
 									<ArrowRight className="ml-2 h-4 w-4" />
 								</a>

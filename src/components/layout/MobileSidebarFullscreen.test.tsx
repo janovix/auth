@@ -183,21 +183,21 @@ describe("MobileNavItem", () => {
 		expect(link).toHaveAttribute("href", "https://example.com");
 	});
 
-	it("renders external links with target blank", () => {
+	it("renders href links in the same window (no target=_blank)", () => {
 		render(
 			<MobileNavItem
 				icon={<span>Icon</span>}
-				label="External Link"
+				label="Cross-app Link"
 				href="https://example.com"
-				external
 			/>,
 		);
 
 		// Get all links and check the last one (handles StrictMode double render)
 		const links = screen.getAllByRole("link");
 		const link = links[links.length - 1];
-		expect(link).toHaveAttribute("target", "_blank");
-		expect(link).toHaveAttribute("rel", "noopener noreferrer");
+		expect(link).toHaveAttribute("href", "https://example.com");
+		expect(link.getAttribute("target")).toBeNull();
+		expect(link.getAttribute("rel")).toBeNull();
 	});
 
 	it("renders as button when no href", () => {

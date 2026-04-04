@@ -160,12 +160,7 @@ export function AppSwitcher({
 								className="cursor-pointer rounded-lg p-3 mx-1 my-0.5"
 							>
 								{app.external ? (
-									<a
-										href={app.href}
-										target="_blank"
-										rel="noopener noreferrer"
-										className={rowClass}
-									>
+									<a href={app.href} className={rowClass}>
 										<div
 											className={cn(
 												"flex size-10 items-center justify-center rounded-lg",
@@ -256,12 +251,7 @@ export function AppSwitcher({
 								return (
 									<DropdownMenuItem key={app.id} asChild className={rowClass}>
 										{app.external ? (
-											<a
-												href={app.href}
-												target="_blank"
-												rel="noopener noreferrer"
-												className="flex gap-3"
-											>
+											<a href={app.href} className="flex gap-3">
 												<div
 													className={cn(
 														"flex size-8 items-center justify-center rounded-md",
@@ -354,12 +344,7 @@ export function AppSwitcher({
 							return (
 								<DropdownMenuItem key={app.id} asChild className={rowClass}>
 									{app.external ? (
-										<a
-											href={app.href}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="flex gap-3"
-										>
+										<a href={app.href} className="flex gap-3">
 											<div
 												className={cn(
 													"flex size-8 items-center justify-center rounded-md",

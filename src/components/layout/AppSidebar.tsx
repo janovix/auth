@@ -410,12 +410,7 @@ export function AppSidebar({
 											isActive={isActive}
 										>
 											{item.external ? (
-												<a
-													href={item.href}
-													onClick={handleLinkClick}
-													target="_blank"
-													rel="noopener noreferrer"
-												>
+												<a href={item.href} onClick={handleLinkClick}>
 													<Icon />
 													<span>{item.name}</span>
 												</a>

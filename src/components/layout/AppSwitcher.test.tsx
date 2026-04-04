@@ -158,8 +158,7 @@ describe("AppSwitcher", () => {
 		expect(await screen.findByText("Current")).toBeInTheDocument();
 	});
 
-	it("renders external links with target blank", async () => {
-		const user = userEvent.setup();
+	it("renders cross-app links without opening a new tab", async () => {
 		const { container } = renderWithProductAccess(
 			<AppSwitcher variant="mobile-fullscreen" />,
 		);
@@ -178,11 +177,18 @@ describe("AppSwitcher", () => {
 
 		// Then find all menu items (links)
 		const links = await screen.findAllByRole("menuitem");
-		// Homepage, AML, and Watchlist should be external links
-		const externalLinks = links.filter(
-			(link) => link.getAttribute("target") === "_blank",
+		const crossAppHrefs = new Set([
+			"https://www.janovix.com",
+			"https://aml.janovix.workers.dev",
+			"https://watchlist.janovix.workers.dev",
+		]);
+		const crossAppLinks = links.filter((link) =>
+			crossAppHrefs.has(link.getAttribute("href") ?? ""),
 		);
-		expect(externalLinks.length).toBe(3);
+		expect(crossAppLinks.length).toBe(3);
+		for (const link of crossAppLinks) {
+			expect(link.getAttribute("target")).toBeNull();
+		}
 	});
 
 	it("hides AML from menu when product access is disabled", async () => {
@@ -219,15 +225,11 @@ describe("AppSwitcher", () => {
 
 		await screen.findByText("Janovix Apps");
 		const links = await screen.findAllByRole("menuitem");
-		const externalHrefs = new Set(
-			links
-				.filter((link) => link.getAttribute("target") === "_blank")
-				.map((link) => link.getAttribute("href")),
+		const hrefs = new Set(
+			links.map((link) => link.getAttribute("href")).filter(Boolean),
 		);
-		expect(externalHrefs.has("https://aml.janovix.workers.dev")).toBe(false);
-		expect(externalHrefs.has("https://www.janovix.com")).toBe(true);
-		expect(externalHrefs.has("https://watchlist.janovix.workers.dev")).toBe(
-			true,
-		);
+		expect(hrefs.has("https://aml.janovix.workers.dev")).toBe(false);
+		expect(hrefs.has("https://www.janovix.com")).toBe(true);
+		expect(hrefs.has("https://watchlist.janovix.workers.dev")).toBe(true);
 	});
 });

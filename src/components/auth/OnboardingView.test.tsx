@@ -125,8 +125,8 @@ describe("OnboardingView", () => {
 			</ThemeProvider>,
 		);
 
-		// Should show loading state initially
-		expect(screen.getByText(/loading/i)).toBeInTheDocument();
+		// Should show skeleton loading state initially (no CLS spinner-only layout)
+		expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0);
 	});
 
 	it("provides proper context to children", async () => {

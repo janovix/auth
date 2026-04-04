@@ -23,6 +23,7 @@ import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function pct(used: number, limit: number): number {
 	if (limit <= 0) return 0;
@@ -97,14 +98,7 @@ export function UsageLimitsSection() {
 	};
 
 	if (loading) {
-		return (
-			<Card>
-				<CardContent className="flex items-center gap-2 py-8 text-muted-foreground">
-					<Loader2 className="h-5 w-5 animate-spin" />
-					Loading usage…
-				</CardContent>
-			</Card>
-		);
+		return <UsageLimitsSkeleton />;
 	}
 
 	if (!details?.limits) {
@@ -218,6 +212,47 @@ export function UsageLimitsSection() {
 							"Save usage billing settings"
 						)}
 					</Button>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+/**
+ * Skeleton matching UsageLimitsSection loaded state: header + metric rows + overage block.
+ */
+function UsageLimitsSkeleton() {
+	return (
+		<Card>
+			<CardHeader>
+				<Skeleton className="h-6 w-40 mb-2" />
+				<Skeleton className="h-4 w-full max-w-md" />
+			</CardHeader>
+			<CardContent className="space-y-6">
+				<div className="space-y-4">
+					{[1, 2, 3, 4, 5, 6, 7].map((i) => (
+						<div key={i} className="space-y-1">
+							<div className="flex justify-between">
+								<Skeleton className="h-4 w-36" />
+								<Skeleton className="h-4 w-24" />
+							</div>
+							<Skeleton className="h-2 w-full rounded-full" />
+						</div>
+					))}
+				</div>
+				<div className="border-t pt-4 space-y-4">
+					<Skeleton className="h-5 w-48" />
+					<Skeleton className="h-4 w-full max-w-xl" />
+					<div className="flex items-center justify-between gap-4">
+						<Skeleton className="h-4 w-40" />
+						<Skeleton className="h-5 w-9 rounded-full" />
+					</div>
+					<div className="space-y-2">
+						<Skeleton className="h-4 w-44" />
+						<Skeleton className="h-10 w-full max-w-xs rounded-md" />
+						<Skeleton className="h-3 w-full max-w-lg" />
+					</div>
+					<Skeleton className="h-10 w-56 rounded-md" />
 				</div>
 			</CardContent>
 		</Card>

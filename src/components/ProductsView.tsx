@@ -10,6 +10,7 @@ import {
 	Loader2,
 	RefreshCw,
 } from "lucide-react";
+import { ProductsViewSkeleton } from "@/components/ProductsViewSkeleton";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -97,12 +98,7 @@ export function ProductsView() {
 	);
 
 	if (sessionPending) {
-		return (
-			<div className="flex min-h-[40vh] flex-col items-center justify-center gap-4">
-				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-				<p className="text-sm text-muted-foreground">{t("products.loading")}</p>
-			</div>
-		);
+		return <ProductsViewSkeleton />;
 	}
 
 	if (error) {
@@ -129,12 +125,7 @@ export function ProductsView() {
 	}
 
 	if (loading) {
-		return (
-			<div className="flex min-h-[40vh] flex-col items-center justify-center gap-4">
-				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-				<p className="text-sm text-muted-foreground">{t("products.loading")}</p>
-			</div>
-		);
+		return <ProductsViewSkeleton />;
 	}
 
 	const amlUrl = getAmlAppUrl();

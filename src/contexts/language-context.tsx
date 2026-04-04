@@ -446,9 +446,9 @@ const translations = {
 		"settings.createOrg.namePlaceholder": "Acme Corporation",
 		"settings.createOrg.nameHelp":
 			"This is how your organization will appear across Janovix",
-		"settings.createOrg.subdomain": "Organization subdomain",
+		"settings.createOrg.subdomain": "Organization path",
 		"settings.createOrg.subdomainHelp":
-			"This will be your organization's unique subdomain",
+			"Your organization will live at {appPathPrefix}your-path — choose the segment after {appPathPrefix}",
 		"settings.createOrg.checkingSlug": "Checking availability...",
 		"settings.createOrg.slugAvailable": "is available!",
 		"settings.createOrg.slugTaken":
@@ -726,6 +726,9 @@ const translations = {
 		"settings.billing.currentPlanBadge": "Current",
 		"settings.billing.recommended": "Recommended",
 		"settings.billing.canceledBadge": "Cancels {date}",
+		"settings.billing.pendingCancelBadge": "Canceling",
+		"settings.billing.pendingCancelDesc":
+			"Your subscription is scheduled to cancel on {date}. You can reactivate before then.",
 		"settings.billing.pastDue": "Past Due",
 		"settings.billing.active": "Active",
 		"settings.billing.trialing": "Trial",
@@ -980,9 +983,9 @@ const translations = {
 		"onboarding.plans.features.ultra.4": "100 notices/month",
 		"onboarding.plans.features.ultra.5": "1000 Watchlist queries/organization",
 		"onboarding.plans.features.ultra.6": "Dedicated support",
-		"onboarding.org.title": "Create your organization",
+		"onboarding.org.title": "Register your Obligated Subject or Organization",
 		"onboarding.org.description":
-			"Set up your organization to start using Janovix",
+			"Register your obligated subject or organization to start using Janovix",
 		"onboarding.org.badge": "{plan} Subscription Active",
 		"onboarding.org.plan.active": "Active",
 		"onboarding.org.logo.edit": "Add Logo",
@@ -990,15 +993,15 @@ const translations = {
 		"onboarding.org.logo.success": "Logo saved!",
 		"onboarding.org.logo.error": "Failed to save logo.",
 		"onboarding.org.logo.help": "Optional: Add a logo for your organization",
-		"onboarding.org.name.label": "Organization name",
+		"onboarding.org.name.label": "Obligated Subject or Organization name",
 		"onboarding.org.name.placeholder": "Acme Corporation",
 		"onboarding.org.name.help":
-			"This is how your organization will appear across Janovix",
-		"onboarding.org.slug.label": "Organization subdomain",
+			"This is how your obligated subject or organization will appear across Janovix",
+		"onboarding.org.slug.label": "Organization path",
 		"onboarding.org.slug.placeholder": "acme-corp",
 		"onboarding.org.slug.help":
-			"This will be your organization's unique subdomain",
-		"onboarding.org.slug.available": "{slug}.janovix.com is available!",
+			"Your organization will be available at {appPathPrefix}your-path — this is the path segment after {appPathPrefix}",
+		"onboarding.org.slug.available": "{appPathPrefix}{slug} is available!",
 		"onboarding.org.slug.error.required": "Slug is required",
 		"onboarding.org.slug.error.min": "Slug must be at least 3 characters",
 		"onboarding.org.slug.error.max": "Slug must be 50 characters or less",
@@ -1012,11 +1015,26 @@ const translations = {
 		"onboarding.org.slug.error.invalid": "Invalid slug",
 		"onboarding.org.slug.error.taken":
 			"This slug is already taken. Please choose another.",
-		"onboarding.org.submit": "Create Organization",
+		"onboarding.org.submit": "Register Organization",
 		"onboarding.org.creating": "Creating...",
-		"onboarding.org.error.createFailed": "Failed to create organization",
+		"onboarding.org.error.createFailed": "Failed to register organization",
 		"onboarding.org.footer":
-			"You can invite team members and configure settings after creating your organization.",
+			"You can invite team members and configure settings after registering your organization.",
+		"onboarding.team.title": "Create your team",
+		"onboarding.team.description": "Set up your team to start using Janovix",
+		"onboarding.team.logo.title": "Team Logo",
+		"onboarding.team.logo.help": "Optional: Add a logo for your team",
+		"onboarding.team.name.label": "Team name",
+		"onboarding.team.name.placeholder": "My Team",
+		"onboarding.team.name.help":
+			"This is how your team will appear across Janovix",
+		"onboarding.team.slug.label": "Team path",
+		"onboarding.team.slug.help":
+			"Your team will be available at {appPathPrefix}your-path — this is the path segment after {appPathPrefix}",
+		"onboarding.team.submit": "Create Team",
+		"onboarding.team.error.createFailed": "Failed to create team",
+		"onboarding.team.footer":
+			"You can invite members and configure settings after creating your team.",
 		"onboarding.invite.loading": "Loading invitation...",
 		"onboarding.invite.none.title": "No pending invitation",
 		"onboarding.invite.none.description":
@@ -1539,9 +1557,9 @@ const translations = {
 		"settings.createOrg.namePlaceholder": "Corporación Acme",
 		"settings.createOrg.nameHelp":
 			"Así aparecerá tu organización en toda la plataforma Janovix",
-		"settings.createOrg.subdomain": "Subdominio de la organización",
+		"settings.createOrg.subdomain": "Ruta de la organización",
 		"settings.createOrg.subdomainHelp":
-			"Este será el subdominio único de tu organización",
+			"Tu organización estará en {appPathPrefix}tu-ruta — elige el segmento después de {appPathPrefix}",
 		"settings.createOrg.checkingSlug": "Comprobando disponibilidad...",
 		"settings.createOrg.slugAvailable": "está disponible!",
 		"settings.createOrg.slugTaken":
@@ -1824,6 +1842,9 @@ const translations = {
 		"settings.billing.currentPlanBadge": "Actual",
 		"settings.billing.recommended": "Recomendado",
 		"settings.billing.canceledBadge": "Cancela el {date}",
+		"settings.billing.pendingCancelBadge": "Cancelando",
+		"settings.billing.pendingCancelDesc":
+			"Tu suscripción está programada para cancelarse el {date}. Puedes reactivarla antes.",
 		"settings.billing.pastDue": "Vencido",
 		"settings.billing.active": "Activo",
 		"settings.billing.trialing": "Prueba",
@@ -2082,9 +2103,9 @@ const translations = {
 		"onboarding.plans.features.ultra.5":
 			"1000 Consultas watchlist/organizacion",
 		"onboarding.plans.features.ultra.6": "Soporte dedicado",
-		"onboarding.org.title": "Crea tu organización",
+		"onboarding.org.title": "Registra tu Sujeto Obligado u Organización",
 		"onboarding.org.description":
-			"Configura tu organización para comenzar a usar Janovix",
+			"Registra tu sujeto obligado u organización para comenzar a usar Janovix",
 		"onboarding.org.badge": "Suscripción {plan} activa",
 		"onboarding.org.plan.active": "Activa",
 		"onboarding.org.logo.edit": "Añadir logo",
@@ -2092,35 +2113,48 @@ const translations = {
 		"onboarding.org.logo.success": "¡Logo guardado!",
 		"onboarding.org.logo.error": "No se pudo guardar el logo.",
 		"onboarding.org.logo.help": "Opcional: añade un logo para tu organización",
-		"onboarding.org.name.label": "Nombre de la organización",
+		"onboarding.org.name.label": "Nombre del Sujeto Obligado u Organización",
 		"onboarding.org.name.placeholder": "Corporación Acme",
-		"onboarding.org.name.help": "Así aparecerá tu organización en Janovix",
-		"onboarding.org.slug.label": "Subdominio de la organización",
+		"onboarding.org.name.help":
+			"Así aparecerá tu sujeto obligado u organización en Janovix",
+		"onboarding.org.slug.label": "Ruta de la organización",
 		"onboarding.org.slug.placeholder": "acme-corp",
 		"onboarding.org.slug.help":
-			"Este será el subdominio único de tu organización",
-		"onboarding.org.slug.available": "{slug}.janovix.com está disponible",
-		"onboarding.org.slug.error.required": "El subdominio es obligatorio",
-		"onboarding.org.slug.error.min":
-			"El subdominio debe tener al menos 3 caracteres",
-		"onboarding.org.slug.error.max":
-			"El subdominio debe tener 50 caracteres o menos",
+			"Tu organización estará en {appPathPrefix}tu-ruta — este es el segmento de la ruta después de {appPathPrefix}",
+		"onboarding.org.slug.available": "{appPathPrefix}{slug} está disponible",
+		"onboarding.org.slug.error.required": "La ruta es obligatoria",
+		"onboarding.org.slug.error.min": "La ruta debe tener al menos 3 caracteres",
+		"onboarding.org.slug.error.max": "La ruta debe tener 50 caracteres o menos",
 		"onboarding.org.slug.error.start":
-			"El subdominio debe comenzar con una letra o número",
+			"La ruta debe comenzar con una letra o número",
 		"onboarding.org.slug.error.end":
-			"El subdominio debe terminar con una letra o número",
+			"La ruta debe terminar con una letra o número",
 		"onboarding.org.slug.error.chars":
-			"El subdominio solo puede contener letras minúsculas, números y guiones",
+			"La ruta solo puede contener letras minúsculas, números y guiones",
 		"onboarding.org.slug.error.consecutive":
-			"El subdominio no puede contener guiones consecutivos",
-		"onboarding.org.slug.error.invalid": "Subdominio inválido",
-		"onboarding.org.slug.error.taken":
-			"Este subdominio ya está en uso. Elige otro.",
-		"onboarding.org.submit": "Crear organización",
+			"La ruta no puede contener guiones consecutivos",
+		"onboarding.org.slug.error.invalid": "Ruta no válida",
+		"onboarding.org.slug.error.taken": "Esta ruta ya está en uso. Elige otra.",
+		"onboarding.org.submit": "Registrar organización",
 		"onboarding.org.creating": "Creando...",
-		"onboarding.org.error.createFailed": "No se pudo crear la organización",
+		"onboarding.org.error.createFailed": "No se pudo registrar la organización",
 		"onboarding.org.footer":
-			"Puedes invitar miembros y configurar ajustes después de crear tu organización.",
+			"Puedes invitar miembros y configurar ajustes después de registrar tu organización.",
+		"onboarding.team.title": "Crea tu equipo",
+		"onboarding.team.description":
+			"Configura tu equipo para comenzar a usar Janovix",
+		"onboarding.team.logo.title": "Logo del equipo",
+		"onboarding.team.logo.help": "Opcional: añade un logo para tu equipo",
+		"onboarding.team.name.label": "Nombre del equipo",
+		"onboarding.team.name.placeholder": "Mi equipo",
+		"onboarding.team.name.help": "Así aparecerá tu equipo en Janovix",
+		"onboarding.team.slug.label": "Ruta del equipo",
+		"onboarding.team.slug.help":
+			"Tu equipo estará en {appPathPrefix}tu-ruta — este es el segmento de la ruta después de {appPathPrefix}",
+		"onboarding.team.submit": "Crear equipo",
+		"onboarding.team.error.createFailed": "No se pudo crear el equipo",
+		"onboarding.team.footer":
+			"Puedes invitar miembros y configurar ajustes después de crear tu equipo.",
 		"onboarding.invite.loading": "Cargando invitación...",
 		"onboarding.invite.none.title": "No hay invitaciones pendientes",
 		"onboarding.invite.none.description":

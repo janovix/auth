@@ -79,7 +79,7 @@ describe("AuditLogTable", () => {
 		cleanup();
 	});
 
-	it("renders loading spinner when loading", () => {
+	it("renders loading skeleton when loading", () => {
 		render(
 			<AuditLogTable
 				logs={[]}
@@ -90,7 +90,7 @@ describe("AuditLogTable", () => {
 			/>,
 		);
 
-		expect(document.querySelector(".animate-spin")).toBeInTheDocument();
+		expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0);
 	});
 
 	it("renders empty state when no logs", () => {

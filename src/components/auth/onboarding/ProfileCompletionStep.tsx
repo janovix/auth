@@ -26,7 +26,6 @@ import { useOnboarding } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
 import { updateProfile, signOut } from "@/lib/auth/authActions";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
-
 type ProfileFormValues = {
 	firstName: string;
 	lastName: string;
@@ -172,12 +171,6 @@ export function ProfileCompletionStep({
 	};
 
 	const isSubmitting = form.formState.isSubmitting || isUploadingAvatar;
-
-	// Get initials for avatar placeholder
-	const firstName = form.watch("firstName");
-	const lastName = form.watch("lastName");
-	const avatarInitials =
-		(firstName.charAt(0) + lastName.charAt(0)).toUpperCase() || "?";
 
 	return (
 		<div className="w-full flex justify-center my-auto pt-6 px-3">

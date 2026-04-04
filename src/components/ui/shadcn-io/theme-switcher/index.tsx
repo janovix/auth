@@ -56,8 +56,21 @@ export const ThemeSwitcher = ({
 		setMounted(true);
 	}, []);
 
+	// Size-matched placeholder before mount to avoid CLS (same footprint as real control)
 	if (!mounted) {
-		return null;
+		return (
+			<div
+				className={cn(
+					"relative isolate flex h-8 rounded-full bg-background p-1 ring-1 ring-border",
+					className,
+				)}
+				aria-hidden
+			>
+				{themes.map(({ key }) => (
+					<div key={key} className="relative h-6 w-6 rounded-full bg-muted" />
+				))}
+			</div>
+		);
 	}
 
 	return (

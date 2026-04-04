@@ -4,6 +4,7 @@ import { Check, Lock, Loader2, Zap, Crown, Rocket, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/language-context";
 import {
 	getSubscriptionPrice,
@@ -78,11 +79,7 @@ export function PlanSelectionGrid({
 	};
 
 	if (isLoading) {
-		return (
-			<div className="flex items-center justify-center py-12">
-				<Loader2 className="h-8 w-8 animate-spin text-primary" />
-			</div>
-		);
+		return <PlanSelectionGridSkeleton />;
 	}
 
 	return (
@@ -232,6 +229,39 @@ export function PlanSelectionGrid({
 						</Card>
 					);
 				})}
+		</div>
+	);
+}
+
+/**
+ * Skeleton matching PlanSelectionGrid: 3 plan cards with icon, title, price, features, CTA.
+ */
+export function PlanSelectionGridSkeleton() {
+	return (
+		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+			{[1, 2, 3].map((i) => (
+				<Card key={i} className="relative border-2 flex flex-col">
+					<CardContent className="p-6 flex flex-col h-full">
+						<div className="text-center mb-6">
+							<Skeleton className="h-12 w-12 rounded-xl mx-auto mb-3" />
+							<Skeleton className="h-6 w-32 mx-auto mb-2" />
+							<Skeleton className="h-3 w-48 mx-auto" />
+							<div className="mt-3 flex justify-center">
+								<Skeleton className="h-10 w-36" />
+							</div>
+						</div>
+						<div className="space-y-3 mb-6 grow">
+							{[1, 2, 3, 4, 5, 6].map((j) => (
+								<div key={j} className="flex items-center gap-2">
+									<Skeleton className="h-4 w-4 shrink-0 rounded-sm" />
+									<Skeleton className="h-4 flex-1 max-w-[200px]" />
+								</div>
+							))}
+						</div>
+						<Skeleton className="h-11 w-full rounded-md mt-auto" />
+					</CardContent>
+				</Card>
+			))}
 		</div>
 	);
 }

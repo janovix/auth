@@ -18,6 +18,7 @@ import {
 	SidebarMenuItem,
 	useSidebar,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/language-context";
 
 interface NavUserProps {
@@ -50,24 +51,22 @@ export function NavUser({ user, isLoading = false, onLogout }: NavUserProps) {
 		}
 	};
 
-	if (isLoading) {
-		return (
-			<SidebarMenu>
-				<SidebarMenuItem>
-					<SidebarMenuButton size="lg" className="animate-pulse">
-						<div className="h-8 w-8 rounded-lg bg-muted" />
-						<div className="grid flex-1 gap-1">
-							<div className="h-4 w-20 rounded bg-muted" />
-							<div className="h-3 w-32 rounded bg-muted" />
-						</div>
-					</SidebarMenuButton>
-				</SidebarMenuItem>
-			</SidebarMenu>
-		);
-	}
+	const userRowSkeleton = (
+		<SidebarMenu>
+			<SidebarMenuItem>
+				<SidebarMenuButton size="lg" disabled className="pointer-events-none">
+					<Skeleton className="h-8 w-8 rounded-lg shrink-0" />
+					<div className="grid flex-1 gap-1 text-left">
+						<Skeleton className="h-4 w-20" />
+						<Skeleton className="h-3 w-32" />
+					</div>
+				</SidebarMenuButton>
+			</SidebarMenuItem>
+		</SidebarMenu>
+	);
 
-	if (!user) {
-		return null;
+	if (isLoading || !user) {
+		return userRowSkeleton;
 	}
 
 	return (

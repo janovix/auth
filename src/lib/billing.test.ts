@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
 	getFeatures,
+	getStatusBadgeInfo,
 	getSubscriptionStatus,
 	hasAmlProductAccess,
 	hasWatchlistProductAccess,
@@ -90,6 +91,33 @@ describe("hasWatchlistProductAccess", () => {
 				"product_watchlist",
 			]),
 		).toBe(true);
+	});
+});
+
+describe("getStatusBadgeInfo", () => {
+	it("returns pending-cancel translation key when active and cancelAtPeriodEnd", () => {
+		expect(getStatusBadgeInfo("active", { cancelAtPeriodEnd: true })).toEqual({
+			label: "",
+			variant: "outline",
+			translationKey: "settings.billing.pendingCancelBadge",
+		});
+	});
+
+	it("returns pending-cancel for trialing when cancelAtPeriodEnd", () => {
+		expect(getStatusBadgeInfo("trialing", { cancelAtPeriodEnd: true })).toEqual(
+			{
+				label: "",
+				variant: "outline",
+				translationKey: "settings.billing.pendingCancelBadge",
+			},
+		);
+	});
+
+	it("returns Active when cancelAtPeriodEnd is false", () => {
+		expect(getStatusBadgeInfo("active", { cancelAtPeriodEnd: false })).toEqual({
+			label: "Active",
+			variant: "default",
+		});
 	});
 });
 

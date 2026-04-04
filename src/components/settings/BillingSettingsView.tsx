@@ -9,6 +9,7 @@ import {
 	FileText,
 	Loader2,
 	KeyRound,
+	CircleAlert,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +21,7 @@ import {
 	formatPriceMXN,
 	startSubscription,
 	cancelSubscription,
+	reactivateSubscription,
 	getPortalUrl,
 	activateLicenseKey,
 	prepareDowngrade,
@@ -58,6 +60,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
 	SettingsPageHeader,
 	SettingsSection,
@@ -212,6 +215,30 @@ export function BillingSettingsView() {
 		}
 	};
 
+	// Reactivate subscription (undo cancel at period end)
+	const handleReactivate = async () => {
+		setActionLoading(true);
+		try {
+			await reactivateSubscription();
+			toast({
+				title: t("settings.billing.reactivateSuccess"),
+			});
+			await loadBillingData();
+			dispatchBillingEntitlementsUpdated();
+		} catch (error) {
+			Sentry.captureException(error, {
+				tags: { context: "reactivate-subscription-error" },
+			});
+			toast({
+				title: t("settings.billing.error"),
+				description: error instanceof Error ? error.message : undefined,
+				variant: "destructive",
+			});
+		} finally {
+			setActionLoading(false);
+		}
+	};
+
 	// State for license redemption confirmation dialog
 	const [pendingLicenseKey, setPendingLicenseKey] = useState("");
 
@@ -256,7 +283,13 @@ export function BillingSettingsView() {
 	}
 
 	const isActive = isSubscriptionActive(subscription);
-	const statusInfo = getStatusBadgeInfo(subscription?.status ?? null);
+	const isPendingCancel =
+		isActive &&
+		!subscription?.isLicenseBased &&
+		Boolean(subscription?.cancelAtPeriodEnd);
+	const statusInfo = getStatusBadgeInfo(subscription?.status ?? null, {
+		cancelAtPeriodEnd: subscription?.cancelAtPeriodEnd ?? false,
+	});
 
 	return (
 		<div className="space-y-8">
@@ -284,13 +317,26 @@ export function BillingSettingsView() {
 											? `${t("settings.billing.licenseExpires")} ${formatDate(subscription.licenseExpiresAt)}`
 											: t("settings.billing.licenseNoExpiry")
 										: subscription.isTrialing
-											? `${t("settings.billing.trial")} - ${subscription.trialDaysRemaining} ${t("settings.billing.daysRemaining")}`
-											: `${t("settings.billing.activeSince")} ${subscription.currentPeriodStart ? formatDate(subscription.currentPeriodStart) : "N/A"}`
+											? subscription.cancelAtPeriodEnd &&
+												subscription.currentPeriodEnd
+												? `${t("settings.billing.trial")} - ${subscription.trialDaysRemaining} ${t("settings.billing.daysRemaining")} — ${t("settings.billing.canceledBadge").replace("{date}", formatDate(subscription.currentPeriodEnd))}`
+												: `${t("settings.billing.trial")} - ${subscription.trialDaysRemaining} ${t("settings.billing.daysRemaining")}`
+											: subscription.cancelAtPeriodEnd &&
+												  subscription.currentPeriodEnd
+												? t("settings.billing.canceledBadge").replace(
+														"{date}",
+														formatDate(subscription.currentPeriodEnd),
+													)
+												: `${t("settings.billing.activeSince")} ${subscription.currentPeriodStart ? formatDate(subscription.currentPeriodStart) : "N/A"}`
 									: t("settings.billing.subscribePrompt")}
 							</CardDescription>
 						</div>
 						{subscription?.status && (
-							<Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+							<Badge variant={statusInfo.variant}>
+								{statusInfo.translationKey
+									? t(statusInfo.translationKey)
+									: statusInfo.label}
+							</Badge>
 						)}
 					</div>
 				</CardHeader>
@@ -352,42 +398,65 @@ export function BillingSettingsView() {
 						)}
 				</CardContent>
 				{isActive && !subscription?.isLicenseBased && (
-					<CardFooter className="flex flex-wrap gap-2 px-6 py-4 border-t">
-						<Button
-							variant="default"
-							onClick={async () => {
-								setActionLoading(true);
-								try {
-									const { url } = await getPortalUrl(
-										`${window.location.origin}/settings/billing`,
-									);
-									window.location.href = url;
-								} catch (error) {
-									toast({
-										title: t("settings.billing.error"),
-										description:
-											error instanceof Error ? error.message : undefined,
-										variant: "destructive",
-									});
-								} finally {
-									setActionLoading(false);
+					<CardFooter className="flex flex-col gap-4 px-6 py-4 border-t">
+						{isPendingCancel && subscription?.currentPeriodEnd != null ? (
+							<Alert className="border-amber-500/50 bg-amber-500/5 text-foreground">
+								<CircleAlert className="text-amber-600 dark:text-amber-500" />
+								<AlertDescription className="text-muted-foreground">
+									{t("settings.billing.pendingCancelDesc").replace(
+										"{date}",
+										formatDate(subscription.currentPeriodEnd),
+									)}
+								</AlertDescription>
+							</Alert>
+						) : null}
+						<div className="flex flex-wrap gap-2">
+							<Button
+								variant="default"
+								onClick={async () => {
+									setActionLoading(true);
+									try {
+										const { url } = await getPortalUrl(
+											`${window.location.origin}/settings/billing`,
+										);
+										window.location.href = url;
+									} catch (error) {
+										toast({
+											title: t("settings.billing.error"),
+											description:
+												error instanceof Error ? error.message : undefined,
+											variant: "destructive",
+										});
+									} finally {
+										setActionLoading(false);
+									}
+								}}
+								disabled={actionLoading}
+								title={
+									t("settings.billing.managePortalHint") ||
+									"Payment methods, invoices, and billing history"
 								}
-							}}
-							disabled={actionLoading}
-							title={
-								t("settings.billing.managePortalHint") ||
-								"Payment methods, invoices, and billing history"
-							}
-						>
-							{t("settings.billing.managePortal")}
-						</Button>
-						<Button
-							variant="outline"
-							onClick={() => setCancelDialogOpen(true)}
-							disabled={actionLoading}
-						>
-							{t("settings.billing.cancel")}
-						</Button>
+							>
+								{t("settings.billing.managePortal")}
+							</Button>
+							{isPendingCancel ? (
+								<Button
+									variant="outline"
+									onClick={handleReactivate}
+									disabled={actionLoading}
+								>
+									{t("settings.billing.reactivate")}
+								</Button>
+							) : (
+								<Button
+									variant="outline"
+									onClick={() => setCancelDialogOpen(true)}
+									disabled={actionLoading}
+								>
+									{t("settings.billing.cancel")}
+								</Button>
+							)}
+						</div>
 					</CardFooter>
 				)}
 				{isActive && subscription?.isLicenseBased && (

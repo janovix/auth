@@ -697,3 +697,35 @@ export function BillingSettingsViewSkeleton() {
 		</div>
 	);
 }
+
+/**
+ * API Keys view skeleton — page header + card with table-style rows.
+ */
+export function ApiKeysViewSkeleton() {
+	return (
+		<div className="space-y-8">
+			<SettingsPageHeaderSkeleton hasAction />
+			<section>
+				<SettingsSectionSkeleton hasDescription={false} />
+				<SettingsCard className="divide-y divide-border p-0 overflow-hidden">
+					{[1, 2, 3, 4].map((i) => (
+						<div
+							key={i}
+							className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4"
+						>
+							<div className="space-y-2 flex-1 min-w-0">
+								<Skeleton className="h-5 w-48" />
+								<Skeleton className="h-4 w-full max-w-md" />
+								<Skeleton className="h-3 w-32" />
+							</div>
+							<div className="flex items-center gap-2 shrink-0">
+								<Skeleton className="h-8 w-20 rounded-md" />
+								<Skeleton className="h-8 w-8 rounded-md" />
+							</div>
+						</div>
+					))}
+				</SettingsCard>
+			</section>
+		</div>
+	);
+}

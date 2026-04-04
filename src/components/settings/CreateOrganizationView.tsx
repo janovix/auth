@@ -17,7 +17,15 @@ import { Input } from "@/components/ui/input";
 import { AvatarEditorDialog } from "@algenium/blocks";
 import { useLanguage } from "@/contexts/language-context";
 import { authClient } from "@/lib/auth/authClient";
-import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
+import {
+	getAuthCoreBaseUrl,
+	getProductOrgSlugUrlPrefix,
+	withAppPathPrefixCopy,
+} from "@/lib/auth/authCoreConfig";
+import {
+	getSubscriptionStatus,
+	shouldUseWatchlistOrgPathPrefix,
+} from "@/lib/billing";
 import { cn } from "@/lib/utils";
 import {
 	generateSlug,
@@ -58,6 +66,25 @@ export function CreateOrganizationView() {
 	const [isCreating, setIsCreating] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [apiSlugError, setApiSlugError] = useState<string | null>(null);
+	const [slugPathPrefix, setSlugPathPrefix] = useState(() =>
+		getProductOrgSlugUrlPrefix(false),
+	);
+
+	useEffect(() => {
+		let cancelled = false;
+		getSubscriptionStatus()
+			.then((status) => {
+				if (!cancelled) {
+					setSlugPathPrefix(
+						getProductOrgSlugUrlPrefix(shouldUseWatchlistOrgPathPrefix(status)),
+					);
+				}
+			})
+			.catch(() => {});
+		return () => {
+			cancelled = true;
+		};
+	}, []);
 
 	const { slugError, slugAvailable, isCheckingSlug } = useSlugAvailability({
 		slug,
@@ -120,15 +147,16 @@ export function CreateOrganizationView() {
 		[],
 	);
 
-	// Get org initials for placeholder
-	const orgInitials = orgName
+	const orgInitials = orgName.trim()
 		? orgName
-				.split(" ")
+				.trim()
+				.split(/\s+/)
 				.map((word) => word[0])
+				.filter(Boolean)
 				.join("")
 				.slice(0, 2)
 				.toUpperCase()
-		: "?";
+		: "";
 
 	const handleCreateOrg = async () => {
 		if (!orgName.trim() || !slug.trim()) return;
@@ -295,24 +323,24 @@ export function CreateOrganizationView() {
 						<div className="space-y-2">
 							<Label htmlFor="orgSlug" className="flex items-center gap-1.5">
 								<Link2 className="h-3.5 w-3.5" />
-								{t("settings.createOrg.subdomain") || "Organization subdomain"}
+								{t("settings.createOrg.subdomain") || "Organization path"}
 							</Label>
 							<div className="flex items-center">
+								<span className="h-9 shrink-0 px-3 flex items-center bg-muted border border-input border-r-0 rounded-l-md text-sm text-muted-foreground whitespace-nowrap font-mono">
+									{slugPathPrefix}
+								</span>
 								<Input
 									id="orgSlug"
 									placeholder="acme-corp"
 									value={slug}
 									onChange={(e) => handleSlugChange(e.target.value)}
 									className={cn(
-										"rounded-r-none font-mono text-sm",
+										"h-9 rounded-l-none rounded-r-md font-mono text-sm min-w-0 flex-1",
 										displaySlugError &&
 											"border-destructive focus-visible:ring-destructive",
 									)}
 									disabled={isCreating}
 								/>
-								<span className="h-9 px-3 flex items-center bg-muted border border-l-0 border-input rounded-r-md text-sm text-muted-foreground whitespace-nowrap">
-									.janovix.com
-								</span>
 							</div>
 							{displaySlugError ? (
 								<p className="text-xs text-destructive flex items-center gap-1">
@@ -328,17 +356,22 @@ export function CreateOrganizationView() {
 							) : slugAvailable === true ? (
 								<p className="text-xs text-success flex items-center gap-1">
 									<Check className="h-3 w-3" />
-									{slug}.janovix.com{" "}
+									{slugPathPrefix}
+									{slug}{" "}
 									{t("settings.createOrg.slugAvailable") || "is available!"}
 								</p>
 							) : slug ? (
-								<p className="text-xs text-muted-foreground">
-									{slug}.janovix.com
+								<p className="text-xs text-muted-foreground font-mono">
+									{slugPathPrefix}
+									{slug}
 								</p>
 							) : (
 								<p className="text-xs text-muted-foreground">
-									{t("settings.createOrg.subdomainHelp") ||
-										"This will be your organization's unique subdomain"}
+									{withAppPathPrefixCopy(
+										t("settings.createOrg.subdomainHelp") ||
+											"Your organization will live at {appPathPrefix}your-path — choose the segment after {appPathPrefix}",
+										slugPathPrefix,
+									)}
 								</p>
 							)}
 						</div>

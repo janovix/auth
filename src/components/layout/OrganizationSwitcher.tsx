@@ -24,6 +24,7 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/language-context";
 
 export interface Organization {
@@ -221,11 +222,11 @@ export function OrganizationSwitcher({
 		return (
 			<SidebarMenu>
 				<SidebarMenuItem>
-					<SidebarMenuButton size="lg" className="animate-pulse">
-						<div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-muted" />
-						<div className="grid flex-1 gap-1">
-							<div className="h-4 w-24 rounded bg-muted" />
-							<div className="h-3 w-16 rounded bg-muted" />
+					<SidebarMenuButton size="lg" disabled className="pointer-events-none">
+						<Skeleton className="size-8 rounded-lg shrink-0" />
+						<div className="grid flex-1 gap-1 text-left">
+							<Skeleton className="h-4 w-24" />
+							<Skeleton className="h-3 w-16" />
 						</div>
 					</SidebarMenuButton>
 				</SidebarMenuItem>

@@ -231,8 +231,8 @@ describe("ApiKeysView", () => {
 
 			render(<ApiKeysView />);
 
-			// The loading indicator should be visible
-			expect(screen.getByText("settings.apiKeys.title")).toBeInTheDocument();
+			// Skeleton layout reserves space while keys load
+			expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0);
 		});
 	});
 });

@@ -340,6 +340,8 @@ export async function startSubscription(
 		plan,
 		successUrl,
 		cancelUrl,
+		// Billing portal path (existing subscription) uses returnUrl; without it, "/" resolves to BETTER_AUTH_URL
+		returnUrl: successUrl,
 	});
 
 	if (result.error) {
@@ -488,10 +490,17 @@ export async function createCheckoutSession(
 }
 
 /**
- * @deprecated Reactivation handled via Stripe Customer Portal
+ * Undo a subscription scheduled to cancel at period end (Stripe cancel_at_period_end).
+ * Uses Better Auth Stripe plugin (`/api/auth/subscription/restore`).
  */
 export async function reactivateSubscription(): Promise<void> {
-	throw new Error("Reactivation now handled via Stripe Customer Portal");
+	const result = await authClient.subscription.restore({});
+
+	if (result.error) {
+		throw new Error(
+			result.error.message || "Failed to reactivate subscription",
+		);
+	}
 }
 
 /**
@@ -737,6 +746,8 @@ export async function changeSubscriptionPlan(
 		plan,
 		successUrl: okSuccess,
 		cancelUrl: okCancel,
+		// Billing portal path (plan change) uses returnUrl; without it, "/" resolves to BETTER_AUTH_URL
+		returnUrl: okSuccess,
 	});
 
 	if (result.error) {
@@ -829,6 +840,20 @@ export function hasAmlProductAccess(
  * Whether the user's subscription includes Watchlist product access.
  * Mirrors {@link hasAmlProductAccess} for the watchlist side of plan logic.
  */
+/**
+ * Whether org path URLs should use the Watchlist app host (watchlist-only plan).
+ * AML and other plans use the AML app host.
+ */
+export function shouldUseWatchlistOrgPathPrefix(
+	subscription: UserSubscriptionStatus | null,
+): boolean {
+	if (!subscription?.hasSubscription) return false;
+	if (subscription.status !== "active" && subscription.status !== "trialing") {
+		return false;
+	}
+	return subscription.plan === "watchlist";
+}
+
 export function hasWatchlistProductAccess(
 	subscription: UserSubscriptionStatus | null,
 	features?: Feature[],
@@ -851,13 +876,30 @@ export function hasWatchlistProductAccess(
 	return features?.includes("product_watchlist") ?? false;
 }
 
-/**
- * Get subscription status badge info
- */
-export function getStatusBadgeInfo(status: UserSubscriptionStatus["status"]): {
+/** Badge copy for the current plan card (use {@link getStatusBadgeInfo}'s `translationKey` with `t()` when set). */
+export type StatusBadgeInfo = {
 	label: string;
 	variant: "default" | "secondary" | "destructive" | "outline";
-} {
+	/** When set, render `t(translationKey)` instead of `label`. */
+	translationKey?: string;
+};
+
+/**
+ * Get subscription status badge info.
+ * When `cancelAtPeriodEnd` is true and status is still active/trialing, shows a pending-cancellation state.
+ */
+export function getStatusBadgeInfo(
+	status: UserSubscriptionStatus["status"],
+	options?: { cancelAtPeriodEnd?: boolean },
+): StatusBadgeInfo {
+	const cancelAtPeriodEnd = options?.cancelAtPeriodEnd ?? false;
+	if (cancelAtPeriodEnd && (status === "active" || status === "trialing")) {
+		return {
+			label: "",
+			variant: "outline",
+			translationKey: "settings.billing.pendingCancelBadge",
+		};
+	}
 	switch (status) {
 		case "active":
 			return { label: "Active", variant: "default" };

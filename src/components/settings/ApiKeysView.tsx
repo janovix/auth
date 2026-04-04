@@ -44,6 +44,7 @@ import {
 	SettingsSection,
 	SettingsPageHeader,
 } from "@/components/settings";
+import { ApiKeysViewSkeleton } from "@/components/settings/SettingsSkeleton";
 import {
 	getApiKeys,
 	createApiKey,
@@ -186,25 +187,7 @@ export function ApiKeysView() {
 	};
 
 	if (loading) {
-		return (
-			<div className="space-y-8">
-				<SettingsPageHeader
-					icon={KeyRound}
-					title={t("settings.apiKeys.title") || "API Keys"}
-					description={
-						t("settings.apiKeys.description") ||
-						"Manage API keys for programmatic access"
-					}
-				/>
-				<SettingsSection title="">
-					<SettingsCard>
-						<div className="flex items-center justify-center py-12">
-							<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-						</div>
-					</SettingsCard>
-				</SettingsSection>
-			</div>
-		);
+		return <ApiKeysViewSkeleton />;
 	}
 
 	if (!activeOrgId) {

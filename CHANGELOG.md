@@ -1,3 +1,10 @@
+# [2.6.0-rc.11](https://github.com/janovix/auth/compare/v2.6.0-rc.10...v2.6.0-rc.11) (2026-04-04)
+
+
+### Features
+
+* **billing:** add support for usage limits and overage settings in Billing and Team Settings views ([3b9cb98](https://github.com/janovix/auth/commit/3b9cb981a11f986295d064ac903cb3d4194bf8d8))
+
 # [2.6.0-rc.10](https://github.com/janovix/auth/compare/v2.6.0-rc.9...v2.6.0-rc.10) (2026-04-04)
 
 

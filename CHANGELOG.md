@@ -1,3 +1,10 @@
+# [2.6.0-rc.9](https://github.com/janovix/auth/compare/v2.6.0-rc.8...v2.6.0-rc.9) (2026-04-04)
+
+
+### Features
+
+* **onboarding:** set the joined organization as active during onboarding process ([74e1eca](https://github.com/janovix/auth/commit/74e1eca98356a79a7b54e6365d0ea49695b2e03f))
+
 # [2.6.0-rc.8](https://github.com/janovix/auth/compare/v2.6.0-rc.7...v2.6.0-rc.8) (2026-04-03)
 
 

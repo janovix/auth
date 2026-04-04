@@ -810,6 +810,17 @@ export function isSubscriptionActive(
 }
 
 /**
+ * Whether the current user may see org **Usage & limits** on billing settings.
+ * True for an **active or trialing** Stripe subscription or an **active enterprise license**
+ * (same rule as {@link isSubscriptionActive}; license-backed rows use `active`/`trialing` status).
+ */
+export function hasActiveBillingForUsageLimits(
+	status: UserSubscriptionStatus | null,
+): boolean {
+	return isSubscriptionActive(status);
+}
+
+/**
  * Whether the user's subscription includes AML product access (PLD compliance
  * settings, AML app). Plan name is authoritative for watchlist-only vs AML;
  * falls back to `product_aml` in features for custom plans.

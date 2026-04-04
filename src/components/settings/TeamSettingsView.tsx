@@ -62,6 +62,7 @@ import { authClient } from "@/lib/auth/authClient";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import {
+	getOverageSettings,
 	getSubscriptionStatus,
 	type UserSubscriptionStatus,
 } from "@/lib/billing";
@@ -137,6 +138,7 @@ export function TeamSettingsView() {
 	);
 	const [subscriptionStatus, setSubscriptionStatus] =
 		useState<UserSubscriptionStatus | null>(null);
+	const [overageEnabled, setOverageEnabled] = useState(false);
 
 	// Invite form state
 	const [inviteEmail, setInviteEmail] = useState("");
@@ -153,11 +155,13 @@ export function TeamSettingsView() {
 	const canManageTeam = isOwner || isAdmin;
 
 	const usersPerOrg = subscriptionStatus?.limits?.usersPerOrg ?? 0;
-	const atMemberLimit =
+	const atIncludedSeatLimit =
 		usersPerOrg > 0 && members.length + invitations.length >= usersPerOrg;
+	const atMemberLimit = atIncludedSeatLimit && !overageEnabled;
 
 	const loadData = useCallback(async () => {
 		if (!activeOrgId) {
+			setOverageEnabled(false);
 			setLoading(false);
 			return;
 		}
@@ -165,15 +169,18 @@ export function TeamSettingsView() {
 		try {
 			setLoading(true);
 
-			const [orgResult, membershipData, statusData] = await Promise.all([
-				authClient.organization.getFullOrganization({
-					query: { organizationId: activeOrgId },
-				}),
-				getOrganizationMembership(activeOrgId),
-				getSubscriptionStatus({ resolveFromOrg: true }).catch(() => null),
-			]);
+			const [orgResult, membershipData, statusData, overageData] =
+				await Promise.all([
+					authClient.organization.getFullOrganization({
+						query: { organizationId: activeOrgId },
+					}),
+					getOrganizationMembership(activeOrgId),
+					getSubscriptionStatus({ resolveFromOrg: true }).catch(() => null),
+					getOverageSettings().catch(() => null),
+				]);
 
 			setSubscriptionStatus(statusData);
+			setOverageEnabled(overageData?.overageEnabled ?? false);
 
 			setMembership(membershipData);
 
@@ -477,6 +484,20 @@ export function TeamSettingsView() {
 					</span>
 				</div>
 			)}
+
+			{/* Metered overage: at included seats but invites allowed */}
+			{canManageTeam &&
+				overageEnabled &&
+				usersPerOrg > 0 &&
+				members.length + invitations.length >= usersPerOrg && (
+					<div className="rounded-lg border border-primary/50 bg-primary/10 px-4 py-3 text-sm text-primary flex items-center justify-between gap-4">
+						<span>
+							{t("settings.team.memberOverageBanner")
+								.replace("{used}", String(members.length + invitations.length))
+								.replace("{limit}", String(usersPerOrg))}
+						</span>
+					</div>
+				)}
 
 			{/* Team Members */}
 			<SettingsSection

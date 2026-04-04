@@ -579,6 +579,8 @@ const translations = {
 			"You have reached the member limit for your plan. Upgrade to invite more members.",
 		"settings.team.memberLimitBanner":
 			"Member limit reached ({used}/{limit}). Upgrade your plan to add more members.",
+		"settings.team.memberOverageBanner":
+			"You have {used} of {limit} included members. Extra members are billed as overage.",
 		"settings.team.you": "You",
 		"settings.team.invitedBy": "Invited by",
 		"settings.team.makeAdmin": "Make admin",
@@ -691,6 +693,8 @@ const translations = {
 		"settings.billing.licenseNoExpiry": "Perpetual license - no expiry",
 		"settings.billing.licenseManagedExternally":
 			"This enterprise license is managed outside Stripe. Contact your administrator for changes.",
+		"settings.billing.usageLicenseOverageHint":
+			"Enterprise licenses do not use automatic metered overage. To increase limits, contact your license provider or account team; they can update your entitlement in admin.",
 		"settings.billing.licensePlaceholder": "Enter your license key",
 		"settings.billing.selectPlan": "Select a Plan",
 		"settings.billing.selectPlanDesc":
@@ -754,6 +758,8 @@ const translations = {
 		"settings.billing.activeSince": "Active since",
 		"settings.billing.subscribePrompt":
 			"Subscribe to create organizations and access features",
+		"settings.billing.inactiveBillingSubtitle":
+			"No active subscription. Choose a plan below.",
 		"settings.billing.organizations": "Organizations",
 		"settings.billing.ends": "Ends",
 		"settings.billing.renews": "Renews",
@@ -852,6 +858,38 @@ const translations = {
 		"settings.billing.freeTierUpgradePrompt":
 			"Upgrade to unlock more features and higher limits",
 		"settings.billing.comingSoon": "Coming Soon",
+		// Usage & limits section (billing settings)
+		"settings.billing.usageLimits.title": "Usage & limits",
+		"settings.billing.usageLimits.noOrgDesc":
+			"Select an organization and ensure you have an active subscription to see usage.",
+		"settings.billing.usageLimits.currentPeriod":
+			"Current billing period {start} — {end}.",
+		"settings.billing.usageLimits.metric.reports": "Reports (period)",
+		"settings.billing.usageLimits.metric.notices": "Notices (period)",
+		"settings.billing.usageLimits.metric.alerts": "Alerts (period)",
+		"settings.billing.usageLimits.metric.operations": "Operations (period)",
+		"settings.billing.usageLimits.metric.clients": "Clients (period)",
+		"settings.billing.usageLimits.metric.members": "Members (this org)",
+		"settings.billing.usageLimits.metric.watchlistQueries":
+			"Watchlist queries (period)",
+		"settings.billing.usageLimits.unlimited": "(unlimited)",
+		"settings.billing.usageLimits.meteredOverageTitle":
+			"Metered overage (Stripe)",
+		"settings.billing.usageLimits.meteredOverageDesc":
+			"When enabled, actions beyond included quotas can continue and are billed as usage. You can set an optional monthly spend cap.",
+		"settings.billing.usageLimits.enableMeteredOverage":
+			"Enable metered overage",
+		"settings.billing.usageLimits.monthlySpendLimit":
+			"Monthly spend limit (MXN)",
+		"settings.billing.usageLimits.noCapPlaceholder": "No cap",
+		"settings.billing.usageLimits.overageHelper":
+			"Leave empty for no cap. Overage charges in this period so far: {amount}",
+		"settings.billing.usageLimits.saveButton": "Save usage billing settings",
+		"settings.billing.usageLimits.saving": "Saving…",
+		"settings.billing.usageLimits.loadError": "Could not load usage",
+		"settings.billing.usageLimits.saveSuccess": "Usage billing settings saved",
+		"settings.billing.usageLimits.saveFailed": "Save failed",
+		"settings.billing.usageLimits.invalidSpendLimit": "Invalid spend limit",
 
 		// Upgrade prompts
 		"billing.upgrade.limitReached": "Limit Reached",
@@ -1695,6 +1733,8 @@ const translations = {
 			"Has alcanzado el límite de miembros de tu plan. Actualiza tu plan para invitar más miembros.",
 		"settings.team.memberLimitBanner":
 			"Límite de miembros alcanzado ({used}/{limit}). Actualiza tu plan para agregar más miembros.",
+		"settings.team.memberOverageBanner":
+			"Tienes {used} de {limit} miembros incluidos. Los miembros adicionales se facturan como exceso de uso.",
 		"settings.team.you": "Tú",
 		"settings.team.invitedBy": "Invitado por",
 		"settings.team.makeAdmin": "Hacer administrador",
@@ -1808,6 +1848,8 @@ const translations = {
 		"settings.billing.licenseNoExpiry": "Licencia perpetua - sin vencimiento",
 		"settings.billing.licenseManagedExternally":
 			"Esta licencia empresarial se administra fuera de Stripe. Contacta a tu administrador para cambios.",
+		"settings.billing.usageLicenseOverageHint":
+			"Las licencias empresariales no usan exceso de uso medido automático. Para aumentar límites, contacta a tu proveedor de licencia o equipo de cuenta; pueden actualizar tu entidad en administración.",
 		"settings.billing.licensePlaceholder": "Ingresa tu clave de licencia",
 		"settings.billing.selectPlan": "Selecciona un Plan",
 		"settings.billing.selectPlanDesc":
@@ -1873,6 +1915,8 @@ const translations = {
 		"settings.billing.activeSince": "Activo desde",
 		"settings.billing.subscribePrompt":
 			"Suscríbete para crear organizaciones y acceder a las funciones",
+		"settings.billing.inactiveBillingSubtitle":
+			"Sin suscripción activa. Elige un plan abajo.",
 		"settings.billing.organizations": "Organizaciones",
 		"settings.billing.ends": "Termina",
 		"settings.billing.renews": "Renueva",
@@ -1973,6 +2017,41 @@ const translations = {
 		"settings.billing.freeTierUpgradePrompt":
 			"Mejora tu plan para desbloquear más funciones y límites más altos",
 		"settings.billing.comingSoon": "Próximamente",
+		// Usage & limits section (billing settings)
+		"settings.billing.usageLimits.title": "Uso y límites",
+		"settings.billing.usageLimits.noOrgDesc":
+			"Selecciona una organización y asegúrate de tener una suscripción activa para ver el uso.",
+		"settings.billing.usageLimits.currentPeriod":
+			"Período de facturación actual {start} — {end}.",
+		"settings.billing.usageLimits.metric.reports": "Reportes (período)",
+		"settings.billing.usageLimits.metric.notices": "Avisos (período)",
+		"settings.billing.usageLimits.metric.alerts": "Alertas (período)",
+		"settings.billing.usageLimits.metric.operations": "Operaciones (período)",
+		"settings.billing.usageLimits.metric.clients": "Clientes (período)",
+		"settings.billing.usageLimits.metric.members": "Miembros (esta org)",
+		"settings.billing.usageLimits.metric.watchlistQueries":
+			"Consultas watchlist (período)",
+		"settings.billing.usageLimits.unlimited": "(ilimitado)",
+		"settings.billing.usageLimits.meteredOverageTitle":
+			"Exceso medido (Stripe)",
+		"settings.billing.usageLimits.meteredOverageDesc":
+			"Si está activado, las acciones que superen las cuotas incluidas pueden continuar y se facturan como uso. Puedes establecer un límite de gasto mensual opcional.",
+		"settings.billing.usageLimits.enableMeteredOverage":
+			"Activar exceso medido",
+		"settings.billing.usageLimits.monthlySpendLimit":
+			"Límite de gasto mensual (MXN)",
+		"settings.billing.usageLimits.noCapPlaceholder": "Sin límite",
+		"settings.billing.usageLimits.overageHelper":
+			"Déjalo vacío para no tener tope. Cargos por exceso en este período hasta ahora: {amount}",
+		"settings.billing.usageLimits.saveButton":
+			"Guardar configuración de facturación por uso",
+		"settings.billing.usageLimits.saving": "Guardando…",
+		"settings.billing.usageLimits.loadError": "No se pudo cargar el uso",
+		"settings.billing.usageLimits.saveSuccess":
+			"Configuración de facturación por uso guardada",
+		"settings.billing.usageLimits.saveFailed": "Error al guardar",
+		"settings.billing.usageLimits.invalidSpendLimit":
+			"Límite de gasto no válido",
 
 		// Upgrade prompts
 		"billing.upgrade.limitReached": "Límite Alcanzado",

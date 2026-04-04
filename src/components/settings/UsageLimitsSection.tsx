@@ -24,13 +24,37 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/contexts/language-context";
 
 function pct(used: number, limit: number): number {
 	if (limit <= 0) return 0;
 	return Math.min(100, Math.round((used / limit) * 100));
 }
 
-export function UsageLimitsSection() {
+/** AML period metrics not shown for the watchlist-only Stripe plan. */
+const WATCHLIST_HIDDEN_METRIC_KEYS = [
+	"reports",
+	"notices",
+	"alerts",
+	"operations",
+	"clients",
+] as const;
+
+const FULL_METRIC_ROW_COUNT = 7;
+const WATCHLIST_METRIC_ROW_COUNT = 2;
+
+export type UsageLimitsSectionProps = {
+	/** Current Stripe plan name; when `watchlist`, AML period rows are hidden. */
+	subscriptionPlan?: string | null;
+	/** Enterprise license: show limits but hide Stripe metered overage controls. */
+	isLicenseBased?: boolean;
+};
+
+export function UsageLimitsSection({
+	subscriptionPlan,
+	isLicenseBased = false,
+}: UsageLimitsSectionProps = {}) {
+	const { t } = useLanguage();
 	const { toast } = useToast();
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
@@ -44,7 +68,9 @@ export function UsageLimitsSection() {
 		try {
 			const [d, o] = await Promise.all([
 				getUsageDetails(),
-				getOverageSettings().catch(() => null),
+				isLicenseBased
+					? Promise.resolve(null)
+					: getOverageSettings().catch(() => null),
 			]);
 			setDetails(d);
 			if (o) {
@@ -53,17 +79,21 @@ export function UsageLimitsSection() {
 				setSpendLimitPesos(
 					o.spendLimitCents != null ? String(o.spendLimitCents / 100) : "",
 				);
+			} else if (isLicenseBased) {
+				setOverage(null);
+				setEnabled(false);
+				setSpendLimitPesos("");
 			}
 		} catch (e) {
 			toast({
-				title: "Could not load usage",
+				title: t("settings.billing.usageLimits.loadError"),
 				description: e instanceof Error ? e.message : undefined,
 				variant: "destructive",
 			});
 		} finally {
 			setLoading(false);
 		}
-	}, [toast]);
+	}, [toast, isLicenseBased, t]);
 
 	useEffect(() => {
 		void load();
@@ -76,7 +106,7 @@ export function UsageLimitsSection() {
 			const spendLimitCents =
 				pesos === "" ? null : Math.round(parseFloat(pesos) * 100);
 			if (pesos !== "" && Number.isNaN(spendLimitCents!)) {
-				throw new Error("Invalid spend limit");
+				throw new Error(t("settings.billing.usageLimits.invalidSpendLimit"));
 			}
 			const row = await updateOverageSettings({
 				overageEnabled: enabled,
@@ -84,11 +114,11 @@ export function UsageLimitsSection() {
 				spendLimitCurrency: "MXN",
 			});
 			setOverage(row);
-			toast({ title: "Usage billing settings saved" });
+			toast({ title: t("settings.billing.usageLimits.saveSuccess") });
 			await load();
 		} catch (e) {
 			toast({
-				title: "Save failed",
+				title: t("settings.billing.usageLimits.saveFailed"),
 				description: e instanceof Error ? e.message : undefined,
 				variant: "destructive",
 			});
@@ -98,17 +128,25 @@ export function UsageLimitsSection() {
 	};
 
 	if (loading) {
-		return <UsageLimitsSkeleton />;
+		return (
+			<UsageLimitsSkeleton
+				metricRowCount={
+					subscriptionPlan === "watchlist"
+						? WATCHLIST_METRIC_ROW_COUNT
+						: FULL_METRIC_ROW_COUNT
+				}
+				showStripeOverageSkeleton={!isLicenseBased}
+			/>
+		);
 	}
 
 	if (!details?.limits) {
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle>Usage & limits</CardTitle>
+					<CardTitle>{t("settings.billing.usageLimits.title")}</CardTitle>
 					<CardDescription>
-						Select an organization and ensure you have an active subscription to
-						see usage.
+						{t("settings.billing.usageLimits.noOrgDesc")}
 					</CardDescription>
 				</CardHeader>
 			</Card>
@@ -122,35 +160,69 @@ export function UsageLimitsSection() {
 		label: string;
 		limit: number;
 	}> = [
-		{ key: "reports", label: "Reports (period)", limit: limits.reports },
-		{ key: "notices", label: "Notices (period)", limit: limits.notices },
-		{ key: "alerts", label: "Alerts (period)", limit: limits.alerts },
+		{
+			key: "reports",
+			label: t("settings.billing.usageLimits.metric.reports"),
+			limit: limits.reports,
+		},
+		{
+			key: "notices",
+			label: t("settings.billing.usageLimits.metric.notices"),
+			limit: limits.notices,
+		},
+		{
+			key: "alerts",
+			label: t("settings.billing.usageLimits.metric.alerts"),
+			limit: limits.alerts,
+		},
 		{
 			key: "operations",
-			label: "Operations (period)",
+			label: t("settings.billing.usageLimits.metric.operations"),
 			limit: limits.operations,
 		},
-		{ key: "clients", label: "Clients (period)", limit: limits.clients },
-		{ key: "users", label: "Members (this org)", limit: limits.users },
+		{
+			key: "clients",
+			label: t("settings.billing.usageLimits.metric.clients"),
+			limit: limits.clients,
+		},
+		{
+			key: "users",
+			label: t("settings.billing.usageLimits.metric.members"),
+			limit: limits.users,
+		},
 		{
 			key: "watchlistQueries",
-			label: "Watchlist queries (period)",
+			label: t("settings.billing.usageLimits.metric.watchlistQueries"),
 			limit: limits.watchlistQueriesPerMonth,
 		},
 	];
 
+	const displayMetrics =
+		subscriptionPlan === "watchlist"
+			? metrics.filter(
+					(m) =>
+						!(WATCHLIST_HIDDEN_METRIC_KEYS as readonly string[]).includes(
+							m.key,
+						),
+				)
+			: metrics;
+
+	const periodStart = new Date(period.start).toLocaleDateString();
+	const periodEnd = new Date(period.end).toLocaleDateString();
+
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Usage & limits</CardTitle>
+				<CardTitle>{t("settings.billing.usageLimits.title")}</CardTitle>
 				<CardDescription>
-					Current billing period {new Date(period.start).toLocaleDateString()} —{" "}
-					{new Date(period.end).toLocaleDateString()}.
+					{t("settings.billing.usageLimits.currentPeriod")
+						.replace("{start}", periodStart)
+						.replace("{end}", periodEnd)}
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-6">
 				<div className="space-y-4">
-					{metrics.map(({ key, label, limit }) => {
+					{displayMetrics.map(({ key, label, limit }) => {
 						const used = usage[key];
 						const p = pct(used, limit);
 						const unlimited = limit <= 0;
@@ -160,7 +232,9 @@ export function UsageLimitsSection() {
 									<span>{label}</span>
 									<span className="text-muted-foreground">
 										{used} {unlimited ? "" : `/ ${limit}`}
-										{unlimited ? " (unlimited)" : ` (${p}%)`}
+										{unlimited
+											? ` ${t("settings.billing.usageLimits.unlimited")}`
+											: ` (${p}%)`}
 									</span>
 								</div>
 								{!unlimited ? <Progress value={p} className="h-2" /> : null}
@@ -169,50 +243,67 @@ export function UsageLimitsSection() {
 					})}
 				</div>
 
-				<div className="border-t pt-4 space-y-4">
-					<h3 className="text-sm font-medium">Metered overage (Stripe)</h3>
-					<p className="text-sm text-muted-foreground">
-						When enabled, actions beyond included quotas can continue and are
-						billed as usage. You can set an optional monthly spend cap.
-					</p>
-					<div className="flex items-center justify-between gap-4">
-						<Label htmlFor="overage-enabled">Enable metered overage</Label>
-						<Switch
-							id="overage-enabled"
-							checked={enabled}
-							onCheckedChange={setEnabled}
-						/>
-					</div>
-					<div className="space-y-2">
-						<Label htmlFor="spend-cap">Monthly spend limit (MXN)</Label>
-						<Input
-							id="spend-cap"
-							type="number"
-							min={0}
-							step="1"
-							placeholder="No cap"
-							value={spendLimitPesos}
-							onChange={(e) => setSpendLimitPesos(e.target.value)}
-						/>
-						<p className="text-xs text-muted-foreground">
-							Leave empty for no cap. Overage charges in this period so far:{" "}
-							{formatCurrency(
-								overage?.periodOverageChargeCents ?? ov?.periodChargeCents ?? 0,
-								ov?.currency ?? "MXN",
-							)}
+				{isLicenseBased ? (
+					<div className="border-t pt-4">
+						<p className="text-sm text-muted-foreground">
+							{t("settings.billing.usageLicenseOverageHint")}
 						</p>
 					</div>
-					<Button onClick={() => void saveOverage()} disabled={saving}>
-						{saving ? (
-							<>
-								<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-								Saving…
-							</>
-						) : (
-							"Save usage billing settings"
-						)}
-					</Button>
-				</div>
+				) : (
+					<div className="border-t pt-4 space-y-4">
+						<h3 className="text-sm font-medium">
+							{t("settings.billing.usageLimits.meteredOverageTitle")}
+						</h3>
+						<p className="text-sm text-muted-foreground">
+							{t("settings.billing.usageLimits.meteredOverageDesc")}
+						</p>
+						<div className="flex items-center justify-between gap-4">
+							<Label htmlFor="overage-enabled">
+								{t("settings.billing.usageLimits.enableMeteredOverage")}
+							</Label>
+							<Switch
+								id="overage-enabled"
+								checked={enabled}
+								onCheckedChange={setEnabled}
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="spend-cap">
+								{t("settings.billing.usageLimits.monthlySpendLimit")}
+							</Label>
+							<Input
+								id="spend-cap"
+								type="number"
+								min={0}
+								step="1"
+								placeholder={t("settings.billing.usageLimits.noCapPlaceholder")}
+								value={spendLimitPesos}
+								onChange={(e) => setSpendLimitPesos(e.target.value)}
+							/>
+							<p className="text-xs text-muted-foreground">
+								{t("settings.billing.usageLimits.overageHelper").replace(
+									"{amount}",
+									formatCurrency(
+										overage?.periodOverageChargeCents ??
+											ov?.periodChargeCents ??
+											0,
+										ov?.currency ?? "MXN",
+									),
+								)}
+							</p>
+						</div>
+						<Button onClick={() => void saveOverage()} disabled={saving}>
+							{saving ? (
+								<>
+									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
+									{t("settings.billing.usageLimits.saving")}
+								</>
+							) : (
+								t("settings.billing.usageLimits.saveButton")
+							)}
+						</Button>
+					</div>
+				)}
 			</CardContent>
 		</Card>
 	);
@@ -221,7 +312,13 @@ export function UsageLimitsSection() {
 /**
  * Skeleton matching UsageLimitsSection loaded state: header + metric rows + overage block.
  */
-function UsageLimitsSkeleton() {
+function UsageLimitsSkeleton({
+	metricRowCount = FULL_METRIC_ROW_COUNT,
+	showStripeOverageSkeleton = true,
+}: {
+	metricRowCount?: number;
+	showStripeOverageSkeleton?: boolean;
+}) {
 	return (
 		<Card>
 			<CardHeader>
@@ -230,7 +327,7 @@ function UsageLimitsSkeleton() {
 			</CardHeader>
 			<CardContent className="space-y-6">
 				<div className="space-y-4">
-					{[1, 2, 3, 4, 5, 6, 7].map((i) => (
+					{Array.from({ length: metricRowCount }, (_, i) => i + 1).map((i) => (
 						<div key={i} className="space-y-1">
 							<div className="flex justify-between">
 								<Skeleton className="h-4 w-36" />
@@ -240,20 +337,27 @@ function UsageLimitsSkeleton() {
 						</div>
 					))}
 				</div>
-				<div className="border-t pt-4 space-y-4">
-					<Skeleton className="h-5 w-48" />
-					<Skeleton className="h-4 w-full max-w-xl" />
-					<div className="flex items-center justify-between gap-4">
-						<Skeleton className="h-4 w-40" />
-						<Skeleton className="h-5 w-9 rounded-full" />
+				{showStripeOverageSkeleton ? (
+					<div className="border-t pt-4 space-y-4">
+						<Skeleton className="h-5 w-48" />
+						<Skeleton className="h-4 w-full max-w-xl" />
+						<div className="flex items-center justify-between gap-4">
+							<Skeleton className="h-4 w-40" />
+							<Skeleton className="h-5 w-9 rounded-full" />
+						</div>
+						<div className="space-y-2">
+							<Skeleton className="h-4 w-44" />
+							<Skeleton className="h-10 w-full max-w-xs rounded-md" />
+							<Skeleton className="h-3 w-full max-w-lg" />
+						</div>
+						<Skeleton className="h-10 w-56 rounded-md" />
 					</div>
-					<div className="space-y-2">
-						<Skeleton className="h-4 w-44" />
-						<Skeleton className="h-10 w-full max-w-xs rounded-md" />
-						<Skeleton className="h-3 w-full max-w-lg" />
+				) : (
+					<div className="border-t pt-4">
+						<Skeleton className="h-4 w-full max-w-xl" />
+						<Skeleton className="h-4 w-full max-w-lg mt-2" />
 					</div>
-					<Skeleton className="h-10 w-56 rounded-md" />
-				</div>
+				)}
 			</CardContent>
 		</Card>
 	);

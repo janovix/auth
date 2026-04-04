@@ -57,6 +57,12 @@ vi.mock("@/lib/billing", async (importOriginal) => {
 	return {
 		...actual,
 		getSubscriptionStatus: vi.fn(),
+		getOverageSettings: vi.fn().mockResolvedValue({
+			overageEnabled: false,
+			spendLimitCents: null,
+			spendLimitCurrency: "MXN",
+			periodOverageChargeCents: 0,
+		}),
 	};
 });
 
@@ -154,6 +160,22 @@ describe("TeamSettingsView", () => {
 				expect(billing.getSubscriptionStatus).toHaveBeenCalledWith({
 					resolveFromOrg: true,
 				});
+			});
+		});
+
+		it("loads overage settings alongside team data", async () => {
+			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+				mockOwnerMembership,
+			);
+			vi.mocked(authClient.organization.getFullOrganization).mockResolvedValue({
+				data: { members: mockMembers, invitations: [] },
+				error: null,
+			});
+
+			render(<TeamSettingsView />);
+
+			await waitFor(() => {
+				expect(billing.getOverageSettings).toHaveBeenCalled();
 			});
 		});
 

@@ -3,6 +3,7 @@ import {
 	getFeatures,
 	getStatusBadgeInfo,
 	getSubscriptionStatus,
+	hasActiveBillingForUsageLimits,
 	hasAmlProductAccess,
 	hasWatchlistProductAccess,
 	type Feature,
@@ -185,5 +186,34 @@ describe("getSubscriptionStatus / getFeatures URL options", () => {
 			"https://auth-svc.example.workers.dev/api/subscription/features?resolveFromOrg=true",
 			expect.objectContaining({ credentials: "include" }),
 		);
+	});
+});
+
+describe("hasActiveBillingForUsageLimits", () => {
+	it("returns false for null", () => {
+		expect(hasActiveBillingForUsageLimits(null)).toBe(false);
+	});
+
+	it("returns false when canceled", () => {
+		expect(
+			hasActiveBillingForUsageLimits({
+				...basePaidActive,
+				status: "canceled",
+			}),
+		).toBe(false);
+	});
+
+	it("returns true for active Stripe subscription", () => {
+		expect(hasActiveBillingForUsageLimits(basePaidActive)).toBe(true);
+	});
+
+	it("returns true for active enterprise license row", () => {
+		expect(
+			hasActiveBillingForUsageLimits({
+				...basePaidActive,
+				isLicenseBased: true,
+				plan: "enterprise",
+			}),
+		).toBe(true);
 	});
 });

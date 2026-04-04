@@ -29,6 +29,7 @@ import {
 	type UserSubscriptionStatus,
 	type PublicPlanInfo,
 	type PrepareDowngradeResponse,
+	hasActiveBillingForUsageLimits,
 	isSubscriptionActive,
 	getStatusBadgeInfo,
 	formatDate,
@@ -67,6 +68,7 @@ import {
 	PricingTable,
 	BillingSettingsViewSkeleton,
 } from "@/components/settings";
+import { getOrganizationMembership } from "@/lib/settings";
 import { dispatchBillingEntitlementsUpdated } from "@/lib/settings/billingEntitlementsEvents";
 import { PlanSelectionGrid } from "@/components/PlanSelectionGrid";
 import { EnterpriseCard } from "@/components/EnterpriseCard";
@@ -92,11 +94,25 @@ export function BillingSettingsView() {
 	>(null);
 	const [downgradePrep, setDowngradePrep] =
 		useState<PrepareDowngradeResponse | null>(null);
+	const [isOrgOwner, setIsOrgOwner] = useState(false);
 
 	// Load billing data
 	const loadBillingData = useCallback(async () => {
 		setLoading(true);
 		try {
+			const activeOrgId = (
+				session?.session as { activeOrganizationId?: string } | undefined
+			)?.activeOrganizationId;
+
+			if (activeOrgId) {
+				const membership = await getOrganizationMembership(activeOrgId).catch(
+					() => null,
+				);
+				setIsOrgOwner(membership?.role === "owner");
+			} else {
+				setIsOrgOwner(false);
+			}
+
 			const [subStatus, planList] = await Promise.all([
 				getSubscriptionStatus().catch(() => null),
 				getPublicPlans().catch(() => []),
@@ -122,7 +138,7 @@ export function BillingSettingsView() {
 		} finally {
 			setLoading(false);
 		}
-	}, [t, toast]);
+	}, [t, toast, session?.session]);
 
 	useEffect(() => {
 		loadBillingData();
@@ -302,7 +318,7 @@ export function BillingSettingsView() {
 
 			{/* Current Subscription Status */}
 			<Card>
-				<CardHeader>
+				<CardHeader className={isActive ? undefined : "pb-4"}>
 					<div className="flex items-center justify-between">
 						<div>
 							<CardTitle>
@@ -311,24 +327,28 @@ export function BillingSettingsView() {
 									: t("settings.billing.noSubscription")}
 							</CardTitle>
 							<CardDescription>
-								{subscription?.hasSubscription
-									? subscription.isLicenseBased
-										? subscription.licenseExpiresAt
-											? `${t("settings.billing.licenseExpires")} ${formatDate(subscription.licenseExpiresAt)}`
-											: t("settings.billing.licenseNoExpiry")
-										: subscription.isTrialing
-											? subscription.cancelAtPeriodEnd &&
-												subscription.currentPeriodEnd
-												? `${t("settings.billing.trial")} - ${subscription.trialDaysRemaining} ${t("settings.billing.daysRemaining")} — ${t("settings.billing.canceledBadge").replace("{date}", formatDate(subscription.currentPeriodEnd))}`
-												: `${t("settings.billing.trial")} - ${subscription.trialDaysRemaining} ${t("settings.billing.daysRemaining")}`
-											: subscription.cancelAtPeriodEnd &&
-												  subscription.currentPeriodEnd
-												? t("settings.billing.canceledBadge").replace(
-														"{date}",
-														formatDate(subscription.currentPeriodEnd),
-													)
-												: `${t("settings.billing.activeSince")} ${subscription.currentPeriodStart ? formatDate(subscription.currentPeriodStart) : "N/A"}`
-									: t("settings.billing.subscribePrompt")}
+								{isActive
+									? subscription?.hasSubscription
+										? subscription.isLicenseBased
+											? subscription.licenseExpiresAt
+												? `${t("settings.billing.licenseExpires")} ${formatDate(subscription.licenseExpiresAt)}`
+												: t("settings.billing.licenseNoExpiry")
+											: subscription.isTrialing
+												? subscription.cancelAtPeriodEnd &&
+													subscription.currentPeriodEnd
+													? `${t("settings.billing.trial")} - ${subscription.trialDaysRemaining} ${t("settings.billing.daysRemaining")} — ${t("settings.billing.canceledBadge").replace("{date}", formatDate(subscription.currentPeriodEnd))}`
+													: `${t("settings.billing.trial")} - ${subscription.trialDaysRemaining} ${t("settings.billing.daysRemaining")}`
+												: subscription.cancelAtPeriodEnd &&
+													  subscription.currentPeriodEnd
+													? t("settings.billing.canceledBadge").replace(
+															"{date}",
+															formatDate(subscription.currentPeriodEnd),
+														)
+													: `${t("settings.billing.activeSince")} ${subscription.currentPeriodStart ? formatDate(subscription.currentPeriodStart) : "N/A"}`
+										: t("settings.billing.subscribePrompt")
+									: subscription?.hasSubscription
+										? t("settings.billing.inactiveBillingSubtitle")
+										: t("settings.billing.subscribePrompt")}
 							</CardDescription>
 						</div>
 						{subscription?.status && (
@@ -340,63 +360,65 @@ export function BillingSettingsView() {
 						)}
 					</div>
 				</CardHeader>
-				<CardContent>
-					<div className="grid grid-cols-2 gap-4">
-						<div className="flex items-center gap-2">
-							<Building2 className="h-4 w-4 text-muted-foreground" />
-							<span className="text-sm">
-								{t("settings.billing.organizations")}:{" "}
-								{subscription?.organizationsOwned ?? 0} /{" "}
-								{subscription?.organizationsLimit === 0
-									? t("settings.billing.unlimited")
-									: (subscription?.organizationsLimit ?? 0)}
-							</span>
-						</div>
-						{subscription?.isLicenseBased
-							? subscription.licenseExpiresAt && (
-									<div className="flex items-center gap-2">
-										<KeyRound className="h-4 w-4 text-muted-foreground" />
-										<span className="text-sm">
-											{t("settings.billing.licenseExpires")}:{" "}
-											{formatDate(subscription.licenseExpiresAt)}
-										</span>
-									</div>
-								)
-							: subscription?.currentPeriodEnd && (
-									<div className="flex items-center gap-2">
-										<FileText className="h-4 w-4 text-muted-foreground" />
-										<span className="text-sm">
-											{subscription.cancelAtPeriodEnd
-												? t("settings.billing.ends")
-												: t("settings.billing.renews")}
-											: {formatDate(subscription.currentPeriodEnd)}
-										</span>
-									</div>
-								)}
-					</div>
-
-					{/* Organization Usage Progress */}
-					{subscription?.hasSubscription &&
-						subscription.organizationsLimit > 0 && (
-							<div className="mt-4">
-								<div className="flex justify-between text-sm mb-1">
-									<span>{t("settings.billing.orgUsage")}</span>
-									<span>
-										{subscription.organizationsOwned} /{" "}
-										{subscription.organizationsLimit}
-									</span>
-								</div>
-								<Progress
-									value={
-										(subscription.organizationsOwned /
-											subscription.organizationsLimit) *
-										100
-									}
-									className="h-2"
-								/>
+				{isActive ? (
+					<CardContent>
+						<div className="grid grid-cols-2 gap-4">
+							<div className="flex items-center gap-2">
+								<Building2 className="h-4 w-4 text-muted-foreground" />
+								<span className="text-sm">
+									{t("settings.billing.organizations")}:{" "}
+									{subscription?.organizationsOwned ?? 0} /{" "}
+									{subscription?.organizationsLimit === 0
+										? t("settings.billing.unlimited")
+										: (subscription?.organizationsLimit ?? 0)}
+								</span>
 							</div>
-						)}
-				</CardContent>
+							{subscription?.isLicenseBased
+								? subscription.licenseExpiresAt && (
+										<div className="flex items-center gap-2">
+											<KeyRound className="h-4 w-4 text-muted-foreground" />
+											<span className="text-sm">
+												{t("settings.billing.licenseExpires")}:{" "}
+												{formatDate(subscription.licenseExpiresAt)}
+											</span>
+										</div>
+									)
+								: subscription?.currentPeriodEnd && (
+										<div className="flex items-center gap-2">
+											<FileText className="h-4 w-4 text-muted-foreground" />
+											<span className="text-sm">
+												{subscription.cancelAtPeriodEnd
+													? t("settings.billing.ends")
+													: t("settings.billing.renews")}
+												: {formatDate(subscription.currentPeriodEnd)}
+											</span>
+										</div>
+									)}
+						</div>
+
+						{/* Organization Usage Progress */}
+						{subscription?.hasSubscription &&
+							subscription.organizationsLimit > 0 && (
+								<div className="mt-4">
+									<div className="flex justify-between text-sm mb-1">
+										<span>{t("settings.billing.orgUsage")}</span>
+										<span>
+											{subscription.organizationsOwned} /{" "}
+											{subscription.organizationsLimit}
+										</span>
+									</div>
+									<Progress
+										value={
+											(subscription.organizationsOwned /
+												subscription.organizationsLimit) *
+											100
+										}
+										className="h-2"
+									/>
+								</div>
+							)}
+					</CardContent>
+				) : null}
 				{isActive && !subscription?.isLicenseBased && (
 					<CardFooter className="flex flex-col gap-4 px-6 py-4 border-t">
 						{isPendingCancel && subscription?.currentPeriodEnd != null ? (
@@ -468,8 +490,11 @@ export function BillingSettingsView() {
 				)}
 			</Card>
 
-			{subscription?.hasSubscription && !subscription.isLicenseBased ? (
-				<UsageLimitsSection />
+			{isOrgOwner && hasActiveBillingForUsageLimits(subscription) ? (
+				<UsageLimitsSection
+					subscriptionPlan={subscription?.plan ?? null}
+					isLicenseBased={subscription?.isLicenseBased ?? false}
+				/>
 			) : null}
 
 			{/* Plan Selection + Enterprise + Watchlist */}

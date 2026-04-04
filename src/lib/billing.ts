@@ -658,6 +658,19 @@ export interface UsageDetailsApi {
 		periodChargeCents: number;
 		currency: string;
 	};
+	/** Stripe plans only: unit prices for overage estimation (null for license-based). */
+	overagePricing?: {
+		reports: { unitCents: number; currency: string } | null;
+		notices: { unitCents: number; currency: string } | null;
+		alerts: { unitCents: number; currency: string } | null;
+		operations: { unitCents: number; currency: string } | null;
+		clients: { unitCents: number; currency: string } | null;
+		seat: {
+			unitCents: number;
+			currency: string;
+			interval: string;
+		} | null;
+	} | null;
 }
 
 export async function getUsageDetails(): Promise<UsageDetailsApi | null> {
@@ -681,6 +694,12 @@ export interface PrepareDowngradeResponse {
 		memberCount: number;
 		exceedsUsersPerOrgAfterDowngrade: boolean;
 	}>;
+	/** Target plan seat unit price for cost projection (null if not configured). */
+	seatPrice: {
+		amountCents: number;
+		currency: string;
+		interval: string;
+	} | null;
 }
 
 export async function prepareDowngrade(

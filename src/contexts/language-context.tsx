@@ -890,6 +890,24 @@ const translations = {
 		"settings.billing.usageLimits.saveSuccess": "Usage billing settings saved",
 		"settings.billing.usageLimits.saveFailed": "Save failed",
 		"settings.billing.usageLimits.invalidSpendLimit": "Invalid spend limit",
+		"settings.billing.usageLimits.excessHint":
+			"{excess} excess × {unitPrice} = {total}",
+		"settings.billing.usageLimits.excessSeatHint":
+			"{excess} extra seats × {unitPrice}/mo = {total}/mo",
+		"settings.billing.usageLimits.estimatedOverageSummary":
+			"Estimated costs (before tax)",
+		"settings.billing.usageLimits.estimatedMeteredLine":
+			"Estimated metered overage this period: {amount}",
+		"settings.billing.usageLimits.extraSeatCharges":
+			"Extra seat charges (monthly): {amount}",
+		"settings.billing.usageLimits.actualOverageSoFar":
+			"Actual metered overage billed so far: {amount}",
+		"settings.billing.usageLimits.spendCapRemaining":
+			"Spend cap: {cap} — {remaining} remaining this period",
+		"settings.billing.downgradeExtraSeatHint":
+			"{excess} extra members × {price}/seat/mo = {total}/mo",
+		"settings.billing.downgradeExtraSeatTotal":
+			"Total additional seat charges: ~{total}/mo",
 
 		// Upgrade prompts
 		"billing.upgrade.limitReached": "Limit Reached",
@@ -2052,6 +2070,24 @@ const translations = {
 		"settings.billing.usageLimits.saveFailed": "Error al guardar",
 		"settings.billing.usageLimits.invalidSpendLimit":
 			"Límite de gasto no válido",
+		"settings.billing.usageLimits.excessHint":
+			"{excess} de exceso × {unitPrice} = {total}",
+		"settings.billing.usageLimits.excessSeatHint":
+			"{excess} asientos extra × {unitPrice}/mes = {total}/mes",
+		"settings.billing.usageLimits.estimatedOverageSummary":
+			"Costos estimados (antes de impuestos)",
+		"settings.billing.usageLimits.estimatedMeteredLine":
+			"Exceso medido estimado en este período: {amount}",
+		"settings.billing.usageLimits.extraSeatCharges":
+			"Cargos por asientos extra (mensual): {amount}",
+		"settings.billing.usageLimits.actualOverageSoFar":
+			"Exceso medido facturado hasta ahora: {amount}",
+		"settings.billing.usageLimits.spendCapRemaining":
+			"Tope de gasto: {cap} — {remaining} restantes en este período",
+		"settings.billing.downgradeExtraSeatHint":
+			"{excess} miembros extra × {price}/asiento/mes = {total}/mes",
+		"settings.billing.downgradeExtraSeatTotal":
+			"Cargos adicionales por asientos: ~{total}/mes",
 
 		// Upgrade prompts
 		"billing.upgrade.limitReached": "Límite Alcanzado",

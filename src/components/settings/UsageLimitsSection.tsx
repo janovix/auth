@@ -31,6 +31,40 @@ function pct(used: number, limit: number): number {
 	return Math.min(100, Math.round((used / limit) * 100));
 }
 
+function meteredExcessCents(
+	usage: UsageDetailsApi["usage"],
+	limits: NonNullable<UsageDetailsApi["limits"]>,
+	pricing: NonNullable<UsageDetailsApi["overagePricing"]>,
+): number {
+	const keys = [
+		"reports",
+		"notices",
+		"alerts",
+		"operations",
+		"clients",
+	] as const;
+	let sum = 0;
+	for (const k of keys) {
+		const limit = limits[k];
+		const used = usage[k];
+		const row = pricing[k];
+		if (limit > 0 && row && used > limit) {
+			sum += (used - limit) * row.unitCents;
+		}
+	}
+	return sum;
+}
+
+function seatExcessCents(
+	usage: UsageDetailsApi["usage"],
+	limits: NonNullable<UsageDetailsApi["limits"]>,
+	pricing: NonNullable<UsageDetailsApi["overagePricing"]>,
+): number {
+	if (limits.users <= 0 || !pricing.seat || usage.users <= limits.users)
+		return 0;
+	return (usage.users - limits.users) * pricing.seat.unitCents;
+}
+
 /** AML period metrics not shown for the watchlist-only Stripe plan. */
 const WATCHLIST_HIDDEN_METRIC_KEYS = [
 	"reports",
@@ -210,6 +244,17 @@ export function UsageLimitsSection({
 	const periodStart = new Date(period.start).toLocaleDateString();
 	const periodEnd = new Date(period.end).toLocaleDateString();
 
+	const op = details.overagePricing;
+	const meteredEst = op && limits ? meteredExcessCents(usage, limits, op) : 0;
+	const seatEst = op && limits ? seatExcessCents(usage, limits, op) : 0;
+	const hasExcessForSummary = meteredEst > 0 || seatEst > 0;
+	const showEstimationSummary =
+		!isLicenseBased && ov.enabled && hasExcessForSummary && Boolean(op);
+	const spendCapRemainingCents =
+		ov.spendLimitCents != null
+			? Math.max(0, ov.spendLimitCents - ov.periodChargeCents)
+			: null;
+
 	return (
 		<Card>
 			<CardHeader>
@@ -226,6 +271,45 @@ export function UsageLimitsSection({
 						const used = usage[key];
 						const p = pct(used, limit);
 						const unlimited = limit <= 0;
+						let excessHint: string | null = null;
+						if (!isLicenseBased && op && !unlimited && used > limit) {
+							if (key === "users" && op.seat) {
+								const excess = used - limit;
+								const totalCents = excess * op.seat.unitCents;
+								excessHint = t("settings.billing.usageLimits.excessSeatHint")
+									.replace("{excess}", String(excess))
+									.replace(
+										"{unitPrice}",
+										formatCurrency(op.seat.unitCents, op.seat.currency),
+									)
+									.replace(
+										"{total}",
+										formatCurrency(totalCents, op.seat.currency),
+									);
+							} else if (
+								key === "reports" ||
+								key === "notices" ||
+								key === "alerts" ||
+								key === "operations" ||
+								key === "clients"
+							) {
+								const row = op[key];
+								if (row) {
+									const excess = used - limit;
+									const totalCents = excess * row.unitCents;
+									excessHint = t("settings.billing.usageLimits.excessHint")
+										.replace("{excess}", String(excess))
+										.replace(
+											"{unitPrice}",
+											formatCurrency(row.unitCents, row.currency),
+										)
+										.replace(
+											"{total}",
+											formatCurrency(totalCents, row.currency),
+										);
+								}
+							}
+						}
 						return (
 							<div key={key} className="space-y-1">
 								<div className="flex justify-between text-sm">
@@ -238,10 +322,56 @@ export function UsageLimitsSection({
 									</span>
 								</div>
 								{!unlimited ? <Progress value={p} className="h-2" /> : null}
+								{excessHint ? (
+									<p className="text-xs text-muted-foreground">{excessHint}</p>
+								) : null}
 							</div>
 						);
 					})}
 				</div>
+
+				{showEstimationSummary ? (
+					<div className="rounded-md border bg-muted/40 p-3 text-sm space-y-2">
+						<p className="font-medium">
+							{t("settings.billing.usageLimits.estimatedOverageSummary")}
+						</p>
+						{meteredEst > 0 ? (
+							<p className="text-muted-foreground">
+								{t("settings.billing.usageLimits.estimatedMeteredLine").replace(
+									"{amount}",
+									formatCurrency(meteredEst, ov.currency),
+								)}
+							</p>
+						) : null}
+						{seatEst > 0 && op?.seat ? (
+							<p className="text-muted-foreground">
+								{t("settings.billing.usageLimits.extraSeatCharges").replace(
+									"{amount}",
+									formatCurrency(seatEst, op.seat.currency),
+								)}
+							</p>
+						) : null}
+						<p className="text-muted-foreground">
+							{t("settings.billing.usageLimits.actualOverageSoFar").replace(
+								"{amount}",
+								formatCurrency(ov.periodChargeCents, ov.currency),
+							)}
+						</p>
+						{spendCapRemainingCents != null && ov.spendLimitCents != null ? (
+							<p className="text-muted-foreground">
+								{t("settings.billing.usageLimits.spendCapRemaining")
+									.replace(
+										"{cap}",
+										formatCurrency(ov.spendLimitCents, ov.currency),
+									)
+									.replace(
+										"{remaining}",
+										formatCurrency(spendCapRemainingCents, ov.currency),
+									)}
+							</p>
+						) : null}
+					</div>
+				) : null}
 
 				{isLicenseBased ? (
 					<div className="border-t pt-4">

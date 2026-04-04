@@ -18,7 +18,9 @@ import type { PrepareDowngradeResponse } from "@/lib/billing";
 import {
 	archiveOrganizationsForDowngrade,
 	changeSubscriptionPlan,
+	formatCurrency,
 } from "@/lib/billing";
+import { useLanguage } from "@/contexts/language-context";
 
 export interface DowngradeWizardProps {
 	open: boolean;
@@ -37,6 +39,7 @@ export function DowngradeWizard({
 	onFinished,
 	onError,
 }: DowngradeWizardProps) {
+	const { t } = useLanguage();
 	const [selected, setSelected] = useState<Set<string>>(new Set());
 	const [submitting, setSubmitting] = useState(false);
 
@@ -79,6 +82,16 @@ export function DowngradeWizard({
 		return remainingOrgs.filter((o) => o.memberCount > usersCap);
 	}, [remainingOrgs, usersCap]);
 
+	const additionalSeatCostCents = useMemo(() => {
+		const sp = prep?.seatPrice;
+		if (!sp || usersCap <= 0) return 0;
+		return remainingOrgs.reduce((sum, o) => {
+			if (o.memberCount <= usersCap) return sum;
+			const extra = o.memberCount - usersCap;
+			return sum + extra * sp.amountCents;
+		}, 0);
+	}, [prep, remainingOrgs, usersCap]);
+
 	const userCapacityBlocked = remainingViolations.length > 0;
 
 	const onlyUserBlock =
@@ -118,6 +131,20 @@ export function DowngradeWizard({
 
 	if (!prep) return null;
 
+	const seatPrice = prep.seatPrice;
+	const orgSeatHint = (memberCount: number) => {
+		if (!seatPrice || usersCap <= 0 || memberCount <= usersCap) return null;
+		const extra = memberCount - usersCap;
+		const totalCents = extra * seatPrice.amountCents;
+		return t("settings.billing.downgradeExtraSeatHint")
+			.replace("{excess}", String(extra))
+			.replace(
+				"{price}",
+				formatCurrency(seatPrice.amountCents, seatPrice.currency),
+			)
+			.replace("{total}", formatCurrency(totalCents, seatPrice.currency));
+	};
+
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
@@ -149,11 +176,19 @@ export function DowngradeWizard({
 							<ul className="mt-2 list-disc pl-5">
 								{prep.organizations
 									.filter((o) => o.exceedsUsersPerOrgAfterDowngrade)
-									.map((o) => (
-										<li key={o.id}>
-											{o.name} ({o.memberCount} members)
-										</li>
-									))}
+									.map((o) => {
+										const hint = orgSeatHint(o.memberCount);
+										return (
+											<li key={o.id}>
+												{o.name} ({o.memberCount} members)
+												{hint ? (
+													<span className="block text-xs text-muted-foreground mt-0.5">
+														{hint}
+													</span>
+												) : null}
+											</li>
+										);
+									})}
 							</ul>
 							<Button asChild variant="outline" className="mt-3" size="sm">
 								<Link href="/settings/team">Open team settings</Link>
@@ -172,32 +207,38 @@ export function DowngradeWizard({
 								You can restore them later if your plan allows.
 							</p>
 							<div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-2">
-								{prep.organizations.map((o) => (
-									<div
-										key={o.id}
-										className="flex items-start gap-2 py-1.5 border-b last:border-0"
-									>
-										<Checkbox
-											id={`org-${o.id}`}
-											checked={selected.has(o.id)}
-											onCheckedChange={() => toggle(o.id)}
-										/>
-										<div className="grid gap-0.5">
-											<Label
-												htmlFor={`org-${o.id}`}
-												className="font-normal cursor-pointer"
-											>
-												{o.name}
-											</Label>
-											<span className="text-xs text-muted-foreground">
-												{o.memberCount} members
-												{o.exceedsUsersPerOrgAfterDowngrade
-													? " · exceeds new seat limit if kept active"
-													: ""}
-											</span>
+								{prep.organizations.map((o) => {
+									const hint = orgSeatHint(o.memberCount);
+									return (
+										<div
+											key={o.id}
+											className="flex items-start gap-2 py-1.5 border-b last:border-0"
+										>
+											<Checkbox
+												id={`org-${o.id}`}
+												checked={selected.has(o.id)}
+												onCheckedChange={() => toggle(o.id)}
+											/>
+											<div className="grid gap-0.5">
+												<Label
+													htmlFor={`org-${o.id}`}
+													className="font-normal cursor-pointer"
+												>
+													{o.name}
+												</Label>
+												<span className="text-xs text-muted-foreground">
+													{o.memberCount} members
+													{o.exceedsUsersPerOrgAfterDowngrade
+														? " · exceeds new seat limit if kept active"
+														: ""}
+													{hint ? (
+														<span className="block mt-0.5">{hint}</span>
+													) : null}
+												</span>
+											</div>
 										</div>
-									</div>
-								))}
+									);
+								})}
 							</div>
 						</div>
 					)}
@@ -209,6 +250,15 @@ export function DowngradeWizard({
 							{remainingViolations.map((o) => o.name).join(", ")}.
 						</p>
 					)}
+
+					{seatPrice && additionalSeatCostCents > 0 ? (
+						<p className="text-sm font-medium text-muted-foreground border-t pt-3">
+							{t("settings.billing.downgradeExtraSeatTotal").replace(
+								"{total}",
+								formatCurrency(additionalSeatCostCents, seatPrice.currency),
+							)}
+						</p>
+					) : null}
 				</div>
 
 				<DialogFooter className="gap-2 sm:gap-0">

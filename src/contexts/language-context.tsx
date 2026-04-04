@@ -314,7 +314,9 @@ const translations = {
 		"products.watchlist.name": "Watchlist screening",
 		"products.watchlist.description":
 			"Search sanctions and watchlists for names and entities.",
-		"products.notIncluded": "Not included in your current plan.",
+		"products.entitlementNote":
+			"You are viewing access for {organizationName}. Product availability follows this organization's plan (the subscription is billed to the organization owner). Invited members share this access.",
+		"products.notIncluded": "Not included in this organization's plan.",
 		"products.upgradeCta": "View plans",
 		"products.openProduct": "Open app",
 		// Mobile sidebar
@@ -1419,7 +1421,9 @@ const translations = {
 		"products.watchlist.name": "Watchlist",
 		"products.watchlist.description":
 			"Búsqueda en listas de sanciones y vigilancia para personas y entidades.",
-		"products.notIncluded": "No incluido en tu plan actual.",
+		"products.entitlementNote":
+			"Estás viendo el acceso para {organizationName}. La disponibilidad de productos sigue el plan de esta organización (la suscripción la paga el propietario). Los miembros invitados comparten este acceso.",
+		"products.notIncluded": "No incluido en el plan de esta organización.",
 		"products.upgradeCta": "Ver planes",
 		"products.openProduct": "Abrir aplicación",
 		// Mobile sidebar

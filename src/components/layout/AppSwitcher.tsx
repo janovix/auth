@@ -62,7 +62,8 @@ export function AppSwitcher({
 	const { isMobile, state } = useSidebar();
 	const isCollapsed = state === "collapsed";
 	const { t } = useLanguage();
-	const { hasAmlAccess } = useSettingsSidebarProductAccess();
+	const { hasAmlAccess, hasWatchlistAccess } =
+		useSettingsSidebarProductAccess();
 
 	const apps: AppItem[] = React.useMemo(() => {
 		const onProducts = pathname?.startsWith("/products") ?? false;
@@ -99,15 +100,19 @@ export function AppSwitcher({
 						},
 					]
 				: []),
-			{
-				id: "watchlist",
-				name: t("appSwitcher.watchlist"),
-				description: t("appSwitcher.watchlistDescription"),
-				href: getWatchlistAppUrl(),
-				icon: Search,
-				external: true,
-				current: false,
-			},
+			...(hasWatchlistAccess
+				? [
+						{
+							id: "watchlist",
+							name: t("appSwitcher.watchlist"),
+							description: t("appSwitcher.watchlistDescription"),
+							href: getWatchlistAppUrl(),
+							icon: Search,
+							external: true,
+							current: false,
+						},
+					]
+				: []),
 			{
 				id: "settings",
 				name: t("appSwitcher.settings"),
@@ -118,7 +123,7 @@ export function AppSwitcher({
 				current: onSettings && !onProducts,
 			},
 		];
-	}, [t, pathname, hasAmlAccess]);
+	}, [t, pathname, hasAmlAccess, hasWatchlistAccess]);
 
 	const currentApp =
 		apps.find((app) => app.current) ??

@@ -28,6 +28,7 @@ import {
 	getSubscriptionStatus,
 	getFeatures,
 	hasAmlProductAccess,
+	hasWatchlistProductAccess,
 	type Feature,
 } from "@/lib/billing";
 import { NotificationsProvider } from "@/contexts/notifications-context";
@@ -102,6 +103,9 @@ function SettingsLayoutInner({
 
 	// AML product (PLD compliance settings) — hide nav when plan is watchlist-only
 	const [hasAmlAccess, setHasAmlAccess] = useState(true);
+	const [hasWatchlistAccess, setHasWatchlistAccess] = useState(true);
+	/** Product hub + nav: org-scoped entitlements loaded from auth-svc */
+	const [hasResolvedEntitlements, setHasResolvedEntitlements] = useState(false);
 
 	// Effective timezone for the navbar clock (resolved from user > org > browser)
 	const [effectiveTimezone, setEffectiveTimezone] = useState<string | null>(
@@ -326,6 +330,15 @@ function SettingsLayoutInner({
 		switchOrg();
 	}, [orgSlugParam, organizations, activeOrgId, router]);
 
+	// No active org: nothing to resolve; product hub can render without waiting
+	useEffect(() => {
+		if (!activeOrgId) {
+			setHasResolvedEntitlements(true);
+		} else {
+			setHasResolvedEntitlements(false);
+		}
+	}, [activeOrgId]);
+
 	// Load completion status for sections (billing, AML access, invitations, etc.)
 	const loadCompletionStatus = useCallback(async () => {
 		if (!activeOrgId) return;
@@ -352,6 +365,9 @@ function SettingsLayoutInner({
 				setOrganizationsLimit(subscriptionStatus.organizationsLimit);
 			}
 			setHasAmlAccess(hasAmlProductAccess(subscriptionStatus, features));
+			setHasWatchlistAccess(
+				hasWatchlistProductAccess(subscriptionStatus, features),
+			);
 
 			// Check for pending invitations — use the lightweight fast path to avoid
 			// the expensive subscription/Stripe checks in the full endpoint
@@ -376,6 +392,8 @@ function SettingsLayoutInner({
 			}
 		} catch {
 			// Silently fail - completion status is optional
+		} finally {
+			setHasResolvedEntitlements(true);
 		}
 	}, [activeOrgId]);
 
@@ -513,7 +531,12 @@ function SettingsLayoutInner({
 	);
 
 	return (
-		<SettingsSidebarProductProvider hasAmlAccess={hasAmlAccess}>
+		<SettingsSidebarProductProvider
+			hasAmlAccess={hasAmlAccess}
+			hasWatchlistAccess={hasWatchlistAccess}
+			activeOrganizationName={activeOrganization?.name ?? null}
+			hasResolvedEntitlements={hasResolvedEntitlements}
+		>
 			<SidebarProvider
 				open={!isCollapsed}
 				onOpenChange={handleSidebarOpenChange}

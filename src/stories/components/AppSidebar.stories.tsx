@@ -77,7 +77,12 @@ type Story = StoryObj<typeof AppSidebar>;
 
 export const AmlProductEnabled: Story = {
 	render: (args) => (
-		<SettingsSidebarProductProvider hasAmlAccess>
+		<SettingsSidebarProductProvider
+			hasAmlAccess
+			hasWatchlistAccess
+			activeOrganizationName={null}
+			hasResolvedEntitlements={true}
+		>
 			<SidebarProvider>
 				<AppSidebar {...args} />
 			</SidebarProvider>
@@ -99,7 +104,12 @@ export const AmlProductEnabled: Story = {
 
 export const WatchlistOnlyNoComplianceNav: Story = {
 	render: (args) => (
-		<SettingsSidebarProductProvider hasAmlAccess={false}>
+		<SettingsSidebarProductProvider
+			hasAmlAccess={false}
+			hasWatchlistAccess
+			activeOrganizationName={null}
+			hasResolvedEntitlements={true}
+		>
 			<SidebarProvider>
 				<AppSidebar {...args} />
 			</SidebarProvider>

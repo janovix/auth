@@ -75,7 +75,8 @@ export function AppSidebar({
 	pendingInvitationsCount = 0,
 	...props
 }: AppSidebarProps) {
-	const { hasAmlAccess } = useSettingsSidebarProductAccess();
+	const { hasAmlAccess, hasWatchlistAccess } =
+		useSettingsSidebarProductAccess();
 	const { t } = useLanguage();
 	const pathname = usePathname();
 	const router = useRouter();
@@ -157,14 +158,18 @@ export function AppSidebar({
 						},
 					]
 				: []),
-			{
-				name: t("settings.nav.watchlist"),
-				href: getWatchlistAppUrl(),
-				icon: Search,
-				external: true,
-			},
+			...(hasWatchlistAccess
+				? [
+						{
+							name: t("settings.nav.watchlist"),
+							href: getWatchlistAppUrl(),
+							icon: Search,
+							external: true,
+						},
+					]
+				: []),
 		],
-		[t, hasAmlAccess],
+		[t, hasAmlAccess, hasWatchlistAccess],
 	);
 
 	const userCompletedCount = userNavItems.filter((s) => s.complete).length;

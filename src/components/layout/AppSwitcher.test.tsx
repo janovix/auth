@@ -88,9 +88,18 @@ vi.mock("@/lib/auth/authCoreConfig", () => ({
 	getWatchlistAppUrl: () => "https://watchlist.janovix.workers.dev",
 }));
 
-function renderWithProductAccess(ui: ReactElement, hasAmlAccess = true) {
+function renderWithProductAccess(
+	ui: ReactElement,
+	hasAmlAccess = true,
+	hasWatchlistAccess = true,
+) {
 	return render(
-		<SettingsSidebarProductProvider hasAmlAccess={hasAmlAccess}>
+		<SettingsSidebarProductProvider
+			hasAmlAccess={hasAmlAccess}
+			hasWatchlistAccess={hasWatchlistAccess}
+			activeOrganizationName={null}
+			hasResolvedEntitlements={true}
+		>
 			{ui}
 		</SettingsSidebarProductProvider>,
 	);
@@ -231,5 +240,25 @@ describe("AppSwitcher", () => {
 		expect(hrefs.has("https://aml.janovix.workers.dev")).toBe(false);
 		expect(hrefs.has("https://www.janovix.com")).toBe(true);
 		expect(hrefs.has("https://watchlist.janovix.workers.dev")).toBe(true);
+	});
+
+	it("hides Watchlist from menu when Watchlist product access is disabled", async () => {
+		cleanup();
+		const user = userEvent.setup();
+		const { container } = renderWithProductAccess(
+			<AppSwitcher variant="mobile-fullscreen" />,
+			true,
+			false,
+		);
+
+		const trigger = container.querySelector(
+			"button.flex.items-center.gap-2.rounded-xl",
+		) as HTMLElement;
+		expect(trigger).not.toBeNull();
+		await user.click(trigger);
+
+		await screen.findByText("Janovix Apps");
+		expect(screen.queryByText("Watchlist")).not.toBeInTheDocument();
+		expect(await screen.findByText("AML Platform")).toBeInTheDocument();
 	});
 });

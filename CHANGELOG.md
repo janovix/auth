@@ -1,3 +1,10 @@
+# [2.6.0-rc.12](https://github.com/janovix/auth/compare/v2.6.0-rc.11...v2.6.0-rc.12) (2026-04-04)
+
+
+### Features
+
+* **billing:** enhance downgrade wizard and usage limits section with overage estimation and hints ([23ba6d6](https://github.com/janovix/auth/commit/23ba6d6aec7f0a1f7ff85925a3146123c28c10fe))
+
 # [2.6.0-rc.11](https://github.com/janovix/auth/compare/v2.6.0-rc.10...v2.6.0-rc.11) (2026-04-04)
 
 

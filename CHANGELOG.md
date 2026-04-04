@@ -1,3 +1,10 @@
+# [2.6.0-rc.10](https://github.com/janovix/auth/compare/v2.6.0-rc.9...v2.6.0-rc.10) (2026-04-04)
+
+
+### Features
+
+* **products:** enhance product access management by integrating watchlist access and entitlement notes ([c186fca](https://github.com/janovix/auth/commit/c186fcaed71e9aff83cbda575a6561396ff7edef))
+
 # [2.6.0-rc.9](https://github.com/janovix/auth/compare/v2.6.0-rc.8...v2.6.0-rc.9) (2026-04-04)
 
 

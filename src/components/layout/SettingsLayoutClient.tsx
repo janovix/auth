@@ -41,6 +41,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { SettingsSidebarProductProvider } from "@/contexts/settings-sidebar-product-context";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SUPPORTED_LANGUAGES } from "@/lib/i18n/supportedLanguages";
+import { useFlags } from "@/hooks/useFlags";
 
 interface SettingsLayoutClientProps {
 	children: React.ReactNode;
@@ -68,6 +69,14 @@ function SettingsLayoutInner({
 	const router = useRouter();
 	const { data: session } = useAuthSession();
 	const { language, setLanguage, t } = useLanguage();
+
+	const { flags: stripeFlags, error: stripeFlagsError } = useFlags([
+		"stripe-billing-enabled",
+	]);
+	const stripeBillingEnabled =
+		stripeFlagsError !== null
+			? true
+			: stripeFlags["stripe-billing-enabled"] !== false;
 
 	const activeOrgId = (
 		session?.session as { activeOrganizationId?: string } | undefined
@@ -359,7 +368,9 @@ function SettingsLayoutInner({
 			if (subscriptionStatus) {
 				setCompletionStatus((prev) => ({
 					...prev,
-					billing: subscriptionStatus.hasSubscription,
+					billing: stripeBillingEnabled
+						? subscriptionStatus.hasSubscription
+						: true,
 				}));
 				setOrganizationsOwned(subscriptionStatus.organizationsOwned);
 				setOrganizationsLimit(subscriptionStatus.organizationsLimit);
@@ -395,7 +406,7 @@ function SettingsLayoutInner({
 		} finally {
 			setHasResolvedEntitlements(true);
 		}
-	}, [activeOrgId]);
+	}, [activeOrgId, stripeBillingEnabled]);
 
 	useEffect(() => {
 		void loadCompletionStatus();

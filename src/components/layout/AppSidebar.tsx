@@ -45,6 +45,7 @@ import { AppSwitcher } from "./AppSwitcher";
 import { getAmlAppUrl, getWatchlistAppUrl } from "@/lib/auth/authCoreConfig";
 import { useLanguage } from "@/contexts/language-context";
 import { useSettingsSidebarProductAccess } from "@/contexts/settings-sidebar-product-context";
+import { useFlags } from "@/hooks/useFlags";
 
 type NavItem = {
 	name: string;
@@ -83,21 +84,41 @@ export function AppSidebar({
 	const { isMobile, setOpenMobile } = useSidebar();
 	const { data: session, isPending } = useAuthSession();
 
+	const { flags: stripeFlags, error: stripeFlagsError } = useFlags([
+		"stripe-billing-enabled",
+	]);
+	const stripeBillingEnabled =
+		stripeFlagsError !== null
+			? true
+			: stripeFlags["stripe-billing-enabled"] !== false;
+
 	// User settings navigation items
-	const userNavItems: NavItem[] = [
-		{
-			name: t("settings.nav.personal"),
-			href: "/settings",
-			icon: User,
-			complete: completionStatus.personal ?? true,
-		},
-		{
-			name: t("settings.nav.billing"),
-			href: "/settings/billing",
-			icon: CreditCard,
-			complete: completionStatus.billing ?? false,
-		},
-	];
+	const userNavItems: NavItem[] = React.useMemo(
+		() => [
+			{
+				name: t("settings.nav.personal"),
+				href: "/settings",
+				icon: User,
+				complete: completionStatus.personal ?? true,
+			},
+			...(stripeBillingEnabled
+				? [
+						{
+							name: t("settings.nav.billing"),
+							href: "/settings/billing",
+							icon: CreditCard,
+							complete: completionStatus.billing ?? false,
+						},
+					]
+				: []),
+		],
+		[
+			t,
+			stripeBillingEnabled,
+			completionStatus.personal,
+			completionStatus.billing,
+		],
+	);
 
 	// Organization settings navigation items (compliance only if AML product enabled)
 	const orgNavItems: NavItem[] = React.useMemo(

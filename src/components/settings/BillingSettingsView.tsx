@@ -75,11 +75,22 @@ import { EnterpriseCard } from "@/components/EnterpriseCard";
 import { WatchlistCard } from "@/components/WatchlistCard";
 import { UsageLimitsSection } from "@/components/settings/UsageLimitsSection";
 import { DowngradeWizard } from "@/components/settings/DowngradeWizard";
+import { useFlags } from "@/hooks/useFlags";
 
 export function BillingSettingsView() {
 	const { t } = useLanguage();
 	const { toast } = useToast();
 	const { data: session } = useAuthSession();
+
+	const {
+		flags: stripeFlags,
+		error: stripeFlagsError,
+		isLoading: flagsLoading,
+	} = useFlags(["stripe-billing-enabled"]);
+	const stripeBillingEnabled =
+		stripeFlagsError !== null
+			? true
+			: stripeFlags["stripe-billing-enabled"] !== false;
 
 	const [loading, setLoading] = useState(true);
 	const [actionLoading, setActionLoading] = useState(false);
@@ -141,8 +152,13 @@ export function BillingSettingsView() {
 	}, [t, toast, session?.session]);
 
 	useEffect(() => {
-		loadBillingData();
-	}, [loadBillingData]);
+		if (flagsLoading) return;
+		if (!stripeBillingEnabled) {
+			setLoading(false);
+			return;
+		}
+		void loadBillingData();
+	}, [loadBillingData, flagsLoading, stripeBillingEnabled]);
 
 	// Handle plan selection / upgrade
 	const handleSelectPlan = async (
@@ -294,8 +310,28 @@ export function BillingSettingsView() {
 		}
 	};
 
-	if (loading) {
+	if (flagsLoading || loading) {
 		return <BillingSettingsViewSkeleton />;
+	}
+
+	if (!stripeBillingEnabled) {
+		return (
+			<div className="space-y-8">
+				<SettingsPageHeader
+					icon={CreditCard}
+					title={t("settings.billing.licenseOnlyTitle")}
+					description={t("settings.billing.licenseOnlyDescription")}
+				/>
+				<Card>
+					<CardHeader>
+						<CardTitle>{t("settings.billing.licenseOnlyTitle")}</CardTitle>
+						<CardDescription>
+							{t("settings.billing.licenseOnlyDescription")}
+						</CardDescription>
+					</CardHeader>
+				</Card>
+			</div>
+		);
 	}
 
 	const isActive = isSubscriptionActive(subscription);

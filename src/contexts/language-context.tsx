@@ -656,6 +656,9 @@ const translations = {
 
 		// Billing settings
 		"settings.nav.billing": "Billing",
+		"settings.billing.licenseOnlyTitle": "License-based access",
+		"settings.billing.licenseOnlyDescription":
+			"Self-service billing is not available. Your organization uses license-based access. Contact your administrator for subscription changes.",
 		"settings.billing.title": "Billing & Subscription",
 		"settings.billing.description":
 			"Manage your subscription, usage, and payment methods",
@@ -983,6 +986,14 @@ const translations = {
 			"Subscribe monthly for flexible pay-as-you-go billing, or activate an annual license for fixed capacity.",
 		"onboarding.plans.note":
 			"Subscription or license required to create an organization.",
+		"onboarding.plans.licenseOnly.title": "Activate your license",
+		"onboarding.plans.licenseOnly.description":
+			"Your organization uses license-based access. Enter your license key below or accept an invitation.",
+		"onboarding.plans.licenseOnly.note":
+			"Stripe subscriptions are not available on this deployment.",
+		"onboarding.plans.licenseOnly.selectTitle": "License activation",
+		"onboarding.plans.licenseOnly.selectDescription":
+			"Enter your enterprise license key to continue. You can also join an organization via invitation.",
 		"onboarding.plans.welcome": "Welcome, {name}!",
 		"onboarding.plans.welcomeFallback": "there",
 		"onboarding.plans.before.title": "Before you continue",
@@ -1828,6 +1839,9 @@ const translations = {
 
 		// Billing settings
 		"settings.nav.billing": "Facturación",
+		"settings.billing.licenseOnlyTitle": "Acceso por licencia",
+		"settings.billing.licenseOnlyDescription":
+			"La facturación en línea no está disponible. Tu organización usa acceso por licencia. Contacta a tu administrador para cambios de suscripción.",
 		"settings.billing.title": "Facturación y Suscripción",
 		"settings.billing.description":
 			"Administra tu suscripción, uso y métodos de pago",
@@ -2164,6 +2178,14 @@ const translations = {
 			"Suscríbete mensualmente con facturación flexible, o activa una licencia anual con capacidad fija.",
 		"onboarding.plans.note":
 			"Se requiere una suscripción o licencia para crear una organización.",
+		"onboarding.plans.licenseOnly.title": "Activa tu licencia",
+		"onboarding.plans.licenseOnly.description":
+			"Tu organización usa acceso por licencia. Ingresa tu clave de licencia abajo o acepta una invitación.",
+		"onboarding.plans.licenseOnly.note":
+			"Las suscripciones con Stripe no están disponibles en este entorno.",
+		"onboarding.plans.licenseOnly.selectTitle": "Activación de licencia",
+		"onboarding.plans.licenseOnly.selectDescription":
+			"Ingresa tu clave de licencia enterprise para continuar. También puedes unirte a una organización mediante invitación.",
 		"onboarding.plans.welcome": "¡Bienvenido, {name}!",
 		"onboarding.plans.welcomeFallback": "hola",
 		"onboarding.plans.before.title": "Antes de continuar",

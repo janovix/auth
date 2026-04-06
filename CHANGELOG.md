@@ -1,3 +1,10 @@
+# [2.6.0-rc.13](https://github.com/janovix/auth/compare/v2.6.0-rc.12...v2.6.0-rc.13) (2026-04-06)
+
+
+### Features
+
+* **flags:** implement feature flag system for dynamic UI behavior and billing settings ([b2b4c89](https://github.com/janovix/auth/commit/b2b4c8986a029f39b464c4b00432a3a54eea04c0))
+
 # [2.6.0-rc.12](https://github.com/janovix/auth/compare/v2.6.0-rc.11...v2.6.0-rc.12) (2026-04-04)
 
 

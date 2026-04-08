@@ -1,3 +1,24 @@
+# [2.7.0](https://github.com/janovix/auth/compare/v2.6.0...v2.7.0) (2026-04-08)
+
+
+### Bug Fixes
+
+* **ProductsView:** update card styles for consistent height and footer alignment ([8357e73](https://github.com/janovix/auth/commit/8357e73f9dc78f1772c4c1dbc9444c597df8865e))
+
+
+### Features
+
+* **billing:** add billing entitlements event handling and update completion status logic ([6fc7b82](https://github.com/janovix/auth/commit/6fc7b82b1d9a24ae50d053a60114e5192bc75e48))
+* **billing:** add support for usage limits and overage settings in Billing and Team Settings views ([3b9cb98](https://github.com/janovix/auth/commit/3b9cb981a11f986295d064ac903cb3d4194bf8d8))
+* **billing:** enhance downgrade wizard and usage limits section with overage estimation and hints ([23ba6d6](https://github.com/janovix/auth/commit/23ba6d6aec7f0a1f7ff85925a3146123c28c10fe))
+* **billing:** implement downgrade and usage limits management in BillingSettingsView ([f56eee1](https://github.com/janovix/auth/commit/f56eee130ac96352fd0847249e6722419af8ea4e))
+* **compliance:** update vulnerable activities and reporting thresholds for alignment with aml-svc ([e4eb893](https://github.com/janovix/auth/commit/e4eb893c0860e691c8b9910b818bcb8033d883d0))
+* **flags:** implement feature flag system for dynamic UI behavior and billing settings ([b2b4c89](https://github.com/janovix/auth/commit/b2b4c8986a029f39b464c4b00432a3a54eea04c0))
+* implement product access controls and enhance compliance settings ([f717dcb](https://github.com/janovix/auth/commit/f717dcbcedbc1165f5489785bf661f77dc3e2200))
+* **layout:** add SettingsChromeFooter component for improved footer layout in settings ([fd019f1](https://github.com/janovix/auth/commit/fd019f167d605ef4dace16304d538aceef798820))
+* **onboarding:** set the joined organization as active during onboarding process ([74e1eca](https://github.com/janovix/auth/commit/74e1eca98356a79a7b54e6365d0ea49695b2e03f))
+* **products:** enhance product access management by integrating watchlist access and entitlement notes ([c186fca](https://github.com/janovix/auth/commit/c186fcaed71e9aff83cbda575a6561396ff7edef))
+
 # [2.7.0-rc.1](https://github.com/janovix/auth/compare/v2.6.0...v2.7.0-rc.1) (2026-04-08)
 
 

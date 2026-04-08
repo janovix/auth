@@ -1,5 +1,11 @@
+export type Language = "en" | "es";
+
+export function isLanguage(value: string): value is Language {
+	return value === "en" || value === "es";
+}
+
 export type SettingsNavLanguage = {
-	key: string;
+	key: Language;
 	label: string;
 	nativeName: string;
 };

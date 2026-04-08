@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/Logo";
 import { useLanguage } from "@/contexts/language-context";
+import { useSettingsSidebarProductAccess } from "@/contexts/settings-sidebar-product-context";
 import {
 	getHomepageUrl,
 	getAmlAppUrl,
@@ -61,6 +62,8 @@ export function AppSwitcher({
 	const { isMobile, state } = useSidebar();
 	const isCollapsed = state === "collapsed";
 	const { t } = useLanguage();
+	const { hasAmlAccess, hasWatchlistAccess } =
+		useSettingsSidebarProductAccess();
 
 	const apps: AppItem[] = React.useMemo(() => {
 		const onProducts = pathname?.startsWith("/products") ?? false;
@@ -84,24 +87,32 @@ export function AppSwitcher({
 				external: false,
 				current: onProducts,
 			},
-			{
-				id: "aml",
-				name: t("appSwitcher.aml"),
-				description: t("appSwitcher.amlDescription"),
-				href: getAmlAppUrl(),
-				icon: LayoutDashboard,
-				external: true,
-				current: false,
-			},
-			{
-				id: "watchlist",
-				name: t("appSwitcher.watchlist"),
-				description: t("appSwitcher.watchlistDescription"),
-				href: getWatchlistAppUrl(),
-				icon: Search,
-				external: true,
-				current: false,
-			},
+			...(hasAmlAccess
+				? [
+						{
+							id: "aml",
+							name: t("appSwitcher.aml"),
+							description: t("appSwitcher.amlDescription"),
+							href: getAmlAppUrl(),
+							icon: LayoutDashboard,
+							external: true,
+							current: false,
+						},
+					]
+				: []),
+			...(hasWatchlistAccess
+				? [
+						{
+							id: "watchlist",
+							name: t("appSwitcher.watchlist"),
+							description: t("appSwitcher.watchlistDescription"),
+							href: getWatchlistAppUrl(),
+							icon: Search,
+							external: true,
+							current: false,
+						},
+					]
+				: []),
 			{
 				id: "settings",
 				name: t("appSwitcher.settings"),
@@ -112,7 +123,7 @@ export function AppSwitcher({
 				current: onSettings && !onProducts,
 			},
 		];
-	}, [t, pathname]);
+	}, [t, pathname, hasAmlAccess, hasWatchlistAccess]);
 
 	const currentApp =
 		apps.find((app) => app.current) ??
@@ -154,12 +165,7 @@ export function AppSwitcher({
 								className="cursor-pointer rounded-lg p-3 mx-1 my-0.5"
 							>
 								{app.external ? (
-									<a
-										href={app.href}
-										target="_blank"
-										rel="noopener noreferrer"
-										className={rowClass}
-									>
+									<a href={app.href} className={rowClass}>
 										<div
 											className={cn(
 												"flex size-10 items-center justify-center rounded-lg",
@@ -250,12 +256,7 @@ export function AppSwitcher({
 								return (
 									<DropdownMenuItem key={app.id} asChild className={rowClass}>
 										{app.external ? (
-											<a
-												href={app.href}
-												target="_blank"
-												rel="noopener noreferrer"
-												className="flex gap-3"
-											>
+											<a href={app.href} className="flex gap-3">
 												<div
 													className={cn(
 														"flex size-8 items-center justify-center rounded-md",
@@ -348,12 +349,7 @@ export function AppSwitcher({
 							return (
 								<DropdownMenuItem key={app.id} asChild className={rowClass}>
 									{app.external ? (
-										<a
-											href={app.href}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="flex gap-3"
-										>
+										<a href={app.href} className="flex gap-3">
 											<div
 												className={cn(
 													"flex size-8 items-center justify-center rounded-md",

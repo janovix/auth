@@ -24,4 +24,5 @@ export {
 	TeamSettingsViewSkeleton,
 	ComplianceSettingsViewSkeleton,
 	BillingSettingsViewSkeleton,
+	ApiKeysViewSkeleton,
 } from "./SettingsSkeleton";

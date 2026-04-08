@@ -1,5 +1,10 @@
 import { requireEnv } from "@/lib/env";
 
+import {
+	isPlanSlugForProductRedirect,
+	planSlugUsesWatchlistApp,
+} from "./planProductRedirect";
+
 /**
  * Gets the auth service URL from environment variables.
  *
@@ -61,11 +66,35 @@ export const getWatchlistAppUrl = (): string => {
 };
 
 /**
+ * Host + "/" for org path display (e.g. aml.janovix.com/ or watchlist.janovix.com/).
+ * Derived from {@link getAmlAppUrl} / {@link getWatchlistAppUrl} so local/preview envs stay correct.
+ */
+export function getProductOrgSlugUrlPrefix(useWatchlistApp: boolean): string {
+	const raw = useWatchlistApp ? getWatchlistAppUrl() : getAmlAppUrl();
+	try {
+		return `${new URL(raw).host}/`;
+	} catch {
+		return useWatchlistApp ? "watchlist.janovix.com/" : "aml.janovix.com/";
+	}
+}
+
+/** Replace `{appPathPrefix}` in translated slug help strings. */
+export function withAppPathPrefixCopy(
+	text: string,
+	appPathPrefix: string,
+): string {
+	return text.replaceAll("{appPathPrefix}", appPathPrefix);
+}
+
+/**
  * Default product app URL after subscribing to a plan (Stripe onboarding).
  * Watchlist-only plan maps to the Watchlist app; all other plans map to AML.
  */
 export function getDefaultAppUrlForPlan(planName: string): string {
-	if (planName === "watchlist") {
+	if (
+		isPlanSlugForProductRedirect(planName) &&
+		planSlugUsesWatchlistApp(planName)
+	) {
 		return getWatchlistAppUrl();
 	}
 	return getAmlAppUrl();
@@ -90,5 +119,13 @@ export const getNotificationsServiceUrl = (): string => {
 	return requireEnv(
 		"NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL",
 		process.env.NEXT_PUBLIC_NOTIFICATIONS_SERVICE_URL,
+	);
+};
+
+/** flags-svc base URL for server-side evaluation (Bearer JWT). */
+export const getFlagsServiceUrl = (): string => {
+	return requireEnv(
+		"NEXT_PUBLIC_FLAGS_SERVICE_URL",
+		process.env.NEXT_PUBLIC_FLAGS_SERVICE_URL,
 	);
 };

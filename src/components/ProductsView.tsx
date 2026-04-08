@@ -1,17 +1,10 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import {
-	LayoutGrid,
-	LayoutDashboard,
-	Search,
-	ArrowRight,
-	Loader2,
-	RefreshCw,
-} from "lucide-react";
+import { LayoutGrid, LayoutDashboard, Search, ArrowRight } from "lucide-react";
+import { ProductsViewSkeleton } from "@/components/ProductsViewSkeleton";
 
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -20,168 +13,70 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { SettingsPageHeader } from "@/components/settings";
 import { useLanguage } from "@/contexts/language-context";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
-import {
-	getSubscriptionStatus,
-	getFeatures,
-	type Feature,
-	type UserSubscriptionStatus,
-} from "@/lib/billing";
+import { useSettingsSidebarProductAccess } from "@/contexts/settings-sidebar-product-context";
 import { getAmlAppUrl, getWatchlistAppUrl } from "@/lib/auth/authCoreConfig";
-
-type ProductAccess = {
-	aml: boolean;
-	watchlist: boolean;
-};
-
-function computeProductAccess(
-	subscription: UserSubscriptionStatus | null,
-	features: Feature[],
-): ProductAccess {
-	const isActive =
-		subscription?.status === "active" || subscription?.status === "trialing";
-	const hasPaidAccess = Boolean(subscription?.hasSubscription && isActive);
-	const plan = subscription?.plan;
-
-	// Plan name is authoritative for watchlist-only vs AML (auth-svc /features may
-	// still default watchlist to business feature lists server-side).
-	if (plan === "watchlist") {
-		return {
-			aml: false,
-			watchlist: hasPaidAccess,
-		};
-	}
-
-	if (
-		plan === "business" ||
-		plan === "pro" ||
-		plan === "ultra" ||
-		plan === "enterprise"
-	) {
-		return {
-			aml: hasPaidAccess,
-			watchlist: hasPaidAccess,
-		};
-	}
-
-	if (subscription?.isLicenseBased) {
-		return {
-			aml: hasPaidAccess,
-			watchlist: hasPaidAccess,
-		};
-	}
-
-	return {
-		aml: hasPaidAccess && features.includes("product_aml"),
-		watchlist: hasPaidAccess && features.includes("product_watchlist"),
-	};
-}
 
 export function ProductsView() {
 	const { t } = useLanguage();
 	const { isPending: sessionPending } = useAuthSession();
-	const [subscription, setSubscription] =
-		useState<UserSubscriptionStatus | null>(null);
-	const [features, setFeatures] = useState<Feature[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [retryKey, setRetryKey] = useState(0);
-
-	useEffect(() => {
-		let cancelled = false;
-		void (async () => {
-			setLoading(true);
-			setError(null);
-			try {
-				const [sub, feats] = await Promise.all([
-					getSubscriptionStatus(),
-					getFeatures().catch(() => [] as Feature[]),
-				]);
-				if (!cancelled) {
-					setSubscription(sub);
-					setFeatures(feats);
-				}
-			} catch (e) {
-				if (!cancelled) {
-					setError(e instanceof Error ? e.message : "Failed to load");
-				}
-			} finally {
-				if (!cancelled) {
-					setLoading(false);
-				}
-			}
-		})();
-		return () => {
-			cancelled = true;
-		};
-	}, [retryKey]);
-
-	const handleRetry = useCallback(() => {
-		setRetryKey((k) => k + 1);
-	}, []);
+	const {
+		hasAmlAccess,
+		hasWatchlistAccess,
+		activeOrganizationName,
+		hasResolvedEntitlements,
+	} = useSettingsSidebarProductAccess();
 
 	const access = useMemo(
-		() => computeProductAccess(subscription, features),
-		[subscription, features],
+		() => ({
+			aml: hasAmlAccess,
+			watchlist: hasWatchlistAccess,
+		}),
+		[hasAmlAccess, hasWatchlistAccess],
 	);
 
 	if (sessionPending) {
-		return (
-			<div className="flex min-h-[40vh] flex-col items-center justify-center gap-4">
-				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-				<p className="text-sm text-muted-foreground">{t("products.loading")}</p>
-			</div>
-		);
+		return <ProductsViewSkeleton />;
 	}
 
-	if (error) {
-		return (
-			<div className="space-y-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
-				<p>{error}</p>
-				<Button
-					type="button"
-					variant="outline"
-					size="sm"
-					className="border-destructive/40"
-					disabled={loading}
-					onClick={handleRetry}
-				>
-					{loading ? (
-						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-					) : (
-						<RefreshCw className="mr-2 h-4 w-4" />
-					)}
-					{t("products.retry")}
-				</Button>
-			</div>
-		);
-	}
-
-	if (loading) {
-		return (
-			<div className="flex min-h-[40vh] flex-col items-center justify-center gap-4">
-				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-				<p className="text-sm text-muted-foreground">{t("products.loading")}</p>
-			</div>
-		);
+	if (!hasResolvedEntitlements) {
+		return <ProductsViewSkeleton />;
 	}
 
 	const amlUrl = getAmlAppUrl();
 	const watchlistUrl = getWatchlistAppUrl();
 
+	const entitlementNote =
+		activeOrganizationName != null && activeOrganizationName.length > 0
+			? t("products.entitlementNote").replace(
+					"{organizationName}",
+					activeOrganizationName,
+				)
+			: null;
+
 	return (
 		<div className="space-y-8">
-			<SettingsPageHeader
-				icon={LayoutGrid}
-				title={t("products.title")}
-				description={t("products.description")}
-			/>
+			<div className="space-y-2">
+				<SettingsPageHeader
+					icon={LayoutGrid}
+					title={t("products.title")}
+					description={t("products.description")}
+				/>
+				{entitlementNote ? (
+					<p className="text-sm text-muted-foreground max-w-3xl">
+						{entitlementNote}
+					</p>
+				) : null}
+			</div>
 			<div className="grid gap-6 sm:grid-cols-2">
 				<Card
 					className={
-						access.aml ? "border-border" : "border-muted bg-muted/30 opacity-90"
+						access.aml
+							? "h-full border-border"
+							: "h-full border-muted bg-muted/30 opacity-90"
 					}
 				>
 					<CardHeader>
@@ -198,10 +93,10 @@ export function ProductsView() {
 							</p>
 						) : null}
 					</CardContent>
-					<CardFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+					<CardFooter className="mt-auto flex flex-col gap-2 sm:flex-row sm:justify-end">
 						{access.aml ? (
 							<Button asChild className="w-full sm:w-auto">
-								<a href={amlUrl} target="_blank" rel="noopener noreferrer">
+								<a href={amlUrl}>
 									{t("products.openProduct")}
 									<ArrowRight className="ml-2 h-4 w-4" />
 								</a>
@@ -220,8 +115,8 @@ export function ProductsView() {
 				<Card
 					className={
 						access.watchlist
-							? "border-border"
-							: "border-muted bg-muted/30 opacity-90"
+							? "h-full border-border"
+							: "h-full border-muted bg-muted/30 opacity-90"
 					}
 				>
 					<CardHeader>
@@ -240,14 +135,10 @@ export function ProductsView() {
 							</p>
 						) : null}
 					</CardContent>
-					<CardFooter className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+					<CardFooter className="mt-auto flex flex-col gap-2 sm:flex-row sm:justify-end">
 						{access.watchlist ? (
 							<Button asChild className="w-full sm:w-auto">
-								<a
-									href={watchlistUrl}
-									target="_blank"
-									rel="noopener noreferrer"
-								>
+								<a href={watchlistUrl}>
 									{t("products.openProduct")}
 									<ArrowRight className="ml-2 h-4 w-4" />
 								</a>

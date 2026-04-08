@@ -9,6 +9,7 @@ import {
 	FileText,
 	Loader2,
 	KeyRound,
+	CircleAlert,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { useToast } from "@/hooks/use-toast";
@@ -20,10 +21,15 @@ import {
 	formatPriceMXN,
 	startSubscription,
 	cancelSubscription,
+	reactivateSubscription,
 	getPortalUrl,
 	activateLicenseKey,
+	prepareDowngrade,
+	changeSubscriptionPlan,
 	type UserSubscriptionStatus,
 	type PublicPlanInfo,
+	type PrepareDowngradeResponse,
+	hasActiveBillingForUsageLimits,
 	isSubscriptionActive,
 	getStatusBadgeInfo,
 	formatDate,
@@ -55,20 +61,36 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
 	SettingsPageHeader,
 	SettingsSection,
 	PricingTable,
 	BillingSettingsViewSkeleton,
 } from "@/components/settings";
+import { getOrganizationMembership } from "@/lib/settings";
+import { dispatchBillingEntitlementsUpdated } from "@/lib/settings/billingEntitlementsEvents";
 import { PlanSelectionGrid } from "@/components/PlanSelectionGrid";
 import { EnterpriseCard } from "@/components/EnterpriseCard";
 import { WatchlistCard } from "@/components/WatchlistCard";
+import { UsageLimitsSection } from "@/components/settings/UsageLimitsSection";
+import { DowngradeWizard } from "@/components/settings/DowngradeWizard";
+import { useFlags } from "@/hooks/useFlags";
 
 export function BillingSettingsView() {
 	const { t } = useLanguage();
 	const { toast } = useToast();
 	const { data: session } = useAuthSession();
+
+	const {
+		flags: stripeFlags,
+		error: stripeFlagsError,
+		isLoading: flagsLoading,
+	} = useFlags(["stripe-billing-enabled"]);
+	const stripeBillingEnabled =
+		stripeFlagsError !== null
+			? true
+			: stripeFlags["stripe-billing-enabled"] !== false;
 
 	const [loading, setLoading] = useState(true);
 	const [actionLoading, setActionLoading] = useState(false);
@@ -77,11 +99,31 @@ export function BillingSettingsView() {
 	const [plans, setPlans] = useState<PublicPlanInfo[]>([]);
 	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
 	const [redeemDialogOpen, setRedeemDialogOpen] = useState(false);
+	const [downgradeOpen, setDowngradeOpen] = useState(false);
+	const [downgradePlan, setDowngradePlan] = useState<
+		"watchlist" | "business" | "pro" | "ultra" | null
+	>(null);
+	const [downgradePrep, setDowngradePrep] =
+		useState<PrepareDowngradeResponse | null>(null);
+	const [isOrgOwner, setIsOrgOwner] = useState(false);
 
 	// Load billing data
 	const loadBillingData = useCallback(async () => {
 		setLoading(true);
 		try {
+			const activeOrgId = (
+				session?.session as { activeOrganizationId?: string } | undefined
+			)?.activeOrganizationId;
+
+			if (activeOrgId) {
+				const membership = await getOrganizationMembership(activeOrgId).catch(
+					() => null,
+				);
+				setIsOrgOwner(membership?.role === "owner");
+			} else {
+				setIsOrgOwner(false);
+			}
+
 			const [subStatus, planList] = await Promise.all([
 				getSubscriptionStatus().catch(() => null),
 				getPublicPlans().catch(() => []),
@@ -107,34 +149,65 @@ export function BillingSettingsView() {
 		} finally {
 			setLoading(false);
 		}
-	}, [t, toast]);
+	}, [t, toast, session?.session]);
 
 	useEffect(() => {
-		loadBillingData();
-	}, [loadBillingData]);
+		if (flagsLoading) return;
+		if (!stripeBillingEnabled) {
+			setLoading(false);
+			return;
+		}
+		void loadBillingData();
+	}, [loadBillingData, flagsLoading, stripeBillingEnabled]);
 
 	// Handle plan selection / upgrade
 	const handleSelectPlan = async (
 		planName: "watchlist" | "business" | "pro" | "ultra",
 	) => {
+		if (subscription?.isLicenseBased) {
+			toast({
+				title: t("settings.billing.error"),
+				description:
+					t("settings.billing.licensePlanChangeHint") ||
+					"Plan changes for enterprise licenses are handled by your account executive.",
+				variant: "destructive",
+			});
+			return;
+		}
+
 		setActionLoading(true);
 		try {
-			// If user already has a subscription, use Customer Portal for plan changes
-			if (subscription?.hasSubscription) {
-				const returnUrl = `${window.location.origin}/settings/billing?success=true`;
-				const { url } = await getPortalUrl(returnUrl);
-				window.location.href = url;
-			} else {
-				// New subscription - use checkout
-				const successUrl = `${window.location.origin}/settings/billing?success=true`;
-				const cancelUrl = `${window.location.origin}/settings/billing?canceled=true`;
-				const { url } = await startSubscription(
-					planName,
-					successUrl,
-					cancelUrl,
-				);
-				window.location.href = url;
+			if (subscription?.hasSubscription && !subscription.isLicenseBased) {
+				const prep = await prepareDowngrade(planName);
+				const needsWizard =
+					prep.excessOrganizationSlots > 0 ||
+					prep.organizations.some((o) => o.exceedsUsersPerOrgAfterDowngrade);
+				if (needsWizard) {
+					setDowngradePrep(prep);
+					setDowngradePlan(planName);
+					setDowngradeOpen(true);
+					setActionLoading(false);
+					return;
+				}
+
+				const { redirectUrl } = await changeSubscriptionPlan(planName);
+				if (redirectUrl) {
+					window.location.href = redirectUrl;
+					return;
+				}
+
+				toast({
+					title: t("settings.billing.planUpdated") || "Plan updated",
+				});
+				await loadBillingData();
+				dispatchBillingEntitlementsUpdated();
+				return;
 			}
+
+			const successUrl = `${window.location.origin}/settings/billing?success=true`;
+			const cancelUrl = `${window.location.origin}/settings/billing?canceled=true`;
+			const { url } = await startSubscription(planName, successUrl, cancelUrl);
+			window.location.href = url;
 		} catch (error) {
 			Sentry.captureException(error, {
 				tags: { context: "checkout-error" },
@@ -159,9 +232,34 @@ export function BillingSettingsView() {
 				title: t("settings.billing.cancelSuccess"),
 			});
 			await loadBillingData();
+			dispatchBillingEntitlementsUpdated();
 		} catch (error) {
 			Sentry.captureException(error, {
 				tags: { context: "cancel-subscription-error" },
+			});
+			toast({
+				title: t("settings.billing.error"),
+				description: error instanceof Error ? error.message : undefined,
+				variant: "destructive",
+			});
+		} finally {
+			setActionLoading(false);
+		}
+	};
+
+	// Reactivate subscription (undo cancel at period end)
+	const handleReactivate = async () => {
+		setActionLoading(true);
+		try {
+			await reactivateSubscription();
+			toast({
+				title: t("settings.billing.reactivateSuccess"),
+			});
+			await loadBillingData();
+			dispatchBillingEntitlementsUpdated();
+		} catch (error) {
+			Sentry.captureException(error, {
+				tags: { context: "reactivate-subscription-error" },
 			});
 			toast({
 				title: t("settings.billing.error"),
@@ -199,6 +297,7 @@ export function BillingSettingsView() {
 				description,
 			});
 			await loadBillingData();
+			dispatchBillingEntitlementsUpdated();
 		} catch (error) {
 			Sentry.captureException(error, {
 				tags: { context: "license-activation-error" },
@@ -211,12 +310,38 @@ export function BillingSettingsView() {
 		}
 	};
 
-	if (loading) {
+	if (flagsLoading || loading) {
 		return <BillingSettingsViewSkeleton />;
 	}
 
+	if (!stripeBillingEnabled) {
+		return (
+			<div className="space-y-8">
+				<SettingsPageHeader
+					icon={CreditCard}
+					title={t("settings.billing.licenseOnlyTitle")}
+					description={t("settings.billing.licenseOnlyDescription")}
+				/>
+				<Card>
+					<CardHeader>
+						<CardTitle>{t("settings.billing.licenseOnlyTitle")}</CardTitle>
+						<CardDescription>
+							{t("settings.billing.licenseOnlyDescription")}
+						</CardDescription>
+					</CardHeader>
+				</Card>
+			</div>
+		);
+	}
+
 	const isActive = isSubscriptionActive(subscription);
-	const statusInfo = getStatusBadgeInfo(subscription?.status ?? null);
+	const isPendingCancel =
+		isActive &&
+		!subscription?.isLicenseBased &&
+		Boolean(subscription?.cancelAtPeriodEnd);
+	const statusInfo = getStatusBadgeInfo(subscription?.status ?? null, {
+		cancelAtPeriodEnd: subscription?.cancelAtPeriodEnd ?? false,
+	});
 
 	return (
 		<div className="space-y-8">
@@ -229,7 +354,7 @@ export function BillingSettingsView() {
 
 			{/* Current Subscription Status */}
 			<Card>
-				<CardHeader>
+				<CardHeader className={isActive ? undefined : "pb-4"}>
 					<div className="flex items-center justify-between">
 						<div>
 							<CardTitle>
@@ -238,112 +363,158 @@ export function BillingSettingsView() {
 									: t("settings.billing.noSubscription")}
 							</CardTitle>
 							<CardDescription>
-								{subscription?.hasSubscription
-									? subscription.isLicenseBased
-										? subscription.licenseExpiresAt
-											? `${t("settings.billing.licenseExpires")} ${formatDate(subscription.licenseExpiresAt)}`
-											: t("settings.billing.licenseNoExpiry")
-										: subscription.isTrialing
-											? `${t("settings.billing.trial")} - ${subscription.trialDaysRemaining} ${t("settings.billing.daysRemaining")}`
-											: `${t("settings.billing.activeSince")} ${subscription.currentPeriodStart ? formatDate(subscription.currentPeriodStart) : "N/A"}`
-									: t("settings.billing.subscribePrompt")}
+								{isActive
+									? subscription?.hasSubscription
+										? subscription.isLicenseBased
+											? subscription.licenseExpiresAt
+												? `${t("settings.billing.licenseExpires")} ${formatDate(subscription.licenseExpiresAt)}`
+												: t("settings.billing.licenseNoExpiry")
+											: subscription.isTrialing
+												? subscription.cancelAtPeriodEnd &&
+													subscription.currentPeriodEnd
+													? `${t("settings.billing.trial")} - ${subscription.trialDaysRemaining} ${t("settings.billing.daysRemaining")} — ${t("settings.billing.canceledBadge").replace("{date}", formatDate(subscription.currentPeriodEnd))}`
+													: `${t("settings.billing.trial")} - ${subscription.trialDaysRemaining} ${t("settings.billing.daysRemaining")}`
+												: subscription.cancelAtPeriodEnd &&
+													  subscription.currentPeriodEnd
+													? t("settings.billing.canceledBadge").replace(
+															"{date}",
+															formatDate(subscription.currentPeriodEnd),
+														)
+													: `${t("settings.billing.activeSince")} ${subscription.currentPeriodStart ? formatDate(subscription.currentPeriodStart) : "N/A"}`
+										: t("settings.billing.subscribePrompt")
+									: subscription?.hasSubscription
+										? t("settings.billing.inactiveBillingSubtitle")
+										: t("settings.billing.subscribePrompt")}
 							</CardDescription>
 						</div>
 						{subscription?.status && (
-							<Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+							<Badge variant={statusInfo.variant}>
+								{statusInfo.translationKey
+									? t(statusInfo.translationKey)
+									: statusInfo.label}
+							</Badge>
 						)}
 					</div>
 				</CardHeader>
-				<CardContent>
-					<div className="grid grid-cols-2 gap-4">
-						<div className="flex items-center gap-2">
-							<Building2 className="h-4 w-4 text-muted-foreground" />
-							<span className="text-sm">
-								{t("settings.billing.organizations")}:{" "}
-								{subscription?.organizationsOwned ?? 0} /{" "}
-								{subscription?.organizationsLimit === 0
-									? t("settings.billing.unlimited")
-									: (subscription?.organizationsLimit ?? 0)}
-							</span>
-						</div>
-						{subscription?.isLicenseBased
-							? subscription.licenseExpiresAt && (
-									<div className="flex items-center gap-2">
-										<KeyRound className="h-4 w-4 text-muted-foreground" />
-										<span className="text-sm">
-											{t("settings.billing.licenseExpires")}:{" "}
-											{formatDate(subscription.licenseExpiresAt)}
-										</span>
-									</div>
-								)
-							: subscription?.currentPeriodEnd && (
-									<div className="flex items-center gap-2">
-										<FileText className="h-4 w-4 text-muted-foreground" />
-										<span className="text-sm">
-											{subscription.cancelAtPeriodEnd
-												? t("settings.billing.ends")
-												: t("settings.billing.renews")}
-											: {formatDate(subscription.currentPeriodEnd)}
-										</span>
-									</div>
-								)}
-					</div>
-
-					{/* Organization Usage Progress */}
-					{subscription?.hasSubscription &&
-						subscription.organizationsLimit > 0 && (
-							<div className="mt-4">
-								<div className="flex justify-between text-sm mb-1">
-									<span>{t("settings.billing.orgUsage")}</span>
-									<span>
-										{subscription.organizationsOwned} /{" "}
-										{subscription.organizationsLimit}
-									</span>
-								</div>
-								<Progress
-									value={
-										(subscription.organizationsOwned /
-											subscription.organizationsLimit) *
-										100
-									}
-									className="h-2"
-								/>
+				{isActive ? (
+					<CardContent>
+						<div className="grid grid-cols-2 gap-4">
+							<div className="flex items-center gap-2">
+								<Building2 className="h-4 w-4 text-muted-foreground" />
+								<span className="text-sm">
+									{t("settings.billing.organizations")}:{" "}
+									{subscription?.organizationsOwned ?? 0} /{" "}
+									{subscription?.organizationsLimit === 0
+										? t("settings.billing.unlimited")
+										: (subscription?.organizationsLimit ?? 0)}
+								</span>
 							</div>
-						)}
-				</CardContent>
+							{subscription?.isLicenseBased
+								? subscription.licenseExpiresAt && (
+										<div className="flex items-center gap-2">
+											<KeyRound className="h-4 w-4 text-muted-foreground" />
+											<span className="text-sm">
+												{t("settings.billing.licenseExpires")}:{" "}
+												{formatDate(subscription.licenseExpiresAt)}
+											</span>
+										</div>
+									)
+								: subscription?.currentPeriodEnd && (
+										<div className="flex items-center gap-2">
+											<FileText className="h-4 w-4 text-muted-foreground" />
+											<span className="text-sm">
+												{subscription.cancelAtPeriodEnd
+													? t("settings.billing.ends")
+													: t("settings.billing.renews")}
+												: {formatDate(subscription.currentPeriodEnd)}
+											</span>
+										</div>
+									)}
+						</div>
+
+						{/* Organization Usage Progress */}
+						{subscription?.hasSubscription &&
+							subscription.organizationsLimit > 0 && (
+								<div className="mt-4">
+									<div className="flex justify-between text-sm mb-1">
+										<span>{t("settings.billing.orgUsage")}</span>
+										<span>
+											{subscription.organizationsOwned} /{" "}
+											{subscription.organizationsLimit}
+										</span>
+									</div>
+									<Progress
+										value={
+											(subscription.organizationsOwned /
+												subscription.organizationsLimit) *
+											100
+										}
+										className="h-2"
+									/>
+								</div>
+							)}
+					</CardContent>
+				) : null}
 				{isActive && !subscription?.isLicenseBased && (
-					<CardFooter className="flex flex-wrap gap-2 px-6 py-4 border-t">
-						<Button
-							variant="default"
-							onClick={async () => {
-								setActionLoading(true);
-								try {
-									const { url } = await getPortalUrl(
-										`${window.location.origin}/settings/billing`,
-									);
-									window.location.href = url;
-								} catch (error) {
-									toast({
-										title: t("settings.billing.error"),
-										description:
-											error instanceof Error ? error.message : undefined,
-										variant: "destructive",
-									});
-								} finally {
-									setActionLoading(false);
+					<CardFooter className="flex flex-col gap-4 px-6 py-4 border-t">
+						{isPendingCancel && subscription?.currentPeriodEnd != null ? (
+							<Alert className="border-amber-500/50 bg-amber-500/5 text-foreground">
+								<CircleAlert className="text-amber-600 dark:text-amber-500" />
+								<AlertDescription className="text-muted-foreground">
+									{t("settings.billing.pendingCancelDesc").replace(
+										"{date}",
+										formatDate(subscription.currentPeriodEnd),
+									)}
+								</AlertDescription>
+							</Alert>
+						) : null}
+						<div className="flex flex-wrap gap-2">
+							<Button
+								variant="default"
+								onClick={async () => {
+									setActionLoading(true);
+									try {
+										const { url } = await getPortalUrl(
+											`${window.location.origin}/settings/billing`,
+										);
+										window.location.href = url;
+									} catch (error) {
+										toast({
+											title: t("settings.billing.error"),
+											description:
+												error instanceof Error ? error.message : undefined,
+											variant: "destructive",
+										});
+									} finally {
+										setActionLoading(false);
+									}
+								}}
+								disabled={actionLoading}
+								title={
+									t("settings.billing.managePortalHint") ||
+									"Payment methods, invoices, and billing history"
 								}
-							}}
-							disabled={actionLoading}
-						>
-							{t("settings.billing.managePortal")}
-						</Button>
-						<Button
-							variant="outline"
-							onClick={() => setCancelDialogOpen(true)}
-							disabled={actionLoading}
-						>
-							{t("settings.billing.cancel")}
-						</Button>
+							>
+								{t("settings.billing.managePortal")}
+							</Button>
+							{isPendingCancel ? (
+								<Button
+									variant="outline"
+									onClick={handleReactivate}
+									disabled={actionLoading}
+								>
+									{t("settings.billing.reactivate")}
+								</Button>
+							) : (
+								<Button
+									variant="outline"
+									onClick={() => setCancelDialogOpen(true)}
+									disabled={actionLoading}
+								>
+									{t("settings.billing.cancel")}
+								</Button>
+							)}
+						</div>
 					</CardFooter>
 				)}
 				{isActive && subscription?.isLicenseBased && (
@@ -354,6 +525,13 @@ export function BillingSettingsView() {
 					</CardFooter>
 				)}
 			</Card>
+
+			{isOrgOwner && hasActiveBillingForUsageLimits(subscription) ? (
+				<UsageLimitsSection
+					subscriptionPlan={subscription?.plan ?? null}
+					isLicenseBased={subscription?.isLicenseBased ?? false}
+				/>
+			) : null}
 
 			{/* Plan Selection + Enterprise + Watchlist */}
 			<SettingsSection
@@ -462,6 +640,35 @@ export function BillingSettingsView() {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
+
+			{downgradePlan && downgradePrep ? (
+				<DowngradeWizard
+					open={downgradeOpen}
+					onOpenChange={(open) => {
+						setDowngradeOpen(open);
+						if (!open) {
+							setDowngradePlan(null);
+							setDowngradePrep(null);
+						}
+					}}
+					targetPlan={downgradePlan}
+					prep={downgradePrep}
+					onFinished={async () => {
+						await loadBillingData();
+						dispatchBillingEntitlementsUpdated();
+						toast({
+							title: t("settings.billing.planUpdated") || "Plan updated",
+						});
+					}}
+					onError={(message) => {
+						toast({
+							title: t("settings.billing.error"),
+							description: message,
+							variant: "destructive",
+						});
+					}}
+				/>
+			) : null}
 		</div>
 	);
 }

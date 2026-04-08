@@ -4,6 +4,7 @@ import {
 	getAuthCoreBaseUrl,
 	getAuthEnvironment,
 	getDefaultAppUrlForPlan,
+	getProductOrgSlugUrlPrefix,
 } from "./authCoreConfig";
 
 describe("authCoreConfig", () => {
@@ -82,6 +83,27 @@ describe("authCoreConfig", () => {
 			expect(getDefaultAppUrlForPlan("business")).toBe(
 				"https://aml.example.com",
 			);
+		});
+	});
+
+	describe("getProductOrgSlugUrlPrefix", () => {
+		it("returns watchlist host when useWatchlistApp is true", () => {
+			process.env.NEXT_PUBLIC_AUTH_SERVICE_URL =
+				"https://auth-svc.example.workers.dev";
+			process.env.NEXT_PUBLIC_AML_APP_URL = "https://aml.example.com";
+			process.env.NEXT_PUBLIC_WATCHLIST_APP_URL =
+				"https://watchlist.janovix.com";
+			global.window = { location: {} } as unknown as Window & typeof globalThis;
+			expect(getProductOrgSlugUrlPrefix(true)).toBe("watchlist.janovix.com/");
+		});
+
+		it("returns AML host when useWatchlistApp is false", () => {
+			process.env.NEXT_PUBLIC_AUTH_SERVICE_URL =
+				"https://auth-svc.example.workers.dev";
+			process.env.NEXT_PUBLIC_AML_APP_URL = "https://aml.janovix.com/path";
+			process.env.NEXT_PUBLIC_WATCHLIST_APP_URL = "https://wl.example.com";
+			global.window = { location: {} } as unknown as Window & typeof globalThis;
+			expect(getProductOrgSlugUrlPrefix(false)).toBe("aml.janovix.com/");
 		});
 	});
 });

@@ -289,7 +289,6 @@ interface MobileNavItemProps {
 	isComplete?: boolean;
 	onClick?: () => void;
 	href?: string;
-	external?: boolean;
 }
 
 export function MobileNavItem({
@@ -300,7 +299,6 @@ export function MobileNavItem({
 	isComplete,
 	onClick,
 	href,
-	external,
 }: MobileNavItemProps) {
 	const content = (
 		<>
@@ -352,13 +350,7 @@ export function MobileNavItem({
 
 	if (href) {
 		return (
-			<a
-				href={href}
-				target={external ? "_blank" : undefined}
-				rel={external ? "noopener noreferrer" : undefined}
-				className={className}
-				onClick={onClick}
-			>
+			<a href={href} className={className} onClick={onClick}>
 				{content}
 			</a>
 		);

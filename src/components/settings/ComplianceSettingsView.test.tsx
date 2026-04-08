@@ -3,7 +3,23 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ComplianceSettingsView } from "./ComplianceSettingsView";
 import * as settingsClient from "@/lib/settings/settingsClient";
+import * as billing from "@/lib/billing";
+import type { UserSubscriptionStatus } from "@/lib/billing";
 import { mockToast } from "@/test/setup";
+
+const mockSubscriptionWithAml: UserSubscriptionStatus = {
+	hasSubscription: true,
+	status: "active",
+	plan: "business",
+	limits: null,
+	isTrialing: false,
+	trialDaysRemaining: null,
+	currentPeriodStart: null,
+	currentPeriodEnd: null,
+	cancelAtPeriodEnd: false,
+	organizationsOwned: 1,
+	organizationsLimit: 5,
+};
 
 // Mock the settings client
 vi.mock("@/lib/settings/settingsClient", () => ({
@@ -39,6 +55,15 @@ const mockUseAuthSession = vi.fn(() => ({
 vi.mock("@/lib/auth/useAuthSession", () => ({
 	useAuthSession: () => mockUseAuthSession(),
 }));
+
+vi.mock("@/lib/billing", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("@/lib/billing")>();
+	return {
+		...actual,
+		getSubscriptionStatus: vi.fn(),
+		getFeatures: vi.fn(),
+	};
+});
 
 const mockAmlSettings = {
 	id: "aml-1",
@@ -97,6 +122,10 @@ describe("ComplianceSettingsView", () => {
 				error: null,
 				isPending: false,
 			});
+			vi.mocked(billing.getSubscriptionStatus).mockResolvedValue(
+				mockSubscriptionWithAml,
+			);
+			vi.mocked(billing.getFeatures).mockResolvedValue([]);
 		});
 
 		it("shows skeleton loader while fetching settings", async () => {
@@ -109,8 +138,34 @@ describe("ComplianceSettingsView", () => {
 
 			render(<ComplianceSettingsView />);
 
+			await waitFor(() => {
+				expect(billing.getSubscriptionStatus).toHaveBeenCalledWith({
+					resolveFromOrg: true,
+				});
+				expect(billing.getFeatures).toHaveBeenCalledWith({
+					resolveFromOrg: true,
+				});
+			});
+
 			// Skeleton uses animate-pulse and data-testid="skeleton"
 			expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0);
+		});
+
+		it("shows plan gate when AML product is not on subscription", async () => {
+			vi.mocked(billing.getSubscriptionStatus).mockResolvedValue({
+				...mockSubscriptionWithAml,
+				plan: "watchlist",
+			});
+
+			render(<ComplianceSettingsView />);
+
+			await waitFor(() => {
+				expect(
+					screen.getByText("settings.compliance.notAvailableTitle"),
+				).toBeInTheDocument();
+			});
+
+			expect(settingsClient.getAmlComplianceSettings).not.toHaveBeenCalled();
 		});
 
 		it("renders compliance settings page header", async () => {

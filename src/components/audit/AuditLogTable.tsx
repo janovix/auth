@@ -11,7 +11,8 @@ import {
 	ShieldAlert,
 	ShieldCheck,
 } from "lucide-react";
-import { Button, Badge, Card, CardContent, Spinner } from "@/components/ui";
+import { Button, Badge, Card, CardContent } from "@/components/ui";
+import { AuditLogTableSkeleton } from "@/components/audit/AuditViewSkeleton";
 import { useLanguage } from "@/contexts/language-context";
 import type { AuditLog } from "@/lib/audit";
 
@@ -71,11 +72,7 @@ export function AuditLogTable({
 	);
 
 	if (loading) {
-		return (
-			<div className="flex items-center justify-center py-20">
-				<Spinner className="h-8 w-8" />
-			</div>
-		);
+		return <AuditLogTableSkeleton />;
 	}
 
 	if (logs.length === 0) {

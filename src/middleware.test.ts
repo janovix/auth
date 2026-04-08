@@ -65,6 +65,14 @@ describe("middleware", () => {
 			);
 		});
 
+		it("should not treat /products-foo as the protected products route", async () => {
+			const request = new NextRequest("https://auth.example.com/products-foo");
+			const response = await middleware(request);
+
+			expect(response.status).toBe(200);
+			expect(response.headers.get("location")).toBeNull();
+		});
+
 		it("should redirect to login when accessing onboarding route", async () => {
 			const request = new NextRequest("https://auth.example.com/onboarding");
 			const response = await middleware(request);

@@ -12,18 +12,25 @@ import {
 	SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/AppSidebar";
+import { SettingsChromeFooter } from "@/components/layout/SettingsChromeFooter";
 import { NavBreadcrumb } from "@/components/layout/NavBreadcrumb";
 import type { Organization } from "@/components/layout/OrganizationSwitcher";
 import { Separator } from "@/components/ui/separator";
-import { NavbarClock } from "@/components/ui/navbar-clock";
 import {
 	setSidebarCollapsed as saveSidebarCollapsed,
 	getResolvedSettings,
 	getAmlComplianceSettings,
 	getUIPreferences,
 } from "@/lib/settings/settingsClient";
+import { BILLING_ENTITLEMENTS_UPDATED_EVENT } from "@/lib/settings/billingEntitlementsEvents";
 import type { NotificationSoundType } from "@/lib/settings/types";
-import { getSubscriptionStatus } from "@/lib/billing";
+import {
+	getSubscriptionStatus,
+	getFeatures,
+	hasAmlProductAccess,
+	hasWatchlistProductAccess,
+	type Feature,
+} from "@/lib/billing";
 import { NotificationsProvider } from "@/contexts/notifications-context";
 import {
 	LanguageSwitcher,
@@ -31,8 +38,10 @@ import {
 	ThemeSwitcher,
 } from "@algenium/blocks";
 import { useLanguage } from "@/contexts/language-context";
+import { SettingsSidebarProductProvider } from "@/contexts/settings-sidebar-product-context";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SUPPORTED_LANGUAGES } from "@/lib/i18n/supportedLanguages";
+import { useFlags } from "@/hooks/useFlags";
 
 interface SettingsLayoutClientProps {
 	children: React.ReactNode;
@@ -60,6 +69,14 @@ function SettingsLayoutInner({
 	const router = useRouter();
 	const { data: session } = useAuthSession();
 	const { language, setLanguage, t } = useLanguage();
+
+	const { flags: stripeFlags, error: stripeFlagsError } = useFlags([
+		"stripe-billing-enabled",
+	]);
+	const stripeBillingEnabled =
+		stripeFlagsError !== null
+			? true
+			: stripeFlags["stripe-billing-enabled"] !== false;
 
 	const activeOrgId = (
 		session?.session as { activeOrganizationId?: string } | undefined
@@ -92,6 +109,12 @@ function SettingsLayoutInner({
 
 	// Pending invitations count for sidebar indicator
 	const [pendingInvitationsCount, setPendingInvitationsCount] = useState(0);
+
+	// AML product (PLD compliance settings) — hide nav when plan is watchlist-only
+	const [hasAmlAccess, setHasAmlAccess] = useState(true);
+	const [hasWatchlistAccess, setHasWatchlistAccess] = useState(true);
+	/** Product hub + nav: org-scoped entitlements loaded from auth-svc */
+	const [hasResolvedEntitlements, setHasResolvedEntitlements] = useState(false);
 
 	// Effective timezone for the navbar clock (resolved from user > org > browser)
 	const [effectiveTimezone, setEffectiveTimezone] = useState<string | null>(
@@ -316,57 +339,88 @@ function SettingsLayoutInner({
 		switchOrg();
 	}, [orgSlugParam, organizations, activeOrgId, router]);
 
-	// Load completion status for sections
+	// No active org: nothing to resolve; product hub can render without waiting
 	useEffect(() => {
-		async function loadCompletionStatus() {
-			if (!activeOrgId) return;
+		if (!activeOrgId) {
+			setHasResolvedEntitlements(true);
+		} else {
+			setHasResolvedEntitlements(false);
+		}
+	}, [activeOrgId]);
 
-			try {
-				// Check compliance settings
-				const amlSettings = await getAmlComplianceSettings(activeOrgId);
+	// Load completion status for sections (billing, AML access, invitations, etc.)
+	const loadCompletionStatus = useCallback(async () => {
+		if (!activeOrgId) return;
+
+		try {
+			// Check compliance settings
+			const amlSettings = await getAmlComplianceSettings(activeOrgId);
+			setCompletionStatus((prev) => ({
+				...prev,
+				compliance: Boolean(amlSettings?.obligatedSubjectKey),
+			}));
+
+			// Check subscription status (billing)
+			const [subscriptionStatus, features] = await Promise.all([
+				getSubscriptionStatus({ resolveFromOrg: true }),
+				getFeatures({ resolveFromOrg: true }).catch(() => [] as Feature[]),
+			]);
+			if (subscriptionStatus) {
 				setCompletionStatus((prev) => ({
 					...prev,
-					compliance: Boolean(amlSettings?.obligatedSubjectKey),
+					billing: stripeBillingEnabled
+						? subscriptionStatus.hasSubscription
+						: true,
 				}));
-
-				// Check subscription status (billing)
-				const subscriptionStatus = await getSubscriptionStatus();
-				if (subscriptionStatus) {
-					setCompletionStatus((prev) => ({
-						...prev,
-						billing: subscriptionStatus.hasSubscription,
-					}));
-					setOrganizationsOwned(subscriptionStatus.organizationsOwned);
-					setOrganizationsLimit(subscriptionStatus.organizationsLimit);
-				}
-
-				// Check for pending invitations — use the lightweight fast path to avoid
-				// the expensive subscription/Stripe checks in the full endpoint
-				const authServiceUrl = getAuthCoreBaseUrl();
-				const onboardingResponse = await fetch(
-					`${authServiceUrl}/api/subscription/onboarding-status?pendingInvitationsOnly=true`,
-					{
-						credentials: "include",
-					},
-				);
-
-				if (onboardingResponse.ok) {
-					const result = (await onboardingResponse.json()) as {
-						success: boolean;
-						data?: {
-							pendingInvitations?: Array<{ id: string }>;
-						};
-					};
-					if (result.success && result.data?.pendingInvitations) {
-						setPendingInvitationsCount(result.data.pendingInvitations.length);
-					}
-				}
-			} catch {
-				// Silently fail - completion status is optional
+				setOrganizationsOwned(subscriptionStatus.organizationsOwned);
+				setOrganizationsLimit(subscriptionStatus.organizationsLimit);
 			}
+			setHasAmlAccess(hasAmlProductAccess(subscriptionStatus, features));
+			setHasWatchlistAccess(
+				hasWatchlistProductAccess(subscriptionStatus, features),
+			);
+
+			// Check for pending invitations — use the lightweight fast path to avoid
+			// the expensive subscription/Stripe checks in the full endpoint
+			const authServiceUrl = getAuthCoreBaseUrl();
+			const onboardingResponse = await fetch(
+				`${authServiceUrl}/api/subscription/onboarding-status?pendingInvitationsOnly=true`,
+				{
+					credentials: "include",
+				},
+			);
+
+			if (onboardingResponse.ok) {
+				const result = (await onboardingResponse.json()) as {
+					success: boolean;
+					data?: {
+						pendingInvitations?: Array<{ id: string }>;
+					};
+				};
+				if (result.success && result.data?.pendingInvitations) {
+					setPendingInvitationsCount(result.data.pendingInvitations.length);
+				}
+			}
+		} catch {
+			// Silently fail - completion status is optional
+		} finally {
+			setHasResolvedEntitlements(true);
 		}
-		loadCompletionStatus();
-	}, [activeOrgId]);
+	}, [activeOrgId, stripeBillingEnabled]);
+
+	useEffect(() => {
+		void loadCompletionStatus();
+	}, [loadCompletionStatus]);
+
+	useEffect(() => {
+		const handler = () => {
+			void loadCompletionStatus();
+		};
+		window.addEventListener(BILLING_ENTITLEMENTS_UPDATED_EVENT, handler);
+		return () => {
+			window.removeEventListener(BILLING_ENTITLEMENTS_UPDATED_EVENT, handler);
+		};
+	}, [loadCompletionStatus]);
 
 	// Load effective timezone for the navbar clock (resolved from user > org > browser)
 	useEffect(() => {
@@ -488,77 +542,88 @@ function SettingsLayoutInner({
 	);
 
 	return (
-		<SidebarProvider open={!isCollapsed} onOpenChange={handleSidebarOpenChange}>
-			<AppSidebar
-				organizations={organizations}
-				activeOrganization={activeOrganization}
-				onOrganizationChange={handleOrganizationChange}
-				completionStatus={completionStatus}
-				isLoading={orgsLoading}
-				organizationsOwned={organizationsOwned}
-				organizationsLimit={organizationsLimit}
-				pendingInvitationsCount={pendingInvitationsCount}
-			/>
-			<SidebarInset className="flex h-screen flex-col overflow-hidden">
-				{/* Header - Fixed navbar */}
-				<TooltipProvider delayDuration={0}>
-					<header className="z-50 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 shadow-xs">
-						<SidebarTrigger className="-ml-1" />
-						<Separator orientation="vertical" className="mx-2 h-6" />
-						<div className="flex-1 min-w-0">
-							<NavBreadcrumb />
-						</div>
-						<div className="flex shrink-0 items-center gap-2">
-							<LanguageSwitcher
-								languages={SUPPORTED_LANGUAGES}
-								currentLanguage={language}
-								onLanguageChange={(key) => setLanguage(key as "en" | "es")}
-								labels={{ language: t("language.label") }}
-								variant="mini"
-								size="sm"
-								shape="rounded"
-								side="bottom"
-								align="end"
-							/>
-							<ThemeSwitcher
-								variant="mini"
-								size="sm"
-								shape="rounded"
-								side="bottom"
-								align="end"
-								labels={{
-									theme: t("theme.label"),
-									system: t("theme.system"),
-									light: t("theme.light"),
-									dark: t("theme.dark"),
-								}}
-							/>
-							<NavbarClock
-								timezone={effectiveTimezone || undefined}
-								defaultFormat={effectiveClockFormat}
-								size="sm"
-								showTimezoneMismatch={Boolean(effectiveTimezone)}
-							/>
-							{/* NotificationsWidget now consumes data from BlocksNotificationsContext automatically */}
-							<NotificationsWidget
-								onNotificationClick={handleNotificationClick}
-								size="md"
-								maxVisible={50}
-								playSound={notificationSound}
-								showPulse={true}
-								soundType={notificationSoundType}
-								pulseStyle="ring"
-							/>
-						</div>
-					</header>
-				</TooltipProvider>
+		<SettingsSidebarProductProvider
+			hasAmlAccess={hasAmlAccess}
+			hasWatchlistAccess={hasWatchlistAccess}
+			activeOrganizationName={activeOrganization?.name ?? null}
+			hasResolvedEntitlements={hasResolvedEntitlements}
+		>
+			<SidebarProvider
+				open={!isCollapsed}
+				onOpenChange={handleSidebarOpenChange}
+			>
+				<AppSidebar
+					organizations={organizations}
+					activeOrganization={activeOrganization}
+					onOrganizationChange={handleOrganizationChange}
+					completionStatus={completionStatus}
+					isLoading={orgsLoading}
+					organizationsOwned={organizationsOwned}
+					organizationsLimit={organizationsLimit}
+					pendingInvitationsCount={pendingInvitationsCount}
+				/>
+				<SidebarInset className="flex h-svh flex-col overflow-hidden">
+					{/* Header - Fixed navbar */}
+					<TooltipProvider delayDuration={0}>
+						<header className="z-50 flex h-16 shrink-0 items-center gap-2 border-b bg-background px-4 shadow-xs">
+							<SidebarTrigger className="-ml-1" />
+							<Separator orientation="vertical" className="mx-2 h-6" />
+							<div className="flex-1 min-w-0">
+								<NavBreadcrumb />
+							</div>
+							<div className="flex shrink-0 items-center gap-2">
+								<LanguageSwitcher
+									languages={SUPPORTED_LANGUAGES}
+									currentLanguage={language}
+									onLanguageChange={(key) => setLanguage(key as "en" | "es")}
+									labels={{ language: t("language.label") }}
+									variant="mini"
+									size="sm"
+									shape="rounded"
+									side="bottom"
+									align="end"
+								/>
+								<ThemeSwitcher
+									variant="mini"
+									size="sm"
+									shape="rounded"
+									side="bottom"
+									align="end"
+									labels={{
+										theme: t("theme.label"),
+										system: t("theme.system"),
+										light: t("theme.light"),
+										dark: t("theme.dark"),
+									}}
+								/>
+								{/* NotificationsWidget now consumes data from BlocksNotificationsContext automatically */}
+								<NotificationsWidget
+									onNotificationClick={handleNotificationClick}
+									size="md"
+									maxVisible={50}
+									playSound={notificationSound}
+									showPulse={true}
+									soundType={notificationSoundType}
+									pulseStyle="ring"
+								/>
+							</div>
+						</header>
+					</TooltipProvider>
 
-				{/* Main Content */}
-				<main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-					<div className="max-w-4xl mx-auto p-6 lg:p-8 w-full">{children}</div>
-				</main>
-			</SidebarInset>
-		</SidebarProvider>
+					{/* Same pattern as aml DashboardLayout: one scroll container (main) wraps content + footer so
+					    the bar sits at the bottom when content is short and after content when it overflows */}
+					<main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+						<div className="flex flex-1 flex-col p-6 lg:p-8">
+							<div className="mx-auto w-full max-w-4xl">{children}</div>
+						</div>
+						<SettingsChromeFooter
+							timezone={effectiveTimezone}
+							clockFormat={effectiveClockFormat}
+						/>
+					</main>
+				</SidebarInset>
+			</SidebarProvider>
+		</SettingsSidebarProductProvider>
 	);
 }
 

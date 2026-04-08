@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Building2, ExternalLink, Key, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -14,12 +14,23 @@ interface EnterpriseCardProps {
 	/** Called when the user submits a license key. Should resolve after
 	 *  activation (or after showing a confirmation dialog). */
 	onRedeem: (key: string) => Promise<void>;
+	/** When true, the license key field is shown expanded on mount (e.g. license-only onboarding). */
+	defaultLicenseInputExpanded?: boolean;
 }
 
-export function EnterpriseCard({ onRedeem }: EnterpriseCardProps) {
+export function EnterpriseCard({
+	onRedeem,
+	defaultLicenseInputExpanded = false,
+}: EnterpriseCardProps) {
 	const { t } = useLanguage();
-	const [showInput, setShowInput] = useState(false);
+	const [showInput, setShowInput] = useState(defaultLicenseInputExpanded);
 	const [licenseKey, setLicenseKey] = useState("");
+
+	useEffect(() => {
+		if (defaultLicenseInputExpanded) {
+			setShowInput(true);
+		}
+	}, [defaultLicenseInputExpanded]);
 	const [isRedeeming, setIsRedeeming] = useState(false);
 
 	const handleSubmit = async () => {

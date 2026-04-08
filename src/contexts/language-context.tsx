@@ -16,13 +16,12 @@ import {
 	updateUserSettings,
 	type LanguageCode,
 } from "@/lib/settings";
+import { type Language, isLanguage } from "@/lib/i18n/supportedLanguages";
 import {
 	LanguageContext as BlocksLanguageContext,
 	type LanguageContextValue as BlocksLanguageContextValue,
 	type BlocksLanguage,
 } from "@algenium/blocks";
-
-type Language = "en" | "es";
 
 interface LanguageContextType {
 	language: Language;
@@ -315,7 +314,9 @@ const translations = {
 		"products.watchlist.name": "Watchlist screening",
 		"products.watchlist.description":
 			"Search sanctions and watchlists for names and entities.",
-		"products.notIncluded": "Not included in your current plan.",
+		"products.entitlementNote":
+			"You are viewing access for {organizationName}. Product availability follows this organization's plan (the subscription is billed to the organization owner). Invited members share this access.",
+		"products.notIncluded": "Not included in this organization's plan.",
 		"products.upgradeCta": "View plans",
 		"products.openProduct": "Open app",
 		// Mobile sidebar
@@ -447,9 +448,9 @@ const translations = {
 		"settings.createOrg.namePlaceholder": "Acme Corporation",
 		"settings.createOrg.nameHelp":
 			"This is how your organization will appear across Janovix",
-		"settings.createOrg.subdomain": "Organization subdomain",
+		"settings.createOrg.subdomain": "Organization path",
 		"settings.createOrg.subdomainHelp":
-			"This will be your organization's unique subdomain",
+			"Your organization will live at {appPathPrefix}your-path — choose the segment after {appPathPrefix}",
 		"settings.createOrg.checkingSlug": "Checking availability...",
 		"settings.createOrg.slugAvailable": "is available!",
 		"settings.createOrg.slugTaken":
@@ -473,23 +474,24 @@ const translations = {
 		"settings.org.defaultLanguage": "Default language",
 		"settings.org.defaultDateFormat": "Default date format",
 		"settings.org.dangerZone": "Danger Zone",
-		"settings.org.dangerZoneDesc": "Irreversible and destructive actions",
-		"settings.org.delete": "Delete organization",
+		"settings.org.dangerZoneDesc":
+			"Archiving removes write access while retaining data for compliance retention",
+		"settings.org.delete": "Archive organization",
 		"settings.org.deleteDesc":
-			"Permanently delete this organization and all its data",
-		"settings.org.deleteButton": "Delete organization",
-		"settings.org.deleteConfirmTitle": "Delete organization?",
+			"Archive this organization (read-only, retained for compliance)",
+		"settings.org.deleteButton": "Archive organization",
+		"settings.org.deleteConfirmTitle": "Archive organization?",
 		"settings.org.deleteConfirmDesc":
-			"This action cannot be undone. This will permanently delete {name} and all associated data including members, operations, and alerts.",
+			"This will archive {name}. Members keep historical access; product apps become read-only until you restore the organization from billing settings if your plan allows.",
 		"settings.org.deleteWarning":
-			"This is a destructive action. All organization data, members, and settings will be permanently removed.",
+			"Archived organizations cannot create or edit data. Data is retained according to your retention policy.",
 		"settings.org.deleteSlugPrompt":
 			"To confirm, type the organization slug: {slug}",
-		"settings.org.deleting": "Deleting...",
+		"settings.org.deleting": "Archiving...",
 		"settings.org.deleteButtonConfirm":
-			"I understand, delete this organization",
-		"settings.org.deleteSuccess": "Organization deleted successfully",
-		"settings.org.deleteError": "Failed to delete organization",
+			"I understand, archive this organization",
+		"settings.org.deleteSuccess": "Organization archived successfully",
+		"settings.org.deleteError": "Failed to archive organization",
 		"settings.org.cancel": "Cancel",
 
 		// AML Compliance settings
@@ -530,6 +532,8 @@ const translations = {
 		"settings.compliance.thresholdMXN": "Threshold (MXN)",
 		"settings.compliance.umaNote": "UMA value",
 		"settings.compliance.viewAllThresholds": "View all thresholds by activity",
+		"settings.compliance.noticeThresholdAlways":
+			"Always (SAT notice required regardless of amount)",
 		"settings.compliance.kycSelfService": "KYC Self-Service",
 		"settings.compliance.kycSelfServiceDesc":
 			"Configure self-service KYC verification settings for your clients",
@@ -546,6 +550,11 @@ const translations = {
 			"Self-service KYC verification links allow clients to submit their own identity documents. Ensure your compliance policies permit this before enabling.",
 		"settings.compliance.selfServiceSavedSuccess":
 			"Self-service settings saved successfully",
+		"settings.compliance.notAvailableTitle":
+			"AML compliance is not included in your plan",
+		"settings.compliance.notAvailableDescription":
+			"Upgrade your subscription to access PLD compliance settings and the AML platform.",
+		"settings.compliance.viewBilling": "View billing & plans",
 
 		// Team settings
 		"settings.team.title": "Team Settings",
@@ -570,6 +579,8 @@ const translations = {
 			"You have reached the member limit for your plan. Upgrade to invite more members.",
 		"settings.team.memberLimitBanner":
 			"Member limit reached ({used}/{limit}). Upgrade your plan to add more members.",
+		"settings.team.memberOverageBanner":
+			"You have {used} of {limit} included members. Extra members are billed as overage.",
 		"settings.team.you": "You",
 		"settings.team.invitedBy": "Invited by",
 		"settings.team.makeAdmin": "Make admin",
@@ -645,6 +656,9 @@ const translations = {
 
 		// Billing settings
 		"settings.nav.billing": "Billing",
+		"settings.billing.licenseOnlyTitle": "License-based access",
+		"settings.billing.licenseOnlyDescription":
+			"Self-service billing is not available. Your organization uses license-based access. Contact your administrator for subscription changes.",
 		"settings.billing.title": "Billing & Subscription",
 		"settings.billing.description":
 			"Manage your subscription, usage, and payment methods",
@@ -664,6 +678,11 @@ const translations = {
 		"settings.billing.paymentMethods": "Payment Methods",
 		"settings.billing.invoices": "Invoice History",
 		"settings.billing.managePortal": "Manage subscription",
+		"settings.billing.managePortalHint":
+			"Payment methods, invoices, and billing history in Stripe",
+		"settings.billing.planUpdated": "Plan updated",
+		"settings.billing.licensePlanChangeHint":
+			"Enterprise licenses are managed outside self-service billing. Contact your administrator.",
 		"settings.billing.upgrade": "Upgrade Plan",
 		"settings.billing.downgrade": "Downgrade Plan",
 		"settings.billing.cancel": "Cancel Subscription",
@@ -677,6 +696,8 @@ const translations = {
 		"settings.billing.licenseNoExpiry": "Perpetual license - no expiry",
 		"settings.billing.licenseManagedExternally":
 			"This enterprise license is managed outside Stripe. Contact your administrator for changes.",
+		"settings.billing.usageLicenseOverageHint":
+			"Enterprise licenses do not use automatic metered overage. To increase limits, contact your license provider or account team; they can update your entitlement in admin.",
 		"settings.billing.licensePlaceholder": "Enter your license key",
 		"settings.billing.selectPlan": "Select a Plan",
 		"settings.billing.selectPlanDesc":
@@ -714,6 +735,9 @@ const translations = {
 		"settings.billing.currentPlanBadge": "Current",
 		"settings.billing.recommended": "Recommended",
 		"settings.billing.canceledBadge": "Cancels {date}",
+		"settings.billing.pendingCancelBadge": "Canceling",
+		"settings.billing.pendingCancelDesc":
+			"Your subscription is scheduled to cancel on {date}. You can reactivate before then.",
 		"settings.billing.pastDue": "Past Due",
 		"settings.billing.active": "Active",
 		"settings.billing.trialing": "Trial",
@@ -737,6 +761,8 @@ const translations = {
 		"settings.billing.activeSince": "Active since",
 		"settings.billing.subscribePrompt":
 			"Subscribe to create organizations and access features",
+		"settings.billing.inactiveBillingSubtitle":
+			"No active subscription. Choose a plan below.",
 		"settings.billing.organizations": "Organizations",
 		"settings.billing.ends": "Ends",
 		"settings.billing.renews": "Renews",
@@ -835,6 +861,56 @@ const translations = {
 		"settings.billing.freeTierUpgradePrompt":
 			"Upgrade to unlock more features and higher limits",
 		"settings.billing.comingSoon": "Coming Soon",
+		// Usage & limits section (billing settings)
+		"settings.billing.usageLimits.title": "Usage & limits",
+		"settings.billing.usageLimits.noOrgDesc":
+			"Select an organization and ensure you have an active subscription to see usage.",
+		"settings.billing.usageLimits.currentPeriod":
+			"Current billing period {start} — {end}.",
+		"settings.billing.usageLimits.metric.reports": "Reports (period)",
+		"settings.billing.usageLimits.metric.notices": "Notices (period)",
+		"settings.billing.usageLimits.metric.alerts": "Alerts (period)",
+		"settings.billing.usageLimits.metric.operations": "Operations (period)",
+		"settings.billing.usageLimits.metric.clients": "Clients (period)",
+		"settings.billing.usageLimits.metric.members": "Members (this org)",
+		"settings.billing.usageLimits.metric.watchlistQueries":
+			"Watchlist queries (period)",
+		"settings.billing.usageLimits.unlimited": "(unlimited)",
+		"settings.billing.usageLimits.meteredOverageTitle":
+			"Metered overage (Stripe)",
+		"settings.billing.usageLimits.meteredOverageDesc":
+			"When enabled, actions beyond included quotas can continue and are billed as usage. You can set an optional monthly spend cap.",
+		"settings.billing.usageLimits.enableMeteredOverage":
+			"Enable metered overage",
+		"settings.billing.usageLimits.monthlySpendLimit":
+			"Monthly spend limit (MXN)",
+		"settings.billing.usageLimits.noCapPlaceholder": "No cap",
+		"settings.billing.usageLimits.overageHelper":
+			"Leave empty for no cap. Overage charges in this period so far: {amount}",
+		"settings.billing.usageLimits.saveButton": "Save usage billing settings",
+		"settings.billing.usageLimits.saving": "Saving…",
+		"settings.billing.usageLimits.loadError": "Could not load usage",
+		"settings.billing.usageLimits.saveSuccess": "Usage billing settings saved",
+		"settings.billing.usageLimits.saveFailed": "Save failed",
+		"settings.billing.usageLimits.invalidSpendLimit": "Invalid spend limit",
+		"settings.billing.usageLimits.excessHint":
+			"{excess} excess × {unitPrice} = {total}",
+		"settings.billing.usageLimits.excessSeatHint":
+			"{excess} extra seats × {unitPrice}/mo = {total}/mo",
+		"settings.billing.usageLimits.estimatedOverageSummary":
+			"Estimated costs (before tax)",
+		"settings.billing.usageLimits.estimatedMeteredLine":
+			"Estimated metered overage this period: {amount}",
+		"settings.billing.usageLimits.extraSeatCharges":
+			"Extra seat charges (monthly): {amount}",
+		"settings.billing.usageLimits.actualOverageSoFar":
+			"Actual metered overage billed so far: {amount}",
+		"settings.billing.usageLimits.spendCapRemaining":
+			"Spend cap: {cap} — {remaining} remaining this period",
+		"settings.billing.downgradeExtraSeatHint":
+			"{excess} extra members × {price}/seat/mo = {total}/mo",
+		"settings.billing.downgradeExtraSeatTotal":
+			"Total additional seat charges: ~{total}/mo",
 
 		// Upgrade prompts
 		"billing.upgrade.limitReached": "Limit Reached",
@@ -910,6 +986,14 @@ const translations = {
 			"Subscribe monthly for flexible pay-as-you-go billing, or activate an annual license for fixed capacity.",
 		"onboarding.plans.note":
 			"Subscription or license required to create an organization.",
+		"onboarding.plans.licenseOnly.title": "Activate your license",
+		"onboarding.plans.licenseOnly.description":
+			"Your organization uses license-based access. Enter your license key below or accept an invitation.",
+		"onboarding.plans.licenseOnly.note":
+			"Stripe subscriptions are not available on this deployment.",
+		"onboarding.plans.licenseOnly.selectTitle": "License activation",
+		"onboarding.plans.licenseOnly.selectDescription":
+			"Enter your enterprise license key to continue. You can also join an organization via invitation.",
 		"onboarding.plans.welcome": "Welcome, {name}!",
 		"onboarding.plans.welcomeFallback": "there",
 		"onboarding.plans.before.title": "Before you continue",
@@ -968,9 +1052,9 @@ const translations = {
 		"onboarding.plans.features.ultra.4": "100 notices/month",
 		"onboarding.plans.features.ultra.5": "1000 Watchlist queries/organization",
 		"onboarding.plans.features.ultra.6": "Dedicated support",
-		"onboarding.org.title": "Create your organization",
+		"onboarding.org.title": "Register your Obligated Subject or Organization",
 		"onboarding.org.description":
-			"Set up your organization to start using Janovix",
+			"Register your obligated subject or organization to start using Janovix",
 		"onboarding.org.badge": "{plan} Subscription Active",
 		"onboarding.org.plan.active": "Active",
 		"onboarding.org.logo.edit": "Add Logo",
@@ -978,15 +1062,15 @@ const translations = {
 		"onboarding.org.logo.success": "Logo saved!",
 		"onboarding.org.logo.error": "Failed to save logo.",
 		"onboarding.org.logo.help": "Optional: Add a logo for your organization",
-		"onboarding.org.name.label": "Organization name",
+		"onboarding.org.name.label": "Obligated Subject or Organization name",
 		"onboarding.org.name.placeholder": "Acme Corporation",
 		"onboarding.org.name.help":
-			"This is how your organization will appear across Janovix",
-		"onboarding.org.slug.label": "Organization subdomain",
+			"This is how your obligated subject or organization will appear across Janovix",
+		"onboarding.org.slug.label": "Organization path",
 		"onboarding.org.slug.placeholder": "acme-corp",
 		"onboarding.org.slug.help":
-			"This will be your organization's unique subdomain",
-		"onboarding.org.slug.available": "{slug}.janovix.com is available!",
+			"Your organization will be available at {appPathPrefix}your-path — this is the path segment after {appPathPrefix}",
+		"onboarding.org.slug.available": "{appPathPrefix}{slug} is available!",
 		"onboarding.org.slug.error.required": "Slug is required",
 		"onboarding.org.slug.error.min": "Slug must be at least 3 characters",
 		"onboarding.org.slug.error.max": "Slug must be 50 characters or less",
@@ -1000,11 +1084,26 @@ const translations = {
 		"onboarding.org.slug.error.invalid": "Invalid slug",
 		"onboarding.org.slug.error.taken":
 			"This slug is already taken. Please choose another.",
-		"onboarding.org.submit": "Create Organization",
+		"onboarding.org.submit": "Register Organization",
 		"onboarding.org.creating": "Creating...",
-		"onboarding.org.error.createFailed": "Failed to create organization",
+		"onboarding.org.error.createFailed": "Failed to register organization",
 		"onboarding.org.footer":
-			"You can invite team members and configure settings after creating your organization.",
+			"You can invite team members and configure settings after registering your organization.",
+		"onboarding.team.title": "Create your team",
+		"onboarding.team.description": "Set up your team to start using Janovix",
+		"onboarding.team.logo.title": "Team Logo",
+		"onboarding.team.logo.help": "Optional: Add a logo for your team",
+		"onboarding.team.name.label": "Team name",
+		"onboarding.team.name.placeholder": "My Team",
+		"onboarding.team.name.help":
+			"This is how your team will appear across Janovix",
+		"onboarding.team.slug.label": "Team path",
+		"onboarding.team.slug.help":
+			"Your team will be available at {appPathPrefix}your-path — this is the path segment after {appPathPrefix}",
+		"onboarding.team.submit": "Create Team",
+		"onboarding.team.error.createFailed": "Failed to create team",
+		"onboarding.team.footer":
+			"You can invite members and configure settings after creating your team.",
 		"onboarding.invite.loading": "Loading invitation...",
 		"onboarding.invite.none.title": "No pending invitation",
 		"onboarding.invite.none.description":
@@ -1389,7 +1488,9 @@ const translations = {
 		"products.watchlist.name": "Watchlist",
 		"products.watchlist.description":
 			"Búsqueda en listas de sanciones y vigilancia para personas y entidades.",
-		"products.notIncluded": "No incluido en tu plan actual.",
+		"products.entitlementNote":
+			"Estás viendo el acceso para {organizationName}. La disponibilidad de productos sigue el plan de esta organización (la suscripción la paga el propietario). Los miembros invitados comparten este acceso.",
+		"products.notIncluded": "No incluido en el plan de esta organización.",
 		"products.upgradeCta": "Ver planes",
 		"products.openProduct": "Abrir aplicación",
 		// Mobile sidebar
@@ -1527,9 +1628,9 @@ const translations = {
 		"settings.createOrg.namePlaceholder": "Corporación Acme",
 		"settings.createOrg.nameHelp":
 			"Así aparecerá tu organización en toda la plataforma Janovix",
-		"settings.createOrg.subdomain": "Subdominio de la organización",
+		"settings.createOrg.subdomain": "Ruta de la organización",
 		"settings.createOrg.subdomainHelp":
-			"Este será el subdominio único de tu organización",
+			"Tu organización estará en {appPathPrefix}tu-ruta — elige el segmento después de {appPathPrefix}",
 		"settings.createOrg.checkingSlug": "Comprobando disponibilidad...",
 		"settings.createOrg.slugAvailable": "está disponible!",
 		"settings.createOrg.slugTaken":
@@ -1553,22 +1654,23 @@ const translations = {
 		"settings.org.defaultLanguage": "Idioma predeterminado",
 		"settings.org.defaultDateFormat": "Formato de fecha predeterminado",
 		"settings.org.dangerZone": "Zona de Peligro",
-		"settings.org.dangerZoneDesc": "Acciones irreversibles y destructivas",
-		"settings.org.delete": "Eliminar organización",
+		"settings.org.dangerZoneDesc":
+			"Archivar quita el acceso de escritura y conserva los datos para retención",
+		"settings.org.delete": "Archivar organización",
 		"settings.org.deleteDesc":
-			"Eliminar permanentemente esta organización y todos sus datos",
-		"settings.org.deleteButton": "Eliminar organización",
-		"settings.org.deleteConfirmTitle": "¿Eliminar organización?",
+			"Archivar esta organización (solo lectura, conservada para cumplimiento)",
+		"settings.org.deleteButton": "Archivar organización",
+		"settings.org.deleteConfirmTitle": "¿Archivar organización?",
 		"settings.org.deleteConfirmDesc":
-			"Esta acción no se puede deshacer. Esto eliminará permanentemente {name} y todos los datos asociados incluyendo miembros, operaciones y alertas.",
+			"Esto archivará {name}. Los miembros conservan acceso histórico; las apps de producto quedan solo lectura hasta restaurar la organización si tu plan lo permite.",
 		"settings.org.deleteWarning":
-			"Esta es una acción destructiva. Todos los datos, miembros y configuraciones de la organización serán eliminados permanentemente.",
+			"Las organizaciones archivadas no pueden crear ni editar datos. Los datos se conservan según tu política de retención.",
 		"settings.org.deleteSlugPrompt":
 			"Para confirmar, escribe el slug de la organización: {slug}",
-		"settings.org.deleting": "Eliminando...",
-		"settings.org.deleteButtonConfirm": "Entiendo, eliminar esta organización",
-		"settings.org.deleteSuccess": "Organización eliminada exitosamente",
-		"settings.org.deleteError": "Error al eliminar la organización",
+		"settings.org.deleting": "Archivando...",
+		"settings.org.deleteButtonConfirm": "Entiendo, archivar esta organización",
+		"settings.org.deleteSuccess": "Organización archivada correctamente",
+		"settings.org.deleteError": "Error al archivar la organización",
 		"settings.org.cancel": "Cancelar",
 
 		// AML Compliance settings
@@ -1612,6 +1714,8 @@ const translations = {
 		"settings.compliance.umaNote": "Valor UMA",
 		"settings.compliance.viewAllThresholds":
 			"Ver todos los umbrales por actividad",
+		"settings.compliance.noticeThresholdAlways":
+			"Siempre (aviso SAT sin importar el monto)",
 		"settings.compliance.kycSelfService": "KYC Autoservicio",
 		"settings.compliance.kycSelfServiceDesc":
 			"Configura las opciones de verificación KYC de autoservicio para tus clientes",
@@ -1628,6 +1732,11 @@ const translations = {
 			"Los enlaces de verificación KYC de autoservicio permiten a los clientes enviar sus propios documentos de identidad. Asegúrate de que tus políticas de cumplimiento lo permitan antes de habilitarlo.",
 		"settings.compliance.selfServiceSavedSuccess":
 			"Configuración de autoservicio guardada exitosamente",
+		"settings.compliance.notAvailableTitle":
+			"El cumplimiento PLD no está incluido en tu plan",
+		"settings.compliance.notAvailableDescription":
+			"Mejora tu suscripción para acceder a la configuración PLD y a la plataforma AML.",
+		"settings.compliance.viewBilling": "Ver facturación y planes",
 
 		// Team settings
 		"settings.team.title": "Configuración de Equipo",
@@ -1653,6 +1762,8 @@ const translations = {
 			"Has alcanzado el límite de miembros de tu plan. Actualiza tu plan para invitar más miembros.",
 		"settings.team.memberLimitBanner":
 			"Límite de miembros alcanzado ({used}/{limit}). Actualiza tu plan para agregar más miembros.",
+		"settings.team.memberOverageBanner":
+			"Tienes {used} de {limit} miembros incluidos. Los miembros adicionales se facturan como exceso de uso.",
 		"settings.team.you": "Tú",
 		"settings.team.invitedBy": "Invitado por",
 		"settings.team.makeAdmin": "Hacer administrador",
@@ -1728,6 +1839,9 @@ const translations = {
 
 		// Billing settings
 		"settings.nav.billing": "Facturación",
+		"settings.billing.licenseOnlyTitle": "Acceso por licencia",
+		"settings.billing.licenseOnlyDescription":
+			"La facturación en línea no está disponible. Tu organización usa acceso por licencia. Contacta a tu administrador para cambios de suscripción.",
 		"settings.billing.title": "Facturación y Suscripción",
 		"settings.billing.description":
 			"Administra tu suscripción, uso y métodos de pago",
@@ -1748,6 +1862,11 @@ const translations = {
 		"settings.billing.paymentMethods": "Métodos de Pago",
 		"settings.billing.invoices": "Historial de Facturas",
 		"settings.billing.managePortal": "Administrar subscripción",
+		"settings.billing.managePortalHint":
+			"Métodos de pago, facturas e historial en Stripe",
+		"settings.billing.planUpdated": "Plan actualizado",
+		"settings.billing.licensePlanChangeHint":
+			"Las licencias enterprise se gestionan fuera del autoservicio. Contacta a tu administrador.",
 		"settings.billing.upgrade": "Mejorar Plan",
 		"settings.billing.downgrade": "Reducir Plan",
 		"settings.billing.cancel": "Cancelar Suscripción",
@@ -1761,6 +1880,8 @@ const translations = {
 		"settings.billing.licenseNoExpiry": "Licencia perpetua - sin vencimiento",
 		"settings.billing.licenseManagedExternally":
 			"Esta licencia empresarial se administra fuera de Stripe. Contacta a tu administrador para cambios.",
+		"settings.billing.usageLicenseOverageHint":
+			"Las licencias empresariales no usan exceso de uso medido automático. Para aumentar límites, contacta a tu proveedor de licencia o equipo de cuenta; pueden actualizar tu entidad en administración.",
 		"settings.billing.licensePlaceholder": "Ingresa tu clave de licencia",
 		"settings.billing.selectPlan": "Selecciona un Plan",
 		"settings.billing.selectPlanDesc":
@@ -1799,6 +1920,9 @@ const translations = {
 		"settings.billing.currentPlanBadge": "Actual",
 		"settings.billing.recommended": "Recomendado",
 		"settings.billing.canceledBadge": "Cancela el {date}",
+		"settings.billing.pendingCancelBadge": "Cancelando",
+		"settings.billing.pendingCancelDesc":
+			"Tu suscripción está programada para cancelarse el {date}. Puedes reactivarla antes.",
 		"settings.billing.pastDue": "Vencido",
 		"settings.billing.active": "Activo",
 		"settings.billing.trialing": "Prueba",
@@ -1823,6 +1947,8 @@ const translations = {
 		"settings.billing.activeSince": "Activo desde",
 		"settings.billing.subscribePrompt":
 			"Suscríbete para crear organizaciones y acceder a las funciones",
+		"settings.billing.inactiveBillingSubtitle":
+			"Sin suscripción activa. Elige un plan abajo.",
 		"settings.billing.organizations": "Organizaciones",
 		"settings.billing.ends": "Termina",
 		"settings.billing.renews": "Renueva",
@@ -1923,6 +2049,59 @@ const translations = {
 		"settings.billing.freeTierUpgradePrompt":
 			"Mejora tu plan para desbloquear más funciones y límites más altos",
 		"settings.billing.comingSoon": "Próximamente",
+		// Usage & limits section (billing settings)
+		"settings.billing.usageLimits.title": "Uso y límites",
+		"settings.billing.usageLimits.noOrgDesc":
+			"Selecciona una organización y asegúrate de tener una suscripción activa para ver el uso.",
+		"settings.billing.usageLimits.currentPeriod":
+			"Período de facturación actual {start} — {end}.",
+		"settings.billing.usageLimits.metric.reports": "Reportes (período)",
+		"settings.billing.usageLimits.metric.notices": "Avisos (período)",
+		"settings.billing.usageLimits.metric.alerts": "Alertas (período)",
+		"settings.billing.usageLimits.metric.operations": "Operaciones (período)",
+		"settings.billing.usageLimits.metric.clients": "Clientes (período)",
+		"settings.billing.usageLimits.metric.members": "Miembros (esta org)",
+		"settings.billing.usageLimits.metric.watchlistQueries":
+			"Consultas watchlist (período)",
+		"settings.billing.usageLimits.unlimited": "(ilimitado)",
+		"settings.billing.usageLimits.meteredOverageTitle":
+			"Exceso medido (Stripe)",
+		"settings.billing.usageLimits.meteredOverageDesc":
+			"Si está activado, las acciones que superen las cuotas incluidas pueden continuar y se facturan como uso. Puedes establecer un límite de gasto mensual opcional.",
+		"settings.billing.usageLimits.enableMeteredOverage":
+			"Activar exceso medido",
+		"settings.billing.usageLimits.monthlySpendLimit":
+			"Límite de gasto mensual (MXN)",
+		"settings.billing.usageLimits.noCapPlaceholder": "Sin límite",
+		"settings.billing.usageLimits.overageHelper":
+			"Déjalo vacío para no tener tope. Cargos por exceso en este período hasta ahora: {amount}",
+		"settings.billing.usageLimits.saveButton":
+			"Guardar configuración de facturación por uso",
+		"settings.billing.usageLimits.saving": "Guardando…",
+		"settings.billing.usageLimits.loadError": "No se pudo cargar el uso",
+		"settings.billing.usageLimits.saveSuccess":
+			"Configuración de facturación por uso guardada",
+		"settings.billing.usageLimits.saveFailed": "Error al guardar",
+		"settings.billing.usageLimits.invalidSpendLimit":
+			"Límite de gasto no válido",
+		"settings.billing.usageLimits.excessHint":
+			"{excess} de exceso × {unitPrice} = {total}",
+		"settings.billing.usageLimits.excessSeatHint":
+			"{excess} asientos extra × {unitPrice}/mes = {total}/mes",
+		"settings.billing.usageLimits.estimatedOverageSummary":
+			"Costos estimados (antes de impuestos)",
+		"settings.billing.usageLimits.estimatedMeteredLine":
+			"Exceso medido estimado en este período: {amount}",
+		"settings.billing.usageLimits.extraSeatCharges":
+			"Cargos por asientos extra (mensual): {amount}",
+		"settings.billing.usageLimits.actualOverageSoFar":
+			"Exceso medido facturado hasta ahora: {amount}",
+		"settings.billing.usageLimits.spendCapRemaining":
+			"Tope de gasto: {cap} — {remaining} restantes en este período",
+		"settings.billing.downgradeExtraSeatHint":
+			"{excess} miembros extra × {price}/asiento/mes = {total}/mes",
+		"settings.billing.downgradeExtraSeatTotal":
+			"Cargos adicionales por asientos: ~{total}/mes",
 
 		// Upgrade prompts
 		"billing.upgrade.limitReached": "Límite Alcanzado",
@@ -1999,6 +2178,14 @@ const translations = {
 			"Suscríbete mensualmente con facturación flexible, o activa una licencia anual con capacidad fija.",
 		"onboarding.plans.note":
 			"Se requiere una suscripción o licencia para crear una organización.",
+		"onboarding.plans.licenseOnly.title": "Activa tu licencia",
+		"onboarding.plans.licenseOnly.description":
+			"Tu organización usa acceso por licencia. Ingresa tu clave de licencia abajo o acepta una invitación.",
+		"onboarding.plans.licenseOnly.note":
+			"Las suscripciones con Stripe no están disponibles en este entorno.",
+		"onboarding.plans.licenseOnly.selectTitle": "Activación de licencia",
+		"onboarding.plans.licenseOnly.selectDescription":
+			"Ingresa tu clave de licencia enterprise para continuar. También puedes unirte a una organización mediante invitación.",
 		"onboarding.plans.welcome": "¡Bienvenido, {name}!",
 		"onboarding.plans.welcomeFallback": "hola",
 		"onboarding.plans.before.title": "Antes de continuar",
@@ -2057,9 +2244,9 @@ const translations = {
 		"onboarding.plans.features.ultra.5":
 			"1000 Consultas watchlist/organizacion",
 		"onboarding.plans.features.ultra.6": "Soporte dedicado",
-		"onboarding.org.title": "Crea tu organización",
+		"onboarding.org.title": "Registra tu Sujeto Obligado u Organización",
 		"onboarding.org.description":
-			"Configura tu organización para comenzar a usar Janovix",
+			"Registra tu sujeto obligado u organización para comenzar a usar Janovix",
 		"onboarding.org.badge": "Suscripción {plan} activa",
 		"onboarding.org.plan.active": "Activa",
 		"onboarding.org.logo.edit": "Añadir logo",
@@ -2067,35 +2254,48 @@ const translations = {
 		"onboarding.org.logo.success": "¡Logo guardado!",
 		"onboarding.org.logo.error": "No se pudo guardar el logo.",
 		"onboarding.org.logo.help": "Opcional: añade un logo para tu organización",
-		"onboarding.org.name.label": "Nombre de la organización",
+		"onboarding.org.name.label": "Nombre del Sujeto Obligado u Organización",
 		"onboarding.org.name.placeholder": "Corporación Acme",
-		"onboarding.org.name.help": "Así aparecerá tu organización en Janovix",
-		"onboarding.org.slug.label": "Subdominio de la organización",
+		"onboarding.org.name.help":
+			"Así aparecerá tu sujeto obligado u organización en Janovix",
+		"onboarding.org.slug.label": "Ruta de la organización",
 		"onboarding.org.slug.placeholder": "acme-corp",
 		"onboarding.org.slug.help":
-			"Este será el subdominio único de tu organización",
-		"onboarding.org.slug.available": "{slug}.janovix.com está disponible",
-		"onboarding.org.slug.error.required": "El subdominio es obligatorio",
-		"onboarding.org.slug.error.min":
-			"El subdominio debe tener al menos 3 caracteres",
-		"onboarding.org.slug.error.max":
-			"El subdominio debe tener 50 caracteres o menos",
+			"Tu organización estará en {appPathPrefix}tu-ruta — este es el segmento de la ruta después de {appPathPrefix}",
+		"onboarding.org.slug.available": "{appPathPrefix}{slug} está disponible",
+		"onboarding.org.slug.error.required": "La ruta es obligatoria",
+		"onboarding.org.slug.error.min": "La ruta debe tener al menos 3 caracteres",
+		"onboarding.org.slug.error.max": "La ruta debe tener 50 caracteres o menos",
 		"onboarding.org.slug.error.start":
-			"El subdominio debe comenzar con una letra o número",
+			"La ruta debe comenzar con una letra o número",
 		"onboarding.org.slug.error.end":
-			"El subdominio debe terminar con una letra o número",
+			"La ruta debe terminar con una letra o número",
 		"onboarding.org.slug.error.chars":
-			"El subdominio solo puede contener letras minúsculas, números y guiones",
+			"La ruta solo puede contener letras minúsculas, números y guiones",
 		"onboarding.org.slug.error.consecutive":
-			"El subdominio no puede contener guiones consecutivos",
-		"onboarding.org.slug.error.invalid": "Subdominio inválido",
-		"onboarding.org.slug.error.taken":
-			"Este subdominio ya está en uso. Elige otro.",
-		"onboarding.org.submit": "Crear organización",
+			"La ruta no puede contener guiones consecutivos",
+		"onboarding.org.slug.error.invalid": "Ruta no válida",
+		"onboarding.org.slug.error.taken": "Esta ruta ya está en uso. Elige otra.",
+		"onboarding.org.submit": "Registrar organización",
 		"onboarding.org.creating": "Creando...",
-		"onboarding.org.error.createFailed": "No se pudo crear la organización",
+		"onboarding.org.error.createFailed": "No se pudo registrar la organización",
 		"onboarding.org.footer":
-			"Puedes invitar miembros y configurar ajustes después de crear tu organización.",
+			"Puedes invitar miembros y configurar ajustes después de registrar tu organización.",
+		"onboarding.team.title": "Crea tu equipo",
+		"onboarding.team.description":
+			"Configura tu equipo para comenzar a usar Janovix",
+		"onboarding.team.logo.title": "Logo del equipo",
+		"onboarding.team.logo.help": "Opcional: añade un logo para tu equipo",
+		"onboarding.team.name.label": "Nombre del equipo",
+		"onboarding.team.name.placeholder": "Mi equipo",
+		"onboarding.team.name.help": "Así aparecerá tu equipo en Janovix",
+		"onboarding.team.slug.label": "Ruta del equipo",
+		"onboarding.team.slug.help":
+			"Tu equipo estará en {appPathPrefix}tu-ruta — este es el segmento de la ruta después de {appPathPrefix}",
+		"onboarding.team.submit": "Crear equipo",
+		"onboarding.team.error.createFailed": "No se pudo crear el equipo",
+		"onboarding.team.footer":
+			"Puedes invitar miembros y configurar ajustes después de crear tu equipo.",
 		"onboarding.invite.loading": "Cargando invitación...",
 		"onboarding.invite.none.title": "No hay invitaciones pendientes",
 		"onboarding.invite.none.description":
@@ -2205,8 +2405,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 		setMounted(true);
 
 		// Step 1: Read from cookie first for instant render (no flash)
-		const stored = getCookie(COOKIE_NAMES.LANGUAGE) as Language | undefined;
-		if (stored && (stored === "en" || stored === "es")) {
+		const stored = getCookie(COOKIE_NAMES.LANGUAGE);
+		if (stored && isLanguage(stored)) {
 			setLanguageState(stored);
 		} else {
 			const browserLang = navigator.language.toLowerCase();
@@ -2218,8 +2418,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 		// Step 2: Fetch from API to verify/sync
 		getResolvedSettings()
 			.then((settings) => {
-				const apiLanguage = settings.language as Language;
-				if (apiLanguage && (apiLanguage === "en" || apiLanguage === "es")) {
+				const apiLanguage = settings.language;
+				if (apiLanguage && isLanguage(apiLanguage)) {
 					setLanguageState(apiLanguage);
 					setCookie(COOKIE_NAMES.LANGUAGE, apiLanguage);
 				}
@@ -2262,7 +2462,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 		() => ({
 			language,
 			setLanguage: (lang: string) => {
-				if (lang === "en" || lang === "es") {
+				if (isLanguage(lang)) {
 					handleSetLanguage(lang);
 				}
 			},

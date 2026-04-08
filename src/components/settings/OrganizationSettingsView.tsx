@@ -44,7 +44,14 @@ import {
 	DeleteOrganizationDialog,
 } from "@/components/settings";
 import { AvatarEditorDialog } from "@algenium/blocks";
-import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
+import {
+	getAuthCoreBaseUrl,
+	getProductOrgSlugUrlPrefix,
+} from "@/lib/auth/authCoreConfig";
+import {
+	getSubscriptionStatus,
+	shouldUseWatchlistOrgPathPrefix,
+} from "@/lib/billing";
 import { cn } from "@/lib/utils";
 
 const DATE_FORMATS: { value: DateFormat; label: string }[] = [
@@ -99,6 +106,9 @@ export function OrganizationSettingsView() {
 	const [selectedLanguage, setSelectedLanguage] = useState<LanguageCode>("en");
 	const [selectedDateFormat, setSelectedDateFormat] =
 		useState<DateFormat>("MM/DD/YYYY");
+	const [slugPathPrefix, setSlugPathPrefix] = useState(() =>
+		getProductOrgSlugUrlPrefix(false),
+	);
 
 	const activeOrgId = (
 		session?.session as { activeOrganizationId?: string } | undefined
@@ -127,14 +137,22 @@ export function OrganizationSettingsView() {
 			try {
 				setLoading(true);
 
-				// Load organization data, settings, and membership in parallel
-				const [orgResult, settings, membershipData] = await Promise.all([
-					authClient.organization.getFullOrganization({
-						query: { organizationId: activeOrgId },
-					}),
-					getOrganizationSettings(activeOrgId),
-					getOrganizationMembership(activeOrgId),
-				]);
+				// Load organization data, settings, membership, and plan (for org URL host)
+				const [orgResult, settings, membershipData, subStatus] =
+					await Promise.all([
+						authClient.organization.getFullOrganization({
+							query: { organizationId: activeOrgId },
+						}),
+						getOrganizationSettings(activeOrgId),
+						getOrganizationMembership(activeOrgId),
+						getSubscriptionStatus({ resolveFromOrg: true }).catch(() => null),
+					]);
+
+				setSlugPathPrefix(
+					getProductOrgSlugUrlPrefix(
+						shouldUseWatchlistOrgPathPrefix(subStatus),
+					),
+				);
 
 				if (orgResult.data) {
 					const org = orgResult.data;
@@ -536,7 +554,7 @@ export function OrganizationSettingsView() {
 									</Label>
 									<div className="flex items-center">
 										<span className="text-sm text-muted-foreground px-3 py-2 bg-muted rounded-l-md border border-r-0 border-input">
-											janovix.com/
+											{slugPathPrefix}
 										</span>
 										<Input
 											id="urlSlug"
@@ -566,12 +584,14 @@ export function OrganizationSettingsView() {
 									) : slugAvailable === true ? (
 										<p className="text-xs text-success flex items-center gap-1">
 											<Check className="h-3 w-3" />
-											janovix.com/{orgSlug}{" "}
+											{slugPathPrefix}
+											{orgSlug}{" "}
 											{t("settings.createOrg.slugAvailable") || "is available!"}
 										</p>
 									) : orgSlug ? (
 										<p className="text-xs text-muted-foreground">
-											janovix.com/{orgSlug}
+											{slugPathPrefix}
+											{orgSlug}
 										</p>
 									) : null}
 								</div>

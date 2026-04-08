@@ -2,6 +2,7 @@ import { render, screen, waitFor, act, cleanup } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TeamSettingsView } from "./TeamSettingsView";
 import * as settingsClient from "@/lib/settings/settingsClient";
+import * as billing from "@/lib/billing";
 import { authClient } from "@/lib/auth/authClient";
 import { mockToast } from "@/test/setup";
 
@@ -50,6 +51,20 @@ const mockUseAuthSession = vi.fn(() => ({
 vi.mock("@/lib/auth/useAuthSession", () => ({
 	useAuthSession: () => mockUseAuthSession(),
 }));
+
+vi.mock("@/lib/billing", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("@/lib/billing")>();
+	return {
+		...actual,
+		getSubscriptionStatus: vi.fn(),
+		getOverageSettings: vi.fn().mockResolvedValue({
+			overageEnabled: false,
+			spendLimitCents: null,
+			spendLimitCurrency: "MXN",
+			periodOverageChargeCents: 0,
+		}),
+	};
+});
 
 const mockMembers = [
 	{
@@ -126,6 +141,41 @@ describe("TeamSettingsView", () => {
 				},
 				error: null,
 				isPending: false,
+			});
+			vi.mocked(billing.getSubscriptionStatus).mockResolvedValue(null);
+		});
+
+		it("loads subscription status with resolveFromOrg for org-scoped limits", async () => {
+			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+				mockOwnerMembership,
+			);
+			vi.mocked(authClient.organization.getFullOrganization).mockResolvedValue({
+				data: { members: mockMembers, invitations: [] },
+				error: null,
+			});
+
+			render(<TeamSettingsView />);
+
+			await waitFor(() => {
+				expect(billing.getSubscriptionStatus).toHaveBeenCalledWith({
+					resolveFromOrg: true,
+				});
+			});
+		});
+
+		it("loads overage settings alongside team data", async () => {
+			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+				mockOwnerMembership,
+			);
+			vi.mocked(authClient.organization.getFullOrganization).mockResolvedValue({
+				data: { members: mockMembers, invitations: [] },
+				error: null,
+			});
+
+			render(<TeamSettingsView />);
+
+			await waitFor(() => {
+				expect(billing.getOverageSettings).toHaveBeenCalled();
 			});
 		});
 

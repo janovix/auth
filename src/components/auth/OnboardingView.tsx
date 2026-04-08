@@ -2,10 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
-
 import { useAurora } from "@/contexts/aurora-context";
-import { useLanguage } from "@/contexts/language-context";
+import { OnboardingViewSkeleton } from "@/components/auth/OnboardingViewSkeleton";
 import { useOnboarding } from "@/contexts/onboarding-context";
 import { resolveSafeRedirectUrl } from "@/lib/auth/safeRedirect";
 import {
@@ -22,7 +20,6 @@ interface OnboardingViewProps {
 export const OnboardingView = ({ redirectTo }: OnboardingViewProps) => {
 	const { setPageProfile } = useAurora();
 	const { state, refreshOnboardingStatus } = useOnboarding();
-	const { t } = useLanguage();
 	const searchParams = useSearchParams();
 
 	// Show passkey setup step after profile completion (only once per session)
@@ -65,14 +62,7 @@ export const OnboardingView = ({ redirectTo }: OnboardingViewProps) => {
 
 	// Show loading state while fetching initial data
 	if (state.isLoading) {
-		return (
-			<div className="w-full flex items-center justify-center py-12">
-				<div className="flex flex-col items-center gap-4">
-					<Loader2 className="h-8 w-8 animate-spin text-primary" />
-					<p className="text-muted-foreground">{t("onboarding.loading")}</p>
-				</div>
-			</div>
-		);
+		return <OnboardingViewSkeleton />;
 	}
 
 	// Redirect if fully onboarded (has profile, organization)
@@ -81,14 +71,7 @@ export const OnboardingView = ({ redirectTo }: OnboardingViewProps) => {
 			redirectTo ?? null,
 			window.location.origin,
 		);
-		return (
-			<div className="w-full flex items-center justify-center py-12">
-				<div className="flex flex-col items-center gap-4">
-					<Loader2 className="h-8 w-8 animate-spin text-primary" />
-					<p className="text-muted-foreground">{t("onboarding.redirecting")}</p>
-				</div>
-			</div>
-		);
+		return <OnboardingViewSkeleton />;
 	}
 
 	// Step 1: Profile completion (name/avatar)

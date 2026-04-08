@@ -44,6 +44,8 @@ import { NavUser } from "./NavUser";
 import { AppSwitcher } from "./AppSwitcher";
 import { getAmlAppUrl, getWatchlistAppUrl } from "@/lib/auth/authCoreConfig";
 import { useLanguage } from "@/contexts/language-context";
+import { useSettingsSidebarProductAccess } from "@/contexts/settings-sidebar-product-context";
+import { useFlags } from "@/hooks/useFlags";
 
 type NavItem = {
 	name: string;
@@ -74,82 +76,122 @@ export function AppSidebar({
 	pendingInvitationsCount = 0,
 	...props
 }: AppSidebarProps) {
+	const { hasAmlAccess, hasWatchlistAccess } =
+		useSettingsSidebarProductAccess();
 	const { t } = useLanguage();
 	const pathname = usePathname();
 	const router = useRouter();
 	const { isMobile, setOpenMobile } = useSidebar();
 	const { data: session, isPending } = useAuthSession();
 
+	const { flags: stripeFlags, error: stripeFlagsError } = useFlags([
+		"stripe-billing-enabled",
+	]);
+	const stripeBillingEnabled =
+		stripeFlagsError !== null
+			? true
+			: stripeFlags["stripe-billing-enabled"] !== false;
+
 	// User settings navigation items
-	const userNavItems: NavItem[] = [
-		{
-			name: t("settings.nav.personal"),
-			href: "/settings",
-			icon: User,
-			complete: completionStatus.personal ?? true,
-		},
-		{
-			name: t("settings.nav.billing"),
-			href: "/settings/billing",
-			icon: CreditCard,
-			complete: completionStatus.billing ?? false,
-		},
-	];
+	const userNavItems: NavItem[] = React.useMemo(
+		() => [
+			{
+				name: t("settings.nav.personal"),
+				href: "/settings",
+				icon: User,
+				complete: completionStatus.personal ?? true,
+			},
+			...(stripeBillingEnabled
+				? [
+						{
+							name: t("settings.nav.billing"),
+							href: "/settings/billing",
+							icon: CreditCard,
+							complete: completionStatus.billing ?? false,
+						},
+					]
+				: []),
+		],
+		[
+			t,
+			stripeBillingEnabled,
+			completionStatus.personal,
+			completionStatus.billing,
+		],
+	);
 
-	// Organization settings navigation items
-	const orgNavItems: NavItem[] = [
-		{
-			name: t("settings.nav.organization"),
-			href: "/settings/organization",
-			icon: Building2,
-			complete: completionStatus.organization ?? true,
-		},
-		{
-			name: t("settings.nav.compliance"),
-			href: "/settings/compliance",
-			icon: Shield,
-			complete: completionStatus.compliance ?? false,
-		},
-		{
-			name: t("settings.nav.team"),
-			href: "/settings/team",
-			icon: Users,
-			complete: completionStatus.team ?? true,
-		},
-		{
-			name: t("settings.nav.apiKeys") || "API Keys",
-			href: "/settings/api-keys",
-			icon: KeyRound,
-			complete: true,
-		},
-	];
+	// Organization settings navigation items (compliance only if AML product enabled)
+	const orgNavItems: NavItem[] = React.useMemo(
+		() => [
+			{
+				name: t("settings.nav.organization"),
+				href: "/settings/organization",
+				icon: Building2,
+				complete: completionStatus.organization ?? true,
+			},
+			...(hasAmlAccess
+				? [
+						{
+							name: t("settings.nav.compliance"),
+							href: "/settings/compliance",
+							icon: Shield,
+							complete: completionStatus.compliance ?? false,
+						},
+					]
+				: []),
+			{
+				name: t("settings.nav.team"),
+				href: "/settings/team",
+				icon: Users,
+				complete: completionStatus.team ?? true,
+			},
+			{
+				name: t("settings.nav.apiKeys") || "API Keys",
+				href: "/settings/api-keys",
+				icon: KeyRound,
+				complete: true,
+			},
+		],
+		[t, hasAmlAccess, completionStatus],
+	);
 
-	// Products: hub in-app + external product apps
+	// Products: hub in-app + external product apps (AML only if plan includes product)
 	const productsNavItems: {
 		name: string;
 		href: string;
 		icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 		external: boolean;
-	}[] = [
-		{
-			name: t("settings.nav.productsHub"),
-			href: "/products",
-			icon: LayoutGrid,
-			external: false,
-		},
-		{
-			name: t("settings.nav.aml"),
-			href: getAmlAppUrl(),
-			icon: LayoutDashboard,
-			external: true,
-		},
-		{
-			name: t("settings.nav.watchlist"),
-			href: getWatchlistAppUrl(),
-			icon: Search,
-			external: true,
-		},
-	];
+	}[] = React.useMemo(
+		() => [
+			{
+				name: t("settings.nav.productsHub"),
+				href: "/products",
+				icon: LayoutGrid,
+				external: false,
+			},
+			...(hasAmlAccess
+				? [
+						{
+							name: t("settings.nav.aml"),
+							href: getAmlAppUrl(),
+							icon: LayoutDashboard,
+							external: true,
+						},
+					]
+				: []),
+			...(hasWatchlistAccess
+				? [
+						{
+							name: t("settings.nav.watchlist"),
+							href: getWatchlistAppUrl(),
+							icon: Search,
+							external: true,
+						},
+					]
+				: []),
+		],
+		[t, hasAmlAccess, hasWatchlistAccess],
+	);
 
 	const userCompletedCount = userNavItems.filter((s) => s.complete).length;
 	const orgCompletedCount = orgNavItems.filter((s) => s.complete).length;
@@ -394,12 +436,7 @@ export function AppSidebar({
 											isActive={isActive}
 										>
 											{item.external ? (
-												<a
-													href={item.href}
-													onClick={handleLinkClick}
-													target="_blank"
-													rel="noopener noreferrer"
-												>
+												<a href={item.href} onClick={handleLinkClick}>
 													<Icon />
 													<span>{item.name}</span>
 												</a>

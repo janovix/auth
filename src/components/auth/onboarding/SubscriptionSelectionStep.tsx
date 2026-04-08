@@ -17,7 +17,6 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
 import { useOnboarding, type Plan } from "@/contexts/onboarding-context";
-import { authClient } from "@/lib/auth/authClient";
 import { signOut } from "@/lib/auth/authActions";
 import {
 	getPublicPlans,
@@ -31,6 +30,7 @@ import {
 	SettingsSection,
 } from "@/components/settings";
 import { useToast } from "@/hooks/use-toast";
+import { useFlags } from "@/hooks/useFlags";
 import { PlanSelectionGrid } from "@/components/PlanSelectionGrid";
 import { EnterpriseCard } from "@/components/EnterpriseCard";
 import { WatchlistCard } from "@/components/WatchlistCard";
@@ -42,6 +42,16 @@ export function SubscriptionSelectionStep() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const {
+		flags: stripeFlags,
+		error: stripeFlagsError,
+		isLoading: flagsLoading,
+	} = useFlags(["stripe-billing-enabled"]);
+	const stripeBillingEnabled =
+		stripeFlagsError !== null
+			? true
+			: stripeFlags["stripe-billing-enabled"] !== false;
+
+	const {
 		state,
 		setSelectedPlan,
 		startSubscriptionFlow,
@@ -52,26 +62,40 @@ export function SubscriptionSelectionStep() {
 	const [plans, setPlans] = useState<PublicPlanInfo[]>([]);
 	const [isLoadingPlans, setIsLoadingPlans] = useState(true);
 
-	// Fetch plans from API
+	// Fetch plans only when Stripe billing is enabled (skip when license-only mode)
 	useEffect(() => {
+		if (flagsLoading) {
+			return;
+		}
+		if (!stripeBillingEnabled) {
+			setIsLoadingPlans(false);
+			return;
+		}
+		let cancelled = false;
 		async function loadPlans() {
 			try {
 				const fetchedPlans = await getPublicPlans();
-				// Sort plans by subscription price (lowest first)
 				fetchedPlans.sort((a, b) => {
 					const priceA = getSubscriptionPrice(a)?.amount ?? 0;
 					const priceB = getSubscriptionPrice(b)?.amount ?? 0;
 					return priceA - priceB;
 				});
-				setPlans(fetchedPlans);
+				if (!cancelled) {
+					setPlans(fetchedPlans);
+				}
 			} catch (error) {
 				console.error("Failed to load plans:", error);
 			} finally {
-				setIsLoadingPlans(false);
+				if (!cancelled) {
+					setIsLoadingPlans(false);
+				}
 			}
 		}
-		loadPlans();
-	}, []);
+		void loadPlans();
+		return () => {
+			cancelled = true;
+		};
+	}, [flagsLoading, stripeBillingEnabled]);
 
 	const handleLogout = async () => {
 		setIsLoggingOut(true);
@@ -155,6 +179,25 @@ export function SubscriptionSelectionStep() {
 	// Determine which plan is recommended (middle tier - pro)
 	const recommendedPlan = "pro";
 
+	const licenseOnlyMode = !flagsLoading && !stripeBillingEnabled;
+
+	const pageTitle = licenseOnlyMode
+		? t("onboarding.plans.licenseOnly.title")
+		: t("onboarding.plans.title");
+	const pageDescription = licenseOnlyMode
+		? t("onboarding.plans.licenseOnly.description")
+		: t("onboarding.plans.description");
+	const pageNote = licenseOnlyMode
+		? t("onboarding.plans.licenseOnly.note")
+		: t("onboarding.plans.note");
+
+	const selectTitle = licenseOnlyMode
+		? t("onboarding.plans.licenseOnly.selectTitle")
+		: t("onboarding.plans.select.title");
+	const selectDescription = licenseOnlyMode
+		? t("onboarding.plans.licenseOnly.selectDescription")
+		: t("onboarding.plans.select.description");
+
 	return (
 		<div className="w-full max-w-6xl mx-auto px-4 pt-6 pb-10 space-y-8">
 			<div className="flex items-center justify-between gap-4">
@@ -188,12 +231,10 @@ export function SubscriptionSelectionStep() {
 
 			<SettingsPageHeader
 				icon={Sparkles}
-				title={t("onboarding.plans.title")}
-				description={t("onboarding.plans.description")}
+				title={pageTitle}
+				description={pageDescription}
 			/>
-			<p className="text-sm text-muted-foreground -mt-4">
-				{t("onboarding.plans.note")}
-			</p>
+			<p className="text-sm text-muted-foreground -mt-4">{pageNote}</p>
 
 			<div className="text-center">
 				<div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium">
@@ -261,61 +302,71 @@ export function SubscriptionSelectionStep() {
 				</div>
 			</SettingsSection>
 
-			<SettingsSection
-				title={t("onboarding.plans.select.title")}
-				description={t("onboarding.plans.select.description")}
-			>
-				{isLoadingPlans ? (
+			<SettingsSection title={selectTitle} description={selectDescription}>
+				{flagsLoading || (stripeBillingEnabled && isLoadingPlans) ? (
 					<div className="flex items-center justify-center py-12">
 						<Loader2 className="h-8 w-8 animate-spin text-primary" />
 					</div>
 				) : (
 					<div className="space-y-6">
-						<PlanSelectionGrid
-							plans={plans}
-							onSelectPlan={handleSelectPlan}
-							isActionLoading={isRedirecting}
-							recommendedPlan={recommendedPlan}
-						/>
-
-						<EnterpriseCard onRedeem={handleRedeemLicense} />
-
-						{(() => {
-							const watchlistPlan = plans.find((p) => p.name === "watchlist");
-							const subscriptionPrice = watchlistPlan
-								? getSubscriptionPrice(watchlistPlan)
-								: null;
-							return (
-								<WatchlistCard
-									displayPrice={subscriptionPrice?.amount ?? 49900}
-									interval={subscriptionPrice?.interval ?? "month"}
-									onSelect={() =>
-										watchlistPlan ? handleSelectPlan(watchlistPlan) : undefined
-									}
-									isLoading={isRedirecting}
-									canSubscribe={Boolean(watchlistPlan && subscriptionPrice)}
+						{stripeBillingEnabled && (
+							<>
+								<PlanSelectionGrid
+									plans={plans}
+									onSelectPlan={handleSelectPlan}
+									isActionLoading={isRedirecting}
+									recommendedPlan={recommendedPlan}
 								/>
-							);
-						})()}
+
+								{(() => {
+									const watchlistPlan = plans.find(
+										(p) => p.name === "watchlist",
+									);
+									const subscriptionPrice = watchlistPlan
+										? getSubscriptionPrice(watchlistPlan)
+										: null;
+									return (
+										<WatchlistCard
+											displayPrice={subscriptionPrice?.amount ?? 49900}
+											interval={subscriptionPrice?.interval ?? "month"}
+											onSelect={() =>
+												watchlistPlan
+													? handleSelectPlan(watchlistPlan)
+													: undefined
+											}
+											isLoading={isRedirecting}
+											canSubscribe={Boolean(watchlistPlan && subscriptionPrice)}
+										/>
+									);
+								})()}
+							</>
+						)}
+
+						<EnterpriseCard
+							onRedeem={handleRedeemLicense}
+							defaultLicenseInputExpanded={licenseOnlyMode}
+						/>
 					</div>
 				)}
 			</SettingsSection>
 
-			<SettingsSection
-				title={t("onboarding.plans.detailed.title")}
-				description={t("onboarding.plans.detailed.description")}
-			>
-				<Accordion type="single" collapsible>
-					<AccordionItem value="pricing">
-						<AccordionTrigger className="text-sm font-semibold">
-							{t("onboarding.plans.detailed.trigger")}
-						</AccordionTrigger>
-						<AccordionContent>
-							<PricingTable currentPlan={null} />
-						</AccordionContent>
-					</AccordionItem>
-				</Accordion>
-			</SettingsSection>
+			{stripeBillingEnabled && (
+				<SettingsSection
+					title={t("onboarding.plans.detailed.title")}
+					description={t("onboarding.plans.detailed.description")}
+				>
+					<Accordion type="single" collapsible>
+						<AccordionItem value="pricing">
+							<AccordionTrigger className="text-sm font-semibold">
+								{t("onboarding.plans.detailed.trigger")}
+							</AccordionTrigger>
+							<AccordionContent>
+								<PricingTable currentPlan={null} />
+							</AccordionContent>
+						</AccordionItem>
+					</Accordion>
+				</SettingsSection>
+			)}
 
 			<div className="border-t border-border pt-6 flex flex-col sm:flex-row sm:items-center justify-end gap-4">
 				<Button

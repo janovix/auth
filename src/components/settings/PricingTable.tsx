@@ -3,7 +3,6 @@
 import * as Sentry from "@sentry/nextjs";
 import { useEffect, useState } from "react";
 import {
-	Loader2,
 	Users,
 	Building2,
 	FileText,
@@ -43,6 +42,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { PricingTableSkeleton } from "@/components/settings/PricingTableSkeleton";
 
 // Price type icons and translation keys
 const priceTypeConfig: Record<
@@ -163,11 +163,7 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 	}, []);
 
 	if (isLoading) {
-		return (
-			<div className="flex items-center justify-center py-12">
-				<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-			</div>
-		);
+		return <PricingTableSkeleton />;
 	}
 
 	if (error) {

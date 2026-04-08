@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
 	Check,
 	ArrowRight,
@@ -21,7 +20,11 @@ import { useLanguage } from "@/contexts/language-context";
 import { useOnboarding } from "@/contexts/onboarding-context";
 import { authClient } from "@/lib/auth/authClient";
 import { signOut } from "@/lib/auth/authActions";
-import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
+import {
+	getAuthCoreBaseUrl,
+	getProductOrgSlugUrlPrefix,
+	withAppPathPrefixCopy,
+} from "@/lib/auth/authCoreConfig";
 import { resolveSafeRedirectUrl } from "@/lib/auth/safeRedirect";
 import { cn } from "@/lib/utils";
 
@@ -99,8 +102,18 @@ export function CreateOrganizationStep({
 	redirectTo,
 }: CreateOrganizationStepProps) {
 	const { t } = useLanguage();
-	const router = useRouter();
 	const { state, createOrganization } = useOnboarding();
+
+	const isTeamPlan = state.currentPlan?.id === "watchlist";
+	const slugPathPrefix = useMemo(
+		() => getProductOrgSlugUrlPrefix(isTeamPlan),
+		[isTeamPlan],
+	);
+	const tOrg = useCallback(
+		(suffix: string) =>
+			t(isTeamPlan ? `onboarding.team.${suffix}` : `onboarding.org.${suffix}`),
+		[isTeamPlan, t],
+	);
 
 	const [orgName, setOrgName] = useState("");
 	const [slug, setSlug] = useState("");
@@ -174,15 +187,17 @@ export function CreateOrganizationStep({
 		[],
 	);
 
-	// Get org initials for placeholder
-	const orgInitials = orgName
+	// Initials under the icon when there is no logo (blocks always shows icon + caption; empty = no "?")
+	const orgInitials = orgName.trim()
 		? orgName
-				.split(" ")
+				.trim()
+				.split(/\s+/)
 				.map((word) => word[0])
+				.filter(Boolean)
 				.join("")
 				.slice(0, 2)
 				.toUpperCase()
-		: "?";
+		: "";
 
 	const handleLogout = async () => {
 		setIsLoggingOut(true);
@@ -213,7 +228,7 @@ export function CreateOrganizationStep({
 			) {
 				setSlugError(t("onboarding.org.slug.error.taken"));
 			} else {
-				setError(result.error || t("onboarding.org.error.createFailed"));
+				setError(result.error || tOrg("error.createFailed"));
 			}
 			setIsCreating(false);
 			return;
@@ -258,11 +273,9 @@ export function CreateOrganizationStep({
 						{t("onboarding.org.badge").replace("{plan}", planName)}
 					</Badge>
 					<h1 className="text-2xl font-bold text-foreground mb-2">
-						{t("onboarding.org.title")}
+						{tOrg("title")}
 					</h1>
-					<p className="text-muted-foreground">
-						{t("onboarding.org.description")}
-					</p>
+					<p className="text-muted-foreground">{tOrg("description")}</p>
 				</div>
 
 				{/* Form Card */}
@@ -286,9 +299,7 @@ export function CreateOrganizationStep({
 								outputSize={256}
 								placeholder={orgInitials}
 								editLabel={t("onboarding.org.logo.edit") || "Add Logo"}
-								dialogTitle={
-									t("onboarding.org.logo.title") || "Organization Logo"
-								}
+								dialogTitle={tOrg("logo.title") || "Organization Logo"}
 								acceptText={t("common.accept") || "Accept"}
 								cancelText={t("common.cancel") || "Cancel"}
 								successMessage={
@@ -299,24 +310,24 @@ export function CreateOrganizationStep({
 								}
 							/>
 							<p className="text-xs text-muted-foreground">
-								{t("onboarding.org.logo.help") ||
+								{tOrg("logo.help") ||
 									"Optional: Add a logo for your organization"}
 							</p>
 						</div>
 
 						{/* Organization Name */}
 						<div className="space-y-2">
-							<Label htmlFor="orgName">{t("onboarding.org.name.label")}</Label>
+							<Label htmlFor="orgName">{tOrg("name.label")}</Label>
 							<Input
 								id="orgName"
-								placeholder={t("onboarding.org.name.placeholder")}
+								placeholder={tOrg("name.placeholder")}
 								value={orgName}
 								onChange={(e) => setOrgName(e.target.value)}
 								className="h-12"
 								disabled={isCreating}
 							/>
 							<p className="text-xs text-muted-foreground">
-								{t("onboarding.org.name.help")}
+								{tOrg("name.help")}
 							</p>
 						</div>
 
@@ -324,24 +335,24 @@ export function CreateOrganizationStep({
 						<div className="space-y-2">
 							<Label htmlFor="orgSlug" className="flex items-center gap-1.5">
 								<Link2 className="h-3.5 w-3.5" />
-								{t("onboarding.org.slug.label")}
+								{tOrg("slug.label")}
 							</Label>
 							<div className="flex items-center">
+								<span className="h-12 shrink-0 px-3 flex items-center bg-muted border border-input border-r-0 rounded-l-md text-sm text-muted-foreground whitespace-nowrap font-mono">
+									{slugPathPrefix}
+								</span>
 								<Input
 									id="orgSlug"
 									placeholder={t("onboarding.org.slug.placeholder")}
 									value={slug}
 									onChange={(e) => handleSlugChange(e.target.value)}
 									className={cn(
-										"h-12 rounded-r-none font-mono text-sm",
+										"h-12 rounded-l-none rounded-r-md font-mono text-sm min-w-0 flex-1",
 										slugError &&
 											"border-destructive focus-visible:ring-destructive",
 									)}
 									disabled={isCreating}
 								/>
-								<span className="h-12 px-3 flex items-center bg-muted border border-l-0 border-input rounded-r-md text-sm text-muted-foreground whitespace-nowrap">
-									.janovix.com
-								</span>
 							</div>
 							{slugError ? (
 								<p className="text-xs text-destructive flex items-center gap-1">
@@ -351,11 +362,14 @@ export function CreateOrganizationStep({
 							) : slug ? (
 								<p className="text-xs text-success flex items-center gap-1">
 									<Check className="h-3 w-3" />
-									{t("onboarding.org.slug.available").replace("{slug}", slug)}
+									{withAppPathPrefixCopy(
+										t("onboarding.org.slug.available"),
+										slugPathPrefix,
+									).replace("{slug}", slug)}
 								</p>
 							) : (
 								<p className="text-xs text-muted-foreground">
-									{t("onboarding.org.slug.help")}
+									{withAppPathPrefixCopy(tOrg("slug.help"), slugPathPrefix)}
 								</p>
 							)}
 						</div>
@@ -373,7 +387,7 @@ export function CreateOrganizationStep({
 								</>
 							) : (
 								<>
-									{t("onboarding.org.submit")}
+									{tOrg("submit")}
 									<ArrowRight className="h-4 w-4 ml-2" />
 								</>
 							)}
@@ -383,9 +397,7 @@ export function CreateOrganizationStep({
 
 				{/* Footer Info */}
 				<div className="mt-6 text-center space-y-3">
-					<p className="text-xs text-muted-foreground">
-						{t("onboarding.org.footer")}
-					</p>
+					<p className="text-xs text-muted-foreground">{tOrg("footer")}</p>
 				</div>
 
 				<div className="flex justify-end mb-4 pt-6">

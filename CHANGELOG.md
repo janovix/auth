@@ -1,3 +1,10 @@
+# [2.8.0-rc.1](https://github.com/janovix/auth/compare/v2.7.0...v2.8.0-rc.1) (2026-04-14)
+
+
+### Features
+
+* **compliance:** add self-service email notification option for KYC sessions ([f0d3676](https://github.com/janovix/auth/commit/f0d3676c774feffd14eb6ad1667ae8cdf3cbd78d))
+
 # [2.7.0-rc.2](https://github.com/janovix/auth/compare/v2.7.0-rc.1...v2.7.0-rc.2) (2026-04-14)
 
 

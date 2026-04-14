@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Trash2, Loader2, AlertTriangle } from "lucide-react";
+import { Trash2, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui";
 import { Input } from "@/components/ui/input";
@@ -143,20 +143,14 @@ export function DeleteOrganizationDialog({
 					<Button
 						variant="destructive"
 						onClick={handleDelete}
-						disabled={!isConfirmed || isDeleting}
+						loading={isDeleting}
+						disabled={!isConfirmed}
 						className="w-full sm:w-auto"
 					>
-						{isDeleting ? (
-							<>
-								<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-								{t("settings.org.deleting")}
-							</>
-						) : (
-							<>
-								<Trash2 className="h-4 w-4 mr-2" />
-								{t("settings.org.deleteButtonConfirm")}
-							</>
-						)}
+						{!isDeleting && <Trash2 className="h-4 w-4 mr-2" />}
+						{isDeleting
+							? t("settings.org.deleting")
+							: t("settings.org.deleteButtonConfirm")}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

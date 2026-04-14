@@ -11,7 +11,6 @@ import {
 	Calendar,
 	User,
 	CreditCard,
-	Loader2,
 	Building2,
 	Lock,
 	AlertCircle,
@@ -679,7 +678,7 @@ export function SettingsView() {
 									{/* Upload overlay */}
 									{uploadingAvatar && (
 										<div className="absolute inset-0 bg-background/80 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center gap-3 z-10">
-											<Loader2 className="h-8 w-8 animate-spin text-primary" />
+											<Spinner className="h-8 w-8 text-primary" />
 											<span className="text-sm font-medium text-foreground">
 												{t("settings.profile.uploading")}
 											</span>
@@ -699,20 +698,15 @@ export function SettingsView() {
 										</p>
 										<Button
 											onClick={handleAvatarEditorSave}
-											disabled={uploadingAvatar}
+											loading={uploadingAvatar}
 											size="sm"
 										>
-											{uploadingAvatar ? (
-												<>
-													<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-													{t("settings.profile.uploading")}
-												</>
-											) : (
-												<>
-													<CheckCircle2 className="h-4 w-4 mr-2" />
-													{t("settings.profile.saveAvatar")}
-												</>
+											{!uploadingAvatar && (
+												<CheckCircle2 className="h-4 w-4 mr-2" />
 											)}
+											{uploadingAvatar
+												? t("settings.profile.uploading")
+												: t("settings.profile.saveAvatar")}
 										</Button>
 									</div>
 								)}
@@ -752,14 +746,10 @@ export function SettingsView() {
 										/>
 										<Button
 											onClick={handleAvatarSave}
-											disabled={saving}
+											loading={saving}
 											size="sm"
 										>
-											{saving ? (
-												<Loader2 className="h-4 w-4 animate-spin" />
-											) : (
-												t("settings.save")
-											)}
+											{t("settings.save")}
 										</Button>
 									</div>
 								</div>
@@ -1000,14 +990,11 @@ export function SettingsView() {
 										/>
 										<Button
 											onClick={handleOrgAvatarSave}
-											disabled={!isOrgOwner || orgSaving}
+											loading={orgSaving}
+											disabled={!isOrgOwner}
 											size="sm"
 										>
-											{orgSaving ? (
-												<Loader2 className="h-4 w-4 animate-spin" />
-											) : (
-												t("settings.save")
-											)}
+											{t("settings.save")}
 										</Button>
 									</div>
 									{orgAvatarUrl && (

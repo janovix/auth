@@ -9,7 +9,6 @@ import {
 	ChevronDown,
 	ChevronRight,
 	Check,
-	Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button, Label } from "@/components/ui";
@@ -22,6 +21,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
 	Tooltip,
 	TooltipContent,
@@ -213,6 +213,7 @@ export function ComplianceSettingsView() {
 		"disabled" | "manual" | "automatic"
 	>("disabled");
 	const [selfServiceExpiryHours, setSelfServiceExpiryHours] = useState(72);
+	const [selfServiceSendEmail, setSelfServiceSendEmail] = useState(true);
 	const [savingSelfService, setSavingSelfService] = useState(false);
 
 	const activeOrgId = (
@@ -288,6 +289,9 @@ export function ComplianceSettingsView() {
 					setSelfServiceMode(complianceSettings.selfServiceMode || "disabled");
 					setSelfServiceExpiryHours(
 						complianceSettings.selfServiceExpiryHours || 72,
+					);
+					setSelfServiceSendEmail(
+						complianceSettings.selfServiceSendEmail !== false,
 					);
 				}
 			} catch (err) {
@@ -383,11 +387,13 @@ export function ComplianceSettingsView() {
 		try {
 			setSavingSelfService(true);
 
-			await updateSelfServiceSettings(activeOrgId, {
+			const updated = await updateSelfServiceSettings(activeOrgId, {
 				selfServiceMode,
 				selfServiceExpiryHours,
+				selfServiceSendEmail,
 			});
 
+			setSettings((prev) => (prev ? { ...prev, ...updated } : prev));
 			showSuccess(t("settings.compliance.selfServiceSavedSuccess"));
 		} catch (err) {
 			toast.error(
@@ -401,6 +407,7 @@ export function ComplianceSettingsView() {
 		canEdit,
 		selfServiceMode,
 		selfServiceExpiryHours,
+		selfServiceSendEmail,
 		showSuccess,
 		t,
 	]);
@@ -408,7 +415,8 @@ export function ComplianceSettingsView() {
 	const isDirtySelfService =
 		settings &&
 		(selfServiceMode !== (settings.selfServiceMode || "disabled") ||
-			selfServiceExpiryHours !== (settings.selfServiceExpiryHours || 72));
+			selfServiceExpiryHours !== (settings.selfServiceExpiryHours || 72) ||
+			selfServiceSendEmail !== (settings.selfServiceSendEmail !== false));
 
 	const selectedActivity = VULNERABLE_ACTIVITIES.find(
 		(a) => a.value === activityKey,
@@ -559,19 +567,13 @@ export function ComplianceSettingsView() {
 							<div className="pt-2">
 								<Button
 									onClick={handleSave}
-									disabled={!canEdit || saving || !rfc || !activityKey}
+									loading={saving}
+									disabled={!canEdit || !rfc || !activityKey}
 								>
-									{saving ? (
-										<>
-											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-											{t("settings.saving")}
-										</>
-									) : (
-										<>
-											<Check className="mr-2 h-4 w-4" />
-											{t("settings.compliance.saveChanges")}
-										</>
-									)}
+									{!saving && <Check className="mr-2 h-4 w-4" />}
+									{saving
+										? t("settings.saving")
+										: t("settings.compliance.saveChanges")}
 								</Button>
 								{!canEdit && (
 									<p className="text-sm text-muted-foreground mt-2">
@@ -743,6 +745,29 @@ export function ComplianceSettingsView() {
 									</div>
 								)}
 
+								{/* Send invite email when creating a KYC session */}
+								{selfServiceMode !== "disabled" && (
+									<div className="flex items-start gap-3 rounded-md border p-3">
+										<Switch
+											id="self-service-send-email"
+											checked={selfServiceSendEmail}
+											onCheckedChange={setSelfServiceSendEmail}
+											disabled={!canEdit || savingSelfService}
+										/>
+										<div className="space-y-1">
+											<Label
+												htmlFor="self-service-send-email"
+												className="cursor-pointer"
+											>
+												{t("settings.compliance.selfServiceSendEmail")}
+											</Label>
+											<p className="text-xs text-muted-foreground">
+												{t("settings.compliance.selfServiceSendEmailHelp")}
+											</p>
+										</div>
+									</div>
+								)}
+
 								{/* Compliance notice */}
 								<div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-3">
 									<AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
@@ -755,21 +780,13 @@ export function ComplianceSettingsView() {
 								<div className="flex justify-end">
 									<Button
 										onClick={handleSaveSelfService}
-										disabled={
-											!canEdit || savingSelfService || !isDirtySelfService
-										}
+										loading={savingSelfService}
+										disabled={!canEdit || !isDirtySelfService}
 									>
-										{savingSelfService ? (
-											<>
-												<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-												{t("settings.saving")}
-											</>
-										) : (
-											<>
-												<Check className="mr-2 h-4 w-4" />
-												{t("settings.compliance.saveChanges")}
-											</>
-										)}
+										{!savingSelfService && <Check className="mr-2 h-4 w-4" />}
+										{savingSelfService
+											? t("settings.saving")
+											: t("settings.compliance.saveChanges")}
 									</Button>
 								</div>
 							</div>

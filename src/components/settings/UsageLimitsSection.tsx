@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
 	getUsageDetails,
@@ -422,15 +421,10 @@ export function UsageLimitsSection({
 								)}
 							</p>
 						</div>
-						<Button onClick={() => void saveOverage()} disabled={saving}>
-							{saving ? (
-								<>
-									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-									{t("settings.billing.usageLimits.saving")}
-								</>
-							) : (
-								t("settings.billing.usageLimits.saveButton")
-							)}
+						<Button onClick={() => void saveOverage()} loading={saving}>
+							{saving
+								? t("settings.billing.usageLimits.saving")
+								: t("settings.billing.usageLimits.saveButton")}
 						</Button>
 					</div>
 				)}

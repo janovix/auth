@@ -11,7 +11,6 @@ import {
 	User,
 	Clock,
 	X,
-	Loader2,
 	Trash2,
 	ArrowRightLeft,
 } from "lucide-react";
@@ -452,20 +451,14 @@ export function TeamSettingsView() {
 									</Button>
 									<Button
 										onClick={handleInvite}
-										disabled={!inviteEmail || inviting}
+										loading={inviting}
+										disabled={!inviteEmail}
 										className="w-full sm:w-auto"
 									>
-										{inviting ? (
-											<>
-												<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-												{t("settings.team.sending")}
-											</>
-										) : (
-											<>
-												<Mail className="mr-2 h-4 w-4" />
-												{t("settings.team.sendInvite")}
-											</>
-										)}
+										{!inviting && <Mail className="mr-2 h-4 w-4" />}
+										{inviting
+											? t("settings.team.sending")
+											: t("settings.team.sendInvite")}
 									</Button>
 								</DialogFooter>
 							</DialogContent>

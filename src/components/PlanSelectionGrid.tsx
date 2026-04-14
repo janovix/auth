@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Lock, Loader2, Zap, Crown, Rocket, Search } from "lucide-react";
+import { Check, Lock, Zap, Crown, Rocket, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -211,13 +211,10 @@ export function PlanSelectionGrid({
 									size="lg"
 									variant={isRecommended ? "default" : "outline"}
 									onClick={() => onSelectPlan(plan)}
-									disabled={isActionLoading || isCurrent || !subscriptionPrice}
+									loading={isActionLoading}
+									disabled={isCurrent || !subscriptionPrice}
 								>
-									{isActionLoading ? (
-										<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-									) : (
-										<Lock className="h-4 w-4 mr-2" />
-									)}
+									{!isActionLoading && <Lock className="h-4 w-4 mr-2" />}
 									{isCurrent
 										? t("settings.billing.currentPlanBadge")
 										: t("onboarding.plans.subscribe").replace(

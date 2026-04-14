@@ -546,6 +546,10 @@ const translations = {
 		"settings.compliance.selfServiceExpiryHours": "Expiry Hours",
 		"settings.compliance.selfServiceExpiryHoursHelp":
 			"Number of hours before a self-service KYC verification link expires",
+		"settings.compliance.selfServiceSendEmail":
+			"Send email on session creation",
+		"settings.compliance.selfServiceSendEmailHelp":
+			"Automatically send the KYC verification link via email when a new session is created",
 		"settings.compliance.kycComplianceNotice":
 			"Self-service KYC verification links allow clients to submit their own identity documents. Ensure your compliance policies permit this before enabling.",
 		"settings.compliance.selfServiceSavedSuccess":
@@ -1728,6 +1732,9 @@ const translations = {
 		"settings.compliance.selfServiceExpiryHours": "Horas de Expiración",
 		"settings.compliance.selfServiceExpiryHoursHelp":
 			"Número de horas antes de que expire el enlace de verificación KYC de autoservicio",
+		"settings.compliance.selfServiceSendEmail": "Enviar correo al crear sesión",
+		"settings.compliance.selfServiceSendEmailHelp":
+			"Enviar automáticamente el enlace de verificación KYC por correo al crear una nueva sesión",
 		"settings.compliance.kycComplianceNotice":
 			"Los enlaces de verificación KYC de autoservicio permiten a los clientes enviar sus propios documentos de identidad. Asegúrate de que tus políticas de cumplimiento lo permitan antes de habilitarlo.",
 		"settings.compliance.selfServiceSavedSuccess":

@@ -16,7 +16,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
 	AlertTriangle,
 	CheckCircle2,
-	Loader2,
 	Mail,
 	RefreshCw,
 	Shield,
@@ -64,6 +63,7 @@ import {
 	InputOTPGroup,
 	InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { Spinner } from "@/components/ui/spinner";
 import { getAuthErrorMessage } from "@/lib/auth/errorMessages";
 import {
 	DEFAULT_POST_AUTH_ROUTE,
@@ -675,18 +675,10 @@ export const LoginView = ({
 										<Button
 											type="submit"
 											className="w-full h-11 gap-3 px-6"
+											loading={isSubmitting || pendingSend}
 											disabled={anyAuthLoading || isOnCooldown}
-											aria-busy={isSubmitting || pendingSend}
 										>
-											{isSubmitting || pendingSend ? (
-												<span className="flex items-center justify-center gap-3">
-													<Loader2
-														className="h-5 w-5 animate-spin"
-														aria-hidden="true"
-													/>
-													{t("login.button.sending")}
-												</span>
-											) : isOnCooldown ? (
+											{isOnCooldown ? (
 												<>
 													<RefreshCw className="h-5 w-5" aria-hidden="true" />
 													{t("login.otp.resendWait").replace(
@@ -694,6 +686,8 @@ export const LoginView = ({
 														String(secondsRemaining),
 													)}
 												</>
+											) : isSubmitting || pendingSend ? (
+												t("login.button.sending")
 											) : (
 												<>
 													<SendHorizontal
@@ -726,15 +720,10 @@ export const LoginView = ({
 											variant="outline"
 											className="w-full h-11 gap-3 px-6"
 											onClick={handleGoogleSignIn}
+											loading={isGoogleLoading}
 											disabled={anyAuthLoading}
-											aria-busy={isGoogleLoading}
 										>
-											{isGoogleLoading ? (
-												<Loader2
-													className="h-5 w-5 animate-spin"
-													aria-hidden="true"
-												/>
-											) : (
+											{!isGoogleLoading && (
 												// eslint-disable-next-line @next/next/no-img-element
 												<img
 													src="/google.svg"
@@ -756,15 +745,10 @@ export const LoginView = ({
 											variant="outline"
 											className="w-full h-11 gap-3 px-6"
 											onClick={handlePasskeySignIn}
+											loading={isPasskeyLoading}
 											disabled={anyAuthLoading}
-											aria-busy={isPasskeyLoading}
 										>
-											{isPasskeyLoading ? (
-												<Loader2
-													className="h-5 w-5 animate-spin"
-													aria-hidden="true"
-												/>
-											) : (
+											{!isPasskeyLoading && (
 												// eslint-disable-next-line @next/next/no-img-element
 												<img
 													src="/passkey.svg"
@@ -837,7 +821,7 @@ export const LoginView = ({
 
 										{isVerifyingOtp && (
 											<div className="flex items-center gap-2 text-sm text-muted-foreground">
-												<Loader2 className="h-4 w-4 animate-spin" />
+												<Spinner className="h-4 w-4" />
 												{t("login.otp.verifying")}
 											</div>
 										)}
@@ -891,15 +875,11 @@ export const LoginView = ({
 									{otpNeedsResend ? (
 										<Button
 											onClick={() => handleResendOtp()}
-											disabled={isResending || isOnCooldown || pendingResend}
+											loading={isResending || pendingResend}
+											disabled={isOnCooldown}
 											className="w-full"
 										>
-											{isResending || pendingResend ? (
-												<>
-													<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-													{t("login.otp.resendNew")}
-												</>
-											) : isOnCooldown ? (
+											{isOnCooldown ? (
 												<>
 													<RefreshCw className="mr-2 h-4 w-4" />
 													{t("login.otp.resendWait").replace(
@@ -907,6 +887,8 @@ export const LoginView = ({
 														String(secondsRemaining),
 													)}
 												</>
+											) : isResending || pendingResend ? (
+												t("login.otp.resendNew")
 											) : (
 												<>
 													<RefreshCw className="mr-2 h-4 w-4" />
@@ -917,16 +899,14 @@ export const LoginView = ({
 									) : (
 										<Button
 											onClick={() => handleResendOtp()}
-											disabled={
-												isResending ||
-												isVerifyingOtp ||
-												isOnCooldown ||
-												pendingResend
-											}
+											loading={isResending || pendingResend}
+											disabled={isVerifyingOtp || isOnCooldown}
 											variant="outline"
 											className="w-full"
 										>
-											<Mail className="mr-2 h-4 w-4" />
+											{!(isResending || pendingResend) && (
+												<Mail className="mr-2 h-4 w-4" />
+											)}
 											{isResending || pendingResend
 												? t("login.otp.resending")
 												: isOnCooldown

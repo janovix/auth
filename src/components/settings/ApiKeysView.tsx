@@ -8,7 +8,6 @@ import {
 	Check,
 	RefreshCw,
 	Trash2,
-	Loader2,
 	AlertTriangle,
 	Clock,
 	ShieldAlert,
@@ -256,20 +255,14 @@ export function ApiKeysView() {
 								</Button>
 								<Button
 									onClick={handleCreate}
-									disabled={!keyName.trim() || creating}
+									loading={creating}
+									disabled={!keyName.trim()}
 									className="w-full sm:w-auto"
 								>
-									{creating ? (
-										<>
-											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-											{t("settings.apiKeys.creating") || "Creating..."}
-										</>
-									) : (
-										<>
-											<Plus className="mr-2 h-4 w-4" />
-											{t("settings.apiKeys.createBtn") || "Create Key"}
-										</>
-									)}
+									{!creating && <Plus className="mr-2 h-4 w-4" />}
+									{creating
+										? t("settings.apiKeys.creating") || "Creating..."
+										: t("settings.apiKeys.createBtn") || "Create Key"}
 								</Button>
 							</DialogFooter>
 						</DialogContent>

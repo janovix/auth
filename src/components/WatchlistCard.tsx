@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -62,17 +62,15 @@ export function WatchlistCard({
 					<Button
 						variant={isCurrent ? "secondary" : "outline"}
 						onClick={onSelect}
-						disabled={isLoading || isCurrent || !canSubscribe}
+						loading={isLoading}
+						disabled={isCurrent || !canSubscribe}
 					>
-						{isLoading ? (
-							<Loader2 className="h-4 w-4 animate-spin" />
-						) : isCurrent ? (
-							t("settings.billing.currentPlanBadge")
-						) : canSubscribe ? (
-							t("onboarding.plans.watchlist.cta")
-						) : (
-							t("onboarding.plans.watchlist.contact")
-						)}
+						{!isLoading &&
+							(isCurrent
+								? t("settings.billing.currentPlanBadge")
+								: canSubscribe
+									? t("onboarding.plans.watchlist.cta")
+									: t("onboarding.plans.watchlist.contact"))}
 					</Button>
 				</div>
 			</CardContent>

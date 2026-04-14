@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import {
 	Dialog,
 	DialogContent,
@@ -271,16 +271,10 @@ export function DowngradeWizard({
 					</Button>
 					<Button
 						onClick={() => void handleSubmit()}
-						disabled={submitting || !canSubmit}
+						loading={submitting}
+						disabled={!canSubmit}
 					>
-						{submitting ? (
-							<>
-								<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-								Working…
-							</>
-						) : (
-							"Continue"
-						)}
+						{submitting ? "Working…" : "Continue"}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

@@ -129,6 +129,8 @@ export interface AmlComplianceSettings {
 	selfServiceMode?: "disabled" | "manual" | "automatic";
 	selfServiceExpiryHours?: number;
 	selfServiceRequiredSections?: string[] | null;
+	/** When true (default), aml-svc emails the client when a KYC session is created. */
+	selfServiceSendEmail?: boolean;
 	createdAt: string;
 	updatedAt: string;
 }
@@ -142,6 +144,7 @@ export interface UpdateSelfServiceSettingsInput {
 	selfServiceMode?: "disabled" | "manual" | "automatic";
 	selfServiceExpiryHours?: number;
 	selfServiceRequiredSections?: string[] | null;
+	selfServiceSendEmail?: boolean;
 }
 
 export interface CreateAmlComplianceSettingsInput {

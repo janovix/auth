@@ -1,14 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import {
-	Check,
-	ArrowRight,
-	Loader2,
-	LogOut,
-	AlertCircle,
-	Link2,
-} from "lucide-react";
+import { Check, ArrowRight, LogOut, AlertCircle, Link2 } from "lucide-react";
 
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
@@ -378,13 +371,11 @@ export function CreateOrganizationStep({
 							className="w-full h-12"
 							size="lg"
 							onClick={handleCreateOrg}
-							disabled={!isFormValid || isCreating}
+							loading={isCreating}
+							disabled={!isFormValid}
 						>
 							{isCreating ? (
-								<>
-									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-									{t("onboarding.org.creating")}
-								</>
+								t("onboarding.org.creating")
 							) : (
 								<>
 									{tOrg("submit")}
@@ -405,14 +396,11 @@ export function CreateOrganizationStep({
 						variant="outline"
 						size="sm"
 						onClick={handleLogout}
-						disabled={isLoggingOut || isCreating}
+						loading={isLoggingOut}
+						disabled={isCreating}
 						className="gap-2"
 					>
-						{isLoggingOut ? (
-							<Loader2 className="h-3.5 w-3.5 animate-spin" />
-						) : (
-							<LogOut className="h-3.5 w-3.5" />
-						)}
+						{!isLoggingOut && <LogOut className="h-3.5 w-3.5" />}
 						{t("settings.nav.signOut")}
 					</Button>
 				</div>

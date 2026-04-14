@@ -2,17 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-	Building2,
-	Copy,
-	Check,
-	Loader2,
-	Plus,
-	AlertCircle,
-	Link2,
-} from "lucide-react";
+import { Building2, Copy, Check, Plus, AlertCircle, Link2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button, Label } from "@/components/ui";
+import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -528,18 +521,14 @@ export function OrganizationSettingsView() {
 										<Button
 											variant="outline"
 											onClick={handleOrgUpdate}
+											loading={saving}
 											disabled={
 												!isOwner ||
-												saving ||
 												!!slugError ||
 												(!!orgSlug && slugAvailable !== true)
 											}
 										>
-											{saving ? (
-												<Loader2 className="h-4 w-4 animate-spin" />
-											) : (
-												t("settings.save")
-											)}
+											{t("settings.save")}
 										</Button>
 									</div>
 								</div>
@@ -577,7 +566,7 @@ export function OrganizationSettingsView() {
 										</p>
 									) : isCheckingSlug ? (
 										<p className="text-xs text-muted-foreground flex items-center gap-1">
-											<Loader2 className="h-3 w-3 animate-spin" />
+											<Spinner className="h-3 w-3" />
 											{t("settings.createOrg.checkingSlug") ||
 												"Checking availability..."}
 										</p>

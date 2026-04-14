@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { ShieldCheck, ShieldAlert, Loader2, RefreshCw } from "lucide-react";
+import { ShieldCheck, ShieldAlert, RefreshCw } from "lucide-react";
 import {
 	Button,
 	Card,
@@ -53,11 +53,9 @@ export function IntegrityChecker() {
 						onClick={handleVerify}
 						disabled={checking}
 					>
-						{checking ? (
-							<Loader2 className="h-4 w-4 animate-spin" />
-						) : (
-							<RefreshCw className="h-4 w-4" />
-						)}
+						<RefreshCw
+							className={`h-4 w-4 ${checking ? "animate-spin" : ""}`}
+						/>
 						<span className="ml-2">{t("audit.integrity.verify")}</span>
 					</Button>
 				</div>

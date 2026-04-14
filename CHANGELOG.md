@@ -1,23 +1,16 @@
-# [2.7.0](https://github.com/janovix/auth/compare/v2.6.0...v2.7.0) (2026-04-08)
-
-
-### Bug Fixes
-
-* **ProductsView:** update card styles for consistent height and footer alignment ([8357e73](https://github.com/janovix/auth/commit/8357e73f9dc78f1772c4c1dbc9444c597df8865e))
+# [2.8.0-rc.1](https://github.com/janovix/auth/compare/v2.7.0...v2.8.0-rc.1) (2026-04-14)
 
 
 ### Features
 
-* **billing:** add billing entitlements event handling and update completion status logic ([6fc7b82](https://github.com/janovix/auth/commit/6fc7b82b1d9a24ae50d053a60114e5192bc75e48))
-* **billing:** add support for usage limits and overage settings in Billing and Team Settings views ([3b9cb98](https://github.com/janovix/auth/commit/3b9cb981a11f986295d064ac903cb3d4194bf8d8))
-* **billing:** enhance downgrade wizard and usage limits section with overage estimation and hints ([23ba6d6](https://github.com/janovix/auth/commit/23ba6d6aec7f0a1f7ff85925a3146123c28c10fe))
-* **billing:** implement downgrade and usage limits management in BillingSettingsView ([f56eee1](https://github.com/janovix/auth/commit/f56eee130ac96352fd0847249e6722419af8ea4e))
-* **compliance:** update vulnerable activities and reporting thresholds for alignment with aml-svc ([e4eb893](https://github.com/janovix/auth/commit/e4eb893c0860e691c8b9910b818bcb8033d883d0))
-* **flags:** implement feature flag system for dynamic UI behavior and billing settings ([b2b4c89](https://github.com/janovix/auth/commit/b2b4c8986a029f39b464c4b00432a3a54eea04c0))
-* implement product access controls and enhance compliance settings ([f717dcb](https://github.com/janovix/auth/commit/f717dcbcedbc1165f5489785bf661f77dc3e2200))
-* **layout:** add SettingsChromeFooter component for improved footer layout in settings ([fd019f1](https://github.com/janovix/auth/commit/fd019f167d605ef4dace16304d538aceef798820))
-* **onboarding:** set the joined organization as active during onboarding process ([74e1eca](https://github.com/janovix/auth/commit/74e1eca98356a79a7b54e6365d0ea49695b2e03f))
-* **products:** enhance product access management by integrating watchlist access and entitlement notes ([c186fca](https://github.com/janovix/auth/commit/c186fcaed71e9aff83cbda575a6561396ff7edef))
+* **compliance:** add self-service email notification option for KYC sessions ([f0d3676](https://github.com/janovix/auth/commit/f0d3676c774feffd14eb6ad1667ae8cdf3cbd78d))
+
+# [2.7.0-rc.2](https://github.com/janovix/auth/compare/v2.7.0-rc.1...v2.7.0-rc.2) (2026-04-14)
+
+
+### Features
+
+* **compliance:** add self-service email notification option for KYC sessions ([f0d3676](https://github.com/janovix/auth/commit/f0d3676c774feffd14eb6ad1667ae8cdf3cbd78d))
 
 # [2.7.0-rc.1](https://github.com/janovix/auth/compare/v2.6.0...v2.7.0-rc.1) (2026-04-08)
 
@@ -40,7 +33,6 @@
 * **onboarding:** set the joined organization as active during onboarding process ([74e1eca](https://github.com/janovix/auth/commit/74e1eca98356a79a7b54e6365d0ea49695b2e03f))
 * **products:** enhance product access management by integrating watchlist access and entitlement notes ([c186fca](https://github.com/janovix/auth/commit/c186fcaed71e9aff83cbda575a6561396ff7edef))
 
-<<<<<<< dev
 # [2.6.0-rc.13](https://github.com/janovix/auth/compare/v2.6.0-rc.12...v2.6.0-rc.13) (2026-04-06)
 
 
@@ -105,30 +97,18 @@
 * **billing:** add billing entitlements event handling and update completion status logic ([6fc7b82](https://github.com/janovix/auth/commit/6fc7b82b1d9a24ae50d053a60114e5192bc75e48))
 
 # [2.6.0-rc.4](https://github.com/janovix/auth/compare/v2.6.0-rc.3...v2.6.0-rc.4) (2026-04-02)
-=======
-# [2.6.0](https://github.com/janovix/auth/compare/v2.5.1...v2.6.0) (2026-03-30)
->>>>>>> main
 
 
 ### Bug Fixes
 
-<<<<<<< dev
 * **ProductsView:** update card styles for consistent height and footer alignment ([8357e73](https://github.com/janovix/auth/commit/8357e73f9dc78f1772c4c1dbc9444c597df8865e))
 
 # [2.6.0-rc.3](https://github.com/janovix/auth/compare/v2.6.0-rc.2...v2.6.0-rc.3) (2026-04-02)
-=======
-* **TaxComplianceBanner:** update styles for improved layout and responsiveness ([a06c1fd](https://github.com/janovix/auth/commit/a06c1fd2a479a600069958b192e0db40e6f377d8))
->>>>>>> main
 
 
 ### Features
 
-<<<<<<< dev
 * implement product access controls and enhance compliance settings ([f717dcb](https://github.com/janovix/auth/commit/f717dcbcedbc1165f5489785bf661f77dc3e2200))
-=======
-* enhance redirect handling and UI components ([6e9043b](https://github.com/janovix/auth/commit/6e9043b48995aab8b95589fea463abd1029186bc))
-* **products:** implement products page and update middleware for product access ([dc20e41](https://github.com/janovix/auth/commit/dc20e415585dab88e9db6bfbf8cb74581eaae7ee))
->>>>>>> main
 
 # [2.6.0-rc.2](https://github.com/janovix/auth/compare/v2.6.0-rc.1...v2.6.0-rc.2) (2026-03-30)
 

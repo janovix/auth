@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { User, ArrowRight, Loader2, LogOut } from "lucide-react";
+import { User, ArrowRight, LogOut } from "lucide-react";
 
 import { Logo } from "@/components/Logo";
 import {
@@ -284,19 +284,18 @@ export function ProfileCompletionStep({
 									type="submit"
 									className="w-full h-12"
 									size="lg"
+									loading={isSubmitting}
 									disabled={
 										!form.watch("firstName").trim() ||
-										!form.watch("lastName").trim() ||
-										isSubmitting
+										!form.watch("lastName").trim()
 									}
 								>
 									{isSubmitting ? (
-										<>
-											<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-											{isUploadingAvatar
-												? t("onboarding.button.uploading")
-												: t("onboarding.button.saving")}
-										</>
+										isUploadingAvatar ? (
+											t("onboarding.button.uploading")
+										) : (
+											t("onboarding.button.saving")
+										)
 									) : (
 										<>
 											{t("onboarding.button.continue")}
@@ -320,14 +319,11 @@ export function ProfileCompletionStep({
 						variant="outline"
 						size="sm"
 						onClick={handleLogout}
-						disabled={isLoggingOut || isSubmitting}
+						loading={isLoggingOut}
+						disabled={isSubmitting}
 						className="gap-2"
 					>
-						{isLoggingOut ? (
-							<Loader2 className="h-3.5 w-3.5 animate-spin" />
-						) : (
-							<LogOut className="h-3.5 w-3.5" />
-						)}
+						{!isLoggingOut && <LogOut className="h-3.5 w-3.5" />}
 						{t("settings.nav.signOut")}
 					</Button>
 				</div>

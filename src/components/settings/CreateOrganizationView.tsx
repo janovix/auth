@@ -2,17 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import {
-	Building2,
-	Check,
-	Loader2,
-	AlertCircle,
-	Link2,
-	ArrowLeft,
-} from "lucide-react";
+import { Building2, Check, AlertCircle, Link2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button, Label } from "@/components/ui";
+import { Spinner } from "@/components/ui/spinner";
 import { Input } from "@/components/ui/input";
 import { AvatarEditorDialog } from "@algenium/blocks";
 import { useLanguage } from "@/contexts/language-context";
@@ -349,7 +343,7 @@ export function CreateOrganizationView() {
 								</p>
 							) : isCheckingSlug ? (
 								<p className="text-xs text-muted-foreground flex items-center gap-1">
-									<Loader2 className="h-3 w-3 animate-spin" />
+									<Spinner className="h-3 w-3" />
 									{t("settings.createOrg.checkingSlug") ||
 										"Checking availability..."}
 								</p>
@@ -380,16 +374,13 @@ export function CreateOrganizationView() {
 						<div className="flex justify-end pt-4">
 							<Button
 								onClick={handleCreateOrg}
-								disabled={!isFormValid || isCreating}
+								loading={isCreating}
+								disabled={!isFormValid}
 							>
-								{isCreating ? (
-									<>
-										<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-										{t("settings.createOrg.creating") || "Creating..."}
-									</>
-								) : (
-									t("settings.nav.createOrganization") || "Create Organization"
-								)}
+								{isCreating
+									? t("settings.createOrg.creating") || "Creating..."
+									: t("settings.nav.createOrganization") ||
+										"Create Organization"}
 							</Button>
 						</div>
 					</div>

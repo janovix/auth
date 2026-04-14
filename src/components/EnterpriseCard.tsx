@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Building2, ExternalLink, Key, Loader2 } from "lucide-react";
+import { Building2, ExternalLink, Key } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -102,13 +102,10 @@ export function EnterpriseCard({
 							</div>
 							<Button
 								onClick={handleSubmit}
-								disabled={!licenseKey.trim() || isRedeeming}
+								loading={isRedeeming}
+								disabled={!licenseKey.trim()}
 							>
-								{isRedeeming ? (
-									<Loader2 className="h-4 w-4 animate-spin" />
-								) : (
-									t("settings.billing.redeem")
-								)}
+								{t("settings.billing.redeem")}
 							</Button>
 						</div>
 					</div>

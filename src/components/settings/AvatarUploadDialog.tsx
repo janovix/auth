@@ -2,7 +2,6 @@
 
 import * as Sentry from "@sentry/nextjs";
 import { useState, useCallback } from "react";
-import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -171,17 +170,13 @@ export function AvatarUploadDialog({
 					</Button>
 					<Button
 						onClick={handleUpload}
-						disabled={!avatarDataUrl || uploading}
+						loading={uploading}
+						disabled={!avatarDataUrl}
 						className="w-full sm:w-auto"
 					>
-						{uploading ? (
-							<>
-								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-								{t("settings.uploading") || "Uploading..."}
-							</>
-						) : (
-							t("settings.avatar.save") || "Save Avatar"
-						)}
+						{uploading
+							? t("settings.uploading") || "Uploading..."
+							: t("settings.avatar.save") || "Save Avatar"}
 					</Button>
 				</DialogFooter>
 			</DialogContent>

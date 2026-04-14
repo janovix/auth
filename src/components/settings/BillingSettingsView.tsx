@@ -7,7 +7,6 @@ import {
 	Check,
 	Building2,
 	FileText,
-	Loader2,
 	KeyRound,
 	CircleAlert,
 } from "lucide-react";

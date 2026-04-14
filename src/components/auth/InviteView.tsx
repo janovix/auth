@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
 	Check,
 	X,
-	Loader2,
 	Mail,
 	UserPlus,
 	ArrowLeft,
@@ -16,6 +15,8 @@ import {
 
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -133,11 +134,10 @@ function InvitationCard({
 						variant="outline"
 						size="sm"
 						onClick={() => onDecline(invitation)}
+						loading={isThisDeclining}
 						disabled={isDisabled}
 					>
-						{isThisDeclining ? (
-							<Loader2 className="h-4 w-4 animate-spin" />
-						) : (
+						{!isThisDeclining && (
 							<>
 								<X className="h-4 w-4 mr-1" />
 								{t("onboarding.invite.decline")}
@@ -147,11 +147,10 @@ function InvitationCard({
 					<Button
 						size="sm"
 						onClick={() => onAccept(invitation)}
+						loading={isThisAccepting}
 						disabled={isDisabled}
 					>
-						{isThisAccepting ? (
-							<Loader2 className="h-4 w-4 animate-spin" />
-						) : (
+						{!isThisAccepting && (
 							<>
 								<Check className="h-4 w-4 mr-1" />
 								{t("onboarding.invite.accept")}
@@ -380,14 +379,10 @@ export function InviteView() {
 							variant="outline"
 							size="sm"
 							onClick={handleLogout}
-							disabled={isLoggingOut}
+							loading={isLoggingOut}
 							className="gap-2"
 						>
-							{isLoggingOut ? (
-								<Loader2 className="h-3.5 w-3.5 animate-spin" />
-							) : (
-								<LogOut className="h-3.5 w-3.5" />
-							)}
+							{!isLoggingOut && <LogOut className="h-3.5 w-3.5" />}
 							{t("settings.nav.signOut")}
 						</Button>
 					</div>
@@ -408,7 +403,7 @@ export function InviteView() {
 							{t("onboarding.invite.success.description")}
 						</p>
 						<div className="flex justify-center">
-							<Loader2 className="h-5 w-5 animate-spin text-primary" />
+							<Spinner className="h-5 w-5 text-primary" />
 						</div>
 					</div>
 				</div>
@@ -426,14 +421,10 @@ export function InviteView() {
 							variant="outline"
 							size="sm"
 							onClick={handleLogout}
-							disabled={isLoggingOut}
+							loading={isLoggingOut}
 							className="gap-2"
 						>
-							{isLoggingOut ? (
-								<Loader2 className="h-3.5 w-3.5 animate-spin" />
-							) : (
-								<LogOut className="h-3.5 w-3.5" />
-							)}
+							{!isLoggingOut && <LogOut className="h-3.5 w-3.5" />}
 							{t("settings.nav.signOut")}
 						</Button>
 					</div>
@@ -457,11 +448,9 @@ export function InviteView() {
 								disabled={isRefreshing}
 								className="w-full"
 							>
-								{isRefreshing ? (
-									<Loader2 className="h-4 w-4 mr-2 animate-spin" />
-								) : (
-									<RefreshCw className="h-4 w-4 mr-2" />
-								)}
+								<RefreshCw
+									className={cn("h-4 w-4 mr-2", isRefreshing && "animate-spin")}
+								/>
 								{t("onboarding.invite.refresh")}
 							</Button>
 							<Button onClick={handleBack} className="w-full">
@@ -484,14 +473,11 @@ export function InviteView() {
 						variant="outline"
 						size="sm"
 						onClick={handleLogout}
-						disabled={isLoggingOut || !!acceptingId || !!decliningId}
+						loading={isLoggingOut}
+						disabled={!!acceptingId || !!decliningId}
 						className="gap-2"
 					>
-						{isLoggingOut ? (
-							<Loader2 className="h-3.5 w-3.5 animate-spin" />
-						) : (
-							<LogOut className="h-3.5 w-3.5" />
-						)}
+						{!isLoggingOut && <LogOut className="h-3.5 w-3.5" />}
 						{t("settings.nav.signOut")}
 					</Button>
 				</div>

@@ -3,7 +3,7 @@
 import * as Sentry from "@sentry/nextjs";
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sparkles, Mail, LogOut, Loader2, Pencil } from "lucide-react";
+import { Sparkles, Mail, LogOut, Pencil } from "lucide-react";
 
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
+import { Spinner } from "@/components/ui/spinner";
 import { useOnboarding, type Plan } from "@/contexts/onboarding-context";
 import { signOut } from "@/lib/auth/authActions";
 import {
@@ -305,7 +306,7 @@ export function SubscriptionSelectionStep() {
 			<SettingsSection title={selectTitle} description={selectDescription}>
 				{flagsLoading || (stripeBillingEnabled && isLoadingPlans) ? (
 					<div className="flex items-center justify-center py-12">
-						<Loader2 className="h-8 w-8 animate-spin text-primary" />
+						<Spinner className="h-8 w-8 text-primary" />
 					</div>
 				) : (
 					<div className="space-y-6">
@@ -373,14 +374,11 @@ export function SubscriptionSelectionStep() {
 					variant="outline"
 					size="sm"
 					onClick={handleLogout}
-					disabled={isLoggingOut || isRedirecting}
+					loading={isLoggingOut}
+					disabled={isRedirecting}
 					className="gap-2"
 				>
-					{isLoggingOut ? (
-						<Loader2 className="h-4 w-4 animate-spin" />
-					) : (
-						<LogOut className="h-4 w-4" />
-					)}
+					{!isLoggingOut && <LogOut className="h-4 w-4" />}
 					{t("settings.nav.signOut")}
 				</Button>
 			</div>

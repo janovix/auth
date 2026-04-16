@@ -156,11 +156,14 @@ export interface CreateAmlComplianceSettingsInput {
 // API Keys (organization-scoped, for third-party programmatic access)
 // ============================================================================
 
+export type ApiKeyEnvironment = "production" | "staging" | "development";
+
 export interface ApiKey {
 	id: string;
 	name: string;
 	keyPrefix: string;
 	organizationId: string;
+	environment: ApiKeyEnvironment;
 	createdById: string;
 	lastUsedAt: string | null;
 	expiresAt: string | null;
@@ -172,4 +175,50 @@ export interface ApiKey {
 export interface ApiKeyCreateResponse {
 	apiKey: ApiKey;
 	plainKey: string;
+}
+
+// ============================================================================
+// Webhooks (organization-scoped, for receiving event notifications)
+// ============================================================================
+
+export const WEBHOOK_EVENTS = [
+	"client.created",
+	"client.updated",
+	"client.kyc_status_changed",
+	"client.watchlist_screening_complete",
+	"operation.created",
+	"alert.created",
+	"alert.status_changed",
+	"notice.generated",
+	"notice.submitted",
+	"kyc_session.submitted",
+	"kyc_session.status_changed",
+] as const;
+
+export type WebhookEventType = (typeof WEBHOOK_EVENTS)[number];
+
+export interface WebhookEndpoint {
+	id: string;
+	organizationId: string;
+	environment: ApiKeyEnvironment;
+	url: string;
+	description: string | null;
+	events: WebhookEventType[];
+	active: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface WebhookDelivery {
+	id: string;
+	endpointId: string;
+	organizationId: string;
+	environment: string;
+	eventType: string;
+	status: "delivered" | "failed";
+	attempts: number;
+	lastAttemptAt: string | null;
+	lastResponseStatus: number | null;
+	lastError: string | null;
+	createdAt: string;
 }

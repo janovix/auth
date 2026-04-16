@@ -1,9 +1,16 @@
-# [2.8.0](https://github.com/janovix/auth/compare/v2.7.0...v2.8.0) (2026-04-14)
+# [2.9.0-rc.1](https://github.com/janovix/auth/compare/v2.8.0...v2.9.0-rc.1) (2026-04-16)
 
 
 ### Features
 
-* **compliance:** add self-service email notification option for KYC sessions ([f0d3676](https://github.com/janovix/auth/commit/f0d3676c774feffd14eb6ad1667ae8cdf3cbd78d))
+* **webhooks:** add webhooks management interface with loading state and skeleton views ([ffa20f5](https://github.com/janovix/auth/commit/ffa20f5cd9931fd067cbc7627ae5afa38437cec1))
+
+# [2.8.0-rc.2](https://github.com/janovix/auth/compare/v2.8.0-rc.1...v2.8.0-rc.2) (2026-04-16)
+
+
+### Features
+
+* **webhooks:** add webhooks management interface with loading state and skeleton views ([ffa20f5](https://github.com/janovix/auth/commit/ffa20f5cd9931fd067cbc7627ae5afa38437cec1))
 
 # [2.8.0-rc.1](https://github.com/janovix/auth/compare/v2.7.0...v2.8.0-rc.1) (2026-04-14)
 

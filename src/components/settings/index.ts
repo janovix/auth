@@ -8,6 +8,7 @@ export { ComplianceSettingsView } from "./ComplianceSettingsView";
 export { TeamSettingsView } from "./TeamSettingsView";
 export { BillingSettingsView } from "./BillingSettingsView";
 export { ApiKeysView } from "./ApiKeysView";
+export { WebhooksView } from "./WebhooksView";
 
 // Shared UI components
 export { SettingsCard } from "./SettingsCard";
@@ -25,4 +26,5 @@ export {
 	ComplianceSettingsViewSkeleton,
 	BillingSettingsViewSkeleton,
 	ApiKeysViewSkeleton,
+	WebhooksViewSkeleton,
 } from "./SettingsSkeleton";

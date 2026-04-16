@@ -30,6 +30,8 @@ const ROUTE_LABELS: Record<string, string> = {
 	billing: "settings.nav.billing",
 	compliance: "settings.nav.compliance",
 	team: "settings.nav.team",
+	"api-keys": "settings.nav.apiKeys",
+	webhooks: "settings.nav.webhooks",
 	new: "settings.organization.create",
 };
 

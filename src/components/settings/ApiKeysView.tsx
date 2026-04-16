@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
 	KeyRound,
 	Plus,
@@ -11,11 +11,13 @@ import {
 	AlertTriangle,
 	Clock,
 	ShieldAlert,
+	Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button, Badge } from "@/components/ui";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
 	Dialog,
 	DialogContent,
@@ -43,6 +45,7 @@ import {
 	SettingsSection,
 	SettingsPageHeader,
 } from "@/components/settings";
+import { cn } from "@/lib/utils";
 import { ApiKeysViewSkeleton } from "@/components/settings/SettingsSkeleton";
 import {
 	getApiKeys,
@@ -50,16 +53,21 @@ import {
 	revokeApiKey,
 	rotateApiKey,
 } from "@/lib/settings/apiKeysClient";
-import type { ApiKey } from "@/lib/settings/types";
+import type { ApiKey, ApiKeyEnvironment } from "@/lib/settings/types";
 
 export function ApiKeysView() {
 	const { t } = useLanguage();
 	const { data: session } = useAuthSession();
 
 	const [loading, setLoading] = useState(true);
+	/** In-place fetch (tab change / refetch) — avoids swapping the whole page for a skeleton */
+	const [refreshing, setRefreshing] = useState(false);
+	const lastLoadedOrgIdRef = useRef<string | undefined>(undefined);
+	const loadSeqRef = useRef(0);
 	const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+	const [selectedEnvironment, setSelectedEnvironment] =
+		useState<ApiKeyEnvironment>("production");
 
-	// Create dialog state
 	const [createDialogOpen, setCreateDialogOpen] = useState(false);
 	const [keyName, setKeyName] = useState("");
 	const [creating, setCreating] = useState(false);
@@ -78,22 +86,38 @@ export function ApiKeysView() {
 
 	const loadData = useCallback(async () => {
 		if (!activeOrgId) {
+			lastLoadedOrgIdRef.current = undefined;
+			loadSeqRef.current += 1;
 			setLoading(false);
+			setRefreshing(false);
 			return;
 		}
 
+		const seq = ++loadSeqRef.current;
+		const switchedOrg = lastLoadedOrgIdRef.current !== activeOrgId;
+		lastLoadedOrgIdRef.current = activeOrgId;
+
 		try {
-			setLoading(true);
-			const keys = await getApiKeys();
+			if (switchedOrg) {
+				setLoading(true);
+			} else {
+				setRefreshing(true);
+			}
+			const keys = await getApiKeys(selectedEnvironment);
+			if (seq !== loadSeqRef.current) return;
 			setApiKeys(keys);
 		} catch (err) {
+			if (seq !== loadSeqRef.current) return;
 			toast.error(
 				err instanceof Error ? err.message : "Failed to load API keys",
 			);
 		} finally {
-			setLoading(false);
+			if (seq === loadSeqRef.current) {
+				setLoading(false);
+				setRefreshing(false);
+			}
 		}
-	}, [activeOrgId]);
+	}, [activeOrgId, selectedEnvironment]);
 
 	useEffect(() => {
 		loadData();
@@ -104,7 +128,7 @@ export function ApiKeysView() {
 
 		try {
 			setCreating(true);
-			const result = await createApiKey(keyName.trim());
+			const result = await createApiKey(keyName.trim(), selectedEnvironment);
 			setRevealedKey(result.plainKey);
 			setRevealDialogOpen(true);
 			setCreateDialogOpen(false);
@@ -185,6 +209,21 @@ export function ApiKeysView() {
 		return formatDate(dateStr);
 	};
 
+	const environmentLabels: Record<ApiKeyEnvironment, string> = {
+		production: t("settings.apiKeys.envProduction") || "Production",
+		staging: t("settings.apiKeys.envStaging") || "Staging",
+		development: t("settings.apiKeys.envDevelopment") || "Development",
+	};
+
+	const environmentBadgeStyles: Record<ApiKeyEnvironment, string> = {
+		production:
+			"bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
+		staging:
+			"bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+		development:
+			"bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+	};
+
 	if (loading) {
 		return <ApiKeysViewSkeleton />;
 	}
@@ -244,6 +283,16 @@ export function ApiKeysView() {
 										onChange={(e) => setKeyName(e.target.value)}
 									/>
 								</div>
+								<div className="flex items-center gap-2 text-sm text-muted-foreground">
+									<span>
+										{t("settings.apiKeys.environment") || "Environment"}:
+									</span>
+									<Badge
+										className={environmentBadgeStyles[selectedEnvironment]}
+									>
+										{environmentLabels[selectedEnvironment]}
+									</Badge>
+								</div>
 							</div>
 							<DialogFooter className="flex-col sm:flex-row gap-2">
 								<Button
@@ -270,217 +319,281 @@ export function ApiKeysView() {
 				}
 			/>
 
-			{/* Plain Key Reveal Dialog */}
-			<Dialog
-				open={revealDialogOpen}
-				onOpenChange={(open) => {
-					if (!open) {
-						setRevealedKey(null);
-						setCopied(false);
-					}
-					setRevealDialogOpen(open);
-				}}
-			>
-				<DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
-					<DialogHeader>
-						<DialogTitle className="flex items-center gap-2">
-							<KeyRound className="h-5 w-5" />
-							{t("settings.apiKeys.keyCreated") || "Your API Key"}
-						</DialogTitle>
-						<DialogDescription>
-							<span className="flex items-start gap-2 mt-2 p-3 rounded-md bg-warning/10 text-warning-foreground text-sm">
-								<AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-								{t("settings.apiKeys.keyWarning") ||
-									"This key will only be shown once. Copy it now and store it securely. You will not be able to see it again."}
-							</span>
-						</DialogDescription>
-					</DialogHeader>
-					<div className="space-y-4 py-4">
-						<div className="flex items-center gap-2">
-							<code className="flex-1 p-3 bg-muted rounded-md text-sm font-mono break-all select-all">
-								{revealedKey}
-							</code>
-							<Button
-								variant="outline"
-								size="icon"
-								onClick={handleCopyKey}
-								className="shrink-0"
-							>
-								{copied ? (
-									<Check className="h-4 w-4 text-success" />
-								) : (
-									<Copy className="h-4 w-4" />
-								)}
-							</Button>
-						</div>
+			<div className="relative">
+				{refreshing ? (
+					<div
+						className="absolute inset-0 z-10 flex justify-center pt-16 sm:pt-20 rounded-lg bg-background/60 backdrop-blur-[1px]"
+						aria-busy="true"
+						aria-live="polite"
+					>
+						<Loader2
+							className="h-7 w-7 shrink-0 animate-spin text-muted-foreground"
+							aria-hidden
+						/>
 					</div>
-					<DialogFooter>
-						<Button onClick={() => setRevealDialogOpen(false)}>
-							{t("settings.apiKeys.done") || "Done"}
-						</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
-
-			{/* Active Keys */}
-			<SettingsSection
-				title={`${t("settings.apiKeys.activeKeys") || "Active Keys"} (${activeKeys.length})`}
-				description={
-					t("settings.apiKeys.activeKeysDesc") ||
-					"Keys currently authorized for API access"
-				}
-			>
-				{activeKeys.length === 0 ? (
-					<SettingsCard>
-						<div className="flex flex-col items-center justify-center py-12 text-center">
-							<KeyRound className="h-10 w-10 text-muted-foreground/40 mb-3" />
-							<p className="text-sm text-muted-foreground">
-								{t("settings.apiKeys.noKeys") ||
-									"No API keys yet. Create one to get started."}
-							</p>
-						</div>
-					</SettingsCard>
-				) : (
-					<SettingsCard className="divide-y divide-border p-0 overflow-hidden">
-						{activeKeys.map((key) => (
-							<div
-								key={key.id}
-								className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
-							>
-								<div className="min-w-0 space-y-1">
-									<div className="flex items-center gap-2 flex-wrap">
-										<span className="text-sm font-medium text-foreground">
-											{key.name}
-										</span>
-										<Badge variant="secondary" className="font-mono text-xs">
-											{key.keyPrefix}••••
-										</Badge>
-									</div>
-									<div className="flex items-center gap-3 text-xs text-muted-foreground">
-										<span>
-											{t("settings.apiKeys.createdOn") || "Created"}{" "}
-											{formatDate(key.createdAt)}
-										</span>
-										<span className="flex items-center gap-1">
-											<Clock className="h-3 w-3" />
-											{t("settings.apiKeys.lastUsed") || "Last used"}{" "}
-											{formatRelativeDate(key.lastUsedAt)}
-										</span>
-									</div>
-								</div>
-								<div className="flex items-center gap-2 shrink-0">
-									{/* Rotate */}
-									<AlertDialog>
-										<AlertDialogTrigger asChild>
-											<Button variant="ghost" size="sm" className="gap-1.5">
-												<RefreshCw className="h-3.5 w-3.5" />
-												{t("settings.apiKeys.rotate") || "Rotate"}
-											</Button>
-										</AlertDialogTrigger>
-										<AlertDialogContent>
-											<AlertDialogHeader>
-												<AlertDialogTitle>
-													{t("settings.apiKeys.rotateTitle") ||
-														"Rotate API Key?"}
-												</AlertDialogTitle>
-												<AlertDialogDescription>
-													{t("settings.apiKeys.rotateDesc") ||
-														"This will revoke the current key and generate a new one. Any systems using the old key will immediately stop working."}
-												</AlertDialogDescription>
-											</AlertDialogHeader>
-											<AlertDialogFooter>
-												<AlertDialogCancel>
-													{t("settings.apiKeys.cancel") || "Cancel"}
-												</AlertDialogCancel>
-												<AlertDialogAction onClick={() => handleRotate(key.id)}>
-													{t("settings.apiKeys.rotateBtn") || "Rotate Key"}
-												</AlertDialogAction>
-											</AlertDialogFooter>
-										</AlertDialogContent>
-									</AlertDialog>
-
-									{/* Revoke */}
-									<AlertDialog>
-										<AlertDialogTrigger asChild>
-											<Button
-												variant="ghost"
-												size="sm"
-												className="gap-1.5 text-destructive hover:text-destructive"
-											>
-												<Trash2 className="h-3.5 w-3.5" />
-												{t("settings.apiKeys.revoke") || "Revoke"}
-											</Button>
-										</AlertDialogTrigger>
-										<AlertDialogContent>
-											<AlertDialogHeader>
-												<AlertDialogTitle>
-													{t("settings.apiKeys.revokeTitle") ||
-														"Revoke API Key?"}
-												</AlertDialogTitle>
-												<AlertDialogDescription>
-													{t("settings.apiKeys.revokeDesc") ||
-														"This action cannot be undone. The key will immediately stop working for any system using it."}
-												</AlertDialogDescription>
-											</AlertDialogHeader>
-											<AlertDialogFooter>
-												<AlertDialogCancel>
-													{t("settings.apiKeys.cancel") || "Cancel"}
-												</AlertDialogCancel>
-												<AlertDialogAction
-													onClick={() => handleRevoke(key.id)}
-													className="bg-destructive text-destructive-foreground"
-												>
-													{t("settings.apiKeys.revokeBtn") || "Revoke Key"}
-												</AlertDialogAction>
-											</AlertDialogFooter>
-										</AlertDialogContent>
-									</AlertDialog>
-								</div>
-							</div>
-						))}
-					</SettingsCard>
-				)}
-			</SettingsSection>
-
-			{/* Revoked Keys */}
-			{revokedKeys.length > 0 && (
-				<SettingsSection
-					title={`${t("settings.apiKeys.revokedKeys") || "Revoked Keys"} (${revokedKeys.length})`}
+				) : null}
+				<div
+					className={cn(
+						"space-y-8",
+						refreshing && "pointer-events-none select-none",
+					)}
 				>
-					<SettingsCard className="divide-y divide-border p-0 overflow-hidden opacity-60">
-						{revokedKeys.map((key) => (
-							<div
-								key={key.id}
-								className="flex items-center justify-between p-4"
-							>
-								<div className="min-w-0 space-y-1">
-									<div className="flex items-center gap-2 flex-wrap">
-										<span className="text-sm font-medium text-muted-foreground line-through">
-											{key.name}
-										</span>
-										<Badge
-											variant="secondary"
-											className="font-mono text-xs opacity-70"
-										>
-											{key.keyPrefix}••••
-										</Badge>
-										<Badge variant="destructive" className="text-xs">
-											<ShieldAlert className="h-3 w-3 mr-1" />
-											{t("settings.apiKeys.revokedBadge") || "Revoked"}
-										</Badge>
-									</div>
-									<div className="flex items-center gap-3 text-xs text-muted-foreground">
-										<span>
-											{t("settings.apiKeys.revokedOn") || "Revoked"}{" "}
-											{key.revokedAt ? formatDate(key.revokedAt) : "—"}
-										</span>
-									</div>
+					{/* Environment Filter */}
+					<Tabs
+						value={selectedEnvironment}
+						onValueChange={(v) =>
+							setSelectedEnvironment(v as ApiKeyEnvironment)
+						}
+					>
+						<TabsList>
+							<TabsTrigger value="production">
+								{environmentLabels.production}
+							</TabsTrigger>
+							<TabsTrigger value="staging">
+								{environmentLabels.staging}
+							</TabsTrigger>
+							<TabsTrigger value="development">
+								{environmentLabels.development}
+							</TabsTrigger>
+						</TabsList>
+					</Tabs>
+
+					{/* Active Keys */}
+					<SettingsSection
+						title={`${t("settings.apiKeys.activeKeys") || "Active Keys"} (${activeKeys.length})`}
+						description={
+							t("settings.apiKeys.activeKeysDesc") ||
+							"Keys currently authorized for API access"
+						}
+					>
+						{activeKeys.length === 0 ? (
+							<SettingsCard>
+								<div className="flex flex-col items-center justify-center py-12 text-center">
+									<KeyRound className="h-10 w-10 text-muted-foreground/40 mb-3" />
+									<p className="text-sm text-muted-foreground">
+										{t("settings.apiKeys.noKeys") ||
+											"No API keys yet. Create one to get started."}
+									</p>
 								</div>
+							</SettingsCard>
+						) : (
+							<SettingsCard className="divide-y divide-border p-0 overflow-hidden">
+								{activeKeys.map((key) => (
+									<div
+										key={key.id}
+										className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
+									>
+										<div className="min-w-0 space-y-1">
+											<div className="flex items-center gap-2 flex-wrap">
+												<span className="text-sm font-medium text-foreground">
+													{key.name}
+												</span>
+												<Badge
+													variant="secondary"
+													className="font-mono text-xs"
+												>
+													{key.keyPrefix}••••
+												</Badge>
+												<Badge
+													className={
+														environmentBadgeStyles[key.environment] ??
+														environmentBadgeStyles.production
+													}
+												>
+													{environmentLabels[key.environment] ??
+														environmentLabels.production}
+												</Badge>
+											</div>
+											<div className="flex items-center gap-3 text-xs text-muted-foreground">
+												<span>
+													{t("settings.apiKeys.createdOn") || "Created"}{" "}
+													{formatDate(key.createdAt)}
+												</span>
+												<span className="flex items-center gap-1">
+													<Clock className="h-3 w-3" />
+													{t("settings.apiKeys.lastUsed") || "Last used"}{" "}
+													{formatRelativeDate(key.lastUsedAt)}
+												</span>
+											</div>
+										</div>
+										<div className="flex items-center gap-2 shrink-0">
+											{/* Rotate */}
+											<AlertDialog>
+												<AlertDialogTrigger asChild>
+													<Button variant="ghost" size="sm" className="gap-1.5">
+														<RefreshCw className="h-3.5 w-3.5" />
+														{t("settings.apiKeys.rotate") || "Rotate"}
+													</Button>
+												</AlertDialogTrigger>
+												<AlertDialogContent>
+													<AlertDialogHeader>
+														<AlertDialogTitle>
+															{t("settings.apiKeys.rotateTitle") ||
+																"Rotate API Key?"}
+														</AlertDialogTitle>
+														<AlertDialogDescription>
+															{t("settings.apiKeys.rotateDesc") ||
+																"This will revoke the current key and generate a new one. Any systems using the old key will immediately stop working."}
+														</AlertDialogDescription>
+													</AlertDialogHeader>
+													<AlertDialogFooter>
+														<AlertDialogCancel>
+															{t("settings.apiKeys.cancel") || "Cancel"}
+														</AlertDialogCancel>
+														<AlertDialogAction
+															onClick={() => handleRotate(key.id)}
+														>
+															{t("settings.apiKeys.rotateBtn") || "Rotate Key"}
+														</AlertDialogAction>
+													</AlertDialogFooter>
+												</AlertDialogContent>
+											</AlertDialog>
+
+											{/* Revoke */}
+											<AlertDialog>
+												<AlertDialogTrigger asChild>
+													<Button
+														variant="ghost"
+														size="sm"
+														className="gap-1.5 text-destructive hover:text-destructive"
+													>
+														<Trash2 className="h-3.5 w-3.5" />
+														{t("settings.apiKeys.revoke") || "Revoke"}
+													</Button>
+												</AlertDialogTrigger>
+												<AlertDialogContent>
+													<AlertDialogHeader>
+														<AlertDialogTitle>
+															{t("settings.apiKeys.revokeTitle") ||
+																"Revoke API Key?"}
+														</AlertDialogTitle>
+														<AlertDialogDescription>
+															{t("settings.apiKeys.revokeDesc") ||
+																"This action cannot be undone. The key will immediately stop working for any system using it."}
+														</AlertDialogDescription>
+													</AlertDialogHeader>
+													<AlertDialogFooter>
+														<AlertDialogCancel>
+															{t("settings.apiKeys.cancel") || "Cancel"}
+														</AlertDialogCancel>
+														<AlertDialogAction
+															onClick={() => handleRevoke(key.id)}
+															className="bg-destructive text-destructive-foreground"
+														>
+															{t("settings.apiKeys.revokeBtn") || "Revoke Key"}
+														</AlertDialogAction>
+													</AlertDialogFooter>
+												</AlertDialogContent>
+											</AlertDialog>
+										</div>
+									</div>
+								))}
+							</SettingsCard>
+						)}
+					</SettingsSection>
+
+					{/* Revoked Keys */}
+					{revokedKeys.length > 0 && (
+						<SettingsSection
+							title={`${t("settings.apiKeys.revokedKeys") || "Revoked Keys"} (${revokedKeys.length})`}
+						>
+							<SettingsCard className="divide-y divide-border p-0 overflow-hidden opacity-60">
+								{revokedKeys.map((key) => (
+									<div
+										key={key.id}
+										className="flex items-center justify-between p-4"
+									>
+										<div className="min-w-0 space-y-1">
+											<div className="flex items-center gap-2 flex-wrap">
+												<span className="text-sm font-medium text-muted-foreground line-through">
+													{key.name}
+												</span>
+												<Badge
+													variant="secondary"
+													className="font-mono text-xs opacity-70"
+												>
+													{key.keyPrefix}••••
+												</Badge>
+												<Badge
+													className={
+														environmentBadgeStyles[key.environment] ??
+														environmentBadgeStyles.production
+													}
+												>
+													{environmentLabels[key.environment] ??
+														environmentLabels.production}
+												</Badge>
+												<Badge variant="destructive" className="text-xs">
+													<ShieldAlert className="h-3 w-3 mr-1" />
+													{t("settings.apiKeys.revokedBadge") || "Revoked"}
+												</Badge>
+											</div>
+											<div className="flex items-center gap-3 text-xs text-muted-foreground">
+												<span>
+													{t("settings.apiKeys.revokedOn") || "Revoked"}{" "}
+													{key.revokedAt ? formatDate(key.revokedAt) : "—"}
+												</span>
+											</div>
+										</div>
+									</div>
+								))}
+							</SettingsCard>
+						</SettingsSection>
+					)}
+				</div>
+
+				{/* Plain Key Reveal Dialog — outside refresh pointer-lock so it stays usable during refetch */}
+				<Dialog
+					open={revealDialogOpen}
+					onOpenChange={(open) => {
+						if (!open) {
+							setRevealedKey(null);
+							setCopied(false);
+						}
+						setRevealDialogOpen(open);
+					}}
+				>
+					<DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
+						<DialogHeader>
+							<DialogTitle className="flex items-center gap-2">
+								<KeyRound className="h-5 w-5" />
+								{t("settings.apiKeys.keyCreated") || "Your API Key"}
+							</DialogTitle>
+							<DialogDescription>
+								<span className="flex items-start gap-2 mt-2 p-3 rounded-md bg-warning/10 text-warning-foreground text-sm">
+									<AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+									{t("settings.apiKeys.keyWarning") ||
+										"This key will only be shown once. Copy it now and store it securely. You will not be able to see it again."}
+								</span>
+							</DialogDescription>
+						</DialogHeader>
+						<div className="space-y-4 py-4">
+							<div className="flex items-center gap-2">
+								<code className="flex-1 p-3 bg-muted rounded-md text-sm font-mono break-all select-all">
+									{revealedKey}
+								</code>
+								<Button
+									variant="outline"
+									size="icon"
+									onClick={handleCopyKey}
+									className="shrink-0"
+								>
+									{copied ? (
+										<Check className="h-4 w-4 text-success" />
+									) : (
+										<Copy className="h-4 w-4" />
+									)}
+								</Button>
 							</div>
-						))}
-					</SettingsCard>
-				</SettingsSection>
-			)}
+						</div>
+						<DialogFooter>
+							<Button onClick={() => setRevealDialogOpen(false)}>
+								{t("settings.apiKeys.done") || "Done"}
+							</Button>
+						</DialogFooter>
+					</DialogContent>
+				</Dialog>
+			</div>
 		</div>
 	);
 }

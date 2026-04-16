@@ -8,6 +8,7 @@ import { getAuthCoreBaseUrl } from "../auth/authCoreConfig";
 import type {
 	ApiKey,
 	ApiKeyCreateResponse,
+	ApiKeyEnvironment,
 	SettingsApiResponse,
 } from "./types";
 
@@ -17,8 +18,12 @@ const getBaseUrl = () => getAuthCoreBaseUrl();
  * List all API keys for the active organization.
  * Returns key metadata (prefix, name, dates) — never the full key.
  */
-export async function getApiKeys(): Promise<ApiKey[]> {
-	const response = await fetch(`${getBaseUrl()}/api/api-keys`, {
+export async function getApiKeys(
+	environment?: ApiKeyEnvironment,
+): Promise<ApiKey[]> {
+	const url = new URL(`${getBaseUrl()}/api/api-keys`);
+	if (environment) url.searchParams.set("environment", environment);
+	const response = await fetch(url.toString(), {
 		credentials: "include",
 	});
 
@@ -39,12 +44,13 @@ export async function getApiKeys(): Promise<ApiKey[]> {
  */
 export async function createApiKey(
 	name: string,
+	environment: ApiKeyEnvironment = "production",
 ): Promise<ApiKeyCreateResponse> {
 	const response = await fetch(`${getBaseUrl()}/api/api-keys`, {
 		method: "POST",
 		credentials: "include",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ name }),
+		body: JSON.stringify({ name, environment }),
 	});
 
 	if (!response.ok) {

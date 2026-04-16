@@ -15,6 +15,7 @@ import {
 	LayoutDashboard,
 	LayoutGrid,
 	KeyRound,
+	Webhook,
 	Mail,
 } from "lucide-react";
 
@@ -149,6 +150,12 @@ export function AppSidebar({
 				name: t("settings.nav.apiKeys") || "API Keys",
 				href: "/settings/api-keys",
 				icon: KeyRound,
+				complete: true,
+			},
+			{
+				name: t("settings.nav.webhooks") || "Webhooks",
+				href: "/settings/webhooks",
+				icon: Webhook,
 				complete: true,
 			},
 		],

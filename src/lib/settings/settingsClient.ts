@@ -3,6 +3,7 @@
 /**
  * Settings API client for the auth frontend
  */
+import { dataEnvironmentHeaders } from "@/lib/data-environment-headers";
 import { getAuthCoreBaseUrl } from "../auth/authCoreConfig";
 import type {
 	UserSettings,
@@ -183,6 +184,9 @@ export async function getAmlComplianceSettings(
 		`${getBaseUrl()}/api/settings/aml-compliance/${organizationId}`,
 		{
 			credentials: "include",
+			headers: {
+				...dataEnvironmentHeaders(),
+			},
 		},
 	);
 
@@ -223,6 +227,7 @@ export async function createOrUpdateAmlComplianceSettings(
 			credentials: "include",
 			headers: {
 				"Content-Type": "application/json",
+				...dataEnvironmentHeaders(),
 			},
 			body: JSON.stringify(input),
 		},
@@ -259,6 +264,7 @@ export async function updateAmlComplianceSettings(
 			credentials: "include",
 			headers: {
 				"Content-Type": "application/json",
+				...dataEnvironmentHeaders(),
 			},
 			body: JSON.stringify(input),
 		},

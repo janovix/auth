@@ -357,7 +357,10 @@ describe("settingsClient", () => {
 			expect(result).toEqual(mockAmlSettings);
 			expect(fetch).toHaveBeenCalledWith(
 				"http://localhost:8787/api/settings/aml-compliance/org-1",
-				{ credentials: "include" },
+				expect.objectContaining({
+					credentials: "include",
+					headers: {},
+				}),
 			);
 		});
 

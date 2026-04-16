@@ -1,6 +1,6 @@
 {
 	"name": "auth",
-	"version": "2.8.0",
+	"version": "2.9.0-rc.1",
 	"description": "Build a full-stack web application with Next.js.",
 	"cloudflare": {
 		"label": "Next.js Framework Starter",
@@ -13,7 +13,7 @@
 		"publish": true
 	},
 	"dependencies": {
-		"@algenium/blocks": "^1.1.2",
+		"@algenium/blocks": "^1.5.0",
 		"@better-auth/passkey": "^1.4.18",
 		"@better-auth/stripe": "^1.4.18",
 		"@hookform/resolvers": "^5.2.2",
@@ -47,7 +47,8 @@
 		"input-otp": "^1.4.2",
 		"lucide-react": "^0.560.0",
 		"motion": "^12.24.12",
-		"nanostores": "^1.1.0",
+		"@nanostores/react": "^1.0.0",
+		"nanostores": "^1.2.0",
 		"next": "16.0.10",
 		"next-themes": "^0.4.6",
 		"radix-ui": "^1.4.3",

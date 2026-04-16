@@ -1,3 +1,10 @@
+# [2.9.0-rc.2](https://github.com/janovix/auth/compare/v2.9.0-rc.1...v2.9.0-rc.2) (2026-04-16)
+
+
+### Features
+
+* **webhooks:** refactor environment selection in WebhooksView component ([aa28b6a](https://github.com/janovix/auth/commit/aa28b6a1e0656158fbd172ddb67c9e82df204436))
+
 # [2.9.0-rc.1](https://github.com/janovix/auth/compare/v2.8.0...v2.9.0-rc.1) (2026-04-16)
 
 

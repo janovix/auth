@@ -1,3 +1,10 @@
+# [2.9.0](https://github.com/janovix/auth/compare/v2.8.0...v2.9.0) (2026-04-16)
+
+
+### Features
+
+* **webhooks:** add webhooks management interface with loading state and skeleton views ([ffa20f5](https://github.com/janovix/auth/commit/ffa20f5cd9931fd067cbc7627ae5afa38437cec1))
+
 # [2.9.0-rc.1](https://github.com/janovix/auth/compare/v2.8.0...v2.9.0-rc.1) (2026-04-16)
 
 

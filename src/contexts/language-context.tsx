@@ -168,6 +168,18 @@ const translations = {
 		"theme.dark": "Dark",
 		// Language switcher
 		"language.label": "Language",
+		// Data environment
+		"env.dataPlane": "Data environment",
+		"env.live": "Live",
+		"env.staging": "Staging",
+		"env.development": "Development",
+		"env.banner.staging":
+			"You are viewing staging data — changes do not affect live customers.",
+		"env.banner.development":
+			"You are viewing development data — for testing only.",
+		"env.toast.switch": "Data environment updated",
+		"env.toast.live": "Live mode (production data)",
+		"env.dismiss": "Dismiss notice",
 		"settings.localization.title": "Localization",
 		"settings.localization.description":
 			"Configure language, timezone, and date format",
@@ -285,6 +297,7 @@ const translations = {
 		"settings.nav.watchlist": "Watchlist",
 		"settings.nav.active": "Active",
 		"settings.nav.apiKeys": "API Keys",
+		"settings.nav.webhooks": "Webhooks",
 		"settings.sidebar.pendingInvitations": "Pending Invitations",
 		"settings.sidebar.invitation": "invitation",
 		"settings.sidebar.invitations": "invitations",
@@ -626,6 +639,9 @@ const translations = {
 		"settings.apiKeys.rotated": "API key rotated successfully",
 		"settings.apiKeys.never": "Never",
 		"settings.apiKeys.justNow": "Just now",
+		"settings.apiKeys.envProduction": "Production",
+		"settings.apiKeys.envStaging": "Staging",
+		"settings.apiKeys.envDevelopment": "Development",
 		"settings.apiKeys.create": "Create API Key",
 		"settings.apiKeys.createTitle": "Create API Key",
 		"settings.apiKeys.createDesc":
@@ -1341,6 +1357,18 @@ const translations = {
 		"theme.dark": "Oscuro",
 		// Language switcher
 		"language.label": "Idioma",
+		// Data environment
+		"env.dataPlane": "Entorno de datos",
+		"env.live": "Producción",
+		"env.staging": "Staging",
+		"env.development": "Desarrollo",
+		"env.banner.staging":
+			"Estás viendo datos de staging — no afectan a clientes en vivo.",
+		"env.banner.development":
+			"Estás viendo datos de desarrollo — solo para pruebas.",
+		"env.toast.switch": "Entorno de datos actualizado",
+		"env.toast.live": "Modo producción (datos en vivo)",
+		"env.dismiss": "Cerrar aviso",
 		"settings.localization.title": "Localización",
 		"settings.localization.description":
 			"Configura idioma, zona horaria y formato de fecha",
@@ -1463,6 +1491,7 @@ const translations = {
 		"settings.nav.watchlist": "Watchlist",
 		"settings.nav.active": "Activo",
 		"settings.nav.apiKeys": "Claves API",
+		"settings.nav.webhooks": "Webhooks",
 		"settings.sidebar.pendingInvitations": "Invitaciones Pendientes",
 		"settings.sidebar.invitation": "invitación",
 		"settings.sidebar.invitations": "invitaciones",
@@ -1812,6 +1841,9 @@ const translations = {
 		"settings.apiKeys.rotated": "Clave API rotada exitosamente",
 		"settings.apiKeys.never": "Nunca",
 		"settings.apiKeys.justNow": "Justo ahora",
+		"settings.apiKeys.envProduction": "Producción",
+		"settings.apiKeys.envStaging": "Staging",
+		"settings.apiKeys.envDevelopment": "Desarrollo",
 		"settings.apiKeys.create": "Crear Clave API",
 		"settings.apiKeys.createTitle": "Crear Clave API",
 		"settings.apiKeys.createDesc":

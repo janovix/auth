@@ -12,6 +12,7 @@ import { OnboardingProvider } from "@/contexts/onboarding-context";
 import { PageStatusProvider } from "@/contexts/page-status-context";
 import { TurnstileProvider } from "@/contexts/turnstile-context";
 import { useSessionSync } from "@/lib/auth/useSessionSync";
+import { DataEnvironmentProvider } from "@/components/DataEnvironmentProvider";
 
 // Turnstile site key from environment variable
 // In production, this comes from Cloudflare Dashboard
@@ -97,7 +98,9 @@ export default function ClientLayout({
 	return (
 		<ThemeProvider>
 			<LanguageProvider>
-				<PageStatusProvider>{content}</PageStatusProvider>
+				<DataEnvironmentProvider>
+					<PageStatusProvider>{content}</PageStatusProvider>
+				</DataEnvironmentProvider>
 			</LanguageProvider>
 		</ThemeProvider>
 	);

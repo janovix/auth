@@ -2,6 +2,8 @@
 
 import type React from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useStore } from "@nanostores/react";
+import { toast } from "sonner";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
 import { authClient } from "@/lib/auth/authClient";
@@ -36,12 +38,18 @@ import {
 	LanguageSwitcher,
 	NotificationsWidget,
 	ThemeSwitcher,
+	EnvironmentBanner,
 } from "@algenium/blocks";
 import { useLanguage } from "@/contexts/language-context";
 import { SettingsSidebarProductProvider } from "@/contexts/settings-sidebar-product-context";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SUPPORTED_LANGUAGES } from "@/lib/i18n/supportedLanguages";
 import { useFlags } from "@/hooks/useFlags";
+import {
+	environmentAtom,
+	envHydratedAtom,
+	type DataEnvironment,
+} from "@/lib/environment-store";
 
 interface SettingsLayoutClientProps {
 	children: React.ReactNode;
@@ -69,6 +77,24 @@ function SettingsLayoutInner({
 	const router = useRouter();
 	const { data: session } = useAuthSession();
 	const { language, setLanguage, t } = useLanguage();
+
+	const dataEnvironment = useStore(environmentAtom);
+	const envHydrated = useStore(envHydratedAtom);
+	const prevEnvRef = useRef<DataEnvironment | null>(null);
+	useEffect(() => {
+		if (!envHydrated) return;
+		if (prevEnvRef.current === null) {
+			prevEnvRef.current = dataEnvironment;
+			return;
+		}
+		if (prevEnvRef.current === dataEnvironment) return;
+		prevEnvRef.current = dataEnvironment;
+		if (dataEnvironment !== "production") {
+			toast.info(t("env.toast.switch"));
+		} else {
+			toast.success(t("env.toast.live"));
+		}
+	}, [envHydrated, dataEnvironment, t]);
 
 	const { flags: stripeFlags, error: stripeFlagsError } = useFlags([
 		"stripe-billing-enabled",
@@ -609,6 +635,14 @@ function SettingsLayoutInner({
 							</div>
 						</header>
 					</TooltipProvider>
+
+					<EnvironmentBanner
+						labels={{
+							stagingMessage: t("env.banner.staging"),
+							developmentMessage: t("env.banner.development"),
+							dismiss: t("env.dismiss"),
+						}}
+					/>
 
 					{/* Same pattern as aml DashboardLayout: one scroll container (main) wraps content + footer so
 					    the bar sits at the bottom when content is short and after content when it overflows */}

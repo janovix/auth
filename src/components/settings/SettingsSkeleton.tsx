@@ -699,6 +699,66 @@ export function BillingSettingsViewSkeleton() {
 }
 
 /**
+ * Webhooks view skeleton — page header + tabs + endpoints card + deliveries card.
+ */
+export function WebhooksViewSkeleton() {
+	return (
+		<div className="space-y-8">
+			<SettingsPageHeaderSkeleton hasAction />
+
+			{/* Environment tabs */}
+			<Skeleton className="h-10 w-80" />
+
+			{/* Endpoints section */}
+			<section>
+				<SettingsSectionSkeleton />
+				<SettingsCard className="divide-y divide-border p-0 overflow-hidden">
+					{[1, 2, 3].map((i) => (
+						<div
+							key={i}
+							className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4"
+						>
+							<div className="space-y-2 flex-1 min-w-0">
+								<div className="flex items-center gap-2">
+									<Skeleton className="h-5 w-64" />
+									<Skeleton className="h-5 w-14" />
+									<Skeleton className="h-5 w-20" />
+								</div>
+								<Skeleton className="h-4 w-40" />
+								<Skeleton className="h-3 w-32" />
+							</div>
+							<div className="flex items-center gap-2 shrink-0">
+								<Skeleton className="h-8 w-20 rounded-md" />
+								<Skeleton className="h-8 w-16 rounded-md" />
+								<Skeleton className="h-8 w-20 rounded-md" />
+							</div>
+						</div>
+					))}
+				</SettingsCard>
+			</section>
+
+			{/* Deliveries section */}
+			<section>
+				<SettingsSectionSkeleton />
+				<SettingsCard className="divide-y divide-border p-0 overflow-hidden">
+					{[1, 2].map((i) => (
+						<div key={i} className="flex items-center justify-between p-4">
+							<div className="space-y-2 flex-1 min-w-0">
+								<div className="flex items-center gap-2">
+									<Skeleton className="h-5 w-40" />
+									<Skeleton className="h-5 w-20" />
+								</div>
+								<Skeleton className="h-3 w-48" />
+							</div>
+						</div>
+					))}
+				</SettingsCard>
+			</section>
+		</div>
+	);
+}
+
+/**
  * API Keys view skeleton — page header + card with table-style rows.
  */
 export function ApiKeysViewSkeleton() {

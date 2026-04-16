@@ -11,6 +11,9 @@ import {
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
+	DropdownMenuSub,
+	DropdownMenuSubContent,
+	DropdownMenuSubTrigger,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -26,6 +29,14 @@ import {
 } from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLanguage } from "@/contexts/language-context";
+import {
+	BLOCKS_DATA_ENVIRONMENTS,
+	EnvironmentDot,
+	EnvironmentMiniBadge,
+	getEnvironmentLabel,
+	useEnvironmentContext,
+	type EnvironmentSwitcherLabels,
+} from "@algenium/blocks";
 
 export interface Organization {
 	id: string;
@@ -166,6 +177,54 @@ interface CreateOrgItemProps {
 	onCreateOrganization: () => void;
 }
 
+function DataEnvironmentSubmenu() {
+	const envCtx = useEnvironmentContext();
+	const { t } = useLanguage();
+
+	if (!envCtx?.setEnvironment) {
+		return null;
+	}
+
+	const environments = envCtx.environments ?? [...BLOCKS_DATA_ENVIRONMENTS];
+	const fullLabels: Required<EnvironmentSwitcherLabels> = {
+		environment: t("env.dataPlane"),
+		live: t("env.live"),
+		staging: t("env.staging"),
+		development: t("env.development"),
+	};
+
+	return (
+		<>
+			<DropdownMenuSeparator />
+			<DropdownMenuSub>
+				<DropdownMenuSubTrigger className="gap-2">
+					<span className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+						<span className="truncate text-muted-foreground">
+							{t("env.dataPlane")}
+						</span>
+						<EnvironmentMiniBadge abbreviated />
+					</span>
+				</DropdownMenuSubTrigger>
+				<DropdownMenuSubContent>
+					{environments.map((env) => (
+						<DropdownMenuItem
+							key={env}
+							data-testid={`org-switcher-env-${env}`}
+							className="gap-2 cursor-pointer"
+							onSelect={() => {
+								envCtx.setEnvironment(env);
+							}}
+						>
+							<EnvironmentDot env={env} size="sm" />
+							<span>{getEnvironmentLabel(env, fullLabels)}</span>
+						</DropdownMenuItem>
+					))}
+				</DropdownMenuSubContent>
+			</DropdownMenuSub>
+		</>
+	);
+}
+
 function CreateOrgItem({
 	canCreate,
 	onCreateOrganization,
@@ -212,6 +271,8 @@ export function OrganizationSwitcher({
 	const { isMobile, state } = useSidebar();
 	const isCollapsed = state === "collapsed";
 	const { t } = useLanguage();
+	const envCtx = useEnvironmentContext();
+	const dataEnv = envCtx?.environment ?? "production";
 
 	const ownedOrgs = organizations.filter((o) => o.role === "owner");
 	const memberOrgs = organizations.filter((o) => o.role !== "owner");
@@ -245,7 +306,7 @@ export function OrganizationSwitcher({
 								size="lg"
 								className="justify-center data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 							>
-								<div className="flex items-center justify-center">
+								<div className="relative flex items-center justify-center">
 									{activeOrganization?.logo ? (
 										<img
 											src={activeOrganization.logo}
@@ -259,6 +320,11 @@ export function OrganizationSwitcher({
 												: "?"}
 										</div>
 									)}
+									{envCtx?.setEnvironment ? (
+										<span className="pointer-events-none absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-sidebar ring-2 ring-sidebar">
+											<EnvironmentDot env={dataEnv} size="xs" />
+										</span>
+									) : null}
 								</div>
 							</SidebarMenuButton>
 						</DropdownMenuTrigger>
@@ -340,6 +406,7 @@ export function OrganizationSwitcher({
 										onOrganizationChange={onOrganizationChange}
 									/>
 								))}
+							<DataEnvironmentSubmenu />
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</SidebarMenuItem>
@@ -378,9 +445,9 @@ export function OrganizationSwitcher({
 					<DropdownMenuTrigger asChild>
 						<SidebarMenuButton
 							size="lg"
-							className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+							className="h-auto min-h-12 items-start py-2 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 						>
-							<div className="flex items-center justify-center shrink-0">
+							<div className="flex size-8 shrink-0 items-center justify-center self-start pt-0.5">
 								{activeOrganization?.logo ? (
 									<img
 										src={activeOrganization.logo}
@@ -395,17 +462,24 @@ export function OrganizationSwitcher({
 									</div>
 								)}
 							</div>
-							<div className="grid flex-1 text-left text-sm leading-tight">
-								<span className="truncate font-medium">
-									{activeOrganization?.name
-										? formatProperNoun(activeOrganization.name)
-										: t("settings.nav.organizations")}
-								</span>
-								<span className="truncate text-xs text-muted-foreground">
-									{activeOrganization?.slug ?? "organization"}
-								</span>
+							<div className="flex min-w-0 flex-1 gap-1.5 text-left text-sm leading-tight">
+								<div className="min-w-0 flex-1 flex flex-col gap-0.5">
+									<span className="truncate font-medium leading-tight">
+										{activeOrganization?.name
+											? formatProperNoun(activeOrganization.name)
+											: t("settings.nav.organizations")}
+									</span>
+									<span className="truncate text-xs text-muted-foreground leading-tight">
+										{activeOrganization?.slug ?? "organization"}
+									</span>
+								</div>
+								<div className="flex shrink-0 flex-col items-end gap-1.5">
+									<ChevronsUpDown className="mt-0.5 size-4 text-muted-foreground" />
+									{envCtx?.setEnvironment && dataEnv !== "production" ? (
+										<EnvironmentMiniBadge abbreviated className="w-fit" />
+									) : null}
+								</div>
 							</div>
-							<ChevronsUpDown className="ml-auto size-4" />
 						</SidebarMenuButton>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent
@@ -486,6 +560,7 @@ export function OrganizationSwitcher({
 									onOrganizationChange={onOrganizationChange}
 								/>
 							))}
+						<DataEnvironmentSubmenu />
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</SidebarMenuItem>

@@ -9,7 +9,9 @@ import {
 	ChevronDown,
 	ChevronRight,
 	Check,
+	Info,
 } from "lucide-react";
+import { useStore } from "@nanostores/react";
 import { toast } from "sonner";
 import { Button, Label } from "@/components/ui";
 import { Input } from "@/components/ui/input";
@@ -43,6 +45,7 @@ import {
 	updateSelfServiceSettings,
 } from "@/lib/settings";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
+import { environmentAtom } from "@/lib/environment-store";
 import {
 	getSubscriptionStatus,
 	getFeatures,
@@ -192,6 +195,7 @@ type AmlAccessState = "unknown" | "granted" | "denied";
 export function ComplianceSettingsView() {
 	const { t } = useLanguage();
 	const { data: session } = useAuthSession();
+	const dataEnvironment = useStore(environmentAtom);
 
 	const [loading, setLoading] = useState(true);
 	const [amlAccess, setAmlAccess] = useState<AmlAccessState>("unknown");
@@ -473,6 +477,18 @@ export function ComplianceSettingsView() {
 					title={t("settings.compliance.title")}
 					description={t("settings.compliance.description")}
 				/>
+
+				{dataEnvironment !== "production" && (
+					<Alert>
+						<Info className="h-4 w-4" />
+						<AlertTitle>
+							{t("settings.compliance.sharedAcrossEnvironmentsTitle")}
+						</AlertTitle>
+						<AlertDescription>
+							{t("settings.compliance.sharedAcrossEnvironmentsDesc")}
+						</AlertDescription>
+					</Alert>
+				)}
 
 				{/* Warning Alert - show when not configured */}
 				{!settings && (

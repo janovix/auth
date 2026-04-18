@@ -517,6 +517,10 @@ const translations = {
 		"settings.compliance.statusNotConfigured": "Compliance not configured",
 		"settings.compliance.statusNotConfiguredDesc":
 			"Please configure your obligated subject information to comply with AML regulations",
+		"settings.compliance.sharedAcrossEnvironmentsTitle":
+			"AML compliance settings are shared across environments",
+		"settings.compliance.sharedAcrossEnvironmentsDesc":
+			"You are viewing Staging or Development. RFC, vulnerable activity, and KYC self-service settings apply to your whole organization—the same values are used for Production, Staging, and Development API keys.",
 		"settings.compliance.obligatedSubject": "Obligated Subject Information",
 		"settings.compliance.obligatedSubjectDesc":
 			"Information required for LFPIORPI compliance",
@@ -1716,6 +1720,10 @@ const translations = {
 		"settings.compliance.statusNotConfigured": "Cumplimiento no configurado",
 		"settings.compliance.statusNotConfiguredDesc":
 			"Por favor configura tu información de sujeto obligado para cumplir con la regulación PLD",
+		"settings.compliance.sharedAcrossEnvironmentsTitle":
+			"La configuración PLD es la misma en todos los entornos",
+		"settings.compliance.sharedAcrossEnvironmentsDesc":
+			"Estás en Staging o Desarrollo. El RFC, la actividad vulnerable y la configuración de KYC autoservicio aplican a toda tu organización: los mismos valores se usan para las llaves API de Producción, Staging y Desarrollo.",
 		"settings.compliance.obligatedSubject": "Información del Sujeto Obligado",
 		"settings.compliance.obligatedSubjectDesc":
 			"Información requerida para cumplimiento LFPIORPI",

@@ -1,3 +1,10 @@
+# [2.10.0-rc.3](https://github.com/janovix/auth/compare/v2.10.0-rc.2...v2.10.0-rc.3) (2026-04-18)
+
+
+### Features
+
+* **compliance:** add shared AML settings notice for non-production environments ([58a7605](https://github.com/janovix/auth/commit/58a7605c2b9468993523236d6d2d3487ccda6a18))
+
 # [2.10.0-rc.2](https://github.com/janovix/auth/compare/v2.10.0-rc.1...v2.10.0-rc.2) (2026-04-18)
 
 

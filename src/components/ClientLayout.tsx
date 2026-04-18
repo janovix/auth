@@ -91,7 +91,7 @@ export default function ClientLayout({
 				// Settings and other routes - no SettingsBar (they have their own controls in the header)
 				children
 			)}
-			<Toaster position="top-right" richColors closeButton />
+			<Toaster />
 		</>
 	);
 

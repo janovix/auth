@@ -72,21 +72,6 @@ const VULNERABLE_ACTIVITIES = [
 		description: "Tarjetas de servicio o crédito",
 	},
 	{
-		value: "TPP",
-		label: "Tarjetas prepagadas (TPP)",
-		description: "Tarjetas prepagadas, vales o cupones",
-	},
-	{
-		value: "TDR",
-		label: "Monederos y certificados (TDR)",
-		description: "Monederos y certificados de devoluciones o recompensas",
-	},
-	{
-		value: "CHV",
-		label: "Cheques de viajero (CHV)",
-		description: "Cheques de viajero",
-	},
-	{
 		value: "MPC",
 		label: "Mutuo, préstamos y créditos (MPC)",
 		description: "Servicios de mutuo, préstamos o créditos",
@@ -151,12 +136,44 @@ const VULNERABLE_ACTIVITIES = [
 		label: "Arrendamiento de inmuebles (ARI)",
 		description: "Derechos personales de uso y goce de inmuebles",
 	},
+];
+
+/**
+ * Removed from {@link VULNERABLE_ACTIVITIES} but still shown when the org already
+ * has this activityKey so the Select value is valid until the user picks another.
+ */
+const LEGACY_VULNERABLE_ACTIVITIES: Array<{
+	value: string;
+	label: string;
+	description: string;
+}> = [
+	{
+		value: "TPP",
+		label: "Tarjetas prepagadas (TPP)",
+		description: "Tarjetas prepagadas, vales o cupones",
+	},
+	{
+		value: "TDR",
+		label: "Monederos y certificados (TDR)",
+		description: "Monederos y certificados de devoluciones o recompensas",
+	},
+	{
+		value: "CHV",
+		label: "Cheques de viajero (CHV)",
+		description: "Cheques de viajero",
+	},
 	{
 		value: "AVI",
 		label: "Activos virtuales (AVI)",
 		description: "Operaciones con Activos Virtuales",
 	},
 ];
+
+function legacyActivityForKey(
+	activityKey: string,
+): (typeof LEGACY_VULNERABLE_ACTIVITIES)[number] | undefined {
+	return LEGACY_VULNERABLE_ACTIVITIES.find((a) => a.value === activityKey);
+}
 
 // RFC validation regex (Mexican format)
 const RFC_REGEX = /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/;
@@ -168,9 +185,6 @@ const REPORTING_THRESHOLDS: Record<
 > = {
 	JYS: { thresholdUma: 645 },
 	TSC: { thresholdUma: 1285 },
-	TPP: { thresholdUma: 645 },
-	TDR: { thresholdUma: 645 },
-	CHV: { thresholdUma: 645 },
 	MPC: { thresholdUma: 1605 },
 	INM: { thresholdUma: 8025 },
 	DIN: { thresholdUma: 8025 },
@@ -184,7 +198,6 @@ const REPORTING_THRESHOLDS: Record<
 	FES: { thresholdUma: "ALWAYS" },
 	DON: { thresholdUma: 3210 },
 	ARI: { thresholdUma: 3210 },
-	AVI: { thresholdUma: 210 },
 };
 
 // Current UMA value (this should be fetched from the API in a real implementation)
@@ -422,9 +435,10 @@ export function ComplianceSettingsView() {
 			selfServiceExpiryHours !== (settings.selfServiceExpiryHours || 72) ||
 			selfServiceSendEmail !== (settings.selfServiceSendEmail !== false));
 
-	const selectedActivity = VULNERABLE_ACTIVITIES.find(
-		(a) => a.value === activityKey,
-	);
+	const legacyCurrentActivity = legacyActivityForKey(activityKey);
+	const selectedActivity =
+		VULNERABLE_ACTIVITIES.find((a) => a.value === activityKey) ??
+		legacyCurrentActivity;
 
 	if (!activeOrgId) {
 		return (
@@ -566,6 +580,14 @@ export function ComplianceSettingsView() {
 										/>
 									</SelectTrigger>
 									<SelectContent>
+										{legacyCurrentActivity && (
+											<SelectItem
+												key={legacyCurrentActivity.value}
+												value={legacyCurrentActivity.value}
+											>
+												{legacyCurrentActivity.label} — configuración actual
+											</SelectItem>
+										)}
 										{VULNERABLE_ACTIVITIES.map((activity) => (
 											<SelectItem key={activity.value} value={activity.value}>
 												{activity.label}

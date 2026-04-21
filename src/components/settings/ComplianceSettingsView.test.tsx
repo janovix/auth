@@ -242,6 +242,24 @@ describe("ComplianceSettingsView", () => {
 			});
 		});
 
+		it("shows legacy AVI activity when API returns removed catalog code", async () => {
+			vi.mocked(settingsClient.getAmlComplianceSettings).mockResolvedValue({
+				...mockAmlSettings,
+				activityKey: "AVI",
+			});
+			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+				mockOwnerMembership,
+			);
+
+			render(<ComplianceSettingsView />);
+
+			await waitFor(() => {
+				expect(
+					screen.getByText("Operaciones con Activos Virtuales"),
+				).toBeInTheDocument();
+			});
+		});
+
 		it("disables inputs for non-owners", async () => {
 			vi.mocked(settingsClient.getAmlComplianceSettings).mockResolvedValue(
 				mockAmlSettings,

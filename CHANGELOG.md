@@ -1,3 +1,10 @@
+# [2.10.0-rc.5](https://github.com/janovix/auth/compare/v2.10.0-rc.4...v2.10.0-rc.5) (2026-04-22)
+
+
+### Features
+
+* **turnstile:** integrate Turnstile site key resolution and context ([780f57f](https://github.com/janovix/auth/commit/780f57f51e7086b2f7a73e78c963a13d9781951f))
+
 # [2.10.0-rc.4](https://github.com/janovix/auth/compare/v2.10.0-rc.3...v2.10.0-rc.4) (2026-04-21)
 
 

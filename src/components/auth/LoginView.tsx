@@ -33,6 +33,7 @@ import { z } from "zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 import { Logo } from "@/components/Logo";
+import { useTurnstile } from "@/contexts/turnstile-context";
 import {
 	Alert,
 	AlertDescription,
@@ -84,9 +85,6 @@ type SignInWithOtpFn = (email: string, otp: string) => Promise<AuthResult>;
 
 const OTP_LENGTH = 6;
 
-// Turnstile site key from environment variable
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
-
 /**
  * LoginView component for passwordless OTP-based authentication.
  *
@@ -111,6 +109,7 @@ export const LoginView = ({
 	signInWithOtp?: SignInWithOtpFn;
 	defaultSuccessMessage?: string;
 }) => {
+	const { siteKey: TURNSTILE_SITE_KEY } = useTurnstile();
 	const { t } = useLanguage();
 	const { setPageProfile, setStateModifier } = useAurora();
 	const [serverError, setServerError] = useState<string | null>(null);

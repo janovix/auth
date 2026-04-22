@@ -14,10 +14,6 @@ import { TurnstileProvider } from "@/contexts/turnstile-context";
 import { useSessionSync } from "@/lib/auth/useSessionSync";
 import { DataEnvironmentProvider } from "@/components/DataEnvironmentProvider";
 
-// Turnstile site key from environment variable
-// In production, this comes from Cloudflare Dashboard
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
-
 function AuthLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<AuroraProvider>
@@ -41,8 +37,11 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
 
 export default function ClientLayout({
 	children,
+	turnstileSiteKey,
 }: {
 	children: React.ReactNode;
+	/** Server-resolved site key; `null` when E2E bypass header matches (no widget). */
+	turnstileSiteKey?: string | null;
 }) {
 	const pathname = usePathname();
 
@@ -66,10 +65,10 @@ export default function ClientLayout({
 
 	// Only enable Turnstile on auth routes (login, recover, verify)
 	// Don't enable on authenticated pages (settings, account, etc.)
-	const shouldEnableTurnstile = isAuthRoute && TURNSTILE_SITE_KEY;
+	const shouldEnableTurnstile = Boolean(isAuthRoute && turnstileSiteKey);
 
 	const authContent = shouldEnableTurnstile ? (
-		<TurnstileProvider siteKey={TURNSTILE_SITE_KEY}>
+		<TurnstileProvider siteKey={turnstileSiteKey!}>
 			<AuthLayout>{children}</AuthLayout>
 		</TurnstileProvider>
 	) : (

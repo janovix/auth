@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import ClientLayout from "@/components/ClientLayout";
 import { getServerSession } from "@/lib/auth/getServerSession";
+import { resolveTurnstileSiteKey } from "@/lib/turnstile-config";
 import { SessionHydrator } from "@/lib/auth/useAuthSession";
 import "./globals.css";
 
@@ -65,6 +66,7 @@ export default async function RootLayout({
 }>) {
 	// Fetch session on server - this runs before any page renders
 	const session = await getServerSession();
+	const turnstileSiteKey = await resolveTurnstileSiteKey();
 
 	return (
 		<html lang="en" suppressHydrationWarning>
@@ -80,7 +82,9 @@ export default async function RootLayout({
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
 				<SessionHydrator session={session}>
-					<ClientLayout>{children}</ClientLayout>
+					<ClientLayout turnstileSiteKey={turnstileSiteKey}>
+						{children}
+					</ClientLayout>
 				</SessionHydrator>
 			</body>
 		</html>

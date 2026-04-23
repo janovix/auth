@@ -1,3 +1,10 @@
+# [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-04-23)
+
+
+### Features
+
+* **auth:** enhance passkey sign-in functionality and add tests ([6691955](https://github.com/janovix/auth/commit/6691955d1f0afb7cc28f10168fdf3bf14cb7c889))
+
 # [2.10.0-rc.6](https://github.com/janovix/auth/compare/v2.10.0-rc.5...v2.10.0-rc.6) (2026-04-23)
 
 

@@ -1,3 +1,10 @@
+# [2.10.0-rc.6](https://github.com/janovix/auth/compare/v2.10.0-rc.5...v2.10.0-rc.6) (2026-04-23)
+
+
+### Features
+
+* **auth:** implement session-based theme and language synchronization ([48c44c4](https://github.com/janovix/auth/commit/48c44c43d439c364b768acbc75529349fba7320a))
+
 # [2.10.0-rc.5](https://github.com/janovix/auth/compare/v2.10.0-rc.4...v2.10.0-rc.5) (2026-04-22)
 
 

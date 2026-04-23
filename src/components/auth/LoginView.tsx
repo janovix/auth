@@ -92,14 +92,17 @@ type PasskeySignInData = NonNullable<PasskeySignInResult["data"]>;
 type PasskeyClientError = NonNullable<PasskeySignInResult["error"]>;
 
 /**
- * Benign passkey / WebAuthn outcomes we should not surface as login failures:
- * - user dismissed the prompt (NotAllowedError, USER_CANCELED)
- * - the browser cancelled the ceremony because a new one started (AbortError) — e.g. CTA after autofill
+ * Benign passkey / WebAuthn outcomes we should not surface as login failures.
+ * Better Auth's passkey client wraps all `startAuthentication` failures (including
+ * AbortError when a new ceremony cancels the in-flight autofill) in
+ * `{ code: "AUTH_CANCELLED" }` — the usual wire shape. We also match raw
+ * DOMException `name` values in case a caller passes them through.
  */
 function isPasskeyUserDismissedError(
 	error: PasskeyClientError | { name?: string; code?: string; message: string },
 ): boolean {
 	const e = error as { name?: string; code?: string };
+	if (e.code === "AUTH_CANCELLED") return true;
 	if (e.name === "NotAllowedError") return true;
 	if (e.name === "AbortError") return true;
 	if (e.code === "USER_CANCELED" || e.code === "ERR_USER_CANCELED") return true;

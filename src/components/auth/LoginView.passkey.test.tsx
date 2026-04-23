@@ -1,4 +1,5 @@
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -32,6 +33,10 @@ const renderWithProviders = (ui: React.ReactElement) => {
 		</ThemeProvider>,
 	);
 };
+
+/** Matches `t("login.passkey.error")` in en or default es (tests may flip language on mount). */
+const PASSKEY_FAILURE_PATTERN =
+	/Passkey sign-in failed|Error al iniciar sesión con llave de acceso/i;
 
 describe("LoginView passkey autofill", () => {
 	const originalLocation = window.location;
@@ -87,7 +92,37 @@ describe("LoginView passkey autofill", () => {
 		});
 	});
 
-	it("does not show serverError when autofill returns AbortError (e.g. new ceremony cancels the previous one)", async () => {
+	it("does not show serverError when autofill returns AUTH_CANCELLED (Better Auth wraps startAuthentication failure)", async () => {
+		(
+			globalThis as { PublicKeyCredential?: typeof PublicKeyCredential }
+		).PublicKeyCredential = {
+			isConditionalMediationAvailable: () => Promise.resolve(true),
+		} as unknown as typeof PublicKeyCredential;
+
+		mockSignInPasskey.mockResolvedValue({
+			data: null,
+			error: {
+				code: "AUTH_CANCELLED",
+				message: "auth cancelled",
+				status: 400,
+				statusText: "BAD_REQUEST",
+			},
+		});
+
+		renderWithProviders(<LoginView />);
+
+		await waitFor(() => {
+			expect(mockSignInPasskey).toHaveBeenCalledWith({ autoFill: true });
+		});
+
+		await waitFor(() => {
+			expect(
+				screen.queryByText(PASSKEY_FAILURE_PATTERN),
+			).not.toBeInTheDocument();
+		});
+	});
+
+	it("does not show serverError when autofill returns Error with name AbortError (safety net)", async () => {
 		(
 			globalThis as { PublicKeyCredential?: typeof PublicKeyCredential }
 		).PublicKeyCredential = {
@@ -111,9 +146,33 @@ describe("LoginView passkey autofill", () => {
 
 		await waitFor(() => {
 			expect(
-				screen.queryByText(
-					/Passkey sign-in failed\. Please try again or use another method\./i,
-				),
+				screen.queryByText(PASSKEY_FAILURE_PATTERN),
+			).not.toBeInTheDocument();
+		});
+	});
+
+	it("does not show serverError when CTA sign-in returns AUTH_CANCELLED", async () => {
+		mockSignInPasskey.mockResolvedValue({
+			data: null,
+			error: {
+				code: "AUTH_CANCELLED",
+				message: "auth cancelled",
+				status: 400,
+				statusText: "BAD_REQUEST",
+			},
+		});
+		const user = userEvent.setup();
+		renderWithProviders(<LoginView />);
+
+		await user.click(screen.getByRole("button", { name: /passkey/i }));
+
+		await waitFor(() => {
+			expect(mockSignInPasskey).toHaveBeenCalled();
+		});
+
+		await waitFor(() => {
+			expect(
+				screen.queryByText(PASSKEY_FAILURE_PATTERN),
 			).not.toBeInTheDocument();
 		});
 	});

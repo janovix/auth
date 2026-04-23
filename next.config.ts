@@ -6,8 +6,8 @@ const sentryEnvironment =
 
 const nextConfig: NextConfig = {
 	/* config options here */
-	// `xr-spatial-tracking` is omitted: Chromium may still log a "[Violation] … xr-spatial-tracking"
-	// for Cloudflare Turnstile's *cross-origin* iframe; that is controlled by their document, not ours.
+	// Delegate `xr-spatial-tracking` to Cloudflare Turnstile's iframe origin so Chrome does not log
+	// a Permissions-Policy violation when their frame requests it via `allow="xr-spatial-tracking …"`.
 	async headers() {
 		return [
 			{
@@ -23,6 +23,10 @@ const nextConfig: NextConfig = {
 							"magnetometer=()",
 							"gyroscope=()",
 							"accelerometer=()",
+							// Explicitly delegate xr-spatial-tracking to Cloudflare Turnstile's iframe origin
+							// so Chrome does not log a Permissions-Policy violation for its cross-origin frame.
+							// WebXR is still denied everywhere else.
+							'xr-spatial-tracking=(self "https://challenges.cloudflare.com")',
 						].join(", "),
 					},
 				],

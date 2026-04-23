@@ -11,6 +11,7 @@ import {
 	useMemo,
 } from "react";
 import { getCookie, setCookie, COOKIE_NAMES } from "@/lib/cookies";
+import { useAuthSession } from "@/lib/auth/useAuthSession";
 import {
 	getResolvedSettings,
 	updateUserSettings,
@@ -2443,11 +2444,12 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 );
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
+	const { data: session, isPending: sessionPending } = useAuthSession();
 	const [language, setLanguageState] = useState<Language>("es");
 	const [mounted, setMounted] = useState(false);
 	const [settingsSynced, setSettingsSynced] = useState(false);
 
-	// Initialize from cookies (instant), then sync with API
+	// Initialize from cookies (instant)
 	useEffect(() => {
 		setMounted(true);
 
@@ -2461,8 +2463,16 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 			setLanguageState(detected);
 			setCookie(COOKIE_NAMES.LANGUAGE, detected);
 		}
+	}, []);
 
-		// Step 2: Fetch from API to verify/sync
+	// Step 2: Fetch from API to verify/sync (only when authenticated; avoids 401s on /login)
+	useEffect(() => {
+		if (sessionPending) return;
+		if (!session?.user) {
+			setSettingsSynced(true);
+			return;
+		}
+
 		getResolvedSettings()
 			.then((settings) => {
 				const apiLanguage = settings.language;
@@ -2476,7 +2486,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 				// API unavailable, keep using cookie/browser value
 				setSettingsSynced(true);
 			});
-	}, []);
+	}, [session?.user, sessionPending]);
 
 	// Update both cookie and API when language changes
 	const handleSetLanguage = useCallback(

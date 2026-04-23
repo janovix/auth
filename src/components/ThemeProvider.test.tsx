@@ -30,12 +30,25 @@ vi.mock("@/lib/settings", () => ({
 	updateUserSettings: vi.fn(),
 }));
 
+const { mockUseAuthSession } = vi.hoisted(() => ({
+	mockUseAuthSession: vi.fn(),
+}));
+
+vi.mock("@/lib/auth/useAuthSession", () => ({
+	useAuthSession: () => mockUseAuthSession(),
+}));
+
 import * as cookiesModule from "@/lib/cookies";
 import { getResolvedSettings, updateUserSettings } from "@/lib/settings";
 
 describe("ThemeProvider", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockUseAuthSession.mockReturnValue({
+			data: null,
+			error: null,
+			isPending: false,
+		});
 		// Default mock: API rejects (not logged in)
 		vi.mocked(getResolvedSettings).mockRejectedValue(
 			new Error("Not authenticated"),
@@ -121,6 +134,14 @@ describe("ThemeProvider", () => {
 	});
 
 	it("syncs cookie when API returns different theme", async () => {
+		mockUseAuthSession.mockReturnValue({
+			data: {
+				user: { id: "u1" },
+				session: { id: "s1" },
+			} as never,
+			error: null,
+			isPending: false,
+		});
 		const setCookieSpy = vi.spyOn(cookiesModule, "setCookie");
 		vi.spyOn(cookiesModule, "getCookie").mockReturnValue("light");
 		vi.mocked(getResolvedSettings).mockResolvedValue({
@@ -173,6 +194,14 @@ describe("ThemeProvider", () => {
 	});
 
 	it("syncs with API when available", async () => {
+		mockUseAuthSession.mockReturnValue({
+			data: {
+				user: { id: "u1" },
+				session: { id: "s1" },
+			} as never,
+			error: null,
+			isPending: false,
+		});
 		vi.spyOn(cookiesModule, "getCookie").mockReturnValue("light");
 		vi.mocked(getResolvedSettings).mockResolvedValue({
 			theme: "dark",

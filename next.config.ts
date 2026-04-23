@@ -6,6 +6,28 @@ const sentryEnvironment =
 
 const nextConfig: NextConfig = {
 	/* config options here */
+	async headers() {
+		return [
+			{
+				source: "/:path*",
+				headers: [
+					{
+						key: "Permissions-Policy",
+						value: [
+							"xr-spatial-tracking=()",
+							"camera=()",
+							"microphone=()",
+							"geolocation=()",
+							"usb=()",
+							"magnetometer=()",
+							"gyroscope=()",
+							"accelerometer=()",
+						].join(", "),
+					},
+				],
+			},
+		];
+	},
 };
 
 export default withSentryConfig(nextConfig, {

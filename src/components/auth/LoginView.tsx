@@ -85,6 +85,25 @@ type SignInWithOtpFn = (email: string, otp: string) => Promise<AuthResult>;
 
 const OTP_LENGTH = 6;
 
+type PasskeySignInResult = Awaited<
+	ReturnType<typeof authClient.signIn.passkey>
+>;
+type PasskeySignInData = NonNullable<PasskeySignInResult["data"]>;
+type PasskeyClientError = NonNullable<PasskeySignInResult["error"]>;
+
+/**
+ * Autofill and explicit passkey UIs can surface a DOM / user-cancel error when
+ * the user dismisses the conditional mediation prompt. Those should be silent in autofill.
+ */
+function isPasskeyUserDismissedError(
+	error: PasskeyClientError | { name?: string; code?: string; message: string },
+): boolean {
+	const e = error as { name?: string; code?: string };
+	if (e.name === "NotAllowedError") return true;
+	if (e.code === "USER_CANCELED" || e.code === "ERR_USER_CANCELED") return true;
+	return false;
+}
+
 /**
  * LoginView component for passwordless OTP-based authentication.
  *
@@ -146,6 +165,8 @@ export const LoginView = ({
 	// Success animation state
 	const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
 	const redirectUrlRef = useRef<string>("");
+	/** Prevents double passkey autofill registration (e.g. React Strict Mode remount) */
+	const passkeyAutofillRunRef = useRef(false);
 
 	// Turnstile captcha state
 	const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -163,23 +184,6 @@ export const LoginView = ({
 	useEffect(() => {
 		setPageProfile("login");
 	}, [setPageProfile]);
-
-	// Conditional UI (passkey autofill) — silently activates if browser has matching credentials
-	useEffect(() => {
-		if (
-			typeof PublicKeyCredential === "undefined" ||
-			!PublicKeyCredential.isConditionalMediationAvailable
-		) {
-			return;
-		}
-
-		void PublicKeyCredential.isConditionalMediationAvailable().then(
-			(available) => {
-				if (!available) return;
-				void authClient.signIn.passkey({ autoFill: true });
-			},
-		);
-	}, []);
 
 	// Listen for rate limit events from authClient to set cooldown dynamically
 	// The cooldown duration comes from the server's X-Retry-After header
@@ -465,6 +469,12 @@ export const LoginView = ({
 		resetCooldown();
 	};
 
+	const isSubmitting = form.formState.isSubmitting;
+	// True whenever any auth method is in progress — disables all buttons to
+	// prevent rage-clicks and accidental multi-method submissions.
+	const anyAuthLoading =
+		isSubmitting || pendingSend || isGoogleLoading || isPasskeyLoading;
+
 	const handleGoogleSignIn = async () => {
 		if (anyAuthLoading) return;
 		try {
@@ -499,56 +509,103 @@ export const LoginView = ({
 		}
 	};
 
-	const handlePasskeySignIn = async () => {
-		if (anyAuthLoading) return;
-		try {
-			setServerError(null);
-			setIsPasskeyLoading(true);
-			setStateModifier("loading");
-
-			const finalRedirectUrl = resolveSafeRedirectUrl(
-				redirectTo ?? null,
-				window.location.origin,
-			);
-
-			const { data, error } = await authClient.signIn.passkey();
+	const finishPasskeySignIn = useCallback(
+		(
+			data: PasskeySignInData | null,
+			error:
+				| PasskeyClientError
+				| { message: string; name?: string; code?: string }
+				| null,
+			opts: { source: "cta" | "autoFill" },
+		) => {
 			if (error) {
+				if (opts.source === "autoFill" && isPasskeyUserDismissedError(error)) {
+					return;
+				}
 				Sentry.captureException(new Error(error.message), {
-					tags: { context: "passkey-signin-error" },
+					tags: { context: "passkey-signin-error", source: opts.source },
 				});
 				setServerError(
 					t("login.passkey.error") ||
 						"Passkey sign-in failed. Please try again.",
 				);
 				setStateModifier("error");
+				setIsPasskeyLoading(false);
 				return;
 			}
-			if (data) {
-				setStateModifier("success");
-				setShowSuccessAnimation(true);
-				setTimeout(() => {
-					window.location.href = finalRedirectUrl;
-				}, 2000);
+			if (!data) {
+				setIsPasskeyLoading(false);
+				return;
 			}
-		} catch (error) {
-			Sentry.captureException(error, {
-				tags: { context: "passkey-signin-error" },
-			});
-			setServerError(
-				t("login.passkey.error") || "Passkey sign-in failed. Please try again.",
+			const finalRedirectUrl = resolveSafeRedirectUrl(
+				redirectTo ?? null,
+				window.location.origin,
 			);
-			setStateModifier("error");
-		} finally {
+			setStateModifier("success");
+			setShowSuccessAnimation(true);
 			setIsPasskeyLoading(false);
+			setTimeout(() => {
+				window.location.href = finalRedirectUrl;
+			}, 2000);
+		},
+		[redirectTo, setStateModifier, t],
+	);
+
+	const handlePasskeySignIn = async () => {
+		if (anyAuthLoading) return;
+		setServerError(null);
+		setIsPasskeyLoading(true);
+		setStateModifier("loading");
+		try {
+			const { data, error } = await authClient.signIn.passkey();
+			finishPasskeySignIn(data, error, { source: "cta" });
+		} catch (error) {
+			const normalized =
+				error instanceof Error
+					? {
+							message: error.message,
+							name: error.name,
+							code: (error as { code?: string }).code,
+						}
+					: { message: String(error) };
+			finishPasskeySignIn(null, normalized, { source: "cta" });
 		}
 	};
 
-	const isSubmitting = form.formState.isSubmitting;
+	// Conditional UI (passkey autofill) — same post-success UX as the CTA when a credential is chosen
+	useEffect(() => {
+		if (
+			typeof PublicKeyCredential === "undefined" ||
+			!PublicKeyCredential.isConditionalMediationAvailable
+		) {
+			return;
+		}
+		if (passkeyAutofillRunRef.current) {
+			return;
+		}
+		passkeyAutofillRunRef.current = true;
 
-	// True whenever any auth method is in progress — disables all buttons to
-	// prevent rage-clicks and accidental multi-method submissions.
-	const anyAuthLoading =
-		isSubmitting || pendingSend || isGoogleLoading || isPasskeyLoading;
+		let cancelled = false;
+		void (async () => {
+			const available =
+				await PublicKeyCredential.isConditionalMediationAvailable();
+			if (!available) {
+				passkeyAutofillRunRef.current = false;
+				return;
+			}
+			if (cancelled) return;
+			const { data, error } = await authClient.signIn.passkey({
+				autoFill: true,
+			});
+			if (cancelled) return;
+			finishPasskeySignIn(data, error, { source: "autoFill" });
+		})();
+
+		return () => {
+			cancelled = true;
+			passkeyAutofillRunRef.current = false;
+		};
+	}, [finishPasskeySignIn]);
 
 	// Show success animation when login is successful
 	if (showSuccessAnimation) {

@@ -6,6 +6,8 @@ const sentryEnvironment =
 
 const nextConfig: NextConfig = {
 	/* config options here */
+	// `xr-spatial-tracking` is omitted: Chromium may still log a "[Violation] … xr-spatial-tracking"
+	// for Cloudflare Turnstile's *cross-origin* iframe; that is controlled by their document, not ours.
 	async headers() {
 		return [
 			{
@@ -14,7 +16,6 @@ const nextConfig: NextConfig = {
 					{
 						key: "Permissions-Policy",
 						value: [
-							"xr-spatial-tracking=()",
 							"camera=()",
 							"microphone=()",
 							"geolocation=()",

@@ -92,14 +92,16 @@ type PasskeySignInData = NonNullable<PasskeySignInResult["data"]>;
 type PasskeyClientError = NonNullable<PasskeySignInResult["error"]>;
 
 /**
- * Autofill and explicit passkey UIs can surface a DOM / user-cancel error when
- * the user dismisses the conditional mediation prompt. Those should be silent in autofill.
+ * Benign passkey / WebAuthn outcomes we should not surface as login failures:
+ * - user dismissed the prompt (NotAllowedError, USER_CANCELED)
+ * - the browser cancelled the ceremony because a new one started (AbortError) — e.g. CTA after autofill
  */
 function isPasskeyUserDismissedError(
 	error: PasskeyClientError | { name?: string; code?: string; message: string },
 ): boolean {
 	const e = error as { name?: string; code?: string };
 	if (e.name === "NotAllowedError") return true;
+	if (e.name === "AbortError") return true;
 	if (e.code === "USER_CANCELED" || e.code === "ERR_USER_CANCELED") return true;
 	return false;
 }
@@ -165,8 +167,6 @@ export const LoginView = ({
 	// Success animation state
 	const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
 	const redirectUrlRef = useRef<string>("");
-	/** Prevents double passkey autofill registration (e.g. React Strict Mode remount) */
-	const passkeyAutofillRunRef = useRef(false);
 
 	// Turnstile captcha state
 	const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -519,7 +519,8 @@ export const LoginView = ({
 			opts: { source: "cta" | "autoFill" },
 		) => {
 			if (error) {
-				if (opts.source === "autoFill" && isPasskeyUserDismissedError(error)) {
+				if (isPasskeyUserDismissedError(error)) {
+					setIsPasskeyLoading(false);
 					return;
 				}
 				Sentry.captureException(new Error(error.message), {
@@ -572,7 +573,13 @@ export const LoginView = ({
 		}
 	};
 
-	// Conditional UI (passkey autofill) — same post-success UX as the CTA when a credential is chosen
+	const finishPasskeyRef = useRef(finishPasskeySignIn);
+	useEffect(() => {
+		finishPasskeyRef.current = finishPasskeySignIn;
+	}, [finishPasskeySignIn]);
+
+	// Conditional UI (passkey autofill) — run once per mount; handler via ref so `finishPasskeySignIn` identity
+	// (tied to `setStateModifier`) does not re-register WebAuthn on every state change
 	useEffect(() => {
 		if (
 			typeof PublicKeyCredential === "undefined" ||
@@ -580,32 +587,23 @@ export const LoginView = ({
 		) {
 			return;
 		}
-		if (passkeyAutofillRunRef.current) {
-			return;
-		}
-		passkeyAutofillRunRef.current = true;
 
 		let cancelled = false;
 		void (async () => {
 			const available =
 				await PublicKeyCredential.isConditionalMediationAvailable();
-			if (!available) {
-				passkeyAutofillRunRef.current = false;
-				return;
-			}
-			if (cancelled) return;
+			if (!available || cancelled) return;
 			const { data, error } = await authClient.signIn.passkey({
 				autoFill: true,
 			});
 			if (cancelled) return;
-			finishPasskeySignIn(data, error, { source: "autoFill" });
+			finishPasskeyRef.current(data, error, { source: "autoFill" });
 		})();
 
 		return () => {
 			cancelled = true;
-			passkeyAutofillRunRef.current = false;
 		};
-	}, [finishPasskeySignIn]);
+	}, []);
 
 	// Show success animation when login is successful
 	if (showSuccessAnimation) {

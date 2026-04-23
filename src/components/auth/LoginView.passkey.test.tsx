@@ -86,4 +86,35 @@ describe("LoginView passkey autofill", () => {
 			expect(screen.getByText(/Redirigiendo/i)).toBeInTheDocument();
 		});
 	});
+
+	it("does not show serverError when autofill returns AbortError (e.g. new ceremony cancels the previous one)", async () => {
+		(
+			globalThis as { PublicKeyCredential?: typeof PublicKeyCredential }
+		).PublicKeyCredential = {
+			isConditionalMediationAvailable: () => Promise.resolve(true),
+		} as unknown as typeof PublicKeyCredential;
+
+		const abortError = Object.assign(
+			new Error("Cancelling existing WebAuthn API call for new one"),
+			{ name: "AbortError" },
+		);
+		mockSignInPasskey.mockResolvedValue({
+			data: null,
+			error: abortError,
+		});
+
+		renderWithProviders(<LoginView />);
+
+		await waitFor(() => {
+			expect(mockSignInPasskey).toHaveBeenCalledWith({ autoFill: true });
+		});
+
+		await waitFor(() => {
+			expect(
+				screen.queryByText(
+					/Passkey sign-in failed\. Please try again or use another method\./i,
+				),
+			).not.toBeInTheDocument();
+		});
+	});
 });

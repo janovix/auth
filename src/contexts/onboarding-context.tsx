@@ -160,7 +160,6 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
 	const [state, setState] = useState<OnboardingState>(initialState);
 	const [isCheckoutOpen, setCheckoutOpen] = useState(false);
 	const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
-
 	// Fetch onboarding status from API
 	const refreshOnboardingStatus = useCallback(async () => {
 		try {

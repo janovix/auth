@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuroraProvider } from "@/contexts/aurora-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { OnboardingProvider } from "@/contexts/onboarding-context";
+import { ReferralAttributionClient } from "@/components/referral/ReferralAttributionClient";
 import { PageStatusProvider } from "@/contexts/page-status-context";
 import { TurnstileProvider } from "@/contexts/turnstile-context";
 import { useSessionSync } from "@/lib/auth/useSessionSync";
@@ -90,6 +91,7 @@ export default function ClientLayout({
 				// Settings and other routes - no SettingsBar (they have their own controls in the header)
 				children
 			)}
+			<ReferralAttributionClient />
 			<Toaster />
 		</>
 	);

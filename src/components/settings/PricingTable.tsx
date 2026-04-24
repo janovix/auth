@@ -127,11 +127,18 @@ const limitConfig: Record<string, { labelKey: string; icon: typeof Users }> = {
 	},
 };
 
+export type PricingTableSection = "limits" | "pricing" | "all";
+
 interface PricingTableProps {
 	currentPlan?: string | null;
+	/** When `limits` or `pricing`, only that part of the reference pricing UI is shown. */
+	section?: PricingTableSection;
 }
 
-export function PricingTable({ currentPlan }: PricingTableProps) {
+export function PricingTable({
+	currentPlan,
+	section = "all",
+}: PricingTableProps) {
 	const { t } = useLanguage();
 	const [plans, setPlans] = useState<PublicPlanInfo[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -187,9 +194,13 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 		return plan.prices.find((p) => p.priceType === priceType);
 	};
 
+	const showLimits = section === "all" || section === "limits";
+	const showPricing = section === "all" || section === "pricing";
+
 	return (
 		<div className="space-y-8">
 			{/* Plan Limits Table */}
+			{showLimits ? (
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
@@ -312,8 +323,10 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 					</div>
 				</CardContent>
 			</Card>
+			) : null}
 
 			{/* Pricing Table */}
+			{showPricing ? (
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
@@ -475,8 +488,10 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 					</div>
 				</CardContent>
 			</Card>
+			) : null}
 
 			{/* Pricing Notes */}
+			{showPricing ? (
 			<Card className="bg-muted/30">
 				<CardContent className="pt-6">
 					<div className="flex items-start gap-3">
@@ -496,6 +511,7 @@ export function PricingTable({ currentPlan }: PricingTableProps) {
 					</div>
 				</CardContent>
 			</Card>
+			) : null}
 		</div>
 	);
 }

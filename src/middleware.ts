@@ -355,8 +355,46 @@ function needsOnboarding(status: OnboardingStatus): boolean {
  *
  * @see https://www.better-auth.com/docs/integrations/next
  */
+const REF_CODE_RE = /^[0-9A-HJKMNP-TV-Z]{8}$/;
+const JANOVIX_REF_MAX_AGE_SEC = 90 * 24 * 60 * 60; // 90 days
+
+/**
+ * Capture `?ref=CODE` (8-char Crockford) into cookies and strip the param
+ * so referral survives signup/Stripe; httpOnly for server; pub mirror for debugging only.
+ */
+function responseWithRefCookies(
+	redirectTo: URL,
+	code: string,
+): NextResponse {
+	const res = NextResponse.redirect(redirectTo);
+	const isProd = process.env.NODE_ENV === "production";
+	const opts = {
+		secure: isProd,
+		sameSite: "lax" as const,
+		path: "/",
+		maxAge: JANOVIX_REF_MAX_AGE_SEC,
+	};
+	res.cookies.set("janovix_ref", code, { ...opts, httpOnly: true });
+	res.cookies.set("janovix_ref_pub", code, { ...opts, httpOnly: false });
+	return res;
+}
+
 export async function middleware(request: NextRequest) {
-	const { pathname } = request.nextUrl;
+	const { pathname, searchParams } = request.nextUrl;
+	const refParam = searchParams.get("ref");
+	if (refParam !== null) {
+		const nextUrl = request.nextUrl.clone();
+		nextUrl.searchParams.delete("ref");
+		const trimmed = refParam.trim();
+		if (trimmed.length > 0) {
+			const code = trimmed.toUpperCase();
+			if (REF_CODE_RE.test(code)) {
+				return responseWithRefCookies(nextUrl, code);
+			}
+		}
+		return NextResponse.redirect(nextUrl);
+	}
+
 	const sessionCookie = getSessionCookie(request);
 	const cookieHeader = request.headers.get("cookie") || "";
 

@@ -120,6 +120,14 @@ export interface SettingsApiResponse<T> {
 /**
  * AML Compliance Settings (stored in aml-svc)
  */
+export type WatchlistRescanChannel = "in_app" | "email";
+export type WatchlistRescanSource =
+	| "ofac"
+	| "un"
+	| "sat69b"
+	| "pep"
+	| "adverse_media";
+
 export interface AmlComplianceSettings {
 	id: string;
 	organizationId: string;
@@ -131,6 +139,14 @@ export interface AmlComplianceSettings {
 	selfServiceRequiredSections?: string[] | null;
 	/** When true (default), aml-svc emails the client when a KYC session is created. */
 	selfServiceSendEmail?: boolean;
+	/** Periodic watchlist re-screening (aml-svc cron + queue) */
+	watchlistRescanEnabled?: boolean;
+	watchlistRescanIntervalDays?: number;
+	watchlistRescanIncludeBcs?: boolean;
+	watchlistRescanNotifyOnStatusChange?: boolean;
+	watchlistRescanDailyCap?: number;
+	watchlistRescanNotifyChannels?: WatchlistRescanChannel[];
+	watchlistRescanSources?: WatchlistRescanSource[];
 	createdAt: string;
 	updatedAt: string;
 }
@@ -138,6 +154,13 @@ export interface AmlComplianceSettings {
 export interface UpdateAmlComplianceSettingsInput {
 	obligatedSubjectKey?: string;
 	activityKey?: string;
+	watchlistRescanEnabled?: boolean;
+	watchlistRescanIntervalDays?: number;
+	watchlistRescanIncludeBcs?: boolean;
+	watchlistRescanNotifyOnStatusChange?: boolean;
+	watchlistRescanDailyCap?: number;
+	watchlistRescanNotifyChannels?: WatchlistRescanChannel[];
+	watchlistRescanSources?: WatchlistRescanSource[];
 }
 
 export interface UpdateSelfServiceSettingsInput {

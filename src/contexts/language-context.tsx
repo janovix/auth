@@ -578,6 +578,34 @@ const translations = {
 			"Upgrade your subscription to access PLD compliance settings and the AML platform.",
 		"settings.compliance.viewBilling": "View billing & plans",
 
+		"settings.compliance.watchlistScreening": "Watchlist screening",
+		"settings.compliance.watchlistScreeningDesc":
+			"Re-screen clients and beneficial controllers against sanctions and PEP lists on a schedule, with notifications on new positive hits.",
+		"settings.compliance.watchlistRescanEnabled": "Enable scheduled rescreening",
+		"settings.compliance.watchlistRescanIntervalDays": "Rescreen interval (days)",
+		"settings.compliance.watchlistRescanIntervalHelp":
+			"Re-run watchlist search when last screening is older than this (7–180 days).",
+		"settings.compliance.watchlistRescanIncludeBcs": "Include beneficial controllers",
+		"settings.compliance.watchlistRescanIncludeBcsHelp":
+			"When on, UBOs/legal reps in scope are re-screened on the same schedule as clients.",
+		"settings.compliance.watchlistRescanDailyCap": "Daily max rescreens (per org)",
+		"settings.compliance.watchlistRescanDailyCapHelp":
+			"Caps how many client/UBO screenings the daily job enqueues to control cost.",
+		"settings.compliance.watchlistRescanNotifyOnStatusChange": "Notify on new hits",
+		"settings.compliance.watchlistRescanNotifyOnStatusChangeHelp":
+			"Send a notification when a new positive list match appears on a profile that was already flagged (incremental change).",
+		"settings.compliance.watchlistRescanNotifyChannelInApp": "In-app",
+		"settings.compliance.watchlistRescanNotifyChannelEmail": "Email",
+		"settings.compliance.watchlistRescanSources": "Notification sources (status change)",
+		"settings.compliance.watchlistRescanSourcesHelp":
+			"For incremental alerts, only selected sources are considered (OFAC, UN, SAT 69-B, PEP, Adverse media).",
+		"settings.compliance.watchlistSourceOfac": "OFAC",
+		"settings.compliance.watchlistSourceUn": "UN",
+		"settings.compliance.watchlistSourceSat69b": "SAT 69-B",
+		"settings.compliance.watchlistSourcePep": "PEP",
+		"settings.compliance.watchlistSourceAdverse": "Adverse media",
+		"settings.compliance.watchlistRescanSavedSuccess": "Watchlist settings saved successfully",
+
 		// Team settings
 		"settings.team.title": "Team Settings",
 		"settings.team.description":
@@ -687,6 +715,11 @@ const translations = {
 		"settings.billing.title": "Billing & Subscription",
 		"settings.billing.description":
 			"Manage your subscription, usage, and payment methods",
+		"settings.billing.tabs.usage": "Usage & limits",
+		"settings.billing.tabs.plans": "Change plan",
+		"settings.billing.tabs.enterprise": "Enterprise",
+		"settings.billing.tabs.limits": "Plan limits",
+		"settings.billing.tabs.pricing": "Pricing & extra fees",
 		"settings.billing.currentPlan": "Current Plan",
 		"settings.billing.noPlan": "No active subscription",
 		"settings.billing.noPlanDesc": "Subscribe to a plan to unlock all features",
@@ -1783,6 +1816,34 @@ const translations = {
 			"Mejora tu suscripción para acceder a la configuración PLD y a la plataforma AML.",
 		"settings.compliance.viewBilling": "Ver facturación y planes",
 
+		"settings.compliance.watchlistScreening": "Cribado de listas (watchlist)",
+		"settings.compliance.watchlistScreeningDesc":
+			"Re-criba clientes y beneficiarios controlador contra sanciones y PEP según un calendario, con notificaciones ante nuevas coincidencias.",
+		"settings.compliance.watchlistRescanEnabled": "Habilitar re-cribado programado",
+		"settings.compliance.watchlistRescanIntervalDays": "Intervalo de re-cribado (días)",
+		"settings.compliance.watchlistRescanIntervalHelp":
+			"Vuelve a ejecutar la búsqueda en listas si el último cribado es más antiguo (7–180 días).",
+		"settings.compliance.watchlistRescanIncludeBcs": "Incluir beneficiarios controladores",
+		"settings.compliance.watchlistRescanIncludeBcsHelp":
+			"Si está activo, se re-criban UBOs/representantes con la misma periodicidad que los clientes.",
+		"settings.compliance.watchlistRescanDailyCap": "Máx. re-cribados diarios (por org)",
+		"settings.compliance.watchlistRescanDailyCapHelp":
+			"Limita cuántos perfiles encola el trabajo diario para controlar coste.",
+		"settings.compliance.watchlistRescanNotifyOnStatusChange": "Notificar en nuevas coincidencias",
+		"settings.compliance.watchlistRescanNotifyOnStatusChangeHelp":
+			"Enviar notificación cuando aparezca un nuevo match en un perfil que ya estaba marcado (cambio incremental).",
+		"settings.compliance.watchlistRescanNotifyChannelInApp": "En la aplicación",
+		"settings.compliance.watchlistRescanNotifyChannelEmail": "Correo",
+		"settings.compliance.watchlistRescanSources": "Fuentes para notificación (cambio de estado)",
+		"settings.compliance.watchlistRescanSourcesHelp":
+			"En alertas incrementales solo se consideran las fuentes seleccionadas (OFAC, ONU, SAT 69-B, PEP, medios adversos).",
+		"settings.compliance.watchlistSourceOfac": "OFAC",
+		"settings.compliance.watchlistSourceUn": "ONU",
+		"settings.compliance.watchlistSourceSat69b": "SAT 69-B",
+		"settings.compliance.watchlistSourcePep": "PEP",
+		"settings.compliance.watchlistSourceAdverse": "Medios adversos",
+		"settings.compliance.watchlistRescanSavedSuccess": "Configuración de listas guardada correctamente",
+
 		// Team settings
 		"settings.team.title": "Configuración de Equipo",
 		"settings.team.description":
@@ -1893,6 +1954,11 @@ const translations = {
 		"settings.billing.title": "Facturación y Suscripción",
 		"settings.billing.description":
 			"Administra tu suscripción, uso y métodos de pago",
+		"settings.billing.tabs.usage": "Uso y límites",
+		"settings.billing.tabs.plans": "Cambiar plan",
+		"settings.billing.tabs.enterprise": "Enterprise",
+		"settings.billing.tabs.limits": "Límites del plan",
+		"settings.billing.tabs.pricing": "Precios y Cargos extra",
 		"settings.billing.currentPlan": "Plan Actual",
 		"settings.billing.noPlan": "Sin suscripción activa",
 		"settings.billing.noPlanDesc":

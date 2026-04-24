@@ -80,6 +80,7 @@ import {
 	SettingsPageHeader,
 	PersonalSettingsViewSkeleton,
 } from "@/components/settings";
+import { ReferralSettingsCard } from "@/components/settings/ReferralSettingsCard";
 import { AvatarEditorDialog } from "@algenium/blocks";
 import { getAuthCoreBaseUrl } from "@/lib/auth/authCoreConfig";
 import { updateProfile } from "@/lib/auth/authActions";
@@ -765,6 +766,8 @@ export function PersonalSettingsView() {
 				title={t("settings.personal.title")}
 				description={t("settings.personal.description")}
 			/>
+
+			<ReferralSettingsCard />
 
 			{/* Profile Section */}
 			<SettingsSection

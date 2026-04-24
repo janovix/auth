@@ -16,7 +16,7 @@ export { SettingsSection } from "./SettingsSection";
 export { SettingsPageHeader } from "./SettingsPageHeader";
 export { AvatarUploadDialog } from "./AvatarUploadDialog";
 export { DeleteOrganizationDialog } from "./DeleteOrganizationDialog";
-export { PricingTable } from "./PricingTable";
+export { PricingTable, type PricingTableSection } from "./PricingTable";
 
 // Skeleton loaders for settings views
 export {

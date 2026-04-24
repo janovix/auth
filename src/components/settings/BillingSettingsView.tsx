@@ -3,7 +3,13 @@
 import * as Sentry from "@sentry/nextjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { CreditCard, Building2, FileText, KeyRound, CircleAlert } from "lucide-react";
+import {
+	CreditCard,
+	Building2,
+	FileText,
+	KeyRound,
+	CircleAlert,
+} from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
@@ -73,7 +79,9 @@ const BILLING_SECTIONS = [
 ] as const;
 type BillingSection = (typeof BILLING_SECTIONS)[number];
 
-function isBillingSection(value: string | null | undefined): value is BillingSection {
+function isBillingSection(
+	value: string | null | undefined,
+): value is BillingSection {
 	if (value == null) return false;
 	return (BILLING_SECTIONS as readonly string[]).includes(value);
 }
@@ -661,20 +669,14 @@ export function BillingSettingsView() {
 					<p className="text-sm text-muted-foreground">
 						{t("onboarding.plans.detailed.description")}
 					</p>
-					<PricingTable
-						currentPlan={subscription?.plan}
-						section="limits"
-					/>
+					<PricingTable currentPlan={subscription?.plan} section="limits" />
 				</TabsContent>
 
 				<TabsContent value="pricing" className="mt-4 space-y-2">
 					<p className="text-sm text-muted-foreground">
 						{t("onboarding.plans.detailed.description")}
 					</p>
-					<PricingTable
-						currentPlan={subscription?.plan}
-						section="pricing"
-					/>
+					<PricingTable currentPlan={subscription?.plan} section="pricing" />
 				</TabsContent>
 			</Tabs>
 

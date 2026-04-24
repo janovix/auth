@@ -16,7 +16,10 @@ export async function tryAttributeReferralFromCookie(): Promise<{
 		return { ok: true, skipped: true };
 	}
 
-	const base = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL?.trim().replace(/\/$/, "");
+	const base = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL?.trim().replace(
+		/\/$/,
+		"",
+	);
 	if (!base) {
 		return { ok: false };
 	}

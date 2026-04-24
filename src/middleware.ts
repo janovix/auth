@@ -362,10 +362,7 @@ const JANOVIX_REF_MAX_AGE_SEC = 90 * 24 * 60 * 60; // 90 days
  * Capture `?ref=CODE` (8-char Crockford) into cookies and strip the param
  * so referral survives signup/Stripe; httpOnly for server; pub mirror for debugging only.
  */
-function responseWithRefCookies(
-	redirectTo: URL,
-	code: string,
-): NextResponse {
+function responseWithRefCookies(redirectTo: URL, code: string): NextResponse {
 	const res = NextResponse.redirect(redirectTo);
 	const isProd = process.env.NODE_ENV === "production";
 	const opts = {

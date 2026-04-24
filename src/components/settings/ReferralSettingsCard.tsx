@@ -7,7 +7,11 @@ import { Button, Label, Badge } from "@/components/ui";
 import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/contexts/language-context";
 import { SettingsCard, SettingsSection } from "@/components/settings";
-import { fetchReferralMe, generateReferralCode, type ReferralMeData } from "@/lib/referrals";
+import {
+	fetchReferralMe,
+	generateReferralCode,
+	type ReferralMeData,
+} from "@/lib/referrals";
 import { cn } from "@/lib/utils";
 
 export function ReferralSettingsCard() {
@@ -42,7 +46,10 @@ export function ReferralSettingsCard() {
 		try {
 			const res = await generateReferralCode();
 			if (!res.ok || !res.data) {
-				toast.error(res.error || (isEn ? "Could not create code" : "No se pudo crear el código"));
+				toast.error(
+					res.error ||
+						(isEn ? "Could not create code" : "No se pudo crear el código"),
+				);
 				return;
 			}
 			setData((prev) => ({
@@ -56,7 +63,9 @@ export function ReferralSettingsCard() {
 				shareUrl: res.data!.shareUrl,
 			}));
 			toast.success(
-				isEn ? "Your referral code is ready" : "Tu código de referido está listo",
+				isEn
+					? "Your referral code is ready"
+					: "Tu código de referido está listo",
 			);
 		} finally {
 			setGenerating(false);
@@ -76,7 +85,9 @@ export function ReferralSettingsCard() {
 		return (
 			<SettingsSection
 				title={isEn ? "Referrals" : "Referidos"}
-				description={isEn ? "Invite others and grow together." : "Invita a otros a unirse."}
+				description={
+					isEn ? "Invite others and grow together." : "Invita a otros a unirse."
+				}
 			>
 				<SettingsCard>
 					<div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -111,13 +122,19 @@ export function ReferralSettingsCard() {
 								? "You don’t have a code yet. Generate a single 8‑character code to share. When someone joins from your link and subscribes or redeems a license, it counts as a success."
 								: "Aún no tienes un código. Genera un código único para compartir. Cuando alguien se una desde tu enlace y pague o active una licencia, contará como éxito."}
 						</p>
-						<Button onClick={onGenerate} disabled={generating} className="gap-2">
+						<Button
+							onClick={onGenerate}
+							disabled={generating}
+							className="gap-2"
+						>
 							{generating ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
 								<Gift className="h-4 w-4" />
 							)}
-							{isEn ? "Generate my referral code" : "Generar mi código de referido"}
+							{isEn
+								? "Generate my referral code"
+								: "Generar mi código de referido"}
 						</Button>
 					</div>
 				) : (
@@ -138,7 +155,9 @@ export function ReferralSettingsCard() {
 								</div>
 							</div>
 							<div className="space-y-2">
-								<Label htmlFor="refCode">{isEn ? "Your code" : "Tu código"}</Label>
+								<Label htmlFor="refCode">
+									{isEn ? "Your code" : "Tu código"}
+								</Label>
 								<div className="flex gap-2">
 									<Input
 										id="refCode"
@@ -159,7 +178,9 @@ export function ReferralSettingsCard() {
 							</div>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="refUrl">{isEn ? "Share link" : "Enlace para compartir"}</Label>
+							<Label htmlFor="refUrl">
+								{isEn ? "Share link" : "Enlace para compartir"}
+							</Label>
 							<div className="flex flex-col sm:flex-row gap-2">
 								<Input
 									id="refUrl"
@@ -181,7 +202,9 @@ export function ReferralSettingsCard() {
 						{list.length > 0 && (
 							<div>
 								<h4 className="text-sm font-medium mb-2">
-									{isEn ? "Recent successful referrals" : "Referidos recientes exitosos"}
+									{isEn
+										? "Recent successful referrals"
+										: "Referidos recientes exitosos"}
 								</h4>
 								<ul className="text-sm text-muted-foreground space-y-1.5 list-none p-0 m-0">
 									{list.map((row) => (
@@ -190,7 +213,10 @@ export function ReferralSettingsCard() {
 											className="flex flex-wrap items-center gap-2"
 										>
 											<span>{row.maskedEmail}</span>
-											<Badge variant="secondary" className="text-xs font-normal">
+											<Badge
+												variant="secondary"
+												className="text-xs font-normal"
+											>
 												{row.conversionType}
 											</Badge>
 											<span className="text-xs text-muted-foreground/80">

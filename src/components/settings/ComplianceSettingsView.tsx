@@ -506,7 +506,10 @@ export function ComplianceSettingsView() {
 			normSrc(watchlistRescanSources) !==
 				normSrc(settings.watchlistRescanSources));
 
-	const toggleRescanChannel = (channel: WatchlistRescanChannel, on: boolean) => {
+	const toggleRescanChannel = (
+		channel: WatchlistRescanChannel,
+		on: boolean,
+	) => {
 		setWatchlistRescanNotifyChannels((prev) => {
 			const next = new Set(prev);
 			if (on) next.add(channel);
@@ -551,9 +554,7 @@ export function ComplianceSettingsView() {
 			showSuccess(t("settings.compliance.watchlistRescanSavedSuccess"));
 		} catch (err) {
 			toast.error(
-				err instanceof Error
-					? err.message
-					: t("settings.compliance.saveError"),
+				err instanceof Error ? err.message : t("settings.compliance.saveError"),
 			);
 		} finally {
 			setSavingWatchlist(false);
@@ -1036,7 +1037,9 @@ export function ComplianceSettingsView() {
 													{t("settings.compliance.watchlistRescanIncludeBcs")}
 												</Label>
 												<p className="text-xs text-muted-foreground">
-													{t("settings.compliance.watchlistRescanIncludeBcsHelp")}
+													{t(
+														"settings.compliance.watchlistRescanIncludeBcsHelp",
+													)}
 												</p>
 											</div>
 										</div>
@@ -1066,9 +1069,7 @@ export function ComplianceSettingsView() {
 											<Switch
 												id="watchlist-notify-change"
 												checked={watchlistRescanNotifyOnStatusChange}
-												onCheckedChange={
-													setWatchlistRescanNotifyOnStatusChange
-												}
+												onCheckedChange={setWatchlistRescanNotifyOnStatusChange}
 												disabled={!canEdit || savingWatchlist}
 											/>
 											<div className="space-y-1">
@@ -1091,8 +1092,13 @@ export function ComplianceSettingsView() {
 										{watchlistRescanNotifyOnStatusChange && (
 											<div className="space-y-4 rounded-md border p-3">
 												<p className="text-sm font-medium">
-													{t("settings.compliance.watchlistRescanNotifyChannelInApp")}{" "}
-													/ {t("settings.compliance.watchlistRescanNotifyChannelEmail")}
+													{t(
+														"settings.compliance.watchlistRescanNotifyChannelInApp",
+													)}{" "}
+													/{" "}
+													{t(
+														"settings.compliance.watchlistRescanNotifyChannelEmail",
+													)}
 												</p>
 												<div className="flex flex-col gap-3 sm:flex-row sm:gap-6">
 													<div className="flex items-center gap-2">
@@ -1101,10 +1107,15 @@ export function ComplianceSettingsView() {
 															checked={watchlistRescanNotifyChannels.includes(
 																"in_app",
 															)}
-															onCheckedChange={(v) => toggleRescanChannel("in_app", v)}
+															onCheckedChange={(v) =>
+																toggleRescanChannel("in_app", v)
+															}
 															disabled={!canEdit || savingWatchlist}
 														/>
-														<Label htmlFor="wl-ch-inapp" className="cursor-pointer">
+														<Label
+															htmlFor="wl-ch-inapp"
+															className="cursor-pointer"
+														>
 															{t(
 																"settings.compliance.watchlistRescanNotifyChannelInApp",
 															)}
@@ -1116,10 +1127,15 @@ export function ComplianceSettingsView() {
 															checked={watchlistRescanNotifyChannels.includes(
 																"email",
 															)}
-															onCheckedChange={(v) => toggleRescanChannel("email", v)}
+															onCheckedChange={(v) =>
+																toggleRescanChannel("email", v)
+															}
 															disabled={!canEdit || savingWatchlist}
 														/>
-														<Label htmlFor="wl-ch-email" className="cursor-pointer">
+														<Label
+															htmlFor="wl-ch-email"
+															className="cursor-pointer"
+														>
 															{t(
 																"settings.compliance.watchlistRescanNotifyChannelEmail",
 															)}
@@ -1132,21 +1148,36 @@ export function ComplianceSettingsView() {
 														{t("settings.compliance.watchlistRescanSources")}
 													</Label>
 													<p className="text-xs text-muted-foreground">
-														{t("settings.compliance.watchlistRescanSourcesHelp")}
+														{t(
+															"settings.compliance.watchlistRescanSourcesHelp",
+														)}
 													</p>
 													<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
 														{(
 															[
-																["ofac", t("settings.compliance.watchlistSourceOfac")],
-																["un", t("settings.compliance.watchlistSourceUn")],
+																[
+																	"ofac",
+																	t("settings.compliance.watchlistSourceOfac"),
+																],
+																[
+																	"un",
+																	t("settings.compliance.watchlistSourceUn"),
+																],
 																[
 																	"sat69b",
-																	t("settings.compliance.watchlistSourceSat69b"),
+																	t(
+																		"settings.compliance.watchlistSourceSat69b",
+																	),
 																],
-																["pep", t("settings.compliance.watchlistSourcePep")],
+																[
+																	"pep",
+																	t("settings.compliance.watchlistSourcePep"),
+																],
 																[
 																	"adverse_media",
-																	t("settings.compliance.watchlistSourceAdverse"),
+																	t(
+																		"settings.compliance.watchlistSourceAdverse",
+																	),
 																],
 															] as const
 														).map(([id, label]) => (
@@ -1157,7 +1188,9 @@ export function ComplianceSettingsView() {
 																<span className="text-sm">{label}</span>
 																<Switch
 																	checked={watchlistRescanSources.includes(id)}
-																	onCheckedChange={(v) => toggleRescanSource(id, v)}
+																	onCheckedChange={(v) =>
+																		toggleRescanSource(id, v)
+																	}
 																	disabled={!canEdit || savingWatchlist}
 																/>
 															</div>

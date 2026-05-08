@@ -874,7 +874,7 @@ const translations = {
 			"You pay the monthly subscription fee upfront, then any overages (extra users, reports, notices, etc.) are calculated at the end of each billing cycle and charged automatically.",
 		"settings.billing.pricing.trialPeriod": "Trial period",
 		"settings.billing.pricing.trialPeriodDesc":
-			"All plans include a 14-day free trial. You won't be charged until the trial ends.",
+			"AML Business, Pro, and Ultra include a limited-time 30-day free trial. You won't be charged until the trial ends. Watchlist and Enterprise do not include this trial.",
 		// Price type labels
 		"settings.billing.pricing.subscription.label": "Monthly Subscription",
 		"settings.billing.pricing.subscription.description": "Base monthly fee",
@@ -1074,6 +1074,8 @@ const translations = {
 		"onboarding.plans.select.title": "Select a plan",
 		"onboarding.plans.select.description":
 			"Pick a monthly plan to start billing. You can change later.",
+		"onboarding.plans.amlTrialDisclaimer":
+			"Limited-time offer: the 30-day free trial applies to AML Business, Pro, and Ultra only; not available on Watchlist or Enterprise.",
 		"onboarding.plans.watchlist.title": "Watchlist Only",
 		"onboarding.plans.watchlist.description":
 			"Screen watchlists without AML access.",
@@ -2124,7 +2126,7 @@ const translations = {
 			"Pagas la tarifa de suscripción mensual por adelantado, luego cualquier excedente (usuarios extra, reportes, avisos, etc.) se calcula al final de cada ciclo de facturación y se cobra automáticamente.",
 		"settings.billing.pricing.trialPeriod": "Período de prueba",
 		"settings.billing.pricing.trialPeriodDesc":
-			"Todos los planes incluyen una prueba gratuita de 14 días. No se te cobrará hasta que termine la prueba.",
+			"AML Business, Pro y Ultra incluyen una prueba gratuita de 30 días por tiempo limitado. No se te cobrará hasta que termine la prueba. Watchlist y Enterprise no incluyen esta prueba.",
 		// Price type labels
 		"settings.billing.pricing.subscription.label": "Suscripción Mensual",
 		"settings.billing.pricing.subscription.description": "Tarifa mensual base",
@@ -2329,6 +2331,8 @@ const translations = {
 		"onboarding.plans.select.title": "Selecciona un plan",
 		"onboarding.plans.select.description":
 			"Elige un plan mensual para comenzar la facturación. Puedes cambiarlo después.",
+		"onboarding.plans.amlTrialDisclaimer":
+			"Oferta por tiempo limitado: la prueba gratuita de 30 días aplica solo a AML Business, Pro y Ultra; no disponible en Watchlist ni Enterprise.",
 		"onboarding.plans.watchlist.title": "Solo watchlist",
 		"onboarding.plans.watchlist.description": "Revisa listas sin acceso AML.",
 		"onboarding.plans.watchlist.cta": "Suscribirse a Watchlist",

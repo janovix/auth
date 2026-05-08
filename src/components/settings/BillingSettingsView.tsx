@@ -650,6 +650,9 @@ export function BillingSettingsView() {
 							isActionLoading={actionLoading}
 							currentPlan={subscription?.plan ?? null}
 						/>
+						<p className="text-sm text-muted-foreground text-center sm:text-left">
+							{t("onboarding.plans.amlTrialDisclaimer")}
+						</p>
 						<WatchlistCard
 							displayPrice={watchlistSubPrice?.amount ?? 49900}
 							interval={watchlistSubPrice?.interval ?? "month"}

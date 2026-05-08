@@ -1076,6 +1076,7 @@ const translations = {
 			"Pick a monthly plan to start billing. You can change later.",
 		"onboarding.plans.amlTrialDisclaimer":
 			"Limited-time offer: the 30-day free trial applies to AML Business, Pro, and Ultra only; not available on Watchlist or Enterprise.",
+		"onboarding.plans.trialBadge": "30-day free trial",
 		"onboarding.plans.watchlist.title": "Watchlist Only",
 		"onboarding.plans.watchlist.description":
 			"Screen watchlists without AML access.",
@@ -2333,6 +2334,7 @@ const translations = {
 			"Elige un plan mensual para comenzar la facturación. Puedes cambiarlo después.",
 		"onboarding.plans.amlTrialDisclaimer":
 			"Oferta por tiempo limitado: la prueba gratuita de 30 días aplica solo a AML Business, Pro y Ultra; no disponible en Watchlist ni Enterprise.",
+		"onboarding.plans.trialBadge": "Prueba gratis 30 días",
 		"onboarding.plans.watchlist.title": "Solo watchlist",
 		"onboarding.plans.watchlist.description": "Revisa listas sin acceso AML.",
 		"onboarding.plans.watchlist.cta": "Suscribirse a Watchlist",

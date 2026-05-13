@@ -1,3 +1,23 @@
+# [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-05-13)
+
+
+### Bug Fixes
+
+* **auth:** enhance passkey sign-in tests and error handling ([05bd810](https://github.com/janovix/auth/commit/05bd8102c73cbc51c4cdd4e1cba758cb4ebc7030))
+* **auth:** handle AbortError in passkey sign-in and update tests ([f753a15](https://github.com/janovix/auth/commit/f753a15ab2d2a254b72fbae5893795b88607aedb))
+* **config:** update permissions policy for xr-spatial-tracking ([601a624](https://github.com/janovix/auth/commit/601a624368dcf61ffda888de544057dfb376433b))
+* formatted code ([8dd67a9](https://github.com/janovix/auth/commit/8dd67a9a15f3f8b70becf276b62178af6c5590c2))
+
+
+### Features
+
+* **auth:** enhance passkey sign-in functionality and add tests ([6691955](https://github.com/janovix/auth/commit/6691955d1f0afb7cc28f10168fdf3bf14cb7c889))
+* **onboarding:** add trial badge to plan selection grid ([f931462](https://github.com/janovix/auth/commit/f931462f52fc2b01a01c39c511849eebb9f13bf9))
+* **onboarding:** add trial disclaimer to subscription selection and billing settings ([d7dea55](https://github.com/janovix/auth/commit/d7dea55074f653ac083bbbf4fd4d6e76643169fe))
+* **products:** refactor ProductsView to use ProductCTA component for cleaner code and improved maintainability ([000e064](https://github.com/janovix/auth/commit/000e064c3c6091690918e6d47648fdc3b64e51da))
+* **referrals:** implement referral code handling and UI components ([db768f8](https://github.com/janovix/auth/commit/db768f8c65a075ac81e487cb1634e97a015a0d08))
+* **settings:** update compliance settings for watchlist rescan interval and daily cap ([707c5a1](https://github.com/janovix/auth/commit/707c5a162f2c06c723a8c1af04e8522ee495ba7a))
+
 # [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-05-08)
 
 

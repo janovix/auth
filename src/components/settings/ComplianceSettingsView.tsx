@@ -246,14 +246,14 @@ export function ComplianceSettingsView() {
 
 	const [watchlistRescanEnabled, setWatchlistRescanEnabled] = useState(true);
 	const [watchlistRescanIntervalDays, setWatchlistRescanIntervalDays] =
-		useState(30);
+		useState(90);
 	const [watchlistRescanIncludeBcs, setWatchlistRescanIncludeBcs] =
 		useState(true);
 	const [
 		watchlistRescanNotifyOnStatusChange,
 		setWatchlistRescanNotifyOnStatusChange,
 	] = useState(true);
-	const [watchlistRescanDailyCap, setWatchlistRescanDailyCap] = useState(500);
+	const [watchlistRescanDailyCap, setWatchlistRescanDailyCap] = useState(5000);
 	const [watchlistRescanNotifyChannels, setWatchlistRescanNotifyChannels] =
 		useState<WatchlistRescanChannel[]>(["in_app"]);
 	const [watchlistRescanSources, setWatchlistRescanSources] = useState<
@@ -342,7 +342,7 @@ export function ComplianceSettingsView() {
 						complianceSettings.watchlistRescanEnabled !== false,
 					);
 					setWatchlistRescanIntervalDays(
-						complianceSettings.watchlistRescanIntervalDays ?? 30,
+						complianceSettings.watchlistRescanIntervalDays ?? 90,
 					);
 					setWatchlistRescanIncludeBcs(
 						complianceSettings.watchlistRescanIncludeBcs !== false,
@@ -351,7 +351,7 @@ export function ComplianceSettingsView() {
 						complianceSettings.watchlistRescanNotifyOnStatusChange !== false,
 					);
 					setWatchlistRescanDailyCap(
-						complianceSettings.watchlistRescanDailyCap ?? 500,
+						complianceSettings.watchlistRescanDailyCap ?? 5000,
 					);
 					const ch = complianceSettings.watchlistRescanNotifyChannels;
 					setWatchlistRescanNotifyChannels(
@@ -495,12 +495,12 @@ export function ComplianceSettingsView() {
 		settings &&
 		(watchlistRescanEnabled !== (settings.watchlistRescanEnabled !== false) ||
 			watchlistRescanIntervalDays !==
-				(settings.watchlistRescanIntervalDays ?? 30) ||
+				(settings.watchlistRescanIntervalDays ?? 90) ||
 			watchlistRescanIncludeBcs !==
 				(settings.watchlistRescanIncludeBcs !== false) ||
 			watchlistRescanNotifyOnStatusChange !==
 				(settings.watchlistRescanNotifyOnStatusChange !== false) ||
-			watchlistRescanDailyCap !== (settings.watchlistRescanDailyCap ?? 500) ||
+			watchlistRescanDailyCap !== (settings.watchlistRescanDailyCap ?? 5000) ||
 			normCh(watchlistRescanNotifyChannels) !==
 				normCh(settings.watchlistRescanNotifyChannels) ||
 			normSrc(watchlistRescanSources) !==
@@ -531,7 +531,7 @@ export function ComplianceSettingsView() {
 
 	const handleSaveWatchlist = useCallback(async () => {
 		if (!activeOrgId || !canEdit) return;
-		const interval = Math.min(180, Math.max(7, watchlistRescanIntervalDays));
+		const interval = Math.min(180, Math.max(90, watchlistRescanIntervalDays));
 		const daily = Math.min(10_000, Math.max(50, watchlistRescanDailyCap));
 		try {
 			setSavingWatchlist(true);
@@ -1005,7 +1005,7 @@ export function ComplianceSettingsView() {
 												<Input
 													id="watchlist-interval"
 													type="number"
-													min={7}
+													min={90}
 													max={180}
 													value={watchlistRescanIntervalDays}
 													onChange={(e) =>

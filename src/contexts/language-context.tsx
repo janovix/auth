@@ -586,15 +586,15 @@ const translations = {
 		"settings.compliance.watchlistRescanIntervalDays":
 			"Rescreen interval (days)",
 		"settings.compliance.watchlistRescanIntervalHelp":
-			"Re-run watchlist search when last screening is older than this (7–180 days).",
+			"Re-run watchlist search when the last screening is older than this (90–180 days; 90 is recommended and matches the weekly batch job).",
 		"settings.compliance.watchlistRescanIncludeBcs":
 			"Include beneficial controllers",
 		"settings.compliance.watchlistRescanIncludeBcsHelp":
 			"When on, UBOs/legal reps in scope are re-screened on the same schedule as clients.",
 		"settings.compliance.watchlistRescanDailyCap":
-			"Daily max rescreens (per org)",
+			"Max rescreens per batch (per org)",
 		"settings.compliance.watchlistRescanDailyCapHelp":
-			"Caps how many client/UBO screenings the daily job enqueues to control cost.",
+			"Caps how many client/UBO screenings each weekly batch job enqueues per organization to control cost.",
 		"settings.compliance.watchlistRescanNotifyOnStatusChange":
 			"Notify on new hits",
 		"settings.compliance.watchlistRescanNotifyOnStatusChangeHelp":
@@ -1834,15 +1834,15 @@ const translations = {
 		"settings.compliance.watchlistRescanIntervalDays":
 			"Intervalo de re-cribado (días)",
 		"settings.compliance.watchlistRescanIntervalHelp":
-			"Vuelve a ejecutar la búsqueda en listas si el último cribado es más antiguo (7–180 días).",
+			"Vuelve a ejecutar la búsqueda en listas si el último cribado es más antiguo (90–180 días; se recomienda 90, alineado con el trabajo semanal).",
 		"settings.compliance.watchlistRescanIncludeBcs":
 			"Incluir beneficiarios controladores",
 		"settings.compliance.watchlistRescanIncludeBcsHelp":
 			"Si está activo, se re-criban UBOs/representantes con la misma periodicidad que los clientes.",
 		"settings.compliance.watchlistRescanDailyCap":
-			"Máx. re-cribados diarios (por org)",
+			"Máx. re-cribados por lote (por org)",
 		"settings.compliance.watchlistRescanDailyCapHelp":
-			"Limita cuántos perfiles encola el trabajo diario para controlar coste.",
+			"Limita cuántos perfiles encola cada trabajo semanal por organización para controlar coste.",
 		"settings.compliance.watchlistRescanNotifyOnStatusChange":
 			"Notificar en nuevas coincidencias",
 		"settings.compliance.watchlistRescanNotifyOnStatusChangeHelp":

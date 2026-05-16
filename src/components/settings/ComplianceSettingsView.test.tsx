@@ -6,6 +6,7 @@ import * as settingsClient from "@/lib/settings/settingsClient";
 import * as billing from "@/lib/billing";
 import type { UserSubscriptionStatus } from "@/lib/billing";
 import { mockToast } from "@/test/setup";
+import { environmentAtom } from "@/lib/environment-store";
 
 const mockSubscriptionWithAml: UserSubscriptionStatus = {
 	hasSubscription: true,
@@ -126,6 +127,7 @@ describe("ComplianceSettingsView", () => {
 				mockSubscriptionWithAml,
 			);
 			vi.mocked(billing.getFeatures).mockResolvedValue([]);
+			environmentAtom.set("production");
 		});
 
 		it("shows skeleton loader while fetching settings", async () => {
@@ -185,6 +187,27 @@ describe("ComplianceSettingsView", () => {
 			});
 		});
 
+		it("shows shared AML settings notice when data environment is not production", async () => {
+			environmentAtom.set("staging");
+			vi.mocked(settingsClient.getAmlComplianceSettings).mockResolvedValue(
+				mockAmlSettings,
+			);
+			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+				mockOwnerMembership,
+			);
+
+			render(<ComplianceSettingsView />);
+
+			await waitFor(() => {
+				expect(
+					screen.getByText("settings.compliance.sharedAcrossEnvironmentsTitle"),
+				).toBeInTheDocument();
+			});
+			expect(
+				screen.getByText("settings.compliance.sharedAcrossEnvironmentsDesc"),
+			).toBeInTheDocument();
+		});
+
 		it("renders RFC input field", async () => {
 			vi.mocked(settingsClient.getAmlComplianceSettings).mockResolvedValue(
 				mockAmlSettings,
@@ -215,6 +238,24 @@ describe("ComplianceSettingsView", () => {
 			await waitFor(() => {
 				expect(
 					screen.getByText("settings.compliance.vulnerableActivity"),
+				).toBeInTheDocument();
+			});
+		});
+
+		it("shows legacy AVI activity when API returns removed catalog code", async () => {
+			vi.mocked(settingsClient.getAmlComplianceSettings).mockResolvedValue({
+				...mockAmlSettings,
+				activityKey: "AVI",
+			});
+			vi.mocked(settingsClient.getOrganizationMembership).mockResolvedValue(
+				mockOwnerMembership,
+			);
+
+			render(<ComplianceSettingsView />);
+
+			await waitFor(() => {
+				expect(
+					screen.getByText("Operaciones con Activos Virtuales"),
 				).toBeInTheDocument();
 			});
 		});

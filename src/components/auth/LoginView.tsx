@@ -33,6 +33,7 @@ import { z } from "zod";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 import { Logo } from "@/components/Logo";
+import { useTurnstile } from "@/contexts/turnstile-context";
 import {
 	Alert,
 	AlertDescription,
@@ -84,8 +85,29 @@ type SignInWithOtpFn = (email: string, otp: string) => Promise<AuthResult>;
 
 const OTP_LENGTH = 6;
 
-// Turnstile site key from environment variable
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "";
+type PasskeySignInResult = Awaited<
+	ReturnType<typeof authClient.signIn.passkey>
+>;
+type PasskeySignInData = NonNullable<PasskeySignInResult["data"]>;
+type PasskeyClientError = NonNullable<PasskeySignInResult["error"]>;
+
+/**
+ * Benign passkey / WebAuthn outcomes we should not surface as login failures.
+ * Better Auth's passkey client wraps all `startAuthentication` failures (including
+ * AbortError when a new ceremony cancels the in-flight autofill) in
+ * `{ code: "AUTH_CANCELLED" }` — the usual wire shape. We also match raw
+ * DOMException `name` values in case a caller passes them through.
+ */
+function isPasskeyUserDismissedError(
+	error: PasskeyClientError | { name?: string; code?: string; message: string },
+): boolean {
+	const e = error as { name?: string; code?: string };
+	if (e.code === "AUTH_CANCELLED") return true;
+	if (e.name === "NotAllowedError") return true;
+	if (e.name === "AbortError") return true;
+	if (e.code === "USER_CANCELED" || e.code === "ERR_USER_CANCELED") return true;
+	return false;
+}
 
 /**
  * LoginView component for passwordless OTP-based authentication.
@@ -111,6 +133,7 @@ export const LoginView = ({
 	signInWithOtp?: SignInWithOtpFn;
 	defaultSuccessMessage?: string;
 }) => {
+	const { siteKey: TURNSTILE_SITE_KEY } = useTurnstile();
 	const { t } = useLanguage();
 	const { setPageProfile, setStateModifier } = useAurora();
 	const [serverError, setServerError] = useState<string | null>(null);
@@ -164,23 +187,6 @@ export const LoginView = ({
 	useEffect(() => {
 		setPageProfile("login");
 	}, [setPageProfile]);
-
-	// Conditional UI (passkey autofill) — silently activates if browser has matching credentials
-	useEffect(() => {
-		if (
-			typeof PublicKeyCredential === "undefined" ||
-			!PublicKeyCredential.isConditionalMediationAvailable
-		) {
-			return;
-		}
-
-		void PublicKeyCredential.isConditionalMediationAvailable().then(
-			(available) => {
-				if (!available) return;
-				void authClient.signIn.passkey({ autoFill: true });
-			},
-		);
-	}, []);
 
 	// Listen for rate limit events from authClient to set cooldown dynamically
 	// The cooldown duration comes from the server's X-Retry-After header
@@ -466,6 +472,12 @@ export const LoginView = ({
 		resetCooldown();
 	};
 
+	const isSubmitting = form.formState.isSubmitting;
+	// True whenever any auth method is in progress — disables all buttons to
+	// prevent rage-clicks and accidental multi-method submissions.
+	const anyAuthLoading =
+		isSubmitting || pendingSend || isGoogleLoading || isPasskeyLoading;
+
 	const handleGoogleSignIn = async () => {
 		if (anyAuthLoading) return;
 		try {
@@ -500,56 +512,101 @@ export const LoginView = ({
 		}
 	};
 
-	const handlePasskeySignIn = async () => {
-		if (anyAuthLoading) return;
-		try {
-			setServerError(null);
-			setIsPasskeyLoading(true);
-			setStateModifier("loading");
-
-			const finalRedirectUrl = resolveSafeRedirectUrl(
-				redirectTo ?? null,
-				window.location.origin,
-			);
-
-			const { data, error } = await authClient.signIn.passkey();
+	const finishPasskeySignIn = useCallback(
+		(
+			data: PasskeySignInData | null,
+			error:
+				| PasskeyClientError
+				| { message: string; name?: string; code?: string }
+				| null,
+			opts: { source: "cta" | "autoFill" },
+		) => {
 			if (error) {
+				if (isPasskeyUserDismissedError(error)) {
+					setIsPasskeyLoading(false);
+					return;
+				}
 				Sentry.captureException(new Error(error.message), {
-					tags: { context: "passkey-signin-error" },
+					tags: { context: "passkey-signin-error", source: opts.source },
 				});
 				setServerError(
 					t("login.passkey.error") ||
 						"Passkey sign-in failed. Please try again.",
 				);
 				setStateModifier("error");
+				setIsPasskeyLoading(false);
 				return;
 			}
-			if (data) {
-				setStateModifier("success");
-				setShowSuccessAnimation(true);
-				setTimeout(() => {
-					window.location.href = finalRedirectUrl;
-				}, 2000);
+			if (!data) {
+				setIsPasskeyLoading(false);
+				return;
 			}
-		} catch (error) {
-			Sentry.captureException(error, {
-				tags: { context: "passkey-signin-error" },
-			});
-			setServerError(
-				t("login.passkey.error") || "Passkey sign-in failed. Please try again.",
+			const finalRedirectUrl = resolveSafeRedirectUrl(
+				redirectTo ?? null,
+				window.location.origin,
 			);
-			setStateModifier("error");
-		} finally {
+			setStateModifier("success");
+			setShowSuccessAnimation(true);
 			setIsPasskeyLoading(false);
+			setTimeout(() => {
+				window.location.href = finalRedirectUrl;
+			}, 2000);
+		},
+		[redirectTo, setStateModifier, t],
+	);
+
+	const handlePasskeySignIn = async () => {
+		if (anyAuthLoading) return;
+		setServerError(null);
+		setIsPasskeyLoading(true);
+		setStateModifier("loading");
+		try {
+			const { data, error } = await authClient.signIn.passkey();
+			finishPasskeySignIn(data, error, { source: "cta" });
+		} catch (error) {
+			const normalized =
+				error instanceof Error
+					? {
+							message: error.message,
+							name: error.name,
+							code: (error as { code?: string }).code,
+						}
+					: { message: String(error) };
+			finishPasskeySignIn(null, normalized, { source: "cta" });
 		}
 	};
 
-	const isSubmitting = form.formState.isSubmitting;
+	const finishPasskeyRef = useRef(finishPasskeySignIn);
+	useEffect(() => {
+		finishPasskeyRef.current = finishPasskeySignIn;
+	}, [finishPasskeySignIn]);
 
-	// True whenever any auth method is in progress — disables all buttons to
-	// prevent rage-clicks and accidental multi-method submissions.
-	const anyAuthLoading =
-		isSubmitting || pendingSend || isGoogleLoading || isPasskeyLoading;
+	// Conditional UI (passkey autofill) — run once per mount; handler via ref so `finishPasskeySignIn` identity
+	// (tied to `setStateModifier`) does not re-register WebAuthn on every state change
+	useEffect(() => {
+		if (
+			typeof PublicKeyCredential === "undefined" ||
+			!PublicKeyCredential.isConditionalMediationAvailable
+		) {
+			return;
+		}
+
+		let cancelled = false;
+		void (async () => {
+			const available =
+				await PublicKeyCredential.isConditionalMediationAvailable();
+			if (!available || cancelled) return;
+			const { data, error } = await authClient.signIn.passkey({
+				autoFill: true,
+			});
+			if (cancelled) return;
+			finishPasskeyRef.current(data, error, { source: "autoFill" });
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	}, []);
 
 	// Show success animation when login is successful
 	if (showSuccessAnimation) {
@@ -622,7 +679,7 @@ export const LoginView = ({
 															id="email"
 															type="email"
 															placeholder={t("login.email.placeholder")}
-															autoComplete="email"
+															autoComplete="email webauthn"
 															aria-describedby="email-description"
 															className="h-11 px-4"
 															required

@@ -12,6 +12,8 @@ import {
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 
 interface TurnstileContextValue {
+	/** Cloudflare Turnstile site key (empty when provider is absent / no-op) */
+	siteKey: string;
 	/** Current captcha token (null if not yet verified) */
 	token: string | null;
 	/** Whether the captcha is currently being verified */
@@ -79,6 +81,7 @@ export function TurnstileProvider({
 	return (
 		<TurnstileContext.Provider
 			value={{
+				siteKey,
 				token,
 				isVerifying,
 				reset,
@@ -87,29 +90,31 @@ export function TurnstileProvider({
 		>
 			{children}
 			{/* Invisible Turnstile widget - positioned off-screen with zero dimensions */}
-			<div
-				style={{
-					position: "absolute",
-					width: "0",
-					height: "0",
-					overflow: "hidden",
-					visibility: "hidden",
-					pointerEvents: "none",
-				}}
-			>
-				<Turnstile
-					ref={turnstileRef}
-					siteKey={siteKey}
-					onSuccess={handleSuccess}
-					onExpire={handleExpire}
-					onError={handleError}
-					options={{
-						size: "invisible",
-						theme: "auto",
-						appearance: "interaction-only",
+			{siteKey ? (
+				<div
+					style={{
+						position: "absolute",
+						width: "0",
+						height: "0",
+						overflow: "hidden",
+						visibility: "hidden",
+						pointerEvents: "none",
 					}}
-				/>
-			</div>
+				>
+					<Turnstile
+						ref={turnstileRef}
+						siteKey={siteKey}
+						onSuccess={handleSuccess}
+						onExpire={handleExpire}
+						onError={handleError}
+						options={{
+							size: "invisible",
+							theme: "auto",
+							appearance: "interaction-only",
+						}}
+					/>
+				</div>
+			) : null}
 		</TurnstileContext.Provider>
 	);
 }
@@ -119,7 +124,7 @@ export function TurnstileProvider({
  *
  * @example
  * ```tsx
- * const { token, getCaptchaHeaders } = useTurnstile();
+ * const { siteKey, token, getCaptchaHeaders } = useTurnstile();
  *
  * // Use with Better Auth
  * await authClient.signIn.email({
@@ -138,6 +143,7 @@ export function useTurnstile(): TurnstileContextValue {
 		// Return a no-op implementation if not wrapped in provider
 		// This allows the app to work without Turnstile in development
 		return {
+			siteKey: "",
 			token: null,
 			isVerifying: false,
 			reset: () => {},

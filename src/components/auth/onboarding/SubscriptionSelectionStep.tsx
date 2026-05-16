@@ -318,6 +318,9 @@ export function SubscriptionSelectionStep() {
 									isActionLoading={isRedirecting}
 									recommendedPlan={recommendedPlan}
 								/>
+								<p className="text-sm text-muted-foreground text-center sm:text-left">
+									{t("onboarding.plans.amlTrialDisclaimer")}
+								</p>
 
 								{(() => {
 									const watchlistPlan = plans.find(

@@ -4,9 +4,10 @@ import { TurnstileProvider, useTurnstile } from "./turnstile-context";
 
 describe("TurnstileProvider", () => {
 	const TestComponent = () => {
-		const { token, isVerifying, getCaptchaHeaders } = useTurnstile();
+		const { siteKey, token, isVerifying, getCaptchaHeaders } = useTurnstile();
 		return (
 			<div>
+				<div data-testid="site-key">{siteKey}</div>
 				<div data-testid="token">{token || "null"}</div>
 				<div data-testid="isVerifying">{isVerifying.toString()}</div>
 				<div data-testid="headers">{JSON.stringify(getCaptchaHeaders())}</div>
@@ -35,6 +36,8 @@ describe("TurnstileProvider", () => {
 				<TestComponent />
 			</TurnstileProvider>,
 		);
+
+		expect(screen.getByTestId("site-key")).toHaveTextContent("test-site-key");
 
 		// The mock in setup.ts auto-verifies immediately with useEffect
 		// So by the time we query, it's likely already verified
@@ -113,9 +116,11 @@ describe("useTurnstile without provider", () => {
 
 	it("returns no-op implementation when used outside provider", () => {
 		const TestComponent = () => {
-			const { token, isVerifying, reset, getCaptchaHeaders } = useTurnstile();
+			const { siteKey, token, isVerifying, reset, getCaptchaHeaders } =
+				useTurnstile();
 			return (
 				<div data-testid="no-provider-test">
+					<div data-testid="np-site-key">{siteKey}</div>
 					<div data-testid="np-token">{token || "null"}</div>
 					<div data-testid="np-isVerifying">{isVerifying.toString()}</div>
 					<button onClick={reset}>Reset</button>
@@ -128,6 +133,7 @@ describe("useTurnstile without provider", () => {
 
 		render(<TestComponent />);
 
+		expect(screen.getByTestId("np-site-key")).toHaveTextContent("");
 		expect(screen.getByTestId("np-token")).toHaveTextContent("null");
 		expect(screen.getByTestId("np-isVerifying")).toHaveTextContent("false");
 		expect(screen.getByTestId("np-headers")).toHaveTextContent("{}");

@@ -9,7 +9,9 @@ import {
 	ChevronDown,
 	ChevronRight,
 	Check,
+	Info,
 } from "lucide-react";
+import { useStore } from "@nanostores/react";
 import { toast } from "sonner";
 import { Button, Label } from "@/components/ui";
 import { Input } from "@/components/ui/input";
@@ -40,9 +42,13 @@ import {
 	getOrganizationMembership,
 	type AmlComplianceSettings,
 	type OrganizationMembership,
+	type WatchlistRescanChannel,
+	type WatchlistRescanSource,
 	updateSelfServiceSettings,
+	updateAmlComplianceSettings,
 } from "@/lib/settings";
 import { useAuthSession } from "@/lib/auth/useAuthSession";
+import { environmentAtom } from "@/lib/environment-store";
 import {
 	getSubscriptionStatus,
 	getFeatures,
@@ -67,21 +73,6 @@ const VULNERABLE_ACTIVITIES = [
 		value: "TSC",
 		label: "Tarjetas de servicio/crédito (TSC)",
 		description: "Tarjetas de servicio o crédito",
-	},
-	{
-		value: "TPP",
-		label: "Tarjetas prepagadas (TPP)",
-		description: "Tarjetas prepagadas, vales o cupones",
-	},
-	{
-		value: "TDR",
-		label: "Monederos y certificados (TDR)",
-		description: "Monederos y certificados de devoluciones o recompensas",
-	},
-	{
-		value: "CHV",
-		label: "Cheques de viajero (CHV)",
-		description: "Cheques de viajero",
 	},
 	{
 		value: "MPC",
@@ -148,12 +139,44 @@ const VULNERABLE_ACTIVITIES = [
 		label: "Arrendamiento de inmuebles (ARI)",
 		description: "Derechos personales de uso y goce de inmuebles",
 	},
+];
+
+/**
+ * Removed from {@link VULNERABLE_ACTIVITIES} but still shown when the org already
+ * has this activityKey so the Select value is valid until the user picks another.
+ */
+const LEGACY_VULNERABLE_ACTIVITIES: Array<{
+	value: string;
+	label: string;
+	description: string;
+}> = [
+	{
+		value: "TPP",
+		label: "Tarjetas prepagadas (TPP)",
+		description: "Tarjetas prepagadas, vales o cupones",
+	},
+	{
+		value: "TDR",
+		label: "Monederos y certificados (TDR)",
+		description: "Monederos y certificados de devoluciones o recompensas",
+	},
+	{
+		value: "CHV",
+		label: "Cheques de viajero (CHV)",
+		description: "Cheques de viajero",
+	},
 	{
 		value: "AVI",
 		label: "Activos virtuales (AVI)",
 		description: "Operaciones con Activos Virtuales",
 	},
 ];
+
+function legacyActivityForKey(
+	activityKey: string,
+): (typeof LEGACY_VULNERABLE_ACTIVITIES)[number] | undefined {
+	return LEGACY_VULNERABLE_ACTIVITIES.find((a) => a.value === activityKey);
+}
 
 // RFC validation regex (Mexican format)
 const RFC_REGEX = /^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/;
@@ -165,9 +188,6 @@ const REPORTING_THRESHOLDS: Record<
 > = {
 	JYS: { thresholdUma: 645 },
 	TSC: { thresholdUma: 1285 },
-	TPP: { thresholdUma: 645 },
-	TDR: { thresholdUma: 645 },
-	CHV: { thresholdUma: 645 },
 	MPC: { thresholdUma: 1605 },
 	INM: { thresholdUma: 8025 },
 	DIN: { thresholdUma: 8025 },
@@ -181,7 +201,6 @@ const REPORTING_THRESHOLDS: Record<
 	FES: { thresholdUma: "ALWAYS" },
 	DON: { thresholdUma: 3210 },
 	ARI: { thresholdUma: 3210 },
-	AVI: { thresholdUma: 210 },
 };
 
 // Current UMA value (this should be fetched from the API in a real implementation)
@@ -189,9 +208,18 @@ const CURRENT_UMA = 108.57; // Value for 2024
 
 type AmlAccessState = "unknown" | "granted" | "denied";
 
+const WATCHLIST_SOURCES_ALL: WatchlistRescanSource[] = [
+	"ofac",
+	"un",
+	"sat69b",
+	"pep",
+	"adverse_media",
+];
+
 export function ComplianceSettingsView() {
 	const { t } = useLanguage();
 	const { data: session } = useAuthSession();
+	const dataEnvironment = useStore(environmentAtom);
 
 	const [loading, setLoading] = useState(true);
 	const [amlAccess, setAmlAccess] = useState<AmlAccessState>("unknown");
@@ -215,6 +243,23 @@ export function ComplianceSettingsView() {
 	const [selfServiceExpiryHours, setSelfServiceExpiryHours] = useState(72);
 	const [selfServiceSendEmail, setSelfServiceSendEmail] = useState(true);
 	const [savingSelfService, setSavingSelfService] = useState(false);
+
+	const [watchlistRescanEnabled, setWatchlistRescanEnabled] = useState(true);
+	const [watchlistRescanIntervalDays, setWatchlistRescanIntervalDays] =
+		useState(90);
+	const [watchlistRescanIncludeBcs, setWatchlistRescanIncludeBcs] =
+		useState(true);
+	const [
+		watchlistRescanNotifyOnStatusChange,
+		setWatchlistRescanNotifyOnStatusChange,
+	] = useState(true);
+	const [watchlistRescanDailyCap, setWatchlistRescanDailyCap] = useState(5000);
+	const [watchlistRescanNotifyChannels, setWatchlistRescanNotifyChannels] =
+		useState<WatchlistRescanChannel[]>(["in_app"]);
+	const [watchlistRescanSources, setWatchlistRescanSources] = useState<
+		WatchlistRescanSource[]
+	>(WATCHLIST_SOURCES_ALL);
+	const [savingWatchlist, setSavingWatchlist] = useState(false);
 
 	const activeOrgId = (
 		session?.session as { activeOrganizationId?: string } | undefined
@@ -292,6 +337,29 @@ export function ComplianceSettingsView() {
 					);
 					setSelfServiceSendEmail(
 						complianceSettings.selfServiceSendEmail !== false,
+					);
+					setWatchlistRescanEnabled(
+						complianceSettings.watchlistRescanEnabled !== false,
+					);
+					setWatchlistRescanIntervalDays(
+						complianceSettings.watchlistRescanIntervalDays ?? 90,
+					);
+					setWatchlistRescanIncludeBcs(
+						complianceSettings.watchlistRescanIncludeBcs !== false,
+					);
+					setWatchlistRescanNotifyOnStatusChange(
+						complianceSettings.watchlistRescanNotifyOnStatusChange !== false,
+					);
+					setWatchlistRescanDailyCap(
+						complianceSettings.watchlistRescanDailyCap ?? 5000,
+					);
+					const ch = complianceSettings.watchlistRescanNotifyChannels;
+					setWatchlistRescanNotifyChannels(
+						ch && ch.length > 0 ? ch : (["in_app"] as WatchlistRescanChannel[]),
+					);
+					const src = complianceSettings.watchlistRescanSources;
+					setWatchlistRescanSources(
+						src && src.length > 0 ? src : [...WATCHLIST_SOURCES_ALL],
 					);
 				}
 			} catch (err) {
@@ -418,9 +486,97 @@ export function ComplianceSettingsView() {
 			selfServiceExpiryHours !== (settings.selfServiceExpiryHours || 72) ||
 			selfServiceSendEmail !== (settings.selfServiceSendEmail !== false));
 
-	const selectedActivity = VULNERABLE_ACTIVITIES.find(
-		(a) => a.value === activityKey,
-	);
+	const normCh = (a: WatchlistRescanChannel[] | undefined) =>
+		[...(a && a.length > 0 ? a : (["in_app"] as const))].sort().join(",");
+	const normSrc = (a: WatchlistRescanSource[] | undefined) =>
+		[...(a && a.length > 0 ? a : WATCHLIST_SOURCES_ALL)].sort().join(",");
+
+	const isDirtyWatchlist =
+		settings &&
+		(watchlistRescanEnabled !== (settings.watchlistRescanEnabled !== false) ||
+			watchlistRescanIntervalDays !==
+				(settings.watchlistRescanIntervalDays ?? 90) ||
+			watchlistRescanIncludeBcs !==
+				(settings.watchlistRescanIncludeBcs !== false) ||
+			watchlistRescanNotifyOnStatusChange !==
+				(settings.watchlistRescanNotifyOnStatusChange !== false) ||
+			watchlistRescanDailyCap !== (settings.watchlistRescanDailyCap ?? 5000) ||
+			normCh(watchlistRescanNotifyChannels) !==
+				normCh(settings.watchlistRescanNotifyChannels) ||
+			normSrc(watchlistRescanSources) !==
+				normSrc(settings.watchlistRescanSources));
+
+	const toggleRescanChannel = (
+		channel: WatchlistRescanChannel,
+		on: boolean,
+	) => {
+		setWatchlistRescanNotifyChannels((prev) => {
+			const next = new Set(prev);
+			if (on) next.add(channel);
+			else next.delete(channel);
+			const out = Array.from(next) as WatchlistRescanChannel[];
+			if (out.length === 0) return ["in_app"];
+			return out;
+		});
+	};
+
+	const toggleRescanSource = (source: WatchlistRescanSource, on: boolean) => {
+		setWatchlistRescanSources((prev) => {
+			const next = new Set(prev);
+			if (on) next.add(source);
+			else next.delete(source);
+			return Array.from(next) as WatchlistRescanSource[];
+		});
+	};
+
+	const handleSaveWatchlist = useCallback(async () => {
+		if (!activeOrgId || !canEdit) return;
+		const interval = Math.min(180, Math.max(90, watchlistRescanIntervalDays));
+		const daily = Math.min(10_000, Math.max(50, watchlistRescanDailyCap));
+		try {
+			setSavingWatchlist(true);
+			const updated = await updateAmlComplianceSettings(activeOrgId, {
+				watchlistRescanEnabled,
+				watchlistRescanIntervalDays: interval,
+				watchlistRescanIncludeBcs,
+				watchlistRescanNotifyOnStatusChange,
+				watchlistRescanDailyCap: daily,
+				watchlistRescanNotifyChannels: watchlistRescanNotifyChannels.length
+					? watchlistRescanNotifyChannels
+					: ["in_app"],
+				watchlistRescanSources: watchlistRescanSources,
+			});
+			setSettings((prev) => (prev ? { ...prev, ...updated } : prev));
+			setWatchlistRescanIntervalDays(
+				updated.watchlistRescanIntervalDays ?? interval,
+			);
+			setWatchlistRescanDailyCap(updated.watchlistRescanDailyCap ?? daily);
+			showSuccess(t("settings.compliance.watchlistRescanSavedSuccess"));
+		} catch (err) {
+			toast.error(
+				err instanceof Error ? err.message : t("settings.compliance.saveError"),
+			);
+		} finally {
+			setSavingWatchlist(false);
+		}
+	}, [
+		activeOrgId,
+		canEdit,
+		watchlistRescanEnabled,
+		watchlistRescanIntervalDays,
+		watchlistRescanIncludeBcs,
+		watchlistRescanNotifyOnStatusChange,
+		watchlistRescanDailyCap,
+		watchlistRescanNotifyChannels,
+		watchlistRescanSources,
+		showSuccess,
+		t,
+	]);
+
+	const legacyCurrentActivity = legacyActivityForKey(activityKey);
+	const selectedActivity =
+		VULNERABLE_ACTIVITIES.find((a) => a.value === activityKey) ??
+		legacyCurrentActivity;
 
 	if (!activeOrgId) {
 		return (
@@ -473,6 +629,18 @@ export function ComplianceSettingsView() {
 					title={t("settings.compliance.title")}
 					description={t("settings.compliance.description")}
 				/>
+
+				{dataEnvironment !== "production" && (
+					<Alert>
+						<Info className="h-4 w-4" />
+						<AlertTitle>
+							{t("settings.compliance.sharedAcrossEnvironmentsTitle")}
+						</AlertTitle>
+						<AlertDescription>
+							{t("settings.compliance.sharedAcrossEnvironmentsDesc")}
+						</AlertDescription>
+					</Alert>
+				)}
 
 				{/* Warning Alert - show when not configured */}
 				{!settings && (
@@ -550,6 +718,14 @@ export function ComplianceSettingsView() {
 										/>
 									</SelectTrigger>
 									<SelectContent>
+										{legacyCurrentActivity && (
+											<SelectItem
+												key={legacyCurrentActivity.value}
+												value={legacyCurrentActivity.value}
+											>
+												{legacyCurrentActivity.label} — configuración actual
+											</SelectItem>
+										)}
 										{VULNERABLE_ACTIVITIES.map((activity) => (
 											<SelectItem key={activity.value} value={activity.value}>
 												{activity.label}
@@ -785,6 +961,255 @@ export function ComplianceSettingsView() {
 									>
 										{!savingSelfService && <Check className="mr-2 h-4 w-4" />}
 										{savingSelfService
+											? t("settings.saving")
+											: t("settings.compliance.saveChanges")}
+									</Button>
+								</div>
+							</div>
+						</SettingsCard>
+					</SettingsSection>
+				)}
+
+				{/* Watchlist re-screening */}
+				{settings && (
+					<SettingsSection
+						title={t("settings.compliance.watchlistScreening")}
+						description={t("settings.compliance.watchlistScreeningDesc")}
+					>
+						<SettingsCard>
+							<div className="space-y-6">
+								<div className="flex items-start gap-3 rounded-md border p-3">
+									<Switch
+										id="watchlist-rescan-enabled"
+										checked={watchlistRescanEnabled}
+										onCheckedChange={setWatchlistRescanEnabled}
+										disabled={!canEdit || savingWatchlist}
+									/>
+									<div className="space-y-1">
+										<Label
+											htmlFor="watchlist-rescan-enabled"
+											className="cursor-pointer"
+										>
+											{t("settings.compliance.watchlistRescanEnabled")}
+										</Label>
+									</div>
+								</div>
+
+								{watchlistRescanEnabled && (
+									<>
+										<div className="space-y-2">
+											<Label htmlFor="watchlist-interval">
+												{t("settings.compliance.watchlistRescanIntervalDays")}
+											</Label>
+											<div className="flex items-center gap-3">
+												<Input
+													id="watchlist-interval"
+													type="number"
+													min={90}
+													max={180}
+													value={watchlistRescanIntervalDays}
+													onChange={(e) =>
+														setWatchlistRescanIntervalDays(
+															Number(e.target.value),
+														)
+													}
+													disabled={!canEdit || savingWatchlist}
+													className="w-28"
+												/>
+											</div>
+											<p className="text-xs text-muted-foreground">
+												{t("settings.compliance.watchlistRescanIntervalHelp")}
+											</p>
+										</div>
+
+										<div className="flex items-start gap-3 rounded-md border p-3">
+											<Switch
+												id="watchlist-include-bc"
+												checked={watchlistRescanIncludeBcs}
+												onCheckedChange={setWatchlistRescanIncludeBcs}
+												disabled={!canEdit || savingWatchlist}
+											/>
+											<div className="space-y-1">
+												<Label
+													htmlFor="watchlist-include-bc"
+													className="cursor-pointer"
+												>
+													{t("settings.compliance.watchlistRescanIncludeBcs")}
+												</Label>
+												<p className="text-xs text-muted-foreground">
+													{t(
+														"settings.compliance.watchlistRescanIncludeBcsHelp",
+													)}
+												</p>
+											</div>
+										</div>
+
+										<div className="space-y-2">
+											<Label htmlFor="watchlist-daily-cap">
+												{t("settings.compliance.watchlistRescanDailyCap")}
+											</Label>
+											<Input
+												id="watchlist-daily-cap"
+												type="number"
+												min={50}
+												max={10000}
+												value={watchlistRescanDailyCap}
+												onChange={(e) =>
+													setWatchlistRescanDailyCap(Number(e.target.value))
+												}
+												disabled={!canEdit || savingWatchlist}
+												className="w-36"
+											/>
+											<p className="text-xs text-muted-foreground">
+												{t("settings.compliance.watchlistRescanDailyCapHelp")}
+											</p>
+										</div>
+
+										<div className="flex items-start gap-3 rounded-md border p-3">
+											<Switch
+												id="watchlist-notify-change"
+												checked={watchlistRescanNotifyOnStatusChange}
+												onCheckedChange={setWatchlistRescanNotifyOnStatusChange}
+												disabled={!canEdit || savingWatchlist}
+											/>
+											<div className="space-y-1">
+												<Label
+													htmlFor="watchlist-notify-change"
+													className="cursor-pointer"
+												>
+													{t(
+														"settings.compliance.watchlistRescanNotifyOnStatusChange",
+													)}
+												</Label>
+												<p className="text-xs text-muted-foreground">
+													{t(
+														"settings.compliance.watchlistRescanNotifyOnStatusChangeHelp",
+													)}
+												</p>
+											</div>
+										</div>
+
+										{watchlistRescanNotifyOnStatusChange && (
+											<div className="space-y-4 rounded-md border p-3">
+												<p className="text-sm font-medium">
+													{t(
+														"settings.compliance.watchlistRescanNotifyChannelInApp",
+													)}{" "}
+													/{" "}
+													{t(
+														"settings.compliance.watchlistRescanNotifyChannelEmail",
+													)}
+												</p>
+												<div className="flex flex-col gap-3 sm:flex-row sm:gap-6">
+													<div className="flex items-center gap-2">
+														<Switch
+															id="wl-ch-inapp"
+															checked={watchlistRescanNotifyChannels.includes(
+																"in_app",
+															)}
+															onCheckedChange={(v) =>
+																toggleRescanChannel("in_app", v)
+															}
+															disabled={!canEdit || savingWatchlist}
+														/>
+														<Label
+															htmlFor="wl-ch-inapp"
+															className="cursor-pointer"
+														>
+															{t(
+																"settings.compliance.watchlistRescanNotifyChannelInApp",
+															)}
+														</Label>
+													</div>
+													<div className="flex items-center gap-2">
+														<Switch
+															id="wl-ch-email"
+															checked={watchlistRescanNotifyChannels.includes(
+																"email",
+															)}
+															onCheckedChange={(v) =>
+																toggleRescanChannel("email", v)
+															}
+															disabled={!canEdit || savingWatchlist}
+														/>
+														<Label
+															htmlFor="wl-ch-email"
+															className="cursor-pointer"
+														>
+															{t(
+																"settings.compliance.watchlistRescanNotifyChannelEmail",
+															)}
+														</Label>
+													</div>
+												</div>
+
+												<div className="pt-2 border-t space-y-2">
+													<Label>
+														{t("settings.compliance.watchlistRescanSources")}
+													</Label>
+													<p className="text-xs text-muted-foreground">
+														{t(
+															"settings.compliance.watchlistRescanSourcesHelp",
+														)}
+													</p>
+													<div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+														{(
+															[
+																[
+																	"ofac",
+																	t("settings.compliance.watchlistSourceOfac"),
+																],
+																[
+																	"un",
+																	t("settings.compliance.watchlistSourceUn"),
+																],
+																[
+																	"sat69b",
+																	t(
+																		"settings.compliance.watchlistSourceSat69b",
+																	),
+																],
+																[
+																	"pep",
+																	t("settings.compliance.watchlistSourcePep"),
+																],
+																[
+																	"adverse_media",
+																	t(
+																		"settings.compliance.watchlistSourceAdverse",
+																	),
+																],
+															] as const
+														).map(([id, label]) => (
+															<div
+																key={id}
+																className="flex items-center justify-between gap-2 rounded bg-muted/40 px-2 py-1.5"
+															>
+																<span className="text-sm">{label}</span>
+																<Switch
+																	checked={watchlistRescanSources.includes(id)}
+																	onCheckedChange={(v) =>
+																		toggleRescanSource(id, v)
+																	}
+																	disabled={!canEdit || savingWatchlist}
+																/>
+															</div>
+														))}
+													</div>
+												</div>
+											</div>
+										)}
+									</>
+								)}
+
+								<div className="flex justify-end">
+									<Button
+										onClick={handleSaveWatchlist}
+										loading={savingWatchlist}
+										disabled={!canEdit || !isDirtyWatchlist}
+									>
+										{!savingWatchlist && <Check className="mr-2 h-4 w-4" />}
+										{savingWatchlist
 											? t("settings.saving")
 											: t("settings.compliance.saveChanges")}
 									</Button>

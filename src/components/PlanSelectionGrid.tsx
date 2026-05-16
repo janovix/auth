@@ -103,11 +103,19 @@ export function PlanSelectionGrid({
 									: "border-border hover:border-muted-foreground/30",
 							)}
 						>
-							{isRecommended && (
-								<Badge className="absolute -top-3 right-4 bg-primary text-primary-foreground">
-									{t("onboarding.plans.recommended")}
+							<div className="absolute -top-3 right-3 z-10 flex max-w-[55%] flex-col items-end gap-1.5 sm:right-4">
+								<Badge
+									variant="secondary"
+									className="whitespace-normal text-center text-[10px] font-semibold leading-tight shadow-sm sm:text-xs"
+								>
+									{t("onboarding.plans.trialBadge")}
 								</Badge>
-							)}
+								{isRecommended ? (
+									<Badge className="bg-primary text-primary-foreground">
+										{t("onboarding.plans.recommended")}
+									</Badge>
+								) : null}
+							</div>
 							<CardContent className="p-6 flex flex-col h-full">
 								<div className="text-center mb-6">
 									<div

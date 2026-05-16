@@ -615,4 +615,40 @@ describe("middleware", () => {
 			);
 		});
 	});
+
+	describe("referral ?ref= query", () => {
+		beforeEach(() => {
+			mockGetSessionCookie.mockReturnValue(null);
+		});
+
+		it("sets cookies and removes ref for a valid 8-char code, preserving other query params", async () => {
+			const request = new NextRequest(
+				"https://auth.example.com/login?ref=01AB8D9H&foo=bar",
+			);
+			const response = await middleware(request);
+			expect(response.status).toBe(307);
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/login?foo=bar",
+			);
+			const set = response.headers.get("set-cookie");
+			expect(set).toBeTruthy();
+			expect(set).toContain("janovix_ref=01AB8D9H");
+			expect(set).toContain("janovix_ref_pub=01AB8D9H");
+		});
+
+		it("strips ref without setting cookies when the code is invalid", async () => {
+			const request = new NextRequest(
+				"https://auth.example.com/login?ref=INVALID&foo=1",
+			);
+			const response = await middleware(request);
+			expect(response.status).toBe(307);
+			expect(response.headers.get("location")).toBe(
+				"https://auth.example.com/login?foo=1",
+			);
+			const set = response.headers.get("set-cookie");
+			if (set) {
+				expect(set).not.toContain("janovix_ref=");
+			}
+		});
+	});
 });

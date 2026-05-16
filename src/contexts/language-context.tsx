@@ -11,6 +11,7 @@ import {
 	useMemo,
 } from "react";
 import { getCookie, setCookie, COOKIE_NAMES } from "@/lib/cookies";
+import { useAuthSession } from "@/lib/auth/useAuthSession";
 import {
 	getResolvedSettings,
 	updateUserSettings,
@@ -517,6 +518,10 @@ const translations = {
 		"settings.compliance.statusNotConfigured": "Compliance not configured",
 		"settings.compliance.statusNotConfiguredDesc":
 			"Please configure your obligated subject information to comply with AML regulations",
+		"settings.compliance.sharedAcrossEnvironmentsTitle":
+			"AML compliance settings are shared across environments",
+		"settings.compliance.sharedAcrossEnvironmentsDesc":
+			"You are viewing Staging or Development. RFC, vulnerable activity, and KYC self-service settings apply to your whole organization—the same values are used for Production, Staging, and Development API keys.",
 		"settings.compliance.obligatedSubject": "Obligated Subject Information",
 		"settings.compliance.obligatedSubjectDesc":
 			"Information required for LFPIORPI compliance",
@@ -572,6 +577,41 @@ const translations = {
 		"settings.compliance.notAvailableDescription":
 			"Upgrade your subscription to access PLD compliance settings and the AML platform.",
 		"settings.compliance.viewBilling": "View billing & plans",
+
+		"settings.compliance.watchlistScreening": "Watchlist screening",
+		"settings.compliance.watchlistScreeningDesc":
+			"Re-screen clients and beneficial controllers against sanctions and PEP lists on a schedule, with notifications on new positive hits.",
+		"settings.compliance.watchlistRescanEnabled":
+			"Enable scheduled rescreening",
+		"settings.compliance.watchlistRescanIntervalDays":
+			"Rescreen interval (days)",
+		"settings.compliance.watchlistRescanIntervalHelp":
+			"Re-run watchlist search when the last screening is older than this (90–180 days; 90 is recommended and matches the weekly batch job).",
+		"settings.compliance.watchlistRescanIncludeBcs":
+			"Include beneficial controllers",
+		"settings.compliance.watchlistRescanIncludeBcsHelp":
+			"When on, UBOs/legal reps in scope are re-screened on the same schedule as clients.",
+		"settings.compliance.watchlistRescanDailyCap":
+			"Max rescreens per batch (per org)",
+		"settings.compliance.watchlistRescanDailyCapHelp":
+			"Caps how many client/UBO screenings each weekly batch job enqueues per organization to control cost.",
+		"settings.compliance.watchlistRescanNotifyOnStatusChange":
+			"Notify on new hits",
+		"settings.compliance.watchlistRescanNotifyOnStatusChangeHelp":
+			"Send a notification when a new positive list match appears on a profile that was already flagged (incremental change).",
+		"settings.compliance.watchlistRescanNotifyChannelInApp": "In-app",
+		"settings.compliance.watchlistRescanNotifyChannelEmail": "Email",
+		"settings.compliance.watchlistRescanSources":
+			"Notification sources (status change)",
+		"settings.compliance.watchlistRescanSourcesHelp":
+			"For incremental alerts, only selected sources are considered (OFAC, UN, SAT 69-B, PEP, Adverse media).",
+		"settings.compliance.watchlistSourceOfac": "OFAC",
+		"settings.compliance.watchlistSourceUn": "UN",
+		"settings.compliance.watchlistSourceSat69b": "SAT 69-B",
+		"settings.compliance.watchlistSourcePep": "PEP",
+		"settings.compliance.watchlistSourceAdverse": "Adverse media",
+		"settings.compliance.watchlistRescanSavedSuccess":
+			"Watchlist settings saved successfully",
 
 		// Team settings
 		"settings.team.title": "Team Settings",
@@ -682,6 +722,11 @@ const translations = {
 		"settings.billing.title": "Billing & Subscription",
 		"settings.billing.description":
 			"Manage your subscription, usage, and payment methods",
+		"settings.billing.tabs.usage": "Usage & limits",
+		"settings.billing.tabs.plans": "Change plan",
+		"settings.billing.tabs.enterprise": "Enterprise",
+		"settings.billing.tabs.limits": "Plan limits",
+		"settings.billing.tabs.pricing": "Pricing & extra fees",
 		"settings.billing.currentPlan": "Current Plan",
 		"settings.billing.noPlan": "No active subscription",
 		"settings.billing.noPlanDesc": "Subscribe to a plan to unlock all features",
@@ -829,7 +874,7 @@ const translations = {
 			"You pay the monthly subscription fee upfront, then any overages (extra users, reports, notices, etc.) are calculated at the end of each billing cycle and charged automatically.",
 		"settings.billing.pricing.trialPeriod": "Trial period",
 		"settings.billing.pricing.trialPeriodDesc":
-			"All plans include a 14-day free trial. You won't be charged until the trial ends.",
+			"AML Business, Pro, and Ultra include a limited-time 30-day free trial. You won't be charged until the trial ends. Watchlist and Enterprise do not include this trial.",
 		// Price type labels
 		"settings.billing.pricing.subscription.label": "Monthly Subscription",
 		"settings.billing.pricing.subscription.description": "Base monthly fee",
@@ -1029,6 +1074,9 @@ const translations = {
 		"onboarding.plans.select.title": "Select a plan",
 		"onboarding.plans.select.description":
 			"Pick a monthly plan to start billing. You can change later.",
+		"onboarding.plans.amlTrialDisclaimer":
+			"Limited-time offer: the 30-day free trial applies to AML Business, Pro, and Ultra only; not available on Watchlist or Enterprise.",
+		"onboarding.plans.trialBadge": "30-day free trial",
 		"onboarding.plans.watchlist.title": "Watchlist Only",
 		"onboarding.plans.watchlist.description":
 			"Screen watchlists without AML access.",
@@ -1716,6 +1764,10 @@ const translations = {
 		"settings.compliance.statusNotConfigured": "Cumplimiento no configurado",
 		"settings.compliance.statusNotConfiguredDesc":
 			"Por favor configura tu información de sujeto obligado para cumplir con la regulación PLD",
+		"settings.compliance.sharedAcrossEnvironmentsTitle":
+			"La configuración PLD es la misma en todos los entornos",
+		"settings.compliance.sharedAcrossEnvironmentsDesc":
+			"Estás en Staging o Desarrollo. El RFC, la actividad vulnerable y la configuración de KYC autoservicio aplican a toda tu organización: los mismos valores se usan para las llaves API de Producción, Staging y Desarrollo.",
 		"settings.compliance.obligatedSubject": "Información del Sujeto Obligado",
 		"settings.compliance.obligatedSubjectDesc":
 			"Información requerida para cumplimiento LFPIORPI",
@@ -1773,6 +1825,41 @@ const translations = {
 		"settings.compliance.notAvailableDescription":
 			"Mejora tu suscripción para acceder a la configuración PLD y a la plataforma AML.",
 		"settings.compliance.viewBilling": "Ver facturación y planes",
+
+		"settings.compliance.watchlistScreening": "Cribado de listas (watchlist)",
+		"settings.compliance.watchlistScreeningDesc":
+			"Re-criba clientes y beneficiarios controlador contra sanciones y PEP según un calendario, con notificaciones ante nuevas coincidencias.",
+		"settings.compliance.watchlistRescanEnabled":
+			"Habilitar re-cribado programado",
+		"settings.compliance.watchlistRescanIntervalDays":
+			"Intervalo de re-cribado (días)",
+		"settings.compliance.watchlistRescanIntervalHelp":
+			"Vuelve a ejecutar la búsqueda en listas si el último cribado es más antiguo (90–180 días; se recomienda 90, alineado con el trabajo semanal).",
+		"settings.compliance.watchlistRescanIncludeBcs":
+			"Incluir beneficiarios controladores",
+		"settings.compliance.watchlistRescanIncludeBcsHelp":
+			"Si está activo, se re-criban UBOs/representantes con la misma periodicidad que los clientes.",
+		"settings.compliance.watchlistRescanDailyCap":
+			"Máx. re-cribados por lote (por org)",
+		"settings.compliance.watchlistRescanDailyCapHelp":
+			"Limita cuántos perfiles encola cada trabajo semanal por organización para controlar coste.",
+		"settings.compliance.watchlistRescanNotifyOnStatusChange":
+			"Notificar en nuevas coincidencias",
+		"settings.compliance.watchlistRescanNotifyOnStatusChangeHelp":
+			"Enviar notificación cuando aparezca un nuevo match en un perfil que ya estaba marcado (cambio incremental).",
+		"settings.compliance.watchlistRescanNotifyChannelInApp": "En la aplicación",
+		"settings.compliance.watchlistRescanNotifyChannelEmail": "Correo",
+		"settings.compliance.watchlistRescanSources":
+			"Fuentes para notificación (cambio de estado)",
+		"settings.compliance.watchlistRescanSourcesHelp":
+			"En alertas incrementales solo se consideran las fuentes seleccionadas (OFAC, ONU, SAT 69-B, PEP, medios adversos).",
+		"settings.compliance.watchlistSourceOfac": "OFAC",
+		"settings.compliance.watchlistSourceUn": "ONU",
+		"settings.compliance.watchlistSourceSat69b": "SAT 69-B",
+		"settings.compliance.watchlistSourcePep": "PEP",
+		"settings.compliance.watchlistSourceAdverse": "Medios adversos",
+		"settings.compliance.watchlistRescanSavedSuccess":
+			"Configuración de listas guardada correctamente",
 
 		// Team settings
 		"settings.team.title": "Configuración de Equipo",
@@ -1884,6 +1971,11 @@ const translations = {
 		"settings.billing.title": "Facturación y Suscripción",
 		"settings.billing.description":
 			"Administra tu suscripción, uso y métodos de pago",
+		"settings.billing.tabs.usage": "Uso y límites",
+		"settings.billing.tabs.plans": "Cambiar plan",
+		"settings.billing.tabs.enterprise": "Enterprise",
+		"settings.billing.tabs.limits": "Límites del plan",
+		"settings.billing.tabs.pricing": "Precios y Cargos extra",
 		"settings.billing.currentPlan": "Plan Actual",
 		"settings.billing.noPlan": "Sin suscripción activa",
 		"settings.billing.noPlanDesc":
@@ -2035,7 +2127,7 @@ const translations = {
 			"Pagas la tarifa de suscripción mensual por adelantado, luego cualquier excedente (usuarios extra, reportes, avisos, etc.) se calcula al final de cada ciclo de facturación y se cobra automáticamente.",
 		"settings.billing.pricing.trialPeriod": "Período de prueba",
 		"settings.billing.pricing.trialPeriodDesc":
-			"Todos los planes incluyen una prueba gratuita de 14 días. No se te cobrará hasta que termine la prueba.",
+			"AML Business, Pro y Ultra incluyen una prueba gratuita de 30 días por tiempo limitado. No se te cobrará hasta que termine la prueba. Watchlist y Enterprise no incluyen esta prueba.",
 		// Price type labels
 		"settings.billing.pricing.subscription.label": "Suscripción Mensual",
 		"settings.billing.pricing.subscription.description": "Tarifa mensual base",
@@ -2240,6 +2332,9 @@ const translations = {
 		"onboarding.plans.select.title": "Selecciona un plan",
 		"onboarding.plans.select.description":
 			"Elige un plan mensual para comenzar la facturación. Puedes cambiarlo después.",
+		"onboarding.plans.amlTrialDisclaimer":
+			"Oferta por tiempo limitado: la prueba gratuita de 30 días aplica solo a AML Business, Pro y Ultra; no disponible en Watchlist ni Enterprise.",
+		"onboarding.plans.trialBadge": "Prueba gratis 30 días",
 		"onboarding.plans.watchlist.title": "Solo watchlist",
 		"onboarding.plans.watchlist.description": "Revisa listas sin acceso AML.",
 		"onboarding.plans.watchlist.cta": "Suscribirse a Watchlist",
@@ -2435,11 +2530,12 @@ const LanguageContext = createContext<LanguageContextType | undefined>(
 );
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
+	const { data: session, isPending: sessionPending } = useAuthSession();
 	const [language, setLanguageState] = useState<Language>("es");
 	const [mounted, setMounted] = useState(false);
 	const [settingsSynced, setSettingsSynced] = useState(false);
 
-	// Initialize from cookies (instant), then sync with API
+	// Initialize from cookies (instant)
 	useEffect(() => {
 		setMounted(true);
 
@@ -2453,8 +2549,16 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 			setLanguageState(detected);
 			setCookie(COOKIE_NAMES.LANGUAGE, detected);
 		}
+	}, []);
 
-		// Step 2: Fetch from API to verify/sync
+	// Step 2: Fetch from API to verify/sync (only when authenticated; avoids 401s on /login)
+	useEffect(() => {
+		if (sessionPending) return;
+		if (!session?.user) {
+			setSettingsSynced(true);
+			return;
+		}
+
 		getResolvedSettings()
 			.then((settings) => {
 				const apiLanguage = settings.language;
@@ -2468,7 +2572,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 				// API unavailable, keep using cookie/browser value
 				setSettingsSynced(true);
 			});
-	}, []);
+	}, [session?.user, sessionPending]);
 
 	// Update both cookie and API when language changes
 	const handleSetLanguage = useCallback(

@@ -1,9 +1,235 @@
-# [2.9.0](https://github.com/janovix/auth/compare/v2.8.0...v2.9.0) (2026-04-16)
+# [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-05-13)
+
+
+### Bug Fixes
+
+* **auth:** enhance passkey sign-in tests and error handling ([05bd810](https://github.com/janovix/auth/commit/05bd8102c73cbc51c4cdd4e1cba758cb4ebc7030))
+* **auth:** handle AbortError in passkey sign-in and update tests ([f753a15](https://github.com/janovix/auth/commit/f753a15ab2d2a254b72fbae5893795b88607aedb))
+* **config:** update permissions policy for xr-spatial-tracking ([601a624](https://github.com/janovix/auth/commit/601a624368dcf61ffda888de544057dfb376433b))
+* formatted code ([8dd67a9](https://github.com/janovix/auth/commit/8dd67a9a15f3f8b70becf276b62178af6c5590c2))
 
 
 ### Features
 
-* **webhooks:** add webhooks management interface with loading state and skeleton views ([ffa20f5](https://github.com/janovix/auth/commit/ffa20f5cd9931fd067cbc7627ae5afa38437cec1))
+* **auth:** enhance passkey sign-in functionality and add tests ([6691955](https://github.com/janovix/auth/commit/6691955d1f0afb7cc28f10168fdf3bf14cb7c889))
+* **onboarding:** add trial badge to plan selection grid ([f931462](https://github.com/janovix/auth/commit/f931462f52fc2b01a01c39c511849eebb9f13bf9))
+* **onboarding:** add trial disclaimer to subscription selection and billing settings ([d7dea55](https://github.com/janovix/auth/commit/d7dea55074f653ac083bbbf4fd4d6e76643169fe))
+* **products:** refactor ProductsView to use ProductCTA component for cleaner code and improved maintainability ([000e064](https://github.com/janovix/auth/commit/000e064c3c6091690918e6d47648fdc3b64e51da))
+* **referrals:** implement referral code handling and UI components ([db768f8](https://github.com/janovix/auth/commit/db768f8c65a075ac81e487cb1634e97a015a0d08))
+* **settings:** update compliance settings for watchlist rescan interval and daily cap ([707c5a1](https://github.com/janovix/auth/commit/707c5a162f2c06c723a8c1af04e8522ee495ba7a))
+
+# [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-05-08)
+
+
+### Bug Fixes
+
+* **auth:** enhance passkey sign-in tests and error handling ([05bd810](https://github.com/janovix/auth/commit/05bd8102c73cbc51c4cdd4e1cba758cb4ebc7030))
+* **auth:** handle AbortError in passkey sign-in and update tests ([f753a15](https://github.com/janovix/auth/commit/f753a15ab2d2a254b72fbae5893795b88607aedb))
+* **config:** update permissions policy for xr-spatial-tracking ([601a624](https://github.com/janovix/auth/commit/601a624368dcf61ffda888de544057dfb376433b))
+* formatted code ([8dd67a9](https://github.com/janovix/auth/commit/8dd67a9a15f3f8b70becf276b62178af6c5590c2))
+
+
+### Features
+
+* **auth:** enhance passkey sign-in functionality and add tests ([6691955](https://github.com/janovix/auth/commit/6691955d1f0afb7cc28f10168fdf3bf14cb7c889))
+* **onboarding:** add trial badge to plan selection grid ([f931462](https://github.com/janovix/auth/commit/f931462f52fc2b01a01c39c511849eebb9f13bf9))
+* **onboarding:** add trial disclaimer to subscription selection and billing settings ([d7dea55](https://github.com/janovix/auth/commit/d7dea55074f653ac083bbbf4fd4d6e76643169fe))
+* **products:** refactor ProductsView to use ProductCTA component for cleaner code and improved maintainability ([000e064](https://github.com/janovix/auth/commit/000e064c3c6091690918e6d47648fdc3b64e51da))
+* **referrals:** implement referral code handling and UI components ([db768f8](https://github.com/janovix/auth/commit/db768f8c65a075ac81e487cb1634e97a015a0d08))
+
+# [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-05-08)
+
+
+### Bug Fixes
+
+* **auth:** enhance passkey sign-in tests and error handling ([05bd810](https://github.com/janovix/auth/commit/05bd8102c73cbc51c4cdd4e1cba758cb4ebc7030))
+* **auth:** handle AbortError in passkey sign-in and update tests ([f753a15](https://github.com/janovix/auth/commit/f753a15ab2d2a254b72fbae5893795b88607aedb))
+* **config:** update permissions policy for xr-spatial-tracking ([601a624](https://github.com/janovix/auth/commit/601a624368dcf61ffda888de544057dfb376433b))
+* formatted code ([8dd67a9](https://github.com/janovix/auth/commit/8dd67a9a15f3f8b70becf276b62178af6c5590c2))
+
+
+### Features
+
+* **auth:** enhance passkey sign-in functionality and add tests ([6691955](https://github.com/janovix/auth/commit/6691955d1f0afb7cc28f10168fdf3bf14cb7c889))
+* **onboarding:** add trial disclaimer to subscription selection and billing settings ([d7dea55](https://github.com/janovix/auth/commit/d7dea55074f653ac083bbbf4fd4d6e76643169fe))
+* **products:** refactor ProductsView to use ProductCTA component for cleaner code and improved maintainability ([000e064](https://github.com/janovix/auth/commit/000e064c3c6091690918e6d47648fdc3b64e51da))
+* **referrals:** implement referral code handling and UI components ([db768f8](https://github.com/janovix/auth/commit/db768f8c65a075ac81e487cb1634e97a015a0d08))
+
+# [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-05-05)
+
+
+### Bug Fixes
+
+* **auth:** enhance passkey sign-in tests and error handling ([05bd810](https://github.com/janovix/auth/commit/05bd8102c73cbc51c4cdd4e1cba758cb4ebc7030))
+* **auth:** handle AbortError in passkey sign-in and update tests ([f753a15](https://github.com/janovix/auth/commit/f753a15ab2d2a254b72fbae5893795b88607aedb))
+* **config:** update permissions policy for xr-spatial-tracking ([601a624](https://github.com/janovix/auth/commit/601a624368dcf61ffda888de544057dfb376433b))
+* formatted code ([8dd67a9](https://github.com/janovix/auth/commit/8dd67a9a15f3f8b70becf276b62178af6c5590c2))
+
+
+### Features
+
+* **auth:** enhance passkey sign-in functionality and add tests ([6691955](https://github.com/janovix/auth/commit/6691955d1f0afb7cc28f10168fdf3bf14cb7c889))
+* **products:** refactor ProductsView to use ProductCTA component for cleaner code and improved maintainability ([000e064](https://github.com/janovix/auth/commit/000e064c3c6091690918e6d47648fdc3b64e51da))
+* **referrals:** implement referral code handling and UI components ([db768f8](https://github.com/janovix/auth/commit/db768f8c65a075ac81e487cb1634e97a015a0d08))
+
+# [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-04-24)
+
+
+### Bug Fixes
+
+* **auth:** enhance passkey sign-in tests and error handling ([05bd810](https://github.com/janovix/auth/commit/05bd8102c73cbc51c4cdd4e1cba758cb4ebc7030))
+* **auth:** handle AbortError in passkey sign-in and update tests ([f753a15](https://github.com/janovix/auth/commit/f753a15ab2d2a254b72fbae5893795b88607aedb))
+* **config:** update permissions policy for xr-spatial-tracking ([601a624](https://github.com/janovix/auth/commit/601a624368dcf61ffda888de544057dfb376433b))
+* formatted code ([8dd67a9](https://github.com/janovix/auth/commit/8dd67a9a15f3f8b70becf276b62178af6c5590c2))
+
+
+### Features
+
+* **auth:** enhance passkey sign-in functionality and add tests ([6691955](https://github.com/janovix/auth/commit/6691955d1f0afb7cc28f10168fdf3bf14cb7c889))
+* **products:** refactor ProductsView to use ProductCTA component for cleaner code and improved maintainability ([000e064](https://github.com/janovix/auth/commit/000e064c3c6091690918e6d47648fdc3b64e51da))
+* **referrals:** implement referral code handling and UI components ([db768f8](https://github.com/janovix/auth/commit/db768f8c65a075ac81e487cb1634e97a015a0d08))
+
+# [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-04-24)
+
+
+### Bug Fixes
+
+* **auth:** enhance passkey sign-in tests and error handling ([05bd810](https://github.com/janovix/auth/commit/05bd8102c73cbc51c4cdd4e1cba758cb4ebc7030))
+* **auth:** handle AbortError in passkey sign-in and update tests ([f753a15](https://github.com/janovix/auth/commit/f753a15ab2d2a254b72fbae5893795b88607aedb))
+* **config:** update permissions policy for xr-spatial-tracking ([601a624](https://github.com/janovix/auth/commit/601a624368dcf61ffda888de544057dfb376433b))
+
+
+### Features
+
+* **auth:** enhance passkey sign-in functionality and add tests ([6691955](https://github.com/janovix/auth/commit/6691955d1f0afb7cc28f10168fdf3bf14cb7c889))
+* **products:** refactor ProductsView to use ProductCTA component for cleaner code and improved maintainability ([000e064](https://github.com/janovix/auth/commit/000e064c3c6091690918e6d47648fdc3b64e51da))
+* **referrals:** implement referral code handling and UI components ([db768f8](https://github.com/janovix/auth/commit/db768f8c65a075ac81e487cb1634e97a015a0d08))
+
+# [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-04-24)
+
+
+### Bug Fixes
+
+* **auth:** enhance passkey sign-in tests and error handling ([05bd810](https://github.com/janovix/auth/commit/05bd8102c73cbc51c4cdd4e1cba758cb4ebc7030))
+* **auth:** handle AbortError in passkey sign-in and update tests ([f753a15](https://github.com/janovix/auth/commit/f753a15ab2d2a254b72fbae5893795b88607aedb))
+* **config:** update permissions policy for xr-spatial-tracking ([601a624](https://github.com/janovix/auth/commit/601a624368dcf61ffda888de544057dfb376433b))
+
+
+### Features
+
+* **auth:** enhance passkey sign-in functionality and add tests ([6691955](https://github.com/janovix/auth/commit/6691955d1f0afb7cc28f10168fdf3bf14cb7c889))
+* **products:** refactor ProductsView to use ProductCTA component for cleaner code and improved maintainability ([000e064](https://github.com/janovix/auth/commit/000e064c3c6091690918e6d47648fdc3b64e51da))
+* **referrals:** implement referral code handling and UI components ([db768f8](https://github.com/janovix/auth/commit/db768f8c65a075ac81e487cb1634e97a015a0d08))
+
+# [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-04-23)
+
+
+### Bug Fixes
+
+* **auth:** enhance passkey sign-in tests and error handling ([05bd810](https://github.com/janovix/auth/commit/05bd8102c73cbc51c4cdd4e1cba758cb4ebc7030))
+* **auth:** handle AbortError in passkey sign-in and update tests ([f753a15](https://github.com/janovix/auth/commit/f753a15ab2d2a254b72fbae5893795b88607aedb))
+* **config:** update permissions policy for xr-spatial-tracking ([601a624](https://github.com/janovix/auth/commit/601a624368dcf61ffda888de544057dfb376433b))
+
+
+### Features
+
+* **auth:** enhance passkey sign-in functionality and add tests ([6691955](https://github.com/janovix/auth/commit/6691955d1f0afb7cc28f10168fdf3bf14cb7c889))
+* **products:** refactor ProductsView to use ProductCTA component for cleaner code and improved maintainability ([000e064](https://github.com/janovix/auth/commit/000e064c3c6091690918e6d47648fdc3b64e51da))
+
+# [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-04-23)
+
+
+### Bug Fixes
+
+* **auth:** enhance passkey sign-in tests and error handling ([05bd810](https://github.com/janovix/auth/commit/05bd8102c73cbc51c4cdd4e1cba758cb4ebc7030))
+* **auth:** handle AbortError in passkey sign-in and update tests ([f753a15](https://github.com/janovix/auth/commit/f753a15ab2d2a254b72fbae5893795b88607aedb))
+* **config:** update permissions policy for xr-spatial-tracking ([601a624](https://github.com/janovix/auth/commit/601a624368dcf61ffda888de544057dfb376433b))
+
+
+### Features
+
+* **auth:** enhance passkey sign-in functionality and add tests ([6691955](https://github.com/janovix/auth/commit/6691955d1f0afb7cc28f10168fdf3bf14cb7c889))
+
+# [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-04-23)
+
+
+### Bug Fixes
+
+* **auth:** enhance passkey sign-in tests and error handling ([05bd810](https://github.com/janovix/auth/commit/05bd8102c73cbc51c4cdd4e1cba758cb4ebc7030))
+* **auth:** handle AbortError in passkey sign-in and update tests ([f753a15](https://github.com/janovix/auth/commit/f753a15ab2d2a254b72fbae5893795b88607aedb))
+
+
+### Features
+
+* **auth:** enhance passkey sign-in functionality and add tests ([6691955](https://github.com/janovix/auth/commit/6691955d1f0afb7cc28f10168fdf3bf14cb7c889))
+
+# [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-04-23)
+
+
+### Bug Fixes
+
+* **auth:** handle AbortError in passkey sign-in and update tests ([f753a15](https://github.com/janovix/auth/commit/f753a15ab2d2a254b72fbae5893795b88607aedb))
+
+
+### Features
+
+* **auth:** enhance passkey sign-in functionality and add tests ([6691955](https://github.com/janovix/auth/commit/6691955d1f0afb7cc28f10168fdf3bf14cb7c889))
+
+# [2.10.0-rc.7](https://github.com/janovix/auth/compare/v2.10.0-rc.6...v2.10.0-rc.7) (2026-04-23)
+
+
+### Features
+
+* **auth:** enhance passkey sign-in functionality and add tests ([6691955](https://github.com/janovix/auth/commit/6691955d1f0afb7cc28f10168fdf3bf14cb7c889))
+
+# [2.10.0-rc.6](https://github.com/janovix/auth/compare/v2.10.0-rc.5...v2.10.0-rc.6) (2026-04-23)
+
+
+### Features
+
+* **auth:** implement session-based theme and language synchronization ([48c44c4](https://github.com/janovix/auth/commit/48c44c43d439c364b768acbc75529349fba7320a))
+
+# [2.10.0-rc.5](https://github.com/janovix/auth/compare/v2.10.0-rc.4...v2.10.0-rc.5) (2026-04-22)
+
+
+### Features
+
+* **turnstile:** integrate Turnstile site key resolution and context ([780f57f](https://github.com/janovix/auth/commit/780f57f51e7086b2f7a73e78c963a13d9781951f))
+
+# [2.10.0-rc.4](https://github.com/janovix/auth/compare/v2.10.0-rc.3...v2.10.0-rc.4) (2026-04-21)
+
+
+### Features
+
+* **compliance:** add support for legacy AVI activity in ComplianceSettingsView ([4db2130](https://github.com/janovix/auth/commit/4db2130dbc245bb0b2a8b3c5d0741efbc667924c))
+
+# [2.10.0-rc.3](https://github.com/janovix/auth/compare/v2.10.0-rc.2...v2.10.0-rc.3) (2026-04-18)
+
+
+### Features
+
+* **compliance:** add shared AML settings notice for non-production environments ([58a7605](https://github.com/janovix/auth/commit/58a7605c2b9468993523236d6d2d3487ccda6a18))
+
+# [2.10.0-rc.2](https://github.com/janovix/auth/compare/v2.10.0-rc.1...v2.10.0-rc.2) (2026-04-18)
+
+
+### Features
+
+* **compliance:** add shared AML settings notice for non-production environments ([793ccbd](https://github.com/janovix/auth/commit/793ccbdf169a7b61aec1209c410a0feb6fece643))
+
+# [2.10.0-rc.1](https://github.com/janovix/auth/compare/v2.9.0...v2.10.0-rc.1) (2026-04-16)
+
+
+### Features
+
+* **webhooks:** refactor environment selection in WebhooksView component ([aa28b6a](https://github.com/janovix/auth/commit/aa28b6a1e0656158fbd172ddb67c9e82df204436))
+
+# [2.9.0-rc.2](https://github.com/janovix/auth/compare/v2.9.0-rc.1...v2.9.0-rc.2) (2026-04-16)
+
+
+### Features
+
+* **webhooks:** refactor environment selection in WebhooksView component ([aa28b6a](https://github.com/janovix/auth/commit/aa28b6a1e0656158fbd172ddb67c9e82df204436))
 
 # [2.9.0-rc.1](https://github.com/janovix/auth/compare/v2.8.0...v2.9.0-rc.1) (2026-04-16)
 

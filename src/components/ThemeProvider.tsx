@@ -6,6 +6,7 @@ import {
 } from "next-themes";
 import { useEffect, useState, useRef } from "react";
 import { getCookie, setCookie, COOKIE_NAMES } from "@/lib/cookies";
+import { useAuthSession } from "@/lib/auth/useAuthSession";
 import {
 	getResolvedSettings,
 	updateUserSettings,
@@ -17,11 +18,12 @@ import {
  */
 function ThemeSettingsSyncer({ children }: { children: React.ReactNode }) {
 	const { theme, setTheme } = useTheme();
+	const { data: session, isPending: sessionPending } = useAuthSession();
 	const [initialized, setInitialized] = useState(false);
 	const [settingsSynced, setSettingsSynced] = useState(false);
 	const previousTheme = useRef<string | undefined>(undefined);
 
-	// On mount: sync from cookie first (instant), then verify with API
+	// On mount: sync from cookie first (instant)
 	useEffect(() => {
 		if (initialized) return;
 
@@ -34,8 +36,16 @@ function ThemeSettingsSyncer({ children }: { children: React.ReactNode }) {
 		}
 		setInitialized(true);
 		previousTheme.current = cookieTheme || theme;
+	}, [initialized, theme, setTheme]);
 
-		// Step 2: Fetch from API to verify/sync
+	// Step 2: Fetch from API to verify/sync (only when authenticated; avoids 401s on /login)
+	useEffect(() => {
+		if (sessionPending) return;
+		if (!session?.user) {
+			setSettingsSynced(true);
+			return;
+		}
+
 		getResolvedSettings()
 			.then((settings) => {
 				const apiTheme = settings.theme;
@@ -51,7 +61,7 @@ function ThemeSettingsSyncer({ children }: { children: React.ReactNode }) {
 				console.debug("Settings API unavailable:", error);
 				setSettingsSynced(true);
 			});
-	}, [initialized, theme, setTheme]);
+	}, [session?.user, sessionPending, setTheme]);
 
 	// Sync theme changes to cookie and API
 	useEffect(() => {

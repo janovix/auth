@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { Button, Badge, Checkbox } from "@/components/ui";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useEnvironmentContext } from "@algenium/blocks";
 import {
 	Dialog,
 	DialogContent,
@@ -65,6 +65,9 @@ import {
 export function WebhooksView() {
 	const { t } = useLanguage();
 	const { data: session } = useAuthSession();
+	const envCtx = useEnvironmentContext();
+	const selectedEnvironment: ApiKeyEnvironment =
+		envCtx?.environment ?? "production";
 
 	const [loading, setLoading] = useState(true);
 	const [refreshing, setRefreshing] = useState(false);
@@ -72,8 +75,6 @@ export function WebhooksView() {
 	const loadSeqRef = useRef(0);
 	const [endpoints, setEndpoints] = useState<WebhookEndpoint[]>([]);
 	const [deliveries, setDeliveries] = useState<WebhookDelivery[]>([]);
-	const [selectedEnvironment, setSelectedEnvironment] =
-		useState<ApiKeyEnvironment>("production");
 
 	const [createDialogOpen, setCreateDialogOpen] = useState(false);
 	const [endpointUrl, setEndpointUrl] = useState("");
@@ -451,6 +452,13 @@ export function WebhooksView() {
 				}
 			/>
 
+			<div className="flex items-center gap-2 text-sm text-muted-foreground">
+				<span>{t("settings.apiKeys.environment") || "Environment"}:</span>
+				<Badge className={environmentBadgeStyles[selectedEnvironment]}>
+					{environmentLabels[selectedEnvironment]}
+				</Badge>
+			</div>
+
 			<div className="relative">
 				{refreshing ? (
 					<div
@@ -470,25 +478,6 @@ export function WebhooksView() {
 						refreshing && "pointer-events-none select-none",
 					)}
 				>
-					<Tabs
-						value={selectedEnvironment}
-						onValueChange={(v) =>
-							setSelectedEnvironment(v as ApiKeyEnvironment)
-						}
-					>
-						<TabsList>
-							<TabsTrigger value="production">
-								{environmentLabels.production}
-							</TabsTrigger>
-							<TabsTrigger value="staging">
-								{environmentLabels.staging}
-							</TabsTrigger>
-							<TabsTrigger value="development">
-								{environmentLabels.development}
-							</TabsTrigger>
-						</TabsList>
-					</Tabs>
-
 					{/* Endpoints List */}
 					<SettingsSection
 						title={`Endpoints (${endpoints.length})`}

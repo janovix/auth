@@ -1,10 +1,10 @@
 "use client";
 
 import * as Sentry from "@sentry/nextjs";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
 	CreditCard,
-	Check,
 	Building2,
 	FileText,
 	KeyRound,
@@ -43,13 +43,8 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -63,7 +58,6 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
 	SettingsPageHeader,
-	SettingsSection,
 	PricingTable,
 	BillingSettingsViewSkeleton,
 } from "@/components/settings";
@@ -75,6 +69,22 @@ import { WatchlistCard } from "@/components/WatchlistCard";
 import { UsageLimitsSection } from "@/components/settings/UsageLimitsSection";
 import { DowngradeWizard } from "@/components/settings/DowngradeWizard";
 import { useFlags } from "@/hooks/useFlags";
+
+const BILLING_SECTIONS = [
+	"usage",
+	"plans",
+	"enterprise",
+	"limits",
+	"pricing",
+] as const;
+type BillingSection = (typeof BILLING_SECTIONS)[number];
+
+function isBillingSection(
+	value: string | null | undefined,
+): value is BillingSection {
+	if (value == null) return false;
+	return (BILLING_SECTIONS as readonly string[]).includes(value);
+}
 
 export function BillingSettingsView() {
 	const { t } = useLanguage();
@@ -309,6 +319,57 @@ export function BillingSettingsView() {
 		}
 	};
 
+	const pathname = usePathname();
+	const router = useRouter();
+	const searchParams = useSearchParams();
+	const showUsageTab =
+		isOrgOwner && hasActiveBillingForUsageLimits(subscription);
+
+	const resolvedSection = useMemo((): BillingSection => {
+		const raw = searchParams.get("section");
+		if (raw === "usage" && !showUsageTab) {
+			return "plans";
+		}
+		if (isBillingSection(raw)) {
+			return raw;
+		}
+		return showUsageTab ? "usage" : "plans";
+	}, [searchParams, showUsageTab]);
+
+	const onBillingTabChange = useCallback(
+		(value: string) => {
+			if (!isBillingSection(value)) return;
+			const params = new URLSearchParams(searchParams.toString());
+			params.set("section", value);
+			router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+		},
+		[pathname, router, searchParams],
+	);
+
+	useEffect(() => {
+		const sectionParam = searchParams.get("section");
+		if (sectionParam === "usage" && !showUsageTab) {
+			const params = new URLSearchParams(searchParams.toString());
+			params.set("section", "plans");
+			router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+			return;
+		}
+		if (sectionParam && !isBillingSection(sectionParam)) {
+			const params = new URLSearchParams(searchParams.toString());
+			params.set("section", showUsageTab ? "usage" : "plans");
+			router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+		}
+	}, [pathname, router, searchParams, showUsageTab]);
+
+	const watchlistPlan = useMemo(
+		() => plans.find((p) => p.name === "watchlist"),
+		[plans],
+	);
+	const watchlistSubPrice = useMemo(
+		() => (watchlistPlan ? getSubscriptionPrice(watchlistPlan) : null),
+		[watchlistPlan],
+	);
+
 	if (flagsLoading || loading) {
 		return <BillingSettingsViewSkeleton />;
 	}
@@ -525,67 +586,102 @@ export function BillingSettingsView() {
 				)}
 			</Card>
 
-			{isOrgOwner && hasActiveBillingForUsageLimits(subscription) ? (
-				<UsageLimitsSection
-					subscriptionPlan={subscription?.plan ?? null}
-					isLicenseBased={subscription?.isLicenseBased ?? false}
-				/>
-			) : null}
-
-			{/* Plan Selection + Enterprise + Watchlist */}
-			<SettingsSection
-				title={t("onboarding.plans.select.title")}
-				description={t("onboarding.plans.select.description")}
+			<Tabs
+				className="w-full"
+				value={resolvedSection}
+				onValueChange={onBillingTabChange}
 			>
-				<div className="space-y-6">
-					<PlanSelectionGrid
-						plans={plans}
-						onSelectPlan={(plan) =>
-							handleSelectPlan(
-								plan.name as "watchlist" | "business" | "pro" | "ultra",
-							)
-						}
-						isActionLoading={actionLoading}
-						currentPlan={subscription?.plan ?? null}
-					/>
+				<TabsList className="mb-1 flex h-auto min-h-9 w-full max-w-full flex-wrap items-stretch justify-start gap-1 p-1 sm:gap-0">
+					{showUsageTab ? (
+						<TabsTrigger
+							value="usage"
+							className="shrink-0 px-2 sm:px-3 text-xs sm:text-sm"
+						>
+							{t("settings.billing.tabs.usage")}
+						</TabsTrigger>
+					) : null}
+					<TabsTrigger
+						value="plans"
+						className="shrink-0 px-2 sm:px-3 text-xs sm:text-sm"
+					>
+						{t("settings.billing.tabs.plans")}
+					</TabsTrigger>
+					<TabsTrigger
+						value="enterprise"
+						className="shrink-0 px-2 sm:px-3 text-xs sm:text-sm"
+					>
+						{t("settings.billing.tabs.enterprise")}
+					</TabsTrigger>
+					<TabsTrigger
+						value="limits"
+						className="shrink-0 px-2 sm:px-3 text-xs sm:text-sm"
+					>
+						{t("settings.billing.tabs.limits")}
+					</TabsTrigger>
+					<TabsTrigger
+						value="pricing"
+						className="shrink-0 px-2 sm:px-3 text-xs sm:text-sm"
+					>
+						{t("settings.billing.tabs.pricing")}
+					</TabsTrigger>
+				</TabsList>
 
+				{showUsageTab ? (
+					<TabsContent value="usage" className="mt-4 space-y-2">
+						<UsageLimitsSection
+							subscriptionPlan={subscription?.plan ?? null}
+							isLicenseBased={subscription?.isLicenseBased ?? false}
+						/>
+					</TabsContent>
+				) : null}
+
+				<TabsContent value="plans" className="mt-4 space-y-4">
+					<p className="text-sm text-muted-foreground">
+						{t("onboarding.plans.select.description")}
+					</p>
+					<div className="space-y-6">
+						<PlanSelectionGrid
+							plans={plans}
+							onSelectPlan={(plan) =>
+								handleSelectPlan(
+									plan.name as "watchlist" | "business" | "pro" | "ultra",
+								)
+							}
+							isActionLoading={actionLoading}
+							currentPlan={subscription?.plan ?? null}
+						/>
+						<p className="text-sm text-muted-foreground text-center sm:text-left">
+							{t("onboarding.plans.amlTrialDisclaimer")}
+						</p>
+						<WatchlistCard
+							displayPrice={watchlistSubPrice?.amount ?? 49900}
+							interval={watchlistSubPrice?.interval ?? "month"}
+							onSelect={() => handleSelectPlan("watchlist")}
+							isLoading={actionLoading}
+							canSubscribe={Boolean(watchlistPlan && watchlistSubPrice)}
+							isCurrent={subscription?.plan === "watchlist"}
+						/>
+					</div>
+				</TabsContent>
+
+				<TabsContent value="enterprise" className="mt-4">
 					<EnterpriseCard onRedeem={handleRedeemLicense} />
+				</TabsContent>
 
-					{(() => {
-						const watchlistPlan = plans.find((p) => p.name === "watchlist");
-						const subscriptionPrice = watchlistPlan
-							? getSubscriptionPrice(watchlistPlan)
-							: null;
-						return (
-							<WatchlistCard
-								displayPrice={subscriptionPrice?.amount ?? 49900}
-								interval={subscriptionPrice?.interval ?? "month"}
-								onSelect={() => handleSelectPlan("watchlist")}
-								isLoading={actionLoading}
-								canSubscribe={Boolean(watchlistPlan && subscriptionPrice)}
-								isCurrent={subscription?.plan === "watchlist"}
-							/>
-						);
-					})()}
-				</div>
-			</SettingsSection>
+				<TabsContent value="limits" className="mt-4 space-y-2">
+					<p className="text-sm text-muted-foreground">
+						{t("onboarding.plans.detailed.description")}
+					</p>
+					<PricingTable currentPlan={subscription?.plan} section="limits" />
+				</TabsContent>
 
-			{/* Detailed Pricing Table */}
-			<SettingsSection
-				title={t("onboarding.plans.detailed.title")}
-				description={t("onboarding.plans.detailed.description")}
-			>
-				<Accordion type="single" collapsible>
-					<AccordionItem value="pricing">
-						<AccordionTrigger className="text-sm font-semibold">
-							{t("onboarding.plans.detailed.trigger")}
-						</AccordionTrigger>
-						<AccordionContent>
-							<PricingTable currentPlan={subscription?.plan} />
-						</AccordionContent>
-					</AccordionItem>
-				</Accordion>
-			</SettingsSection>
+				<TabsContent value="pricing" className="mt-4 space-y-2">
+					<p className="text-sm text-muted-foreground">
+						{t("onboarding.plans.detailed.description")}
+					</p>
+					<PricingTable currentPlan={subscription?.plan} section="pricing" />
+				</TabsContent>
+			</Tabs>
 
 			{/* Cancel Confirmation Dialog */}
 			<AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>

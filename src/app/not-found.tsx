@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowLeft, FileQuestion, Home } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { useSetPageStatus } from "@/contexts/page-status-context";
-import { GlobalAuroraBackground } from "@/components/aurora";
+import { ShaderBackdrop } from "@/components/shader/shader-backdrop";
 import { NavSettingsBar } from "@/components/layout/NavSettingsBar";
 import { Logo } from "@/components/Logo";
 import { AuroraProvider } from "@/contexts/aurora-context";
@@ -32,8 +32,7 @@ export default function NotFound() {
 	return (
 		<AuroraProvider>
 			<div className="flex h-svh w-full flex-col overflow-hidden relative">
-				{/* Aurora background */}
-				<GlobalAuroraBackground />
+				<ShaderBackdrop />
 
 				{/* Language and Theme pickers - top right */}
 				<NavSettingsBar />

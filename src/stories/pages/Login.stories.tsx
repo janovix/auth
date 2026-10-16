@@ -1,7 +1,7 @@
 import type { AuthResult } from "@/lib/auth/authActions";
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { GlobalAuroraBackground } from "@/components/aurora";
+import { ShaderBackdrop } from "@/components/shader/shader-backdrop";
 import { LoginView } from "@/components/auth/LoginView";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuroraProvider } from "@/contexts/aurora-context";
@@ -66,7 +66,7 @@ const meta = {
 				<LanguageProvider>
 					<AuroraProvider>
 						<div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-							<GlobalAuroraBackground />
+							<ShaderBackdrop />
 							<div className="w-full max-w-md relative z-10">
 								<Story />
 							</div>

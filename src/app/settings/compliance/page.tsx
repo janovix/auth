@@ -2,7 +2,7 @@ import { ComplianceSettingsView } from "@/components/settings/ComplianceSettings
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "AML Compliance Settings | Janovix",
+	title: "AML Compliance Settings | Yenio",
 	description:
 		"Manage your organization's AML compliance settings including RFC and vulnerable activity configuration.",
 };

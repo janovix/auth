@@ -309,7 +309,7 @@ export function CreateOrganizationView() {
 							/>
 							<p className="text-xs text-muted-foreground">
 								{t("settings.createOrg.nameHelp") ||
-									"This is how your organization will appear across Janovix"}
+									"This is how your organization will appear across Yenio"}
 							</p>
 						</div>
 

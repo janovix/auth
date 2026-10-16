@@ -17,7 +17,7 @@ const getRedirect = (
 };
 
 export const metadata: Metadata = {
-	title: "Completa tu perfil | Janovix",
+	title: "Completa tu perfil | Yenio",
 	description: "Configura tu nombre y foto de perfil para continuar.",
 };
 

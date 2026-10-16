@@ -4,7 +4,7 @@ import { getSidebarCollapsedServer } from "@/lib/settings/settingsServer";
 import { SettingsLayoutClient } from "@/components/layout/SettingsLayoutClient";
 
 export const metadata: Metadata = {
-	title: "Settings | Janovix",
+	title: "Settings | Yenio",
 	description: "Manage your account settings and preferences.",
 };
 

@@ -4,7 +4,7 @@ import { getSidebarCollapsedServer } from "@/lib/settings/settingsServer";
 import { SettingsLayoutClient } from "@/components/layout/SettingsLayoutClient";
 
 export const metadata: Metadata = {
-	title: "Your Products | Janovix",
+	title: "Your Products | Yenio",
 	description: "Open AML, Watchlist, and other products included in your plan.",
 };
 

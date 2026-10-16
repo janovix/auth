@@ -6,8 +6,8 @@ type PageProps = {
 };
 
 export const metadata: Metadata = {
-	title: "Janovix",
-	description: "Accede a tu cuenta o crea una nueva en Janovix.",
+	title: "Yenio",
+	description: "Accede a tu cuenta o crea una nueva en Yenio.",
 };
 
 /**

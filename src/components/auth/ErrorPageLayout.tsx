@@ -9,7 +9,7 @@ interface ErrorPageLayoutProps {
 
 /**
  * Shared layout for error pages (404, forbidden, unauthorized, etc.)
- * Includes the Janovix logo and centers the content.
+ * Includes the Yenio logo and centers the content.
  * Should be used inside pages that are wrapped by AuthLayout (via ClientLayout).
  */
 export function ErrorPageLayout({ children }: ErrorPageLayoutProps) {

@@ -19,9 +19,9 @@ const geistMono = Geist_Mono({
 
 // Icons, manifest, viewport: keep in sync with aml/src/app/layout.tsx
 export const metadata: Metadata = {
-	title: "Janovix",
+	title: "Yenio",
 	description:
-		"Acceso y gestión de cuenta en Janovix: inicio de sesión, registro, recuperación de contraseña y sesión.",
+		"Acceso y gestión de cuenta en Yenio: inicio de sesión, registro, recuperación de contraseña y sesión.",
 	manifest: "/site.webmanifest",
 	icons: {
 		icon: [
@@ -40,7 +40,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-	themeColor: "#0f766e",
+	themeColor: [
+		{ media: "(prefers-color-scheme: light)", color: "#f7fbfc" },
+		{ media: "(prefers-color-scheme: dark)", color: "#11171d" },
+	],
 	width: "device-width",
 	initialScale: 1,
 	maximumScale: 5,

@@ -2,8 +2,8 @@ import { AccountView } from "@/components/auth/AccountView";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Mi sesión | Janovix",
-	description: "Revisa tu sesión y la información de tu cuenta en Janovix.",
+	title: "Mi sesión | Yenio",
+	description: "Revisa tu sesión y la información de tu cuenta en Yenio.",
 };
 
 /**

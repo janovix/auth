@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/language-context";
-import { TaxComplianceBanner } from "@/components/TaxComplianceBanner";
 
 interface EnterpriseCardProps {
 	/** Called when the user submits a license key. Should resolve after
@@ -110,8 +109,6 @@ export function EnterpriseCard({
 						</div>
 					</div>
 				)}
-
-				<TaxComplianceBanner />
 			</CardContent>
 		</Card>
 	);

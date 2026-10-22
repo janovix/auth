@@ -34,8 +34,8 @@ const getResetSuccessMessage = (
 };
 
 export const metadata: Metadata = {
-	title: "Iniciar sesión | Yenio",
-	description: "Accede a tu cuenta de Yenio.",
+	title: "Iniciar sesión | Janovix",
+	description: "Accede a tu cuenta de Janovix.",
 };
 
 export default async function LoginPage({ searchParams }: PageProps) {

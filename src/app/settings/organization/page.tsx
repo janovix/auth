@@ -2,7 +2,7 @@ import { OrganizationSettingsView } from "@/components/settings/OrganizationSett
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Organization Settings | Yenio",
+	title: "Organization Settings | Janovix",
 	description: "Manage your organization profile and default settings.",
 };
 

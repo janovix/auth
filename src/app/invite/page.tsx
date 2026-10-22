@@ -2,7 +2,7 @@ import { InviteView } from "@/components/auth/InviteView";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Organization Invitation | Yenio",
+	title: "Organization Invitation | Janovix",
 	description: "Accept or decline your organization invitation.",
 };
 

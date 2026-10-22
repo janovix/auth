@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { LoginPageWrapper } from "@/components/auth/LoginPageWrapper";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuroraProvider } from "@/contexts/aurora-context";
-import { ShaderBackdrop } from "@/components/shader/shader-backdrop";
+import { GlobalAuroraBackground } from "@/components/aurora";
 import { mockRouter } from "../mocks/router";
 
 const meta: Meta<typeof LoginPageWrapper> = {
@@ -19,7 +19,7 @@ const meta: Meta<typeof LoginPageWrapper> = {
 			<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
 				<AuroraProvider>
 					<div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-						<ShaderBackdrop />
+						<GlobalAuroraBackground />
 						<div className="w-full max-w-md relative z-10">
 							<Story />
 						</div>

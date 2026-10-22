@@ -2,7 +2,7 @@ import { BetaAccessView } from "@/components/auth/BetaAccessView";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Beta Access - Yenio",
+	title: "Beta Access - Janovix",
 	description: "Your registration is being reviewed for beta access",
 };
 

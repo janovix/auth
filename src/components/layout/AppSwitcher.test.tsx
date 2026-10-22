@@ -63,7 +63,7 @@ vi.mock("@/contexts/language-context", () => ({
 	useLanguage: () => ({
 		t: (key: string) => {
 			const translations: Record<string, string> = {
-				"appSwitcher.title": "Yenio Apps",
+				"appSwitcher.title": "Janovix Apps",
 				"appSwitcher.homepage": "Homepage",
 				"appSwitcher.homepageDescription": "Main website",
 				"appSwitcher.products": "Products",
@@ -137,7 +137,7 @@ describe("AppSwitcher", () => {
 		await user.click(trigger);
 
 		// Check that app options are displayed
-		expect(await screen.findByText("Yenio Apps")).toBeInTheDocument();
+		expect(await screen.findByText("Janovix Apps")).toBeInTheDocument();
 		expect(await screen.findByText("Homepage")).toBeInTheDocument();
 		expect(await screen.findByText("Products")).toBeInTheDocument();
 		expect(await screen.findByText("AML Platform")).toBeInTheDocument();
@@ -163,7 +163,7 @@ describe("AppSwitcher", () => {
 
 		// Wait for dropdown to open and check for "Current" badge
 		// First wait for the menu to appear, then check for Current badge
-		await screen.findByText("Yenio Apps");
+		await screen.findByText("Janovix Apps");
 		expect(await screen.findByText("Current")).toBeInTheDocument();
 	});
 
@@ -182,7 +182,7 @@ describe("AppSwitcher", () => {
 		fireEvent.click(trigger);
 
 		// Wait for dropdown to open - first wait for menu label
-		await screen.findByText("Yenio Apps");
+		await screen.findByText("Janovix Apps");
 
 		// Then find all menu items (links)
 		const links = await screen.findAllByRole("menuitem");
@@ -214,7 +214,7 @@ describe("AppSwitcher", () => {
 		expect(trigger).not.toBeNull();
 		await user.click(trigger);
 
-		await screen.findByText("Yenio Apps");
+		await screen.findByText("Janovix Apps");
 		expect(screen.queryByText("AML Platform")).not.toBeInTheDocument();
 		expect(await screen.findByText("Watchlist")).toBeInTheDocument();
 	});
@@ -232,7 +232,7 @@ describe("AppSwitcher", () => {
 		) as HTMLElement;
 		await user.click(trigger);
 
-		await screen.findByText("Yenio Apps");
+		await screen.findByText("Janovix Apps");
 		const links = await screen.findAllByRole("menuitem");
 		const hrefs = new Set(
 			links.map((link) => link.getAttribute("href")).filter(Boolean),
@@ -257,7 +257,7 @@ describe("AppSwitcher", () => {
 		expect(trigger).not.toBeNull();
 		await user.click(trigger);
 
-		await screen.findByText("Yenio Apps");
+		await screen.findByText("Janovix Apps");
 		expect(screen.queryByText("Watchlist")).not.toBeInTheDocument();
 		expect(await screen.findByText("AML Platform")).toBeInTheDocument();
 	});

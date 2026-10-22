@@ -303,7 +303,7 @@ const translations = {
 		"settings.sidebar.invitation": "invitation",
 		"settings.sidebar.invitations": "invitations",
 		// App Switcher
-		"appSwitcher.title": "Yenio Apps",
+		"appSwitcher.title": "Janovix Apps",
 		"appSwitcher.homepage": "Homepage",
 		"appSwitcher.homepageDescription": "Main website",
 		"appSwitcher.products": "Products",
@@ -320,7 +320,7 @@ const translations = {
 		"products.retry": "Retry",
 		"products.title": "Your products",
 		"products.description":
-			"Open the Yenio apps included in your plan for the active organization.",
+			"Open the Janovix apps included in your plan for the active organization.",
 		"products.activeOrg": "Active organization: {name}",
 		"products.aml.name": "AML compliance",
 		"products.aml.description":
@@ -461,7 +461,7 @@ const translations = {
 		"settings.createOrg.name": "Organization name",
 		"settings.createOrg.namePlaceholder": "Acme Corporation",
 		"settings.createOrg.nameHelp":
-			"This is how your organization will appear across Yenio",
+			"This is how your organization will appear across Janovix",
 		"settings.createOrg.subdomain": "Organization path",
 		"settings.createOrg.subdomainHelp":
 			"Your organization will live at {appPathPrefix}your-path — choose the segment after {appPathPrefix}",
@@ -673,7 +673,7 @@ const translations = {
 		// API Keys settings
 		"settings.apiKeys.title": "API Keys",
 		"settings.apiKeys.description":
-			"Manage API keys for programmatic access to the Yenio API",
+			"Manage API keys for programmatic access to the Janovix API",
 		"settings.apiKeys.created": "API key created successfully",
 		"settings.apiKeys.revoked": "API key revoked",
 		"settings.apiKeys.rotated": "API key rotated successfully",
@@ -1122,7 +1122,7 @@ const translations = {
 		"onboarding.plans.features.ultra.6": "Dedicated support",
 		"onboarding.org.title": "Register your Obligated Subject or Organization",
 		"onboarding.org.description":
-			"Register your obligated subject or organization to start using Yenio",
+			"Register your obligated subject or organization to start using Janovix",
 		"onboarding.org.badge": "{plan} Subscription Active",
 		"onboarding.org.plan.active": "Active",
 		"onboarding.org.logo.edit": "Add Logo",
@@ -1133,7 +1133,7 @@ const translations = {
 		"onboarding.org.name.label": "Obligated Subject or Organization name",
 		"onboarding.org.name.placeholder": "Acme Corporation",
 		"onboarding.org.name.help":
-			"This is how your obligated subject or organization will appear across Yenio",
+			"This is how your obligated subject or organization will appear across Janovix",
 		"onboarding.org.slug.label": "Organization path",
 		"onboarding.org.slug.placeholder": "acme-corp",
 		"onboarding.org.slug.help":
@@ -1158,13 +1158,13 @@ const translations = {
 		"onboarding.org.footer":
 			"You can invite team members and configure settings after registering your organization.",
 		"onboarding.team.title": "Create your team",
-		"onboarding.team.description": "Set up your team to start using Yenio",
+		"onboarding.team.description": "Set up your team to start using Janovix",
 		"onboarding.team.logo.title": "Team Logo",
 		"onboarding.team.logo.help": "Optional: Add a logo for your team",
 		"onboarding.team.name.label": "Team name",
 		"onboarding.team.name.placeholder": "My Team",
 		"onboarding.team.name.help":
-			"This is how your team will appear across Yenio",
+			"This is how your team will appear across Janovix",
 		"onboarding.team.slug.label": "Team path",
 		"onboarding.team.slug.help":
 			"Your team will be available at {appPathPrefix}your-path — this is the path segment after {appPathPrefix}",
@@ -1544,7 +1544,7 @@ const translations = {
 		"settings.sidebar.invitation": "invitación",
 		"settings.sidebar.invitations": "invitaciones",
 		// App Switcher
-		"appSwitcher.title": "Apps de Yenio",
+		"appSwitcher.title": "Apps de Janovix",
 		"appSwitcher.homepage": "Página principal",
 		"appSwitcher.homepageDescription": "Sitio web principal",
 		"appSwitcher.products": "Productos",
@@ -1561,7 +1561,7 @@ const translations = {
 		"products.retry": "Reintentar",
 		"products.title": "Tus productos",
 		"products.description":
-			"Abre las aplicaciones Yenio incluidas en tu plan para la organización activa.",
+			"Abre las aplicaciones Janovix incluidas en tu plan para la organización activa.",
 		"products.activeOrg": "Organización activa: {name}",
 		"products.aml.name": "Cumplimiento AML",
 		"products.aml.description":
@@ -1708,7 +1708,7 @@ const translations = {
 		"settings.createOrg.name": "Nombre de la organización",
 		"settings.createOrg.namePlaceholder": "Corporación Acme",
 		"settings.createOrg.nameHelp":
-			"Así aparecerá tu organización en toda la plataforma Yenio",
+			"Así aparecerá tu organización en toda la plataforma Janovix",
 		"settings.createOrg.subdomain": "Ruta de la organización",
 		"settings.createOrg.subdomainHelp":
 			"Tu organización estará en {appPathPrefix}tu-ruta — elige el segmento después de {appPathPrefix}",
@@ -1922,7 +1922,7 @@ const translations = {
 		// API Keys settings
 		"settings.apiKeys.title": "Claves API",
 		"settings.apiKeys.description":
-			"Administra las claves API para acceso programático a la API de Yenio",
+			"Administra las claves API para acceso programático a la API de Janovix",
 		"settings.apiKeys.created": "Clave API creada exitosamente",
 		"settings.apiKeys.revoked": "Clave API revocada",
 		"settings.apiKeys.rotated": "Clave API rotada exitosamente",
@@ -2380,7 +2380,7 @@ const translations = {
 		"onboarding.plans.features.ultra.6": "Soporte dedicado",
 		"onboarding.org.title": "Registra tu Sujeto Obligado u Organización",
 		"onboarding.org.description":
-			"Registra tu sujeto obligado u organización para comenzar a usar Yenio",
+			"Registra tu sujeto obligado u organización para comenzar a usar Janovix",
 		"onboarding.org.badge": "Suscripción {plan} activa",
 		"onboarding.org.plan.active": "Activa",
 		"onboarding.org.logo.edit": "Añadir logo",
@@ -2391,7 +2391,7 @@ const translations = {
 		"onboarding.org.name.label": "Nombre del Sujeto Obligado u Organización",
 		"onboarding.org.name.placeholder": "Corporación Acme",
 		"onboarding.org.name.help":
-			"Así aparecerá tu sujeto obligado u organización en Yenio",
+			"Así aparecerá tu sujeto obligado u organización en Janovix",
 		"onboarding.org.slug.label": "Ruta de la organización",
 		"onboarding.org.slug.placeholder": "acme-corp",
 		"onboarding.org.slug.help":
@@ -2417,12 +2417,12 @@ const translations = {
 			"Puedes invitar miembros y configurar ajustes después de registrar tu organización.",
 		"onboarding.team.title": "Crea tu equipo",
 		"onboarding.team.description":
-			"Configura tu equipo para comenzar a usar Yenio",
+			"Configura tu equipo para comenzar a usar Janovix",
 		"onboarding.team.logo.title": "Logo del equipo",
 		"onboarding.team.logo.help": "Opcional: añade un logo para tu equipo",
 		"onboarding.team.name.label": "Nombre del equipo",
 		"onboarding.team.name.placeholder": "Mi equipo",
-		"onboarding.team.name.help": "Así aparecerá tu equipo en Yenio",
+		"onboarding.team.name.help": "Así aparecerá tu equipo en Janovix",
 		"onboarding.team.slug.label": "Ruta del equipo",
 		"onboarding.team.slug.help":
 			"Tu equipo estará en {appPathPrefix}tu-ruta — este es el segmento de la ruta después de {appPathPrefix}",

@@ -2,7 +2,7 @@ import { AuditView } from "@/components/audit/AuditView";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Audit Logs | Yenio",
+	title: "Audit Logs | Janovix",
 	description:
 		"View and manage audit logs for compliance and security monitoring.",
 };

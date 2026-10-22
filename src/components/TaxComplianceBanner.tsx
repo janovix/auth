@@ -139,7 +139,7 @@ export function TaxComplianceBanner() {
 						<div className="flex shrink-0 items-center gap-3">
 							<Image
 								src="/janovix-logo.svg"
-								alt="YENIO"
+								alt="JANOVIX"
 								width={72}
 								height={12}
 								className="shrink-0"
@@ -242,7 +242,7 @@ export function TaxComplianceBanner() {
 									<div className="animate-scale-in mb-6 flex items-center gap-4">
 										<Image
 											src="/janovix-logo.svg"
-											alt="YENIO"
+											alt="JANOVIX"
 											width={100}
 											height={16}
 											className="shrink-0"
@@ -305,7 +305,7 @@ export function TaxComplianceBanner() {
 									Servicios Especializados
 								</h3>
 								<p className="animate-slide-in-d4 mt-1 text-xs text-blue-300">
-									Áreas de práctica que complementan tu operación en YENIO.
+									Áreas de práctica que complementan tu operación en JANOVIX.
 								</p>
 
 								<div className="mt-4 space-y-3">
@@ -472,7 +472,7 @@ export function TaxComplianceBanner() {
 									<div className="flex items-center gap-3">
 										<Image
 											src="/janovix-logo.svg"
-											alt="YENIO"
+											alt="JANOVIX"
 											width={70}
 											height={11}
 											className="shrink-0"
@@ -505,7 +505,7 @@ export function TaxComplianceBanner() {
 									</div>
 								</div>
 								<p className="mt-3 text-xs font-medium text-blue-200">
-									Acceso preferencial para clientes Enterprise de YENIO.
+									Acceso preferencial para clientes Enterprise de JANOVIX.
 								</p>
 								<p className="mt-2 text-[10px] text-blue-300 leading-relaxed">
 									Todas las consultas son tratadas con absoluta

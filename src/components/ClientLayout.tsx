@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 
-import { ShaderBackdrop } from "@/components/shader/shader-backdrop";
+import { GlobalAuroraBackground } from "@/components/aurora";
 import { NavSettingsBar } from "@/components/layout/NavSettingsBar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
@@ -19,7 +19,8 @@ function AuthLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<AuroraProvider>
 			<div className="flex h-svh w-full flex-col overflow-hidden relative">
-				<ShaderBackdrop />
+				{/* Aurora background - always shown on auth pages */}
+				<GlobalAuroraBackground />
 
 				{/* Language and Theme pickers - top right */}
 				<NavSettingsBar />

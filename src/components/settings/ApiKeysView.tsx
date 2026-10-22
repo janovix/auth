@@ -251,7 +251,7 @@ export function ApiKeysView() {
 				title={t("settings.apiKeys.title") || "API Keys"}
 				description={
 					t("settings.apiKeys.description") ||
-					"Manage API keys for programmatic access to the Yenio API"
+					"Manage API keys for programmatic access to the Janovix API"
 				}
 				action={
 					<Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>

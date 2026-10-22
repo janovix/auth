@@ -2,8 +2,8 @@ import { CreateOrganizationView } from "@/components/settings/CreateOrganization
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Create Organization | Yenio",
-	description: "Create a new organization in Yenio.",
+	title: "Create Organization | Janovix",
+	description: "Create a new organization in Janovix.",
 };
 
 export default function CreateOrganizationPage() {

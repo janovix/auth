@@ -40,17 +40,14 @@ const renderWithTheme = (ui: React.ReactElement) => {
 describe("Logo", () => {
 	it("renders logo variant by default", () => {
 		renderWithTheme(<Logo />);
-		expect(screen.getByText("Yenio")).toBeInTheDocument();
-		expect(
-			document.querySelector('svg[viewBox="0 0 183 147"]'),
-		).toBeInTheDocument();
+		const svg = document.querySelector("svg[viewBox='0 0 102 16']");
+		expect(svg).toBeInTheDocument();
 	});
 
 	it("renders icon variant when specified", () => {
 		renderWithTheme(<Logo variant="icon" />);
-		expect(
-			document.querySelector('svg[viewBox="0 0 183 147"]'),
-		).toBeInTheDocument();
+		const svg = document.querySelector("svg[viewBox='0 0 200 200']");
+		expect(svg).toBeInTheDocument();
 	});
 
 	it("applies custom className", () => {
@@ -61,8 +58,9 @@ describe("Logo", () => {
 
 	it("applies custom width and height to icon", () => {
 		renderWithTheme(<Logo variant="icon" width={300} height={50} />);
-		const svgs = document.querySelectorAll('svg[viewBox="0 0 183 147"]');
+		const svgs = document.querySelectorAll("svg[viewBox='0 0 200 200']");
 		expect(svgs.length).toBeGreaterThan(0);
+		// Check the last rendered SVG (most recent in StrictMode)
 		const svg = svgs[svgs.length - 1];
 		if (svg) {
 			expect(svg.getAttribute("width")).toBe("300");
@@ -70,9 +68,9 @@ describe("Logo", () => {
 		}
 	});
 
-	it("uses currentColor for the isotype", () => {
+	it("uses CSS custom properties for colors", () => {
 		const { container } = renderWithTheme(<Logo variant="logo" />);
 		const svg = container.querySelector("svg");
-		expect(svg?.innerHTML).toContain('fill="currentColor"');
+		expect(svg?.innerHTML).toContain("var(--logo-text-primary)");
 	});
 });

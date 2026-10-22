@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Home, ServerCrash } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { useSetPageStatus } from "@/contexts/page-status-context";
-import { ShaderBackdrop } from "@/components/shader/shader-backdrop";
+import { GlobalAuroraBackground } from "@/components/aurora";
 import { NavSettingsBar } from "@/components/layout/NavSettingsBar";
 import { Logo } from "@/components/Logo";
 import { AuroraProvider } from "@/contexts/aurora-context";
@@ -32,7 +32,8 @@ export default function SigninErrorPage() {
 	return (
 		<AuroraProvider>
 			<div className="flex h-svh w-full flex-col overflow-hidden relative">
-				<ShaderBackdrop />
+				{/* Aurora background */}
+				<GlobalAuroraBackground />
 
 				{/* Language and Theme pickers - top right */}
 				<NavSettingsBar />
